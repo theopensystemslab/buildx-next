@@ -1,10 +1,9 @@
 import { useSystemsData } from "@/context/SystemsData"
-import { findCollisions, House, Houses } from "@/data/house"
+import { findCollisions, House } from "@/data/house"
 import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
 import { moduleLayout } from "@/data/moduleLayout"
-import { snapToGrid } from "@/utils"
-import { mapO } from "@/utils"
+import { mapO, snapToGrid } from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
 import { transpose } from "fp-ts-std/Array"
@@ -12,16 +11,10 @@ import { flow, pipe } from "fp-ts/lib/function"
 import { chunksOf, range } from "fp-ts/lib/NonEmptyArray"
 import { getOrElse } from "fp-ts/lib/Option"
 import { filterMap, findFirst } from "fp-ts/lib/ReadonlyArray"
-import {
-  MutableRefObject,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-} from "react"
+import { MutableRefObject, useCallback, useEffect, useMemo } from "react"
 import { Group, Plane } from "three"
-import { subscribe } from "valtio"
-import { ScopeTypeEnum, store, useSetCameraEnabled, useStoreSnap } from "."
+import { subscribe, useSnapshot } from "valtio"
+import { ScopeTypeEnum, setCameraEnabled, store } from ".."
 
 export type HorizontalSectionCut = {
   levelType: string
@@ -31,44 +24,19 @@ export type HorizontalSectionCut = {
   plane: Plane
 }
 
-export const useHouses = () => {
-  const snap = useStoreSnap()
-  return [
-    snap.houses,
-    (input: SetStateAction<Houses>): void => {
-      if (typeof input === "function") {
-        store.houses = input(store.houses)
-      } else {
-        store.houses = input
-      }
-    },
-  ] as const
-}
-
-export const useAddHouse = () => (house: House) =>
-  (store.houses[house.id] = house)
+export const addHouse = (house: House) => void (store.houses[house.id] = house)
 
 export const useCollisions = () => {
+  const snap = useSnapshot(store)
   const { modules, houseTypes } = useSystemsData()
-  const snap = useStoreSnap()
   return useMemo(() => {
     return findCollisions(store.houses, houseTypes, modules)
   }, [snap.houses, houseTypes, modules])
 }
 
-export const useSetHouse = (id: string) => {
-  return (input: SetStateAction<House>): void => {
-    if (typeof input === "function") {
-      store.houses[id] = input(store.houses[id])
-    } else {
-      store.houses[id] = input
-    }
-  }
-}
-
 export const useHouseModules = (houseId: string) => {
   const { houseTypes, modules: sysModules } = useSystemsData()
-  const [houses] = useHouses()
+  const { houses } = useSnapshot(store)
   const house = houses[houseId]
   return !house
     ? []
@@ -116,7 +84,6 @@ export const useUpdatePosition = (
   houseId: string,
   groupRef: MutableRefObject<Group | undefined>
 ): Handler<"drag", ThreeEvent<PointerEvent>> => {
-  const setCameraEnabled = useSetCameraEnabled()
   const invalidate = useThree((three) => three.invalidate)
 
   const onPositionUpdate = useCallback(() => {
@@ -137,7 +104,7 @@ export const useUpdatePosition = (
       setCameraEnabled(false)
     }
 
-    const [px, pz] = store.scratch.horizontalPointer
+    const [px, pz] = store.horizontalPointer
     const [x, z] = store.houses[houseId].position
     const [dx, dz] = [px - x, pz - z].map(snapToGrid)
 

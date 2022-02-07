@@ -1,9 +1,7 @@
 import { Houses } from "@/data/house"
 import CameraControls from "camera-controls"
-import { proxy, ref, useSnapshot } from "valtio"
+import { proxy } from "valtio"
 import { Scope, ScopeTypeEnum } from "./scope"
-// import { HorizontalSectionCut } from "./houses"
-// import { Scratch } from "./scratch"
 
 type Store = {
   houses: Houses
@@ -11,15 +9,8 @@ type Store = {
   camControls: CameraControls | null
   orthographic: boolean
   shadows: boolean
-  // sectionCuts: {
-  //   vertical: {
-  //     short: boolean
-  //     long: boolean
-  //   }
-  //   horizontal: HorizontalSectionCut | null
-  // }
-  // scratch: Scratch
-  // contextMenu: [number, number] | null
+  lastLookAt: V6
+  horizontalPointer: [number, number]
 }
 
 export const store = proxy<Store>({
@@ -32,17 +23,16 @@ export const store = proxy<Store>({
   camControls: null,
   orthographic: false,
   shadows: true,
-  // sectionCuts: {
-  //   horizontal: null,
-  //   vertical: {
-  //     long: false,
-  //     short: false,
-  //   },
-  // },
-  // scratch: ref({
-  //   horizontalPointer: [0, 0],
-  //   lastLookAt: [0, 0, 0, 0, 0, 0],
-  //   meshRefs: {},
-  // }),
-  // contextMenu: null,
+  horizontalPointer: [0, 0],
+  lastLookAt: [0, 0, 0, 0, 0, 0],
 })
+
+export const setCameraEnabled = (b: boolean) => {
+  if (store.camControls) store.camControls.enabled = b
+}
+
+export const defaultCamPos: [number, number, number] = [12, 24, 12]
+export const defaultCamTgt: [number, number, number] = [0, 0, 0]
+
+export * from "./houses"
+export * from "./scope"
