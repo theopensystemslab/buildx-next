@@ -1,21 +1,21 @@
-import { find } from "ramda";
-import { getAirtableEntries } from "./utils";
-import type { System } from "./system";
-import type { HouseType } from "./houseType";
-import type { House } from "./house";
-import type { Module } from "./module";
-import { moduleLayout } from "./moduleLayout";
+import { find } from "ramda"
+import type { House } from "./house"
+import type { HouseType } from "./houseType"
+import type { Module } from "./module"
+import { moduleLayout } from "./moduleLayout"
+import type { System } from "./system"
+import { getAirtableEntries } from "./utils"
 
 export interface EnergyInfo {
-  systemId: string;
-  dhwDemand: number; // kWh/m2/yr
-  spaceHeatingDemand: number; // kWh/m2/yr
-  totalHeadingDemand: number; // kWh/m2/yr
-  freshAirRequirement: number; // m3
-  operationalCo2: number; // kg/m2/yr
-  primaryEnergyDemand: number; // kWh/m2/yr
-  generationEnergy: number; // kWh/m2/yr
-  electricityTariff: number; // EUR
+  systemId: string
+  dhwDemand: number // kWh/m2/yr
+  spaceHeatingDemand: number // kWh/m2/yr
+  totalHeadingDemand: number // kWh/m2/yr
+  freshAirRequirement: number // m3
+  operationalCo2: number // kg/m2/yr
+  primaryEnergyDemand: number // kWh/m2/yr
+  generationEnergy: number // kWh/m2/yr
+  electricityTariff: number // EUR
 }
 
 const getEnergyEntry = (fieldName: string, records: Array<any>): number => {
@@ -23,8 +23,8 @@ const getEnergyEntry = (fieldName: string, records: Array<any>): number => {
     find((record) => record.fields["Field"] === fieldName, records)?.fields[
       "SWC_constants"
     ] || 0
-  );
-};
+  )
+}
 
 export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
   try {
@@ -33,7 +33,7 @@ export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
         tableId: system.airtableId,
         tab: "energy_calculator",
       })
-    ).records;
+    ).records
     return {
       systemId: system.id,
       dhwDemand: getEnergyEntry("DHW demand", records),
@@ -44,9 +44,9 @@ export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
       primaryEnergyDemand: getEnergyEntry("Primary Energy Demand ", records),
       generationEnergy: getEnergyEntry("Generation Energy", records),
       electricityTariff: getEnergyEntry("Electricity tariff", records),
-    };
+    }
   } catch (err) {
-    console.warn(err);
+    console.warn(err)
     return {
       systemId: system.id,
       dhwDemand: 0,
@@ -57,16 +57,16 @@ export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
       primaryEnergyDemand: 0,
       generationEnergy: 0,
       electricityTariff: 0,
-    };
+    }
   }
-};
+}
 
 export interface HouseStats {
-  cost: number;
-  embodiedCarbon: number;
-  totalHeatingDemand: number;
-  operationalCo2: number;
-  estimatedHeatingCosts: number;
+  cost: number
+  embodiedCarbon: number
+  totalHeatingDemand: number
+  operationalCo2: number
+  estimatedHeatingCosts: number
 }
 
 const noHouseStats: HouseStats = {
@@ -75,7 +75,7 @@ const noHouseStats: HouseStats = {
   totalHeatingDemand: 0,
   operationalCo2: 0,
   estimatedHeatingCosts: 0,
-};
+}
 
 export const sumHouseStats = (houseStats: Array<HouseStats>) => {
   return houseStats.reduce(
@@ -89,8 +89,8 @@ export const sumHouseStats = (houseStats: Array<HouseStats>) => {
         accumulator.estimatedHeatingCosts + current.estimatedHeatingCosts,
     }),
     noHouseStats
-  );
-};
+  )
+}
 
 export const getHouseStats = ({
   house,
@@ -98,30 +98,20 @@ export const getHouseStats = ({
   houseTypes,
   energyInfo,
 }: {
-  house: House;
-  modules: Array<Module>;
-  houseTypes: Array<HouseType>;
-  energyInfo: Array<EnergyInfo>;
+  house: House
+  modules: Array<Module>
+  houseTypes: Array<HouseType>
+  energyInfo: Array<EnergyInfo>
 }): HouseStats => {
   const relevantEnergyInfo = find(
     (info) => info.systemId === house.systemId,
     energyInfo
-  );
+  )
   if (!relevantEnergyInfo) {
-    return noHouseStats;
+    return noHouseStats
   }
 
-  const dna: Array<string> =
-    house.modifiedDna ||
-    find(
-      (houseType) =>
-        houseType.systemId === house.systemId &&
-        houseType.id === house.houseTypeId,
-      houseTypes
-    )?.dna ||
-    [];
-
-  const houseModules: Array<Module> = dna
+  const houseModules: Array<Module> = house.dna
     .map((sequence) =>
       find(
         (module) =>
@@ -129,13 +119,13 @@ export const getHouseStats = ({
         modules
       )
     )
-    .filter((m): m is Module => Boolean(m));
+    .filter((m): m is Module => Boolean(m))
 
-  const layout = moduleLayout(houseModules);
+  const layout = moduleLayout(houseModules)
 
   const surface = layout.cellWidths.reduce((runningTotal, width, index) => {
-    return runningTotal + width * (layout.cellLengths[index] || 0);
-  }, 0);
+    return runningTotal + width * (layout.cellLengths[index] || 0)
+  }, 0)
 
   return {
     cost: houseModules.reduce(
@@ -155,5 +145,5 @@ export const getHouseStats = ({
         surface *
         relevantEnergyInfo.electricityTariff
     ),
-  };
-};
+  }
+}

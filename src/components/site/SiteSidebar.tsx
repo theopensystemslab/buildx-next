@@ -63,6 +63,7 @@ const SiteSidebar = ({ open, close }: Props) => {
                     //   Object.values(prevHouses).map((house) => house.position)
                     // ),
                     rotation: 0,
+                    dna: houseType.dna,
                     modifiedMaterials: {},
                   })
                 }

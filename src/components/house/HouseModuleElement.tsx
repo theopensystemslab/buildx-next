@@ -14,16 +14,6 @@ type Props = MeshProps & {
 const HouseModuleElement = (props: Props) => {
   const { geometry, material, elementName, moduleIndex, houseId } = props
   const meshRef = useRef<Mesh>()
-  // usePushMeshRef(elementName, moduleIndex, houseId, meshRef)
-
-  // const elementHover = useElementHover(
-  //   meshRef,
-  //   elementName,
-  //   moduleIndex,
-  //   houseId
-  // )
-
-  // const selectElement = useSelectElement(houseId, moduleIndex, elementName)
 
   const bind = useGesture<{
     hover: ThreeEvent<PointerEvent>

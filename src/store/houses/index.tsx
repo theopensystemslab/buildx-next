@@ -34,6 +34,11 @@ export const useCollisions = () => {
   }, [snap.houses, houseTypes, modules])
 }
 
+export const useHouse = (houseId: string) => {
+  const { houses } = useSnapshot(store)
+  return houses[houseId]
+}
+
 export const useHouseModules = (houseId: string) => {
   const { houseTypes, modules: sysModules } = useSystemsData()
   const { houses } = useSnapshot(store)
@@ -43,7 +48,7 @@ export const useHouseModules = (houseId: string) => {
     : pipe(
         houseTypes,
         findFirst((ht: HouseType) => ht.id === house.houseTypeId),
-        mapO((houseType) => house.modifiedDna ?? houseType.dna),
+        mapO((houseType) => house.dna ?? houseType.dna),
         mapO(
           flow(
             filterMap((dna) =>

@@ -66,13 +66,6 @@ export const getPositions = (
             ? z0 + module.length / 2
             : z0 + (-module.length + module.length / 2)
 
-          console.log({
-            moduleIndex,
-            module: module.dna,
-            mirror,
-            z1,
-          })
-
           return {
             position: [0, y, z1],
             indices: [0, heightIndex, lengthIndex],

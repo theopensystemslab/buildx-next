@@ -5,7 +5,7 @@ import { keys } from "fp-ts/lib/ReadonlyRecord"
 import React, { Suspense } from "react"
 import { useSnapshot } from "valtio"
 import Loader3D from "../ui-3d/Loader3D"
-import { House } from "./house"
+import { House } from "../house"
 
 const SiteThreeApp = () => {
   const { houses } = useSnapshot(store)

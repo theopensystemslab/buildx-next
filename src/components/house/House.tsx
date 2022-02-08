@@ -42,8 +42,6 @@ const House = (props: Props) => {
         mapWithIndex((moduleIndex, module) => {
           const gltf = gltfs[moduleIndex]
 
-          console.log(layout.modules[moduleIndex], layout2[moduleIndex])
-
           const {
             grid,
             position: [x, y, z0],
