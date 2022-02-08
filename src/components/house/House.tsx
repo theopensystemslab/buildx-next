@@ -1,6 +1,6 @@
 import { getPositions } from "@/data/layout"
 import { moduleLayout } from "@/data/moduleLayout"
-import { useHouseModules, useUpdatePosition } from "@/store"
+import { store, useHouseModules, useUpdatePosition } from "@/store"
 import { useGLTF } from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
@@ -30,15 +30,6 @@ const House = (props: Props) => {
     hover: ThreeEvent<PointerEvent>
   }>({
     onDrag,
-    // onHover: ({ event: { intersections }}) => {
-
-    // }
-    // onContextMenu: ({ event: { pageX, pageY } }) => {
-    //   if (store.contextMenu === null) {
-    //     store.contextMenu = [pageX, pageY]
-    //     invalidate()
-    //   }
-    // },
   })
 
   return (

@@ -60,7 +60,10 @@ const SiteThreeInit = () => {
         {/* </group> */}
         <HorizontalPlane
           onChange={(xy) => void (store.horizontalPointer = xy)}
-          onNearClick={() => void (store.scope.selected = [])}
+          onNearClick={() => {
+            store.scope.selected = []
+            store.contextMenu = null
+          }}
           onNearHover={() => void (store.scope.hovered = null)}
         />
         {shadows && (

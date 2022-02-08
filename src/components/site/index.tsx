@@ -12,6 +12,7 @@ import Layout from "../layouts"
 import { IconButton, IconMenu, Loader, Radio } from "../ui"
 import { Crosshair, Environment, Menu } from "../ui/icons"
 import Container from "./Container"
+import SiteContextMenu from "./SiteContextMenu"
 import SiteSidebar from "./SiteSidebar"
 
 const ThreeInit = dynamic(() => import("./SiteThreeInit"), { ssr: false })
@@ -96,6 +97,7 @@ const SitePageIndex = () => {
       </div>
       <SiteSidebar open={sidebar} close={() => setSidebar(false)} />
       <ThreeInit />
+      <SiteContextMenu />
     </Fragment>
   )
 }

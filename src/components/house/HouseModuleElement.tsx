@@ -1,11 +1,10 @@
-import { ScopeTypeEnum, setContextMenu, store } from "@/store"
+import { ScopeTypeEnum, store } from "@/store"
 import { all, any, undef } from "@/utils"
-import { Html } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import React, { useEffect, useRef, useState } from "react"
 import { BufferGeometry, Material, Mesh } from "three"
-import { ref, subscribe, useSnapshot } from "valtio"
+import { ref, subscribe } from "valtio"
 
 type Props = MeshProps & {
   elementName: string
@@ -56,7 +55,8 @@ const HouseModuleElement = (props: Props) => {
   const bind = useGesture<{
     hover: ThreeEvent<PointerEvent>
     onPointerDown: ThreeEvent<PointerEvent>
-    onContextMenu: ThreeEvent<PointerEvent>
+    onContextMenu: ThreeEvent<PointerEvent> &
+      React.MouseEvent<EventTarget, MouseEvent>
   }>({
     onHover: ({ event: { intersections } }) => {
       if (store.contextMenu) return
@@ -70,13 +70,13 @@ const HouseModuleElement = (props: Props) => {
           store.scope.hovered = houseId
       }
     },
-    onContextMenu: ({ event: { intersections } }) => {
+    onContextMenu: ({ event: { intersections, pageX, pageY } }) => {
       const returnIf = any(
         undef(intersections?.[0]),
         intersections[0].object.id !== meshRef.current?.id
       )
       if (returnIf) return
-      setContextMenu(true)
+      store.contextMenu = [pageX, pageY]
     },
     onPointerDown: ({ event: { intersections }, shiftKey }) => {
       const returnIf = any(

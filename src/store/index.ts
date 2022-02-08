@@ -14,7 +14,7 @@ type Store = {
   shadows: boolean
   lastLookAt: V6
   horizontalPointer: [number, number]
-  contextMenu: boolean
+  contextMenu: [number, number] | null
   outlined: Array<MutableRefObject<Object3D | undefined>>
 }
 
@@ -30,13 +30,9 @@ export const store = proxy<Store>({
   shadows: true,
   horizontalPointer: [0, 0],
   lastLookAt: [0, 0, 0, 0, 0, 0],
-  contextMenu: false,
+  contextMenu: null,
   outlined: ref([]),
 })
-
-export const setContextMenu = (b: boolean) => {
-  store.contextMenu = b
-}
 
 export * from "./houses"
 export * from "./scope"
