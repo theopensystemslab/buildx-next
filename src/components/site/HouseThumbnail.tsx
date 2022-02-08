@@ -5,9 +5,9 @@ import type { HouseType } from "@/data/houseType"
 const HouseThumbnail: FC<{ houseType: HouseType; onAdd: () => void }> = (
   props
 ) => (
-  <div className="flex items-center px-4 py-4 border-b border-gray-200 space-x-2">
+  <div className="flex items-center space-x-2 border-b border-gray-200 px-4 py-4">
     <div
-      className="flex-none w-20 h-20 bg-gray-200 rounded-full"
+      className="h-20 w-20 flex-none rounded-full bg-gray-200"
       style={{
         backgroundImage: `url(${props.houseType.imageUrl})`,
         backgroundSize: "cover",
@@ -19,14 +19,14 @@ const HouseThumbnail: FC<{ houseType: HouseType; onAdd: () => void }> = (
       <p className="text-sm">Description</p>
       <div className="space-x-2">
         {[].map((tag, tagIndex) => (
-          <span key={tagIndex} className="px-3 py-0.5 bg-gray-100 rounded-xl">
+          <span key={tagIndex} className="rounded-xl bg-gray-100 px-3 py-0.5">
             {tag}
           </span>
         ))}
       </div>
       <button
         onClick={props.onAdd}
-        className="px-3 py-1 text-sm text-white bg-gray-800 rounded hover:bg-black transition-colors duration-200 ease-in-out"
+        className="rounded bg-gray-800 px-3 py-1 text-sm text-white transition-colors duration-200 ease-in-out hover:bg-black"
       >
         Add to site
       </button>
