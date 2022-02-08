@@ -14,7 +14,7 @@ import { filterMap, findFirst } from "fp-ts/lib/ReadonlyArray"
 import { MutableRefObject, useCallback, useEffect, useMemo } from "react"
 import { Group, Plane } from "three"
 import { subscribe, useSnapshot } from "valtio"
-import { ScopeTypeEnum, setCameraEnabled, store } from ".."
+import { ScopeTypeEnum, setCameraEnabled, store } from "."
 
 export type HorizontalSectionCut = {
   levelType: string
@@ -103,7 +103,7 @@ export const useUpdatePosition = (
   )
   useEffect(onPositionUpdate, [onPositionUpdate])
 
-  return ({ first, last, shiftKey }) => {
+  return ({ first, last }) => {
     if (store.scope.type !== ScopeTypeEnum.Enum.HOUSE) return
     if (first) {
       setCameraEnabled(false)

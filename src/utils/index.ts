@@ -28,5 +28,8 @@ export const snapToGrid = (x: number) => {
   return Math.round(x)
 }
 
+export const undef = <T extends unknown>(t: T | undefined): t is undefined =>
+  typeof t === "undefined"
+
 export * from "./three"
 export * from "./fp"

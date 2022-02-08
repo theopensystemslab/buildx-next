@@ -14,6 +14,7 @@ import GroundCircle from "./GroundCircle"
 import ShadowPlane from "./ShadowPlane"
 import SiteCamControls from "./SiteCamControls"
 import SiteThreeApp from "./SiteThreeApp"
+import Effects from "./Effects"
 
 const SiteThreeInit = () => {
   const ContextBridge = useContextBridge(SystemsDataContext)
@@ -59,6 +60,8 @@ const SiteThreeInit = () => {
         {/* </group> */}
         <HorizontalPlane
           onChange={(xy) => void (store.horizontalPointer = xy)}
+          onNearClick={() => void (store.scope.selected = [])}
+          onNearHover={() => void (store.scope.hovered = null)}
         />
         {shadows && (
           <>
@@ -70,7 +73,7 @@ const SiteThreeInit = () => {
         {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
         <SiteThreeApp />
         <SiteCamControls />
-        {/* <Effects /> */}
+        <Effects />
       </ContextBridge>
     </Canvas>
   )

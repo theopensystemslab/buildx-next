@@ -47,8 +47,6 @@ export const getHouseTypes = async (
       }
     })
 
-    console.log(houseTypes)
-
     return houseTypes
   } catch (err) {
     console.warn(err)

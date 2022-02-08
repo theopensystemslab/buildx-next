@@ -20,13 +20,19 @@ const House = (props: Props) => {
   const modules = useHouseModules(houseId)
   const gltfs = useGLTF(modules.map((module) => module.modelUrl))
   const layout = moduleLayout(modules)
-  const layout2 = getPositions(modules)
+  // const layout2 = getPositions(modules)
 
   const onDrag = useUpdatePosition(houseId, groupRef)
-  const invalidate = useThree((three) => three.invalidate)
+  // const invalidate = useThree((three) => three.invalidate)
 
-  const bind = useGesture<{ drag: ThreeEvent<PointerEvent> }>({
+  const bind = useGesture<{
+    drag: ThreeEvent<PointerEvent>
+    hover: ThreeEvent<PointerEvent>
+  }>({
     onDrag,
+    // onHover: ({ event: { intersections }}) => {
+
+    // }
     // onContextMenu: ({ event: { pageX, pageY } }) => {
     //   if (store.contextMenu === null) {
     //     store.contextMenu = [pageX, pageY]

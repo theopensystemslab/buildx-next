@@ -1,6 +1,9 @@
 import { Houses } from "@/data/house"
 import CameraControls from "camera-controls"
-import { proxy } from "valtio"
+import { boolean } from "fp-ts-std"
+import { MutableRefObject } from "react"
+import { Object3D } from "three"
+import { proxy, ref, useSnapshot } from "valtio"
 import { Scope, ScopeTypeEnum } from "./scope"
 
 type Store = {
@@ -11,6 +14,8 @@ type Store = {
   shadows: boolean
   lastLookAt: V6
   horizontalPointer: [number, number]
+  contextMenu: boolean
+  outlined: Array<MutableRefObject<Object3D | undefined>>
 }
 
 export const store = proxy<Store>({
@@ -25,14 +30,14 @@ export const store = proxy<Store>({
   shadows: true,
   horizontalPointer: [0, 0],
   lastLookAt: [0, 0, 0, 0, 0, 0],
+  contextMenu: false,
+  outlined: ref([]),
 })
 
-export const setCameraEnabled = (b: boolean) => {
-  if (store.camControls) store.camControls.enabled = b
+export const setContextMenu = (b: boolean) => {
+  store.contextMenu = b
 }
-
-export const defaultCamPos: [number, number, number] = [12, 24, 12]
-export const defaultCamTgt: [number, number, number] = [0, 0, 0]
 
 export * from "./houses"
 export * from "./scope"
+export * from "./camera"
