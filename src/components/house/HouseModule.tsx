@@ -26,6 +26,7 @@ type Props = GroupProps & {
   moduleIndex: number
   gltf: GltfT
   houseId: string
+  levelModuleIndices: number[]
 }
 
 const builtInMaterials: Record<string, Material> = {
@@ -33,7 +34,14 @@ const builtInMaterials: Record<string, Material> = {
 }
 
 const HouseModule = (props: Props) => {
-  const { module, moduleIndex, gltf, houseId, ...groupProps } = props
+  const {
+    module,
+    moduleIndex,
+    gltf,
+    houseId,
+    levelModuleIndices,
+    ...groupProps
+  } = props
 
   const { elements, materials } = useSystemsData()
   const house = useHouse(houseId)
@@ -113,6 +121,7 @@ const HouseModule = (props: Props) => {
           material: getMaterial(elementName),
           houseId,
           moduleIndex,
+          levelModuleIndices,
         }}
       />
     )),

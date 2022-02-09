@@ -1,4 +1,10 @@
-import { ScopeTypeEnum, store } from "@/store"
+import {
+  ElementScopeItem,
+  LevelScopeItem,
+  ModuleScopeItem,
+  ScopeTypeEnum,
+  store,
+} from "@/store"
 import { all, any, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
@@ -9,45 +15,79 @@ import { ref, subscribe } from "valtio"
 type Props = MeshProps & {
   elementName: string
   moduleIndex: number
+  levelModuleIndices: number[]
   houseId: string
   geometry: BufferGeometry
   material: Material
 }
 
 const HouseModuleElement = (props: Props) => {
-  const { geometry, material, elementName, moduleIndex, houseId } = props
+  const {
+    geometry,
+    material,
+    elementName,
+    moduleIndex,
+    houseId,
+    levelModuleIndices,
+  } = props
   const meshRef = useRef<Mesh>()
 
   useEffect(() =>
     subscribe(store.scope, () => {
+      let isOutlined = store.outlined.includes(meshRef),
+        isHovered = false,
+        isSelected = false
       switch (store.scope.type) {
         case ScopeTypeEnum.Enum.HOUSE:
-          if (
-            all(
-              any(
-                store.scope.hovered === houseId,
-                store.scope.selected.includes(houseId)
-              ),
-              !store.outlined.includes(meshRef)
+          isHovered = store.scope.hovered === houseId
+          isSelected = store.scope.selected.includes(houseId)
+          break
+
+        case ScopeTypeEnum.Enum.ELEMENT:
+          isHovered =
+            store.scope.hovered?.houseId === houseId &&
+            store.scope.hovered.elementName === elementName
+          isSelected = !undef(
+            store.scope.selected.find(
+              (x) => x.houseId === houseId && x.elementName === elementName
             )
-          ) {
-            store.outlined = ref([...store.outlined, meshRef])
-            invalidate()
-          }
-          if (
-            all(
-              store.outlined.includes(meshRef),
-              store.scope.hovered !== houseId,
-              !store.scope.selected.includes(houseId)
+          )
+          break
+
+        case ScopeTypeEnum.Enum.MODULE:
+          isHovered =
+            store.scope.hovered?.houseId === houseId &&
+            store.scope.hovered.moduleIndex === moduleIndex
+          isSelected = !undef(
+            store.scope.selected.find(
+              (x) => x.houseId === houseId && x.moduleIndex === moduleIndex
             )
-          ) {
-            store.outlined = ref(
-              store.outlined.filter(
-                (x) => x.current?.id !== meshRef.current?.id
-              )
+          )
+          break
+
+        case ScopeTypeEnum.Enum.LEVEL:
+          isHovered =
+            store.scope.hovered?.houseId === houseId &&
+            store.scope.hovered.levelModuleIndices.includes(moduleIndex)
+          isSelected = !undef(
+            store.scope.selected.find(
+              (x) =>
+                x.houseId === houseId &&
+                x.levelModuleIndices.includes(moduleIndex)
             )
-            invalidate()
-          }
+          )
+          break
+      }
+
+      if ((isHovered || isSelected) && !isOutlined) {
+        store.outlined = ref([...store.outlined, meshRef])
+        invalidate()
+      }
+      if (all(isOutlined, !isHovered, !isSelected)) {
+        store.outlined = ref(
+          store.outlined.filter((x) => x.current?.id !== meshRef.current?.id)
+        )
+        invalidate()
       }
     })
   )
@@ -68,6 +108,15 @@ const HouseModuleElement = (props: Props) => {
       switch (store.scope.type) {
         case ScopeTypeEnum.Enum.HOUSE:
           store.scope.hovered = houseId
+          break
+        case ScopeTypeEnum.Enum.ELEMENT:
+          store.scope.hovered = { houseId, elementName }
+          break
+        case ScopeTypeEnum.Enum.MODULE:
+          store.scope.hovered = { houseId, moduleIndex }
+          break
+        case ScopeTypeEnum.Enum.LEVEL:
+          store.scope.hovered = { houseId, levelModuleIndices }
       }
     },
     onContextMenu: ({ event: { intersections, pageX, pageY } }) => {
@@ -85,12 +134,45 @@ const HouseModuleElement = (props: Props) => {
       )
       if (returnIf) return
 
+      let isSelected = false
+      let payload: any
+
       switch (store.scope.type) {
         case ScopeTypeEnum.Enum.HOUSE:
-          if (!store.scope.selected.includes(houseId)) {
-            if (shiftKey) store.scope.selected.push(houseId)
-            else store.scope.selected = [houseId]
-          }
+          isSelected = store.scope.selected.includes(houseId)
+          payload = houseId
+          break
+        case ScopeTypeEnum.Enum.MODULE:
+          isSelected = !undef(
+            store.scope.selected.find(
+              (x) => x.houseId === houseId && x.moduleIndex === moduleIndex
+            )
+          )
+          payload = { houseId, moduleIndex } as ModuleScopeItem
+          break
+        case ScopeTypeEnum.Enum.ELEMENT:
+          isSelected = !undef(
+            store.scope.selected.find(
+              (x) => x.houseId === houseId && x.elementName === elementName
+            )
+          )
+          payload = { houseId, elementName } as ElementScopeItem
+          break
+        case ScopeTypeEnum.Enum.LEVEL:
+          isSelected = !undef(
+            store.scope.selected.find(
+              (x) =>
+                x.houseId === houseId &&
+                x.levelModuleIndices.includes(moduleIndex)
+            )
+          )
+          payload = { houseId, levelModuleIndices } as LevelScopeItem
+          break
+      }
+
+      if (!isSelected) {
+        if (shiftKey) store.scope.selected.push(payload)
+        else store.scope.selected = [payload]
       }
     },
   })

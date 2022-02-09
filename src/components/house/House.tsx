@@ -4,8 +4,10 @@ import { store, useHouseModules, useUpdatePosition } from "@/store"
 import { useGLTF } from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
+import { transpose } from "fp-ts-std/ReadonlyArray"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
+import { chunksOf, range } from "fp-ts/lib/ReadonlyNonEmptyArray"
 import { useRef } from "react"
 import { Group } from "three"
 import HouseModule from "./HouseModule"
@@ -50,12 +52,23 @@ const House = (props: Props) => {
             ? z0 + module.length / 2
             : z0 + (-module.length + module.length / 2)
 
+          const layoutHeight = layout.gridBounds[1] + 1
+
+          const chunks = pipe(
+            range(0, modules.length - 1),
+            chunksOf(layoutHeight),
+            transpose
+          ) as number[][]
+
+          const heightIndex = moduleIndex % layoutHeight
+
           return (
             <HouseModule
               key={moduleIndex}
               {...{ module, gltf, moduleIndex, houseId }}
               position={[x, y - (layout.cellHeights[0] || 0), z]}
               scale={!mirror ? [1, 1, 1] : [1, 1, -1]}
+              levelModuleIndices={chunks[heightIndex]}
             />
           )
         })
