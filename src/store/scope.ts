@@ -56,14 +56,3 @@ export const setScopeType = (type: ScopeType) => {
     hovered: null,
   }
 }
-
-// export const outlined = derive({
-//   outlined: (get):  => {
-//     const scopeType = get(store).scope.type
-//     switch (scopeType) {
-//       case ScopeTypeEnum.Enum.HOUSE:
-//       default:
-//         return []
-//     }
-//   }
-// })
