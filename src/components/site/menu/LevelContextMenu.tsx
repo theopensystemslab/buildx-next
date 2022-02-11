@@ -1,3 +1,8 @@
+import { Radio } from "@/components/ui"
+import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
+import ContextMenuButton from "@/components/ui/ContextMenuButton"
+import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
+import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { useSystemsData } from "@/context/SystemsData"
 import { filterCompatibleModules, Module } from "@/data/module"
 import { moduleLayout, ModuleLayoutItem } from "@/data/moduleLayout"
@@ -23,12 +28,6 @@ import { alt, none, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { Eq, Ord as StrOrd } from "fp-ts/lib/string"
 import React from "react"
-import { useSnapshot } from "valtio"
-import { Radio } from "../ui"
-import ContextMenu, { ContextMenuProps } from "../ui/ContextMenu"
-import ContextMenuButton from "../ui/ContextMenuButton"
-import ContextMenuHeading from "../ui/ContextMenuHeading"
-import ContextMenuNested from "../ui/ContextMenuNested"
 
 const LevelContextMenu = (props: ContextMenuProps) => {
   if (store.scope.type !== ScopeTypeEnum.Enum.LEVEL) {
@@ -139,7 +138,9 @@ const LevelContextMenu = (props: ContextMenuProps) => {
 
   const levelTypeOptions = pipe(
     systemModules,
-    filterCompatibleModules(levelModule),
+    filterCompatibleModules(["sectionType", "positionType", "level"])(
+      levelModule
+    ),
     map((x) => x.structuredDna.levelType),
     uniq(Eq)
   )
@@ -154,7 +155,9 @@ const LevelContextMenu = (props: ContextMenuProps) => {
           ? m
           : pipe(
               systemModules,
-              filterCompatibleModules(houseModules[i]),
+              filterCompatibleModules(["sectionType", "positionType", "level"])(
+                houseModules[i]
+              ),
               (compatModules) =>
                 pipe(
                   compatModules,
@@ -198,12 +201,12 @@ const LevelContextMenu = (props: ContextMenuProps) => {
 
     if (!guard(next)) return
 
-    const diff = pipe(
-      store.houses[houseId].dna,
-      zip(next),
-      filter(([l, r]) => l !== r)
-    )
-    console.log(diff)
+    // const diff = pipe(
+    //   store.houses[houseId].dna,
+    //   zip(next),
+    //   filter(([l, r]) => l !== r)
+    // )
+    // console.log(diff)
 
     store.houses[houseId].dna = next
 
@@ -233,22 +236,4 @@ const LevelContextMenu = (props: ContextMenuProps) => {
   )
 }
 
-const SiteContextMenu = () => {
-  const { contextMenu } = useSnapshot(store)
-  if (!contextMenu) return null
-
-  const [pageX, pageY] = contextMenu
-
-  const onClose = () => void (store.contextMenu = null)
-
-  const props = { pageX, pageY, onClose }
-
-  switch (store.scope.type) {
-    case ScopeTypeEnum.Enum.LEVEL:
-      return <LevelContextMenu {...props} />
-    default:
-      return null
-  }
-}
-
-export default SiteContextMenu
+export default LevelContextMenu

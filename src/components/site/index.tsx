@@ -12,7 +12,7 @@ import Layout from "../layouts"
 import { IconButton, IconMenu, Loader, Radio } from "../ui"
 import { Crosshair, Environment, Menu } from "../ui/icons"
 import Container from "./Container"
-import SiteContextMenu from "./SiteContextMenu"
+import { SiteContextMenu } from "./menu"
 import SiteSidebar from "./SiteSidebar"
 
 const ThreeInit = dynamic(() => import("./SiteThreeInit"), { ssr: false })

@@ -43,13 +43,12 @@ export const getModules = (system: System): Promise<Array<Module>> =>
       return Promise.resolve([])
     })
 
-export const filterCompatibleModules = (module: Module) =>
-  filter((m: Module) =>
-    (
-      ["sectionType", "positionType", "level"] as Array<keyof StructuredDna>
-    ).reduce(
-      (acc: boolean, k) =>
-        acc && m.structuredDna[k] === module.structuredDna[k],
-      true
+export const filterCompatibleModules =
+  (ks: Array<keyof StructuredDna>) => (module: Module) =>
+    filter((m: Module) =>
+      ks.reduce(
+        (acc: boolean, k) =>
+          acc && m.structuredDna[k] === module.structuredDna[k],
+        true
+      )
     )
-  )
