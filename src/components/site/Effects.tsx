@@ -9,8 +9,6 @@ const Effects = () => {
   const size = useThree((three) => three.size)
   const { outlined } = useSnapshot(store)
 
-  // useEffect(() => void console.log(outlined), [outlined])
-
   return (
     <Suspense fallback={null}>
       <EffectComposer autoClear={false} multisampling={8} disableNormalPass>

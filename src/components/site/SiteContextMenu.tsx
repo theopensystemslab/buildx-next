@@ -1,26 +1,31 @@
 import { useSystemsData } from "@/context/SystemsData"
-import { Module } from "@/data/module"
+import { filterCompatibleModules, Module } from "@/data/module"
 import { moduleLayout, ModuleLayoutItem } from "@/data/moduleLayout"
 import { ScopeTypeEnum, store, useHouseModules } from "@/store"
 import {
   chunksOf,
   filterMap,
   filterWithIndex,
+  findFirstMap,
   flatten,
   head,
   map,
+  mapWithIndex,
   sort,
   splitAt,
+  uniq,
 } from "fp-ts/lib/Array"
 import { flow, pipe } from "fp-ts/lib/function"
 import { none, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
-import { Ord } from "fp-ts/lib/string"
+import { Eq, Ord as StrOrd } from "fp-ts/lib/string"
 import React from "react"
 import { useSnapshot } from "valtio"
+import { Radio } from "../ui"
 import ContextMenu, { ContextMenuProps } from "../ui/ContextMenu"
 import ContextMenuButton from "../ui/ContextMenuButton"
 import ContextMenuHeading from "../ui/ContextMenuHeading"
+import ContextMenuNested from "../ui/ContextMenuNested"
 
 const LevelContextMenu = (props: ContextMenuProps) => {
   if (store.scope.type !== ScopeTypeEnum.Enum.LEVEL) {
@@ -31,12 +36,16 @@ const LevelContextMenu = (props: ContextMenuProps) => {
   const levels = store.scope.selected.length
   const levelIndex = store.scope.selected[0].levelModuleIndices[0]
   const { modules: allModules } = useSystemsData()
+
   const houseId = store.scope.selected[0].houseId
   const houseModules = useHouseModules(houseId)
   const layout = moduleLayout(houseModules)
   const systemModules = allModules.filter(
     (m) => m.systemId === houseModules[0].systemId
   )
+
+  const levelModuleIndices = store.scope.selected[0].levelModuleIndices
+  const levelModule = houseModules[levelModuleIndices[0]]
 
   const heading =
     levels === 1
@@ -65,7 +74,7 @@ const LevelContextMenu = (props: ContextMenuProps) => {
         ),
         sort(
           pipe(
-            Ord,
+            StrOrd,
             contramap((m: ModuleLayoutItem) => m.dna)
           )
         ),
@@ -80,14 +89,11 @@ const LevelContextMenu = (props: ContextMenuProps) => {
       map(
         flow(
           splitAt(levelIndex + 1),
-          ([init, rest]) => {
-            console.log({ init, rest })
-            return [
-              ...init,
-              getIntermediateModule(init[init.length - 1]),
-              ...rest,
-            ]
-          },
+          ([init, rest]) => [
+            ...init,
+            getIntermediateModule(init[init.length - 1]),
+            ...rest,
+          ],
           filterMap((x) => (x !== null ? some(x.dna) : none))
         )
       ),
@@ -111,6 +117,67 @@ const LevelContextMenu = (props: ContextMenuProps) => {
     )
   }
 
+  // strip the level type out of the dna
+
+  // compute hamming
+
+  // distance between module algorithm
+  // ---------------------------------
+  // split into tokens
+  // parseDna
+  // GRID0 GRID1 SIDE0 SIDE1
+  // split to str vs. number parts
+
+  // could just like...
+  // match the first bit
+  // check level type LETTER same
+  // level type NUMBER different
+  // sort string
+
+  const levelTypeOptions = pipe(
+    systemModules,
+    filterCompatibleModules(levelModule),
+    map((x) => x.structuredDna.levelType),
+    uniq(Eq)
+  )
+
+  const levelType = levelModule.structuredDna.levelType
+
+  const changeLevelType = (newLevelType: any) => {
+    const next = pipe(
+      store.houses[houseId].dna,
+      mapWithIndex((i, m) =>
+        !levelModuleIndices.includes(i)
+          ? m
+          : pipe(
+              systemModules,
+              filterCompatibleModules(houseModules[i]),
+              sort(
+                pipe(
+                  StrOrd,
+                  contramap((x: Module) => x.dna)
+                )
+              ),
+              findFirstMap((x) =>
+                x.structuredDna.levelType === newLevelType ? some(x.dna) : none
+              ),
+              toNullable
+            )
+      )
+    )
+
+    const guard = (xs: (string | null)[]): xs is string[] => !xs.includes(null)
+
+    if (!guard(next)) return
+
+    store.houses[houseId].dna = next
+
+    // for each module in levelModuleIndices
+    // find either
+    //    a) same dna except level type change
+    //    b) same section, position; incoming level; vanilla rest
+  }
+
   return (
     <ContextMenu {...props}>
       <ContextMenuHeading>{heading}</ContextMenuHeading>
@@ -119,6 +186,14 @@ const LevelContextMenu = (props: ContextMenuProps) => {
         Add floor below
       </ContextMenuButton> */}
       <ContextMenuButton onClick={removeFloor}>Remove floor</ContextMenuButton>
+      {/* <ContextMenuButton onClick={getLevelTypeOptions}>foo</ContextMenuButton> */}
+      <ContextMenuNested label="Change Level Type">
+        <Radio
+          options={levelTypeOptions.map((value) => ({ label: value, value }))}
+          selected={levelType}
+          onChange={changeLevelType}
+        />
+      </ContextMenuNested>
     </ContextMenu>
   )
 }

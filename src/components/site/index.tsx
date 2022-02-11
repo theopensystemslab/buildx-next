@@ -1,4 +1,4 @@
-import { SystemsDataProvider } from "@/context/SystemsData"
+import { SystemsDataProvider, useSystemsData } from "@/context/SystemsData"
 import { ScopeTypeEnum, setOrthographic, setScopeType, store } from "@/store"
 import { upperFirst } from "@/utils"
 import { pipe } from "fp-ts/lib/function"

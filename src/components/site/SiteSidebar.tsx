@@ -48,8 +48,8 @@ const SiteSidebar = ({ open, close }: Props) => {
             ← Back
           </button>
           <p className="px-4 font-bold">{selectedSystem.name} House types</p>
-          {systemsData.houseTypes.map((houseType, index) =>
-            houseType.systemId === selectedSystem.id ? (
+          {systemsData.houseTypes.map((houseType, index) => {
+            return houseType.systemId === selectedSystem.id ? (
               <HouseThumbnail
                 key={index}
                 houseType={houseType}
@@ -69,7 +69,7 @@ const SiteSidebar = ({ open, close }: Props) => {
                 }
               />
             ) : null
-          )}
+          })}
         </div>
       )}
     </Sidebar>

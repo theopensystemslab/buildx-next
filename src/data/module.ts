@@ -2,6 +2,7 @@ import type { System } from "./system"
 import { getAirtableEntries } from "./utils"
 import type { StructuredDna } from "./moduleLayout"
 import { parseDna } from "./moduleLayout"
+import { filter } from "fp-ts/lib/Array"
 
 export interface Module {
   id: string
@@ -41,3 +42,14 @@ export const getModules = (system: System): Promise<Array<Module>> =>
       console.warn(err)
       return Promise.resolve([])
     })
+
+export const filterCompatibleModules = (module: Module) =>
+  filter((m: Module) =>
+    (
+      ["sectionType", "positionType", "level"] as Array<keyof StructuredDna>
+    ).reduce(
+      (acc: boolean, k) =>
+        acc && m.structuredDna[k] === module.structuredDna[k],
+      true
+    )
+  )
