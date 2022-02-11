@@ -4,6 +4,7 @@ import { moduleLayout, ModuleLayoutItem } from "@/data/moduleLayout"
 import { ScopeTypeEnum, store, useHouseModules } from "@/store"
 import {
   chunksOf,
+  filter,
   filterMap,
   filterWithIndex,
   findFirstMap,
@@ -11,12 +12,14 @@ import {
   head,
   map,
   mapWithIndex,
+  reduceWithIndex,
   sort,
   splitAt,
   uniq,
+  zip,
 } from "fp-ts/lib/Array"
 import { flow, pipe } from "fp-ts/lib/function"
-import { none, some, toNullable } from "fp-ts/lib/Option"
+import { alt, none, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { Eq, Ord as StrOrd } from "fp-ts/lib/string"
 import React from "react"
@@ -152,16 +155,41 @@ const LevelContextMenu = (props: ContextMenuProps) => {
           : pipe(
               systemModules,
               filterCompatibleModules(houseModules[i]),
-              sort(
+              (compatModules) =>
                 pipe(
-                  StrOrd,
-                  contramap((x: Module) => x.dna)
+                  compatModules,
+                  findFirstMap((x) => {
+                    const xdnas = x.dna.split("-")
+                    const mdnas = m.split("-")
+                    return pipe(
+                      zip(mdnas)(xdnas),
+                      reduceWithIndex(
+                        true,
+                        (j, acc, [xs, ms]) =>
+                          acc && (j === 2 ? xs !== ms : xs === ms)
+                      )
+                    )
+                      ? some(x.dna)
+                      : none
+                  }),
+                  alt(() => {
+                    return pipe(
+                      compatModules,
+                      sort(
+                        pipe(
+                          StrOrd,
+                          contramap((x: Module) => x.dna)
+                        )
+                      ),
+                      findFirstMap((x) =>
+                        x.structuredDna.levelType === newLevelType
+                          ? some(x.dna)
+                          : none
+                      )
+                    )
+                  }),
+                  toNullable
                 )
-              ),
-              findFirstMap((x) =>
-                x.structuredDna.levelType === newLevelType ? some(x.dna) : none
-              ),
-              toNullable
             )
       )
     )
@@ -169,6 +197,13 @@ const LevelContextMenu = (props: ContextMenuProps) => {
     const guard = (xs: (string | null)[]): xs is string[] => !xs.includes(null)
 
     if (!guard(next)) return
+
+    const diff = pipe(
+      store.houses[houseId].dna,
+      zip(next),
+      filter(([l, r]) => l !== r)
+    )
+    console.log(diff)
 
     store.houses[houseId].dna = next
 
