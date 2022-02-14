@@ -6,7 +6,7 @@ import { ThreeEvent, useThree } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { transpose } from "fp-ts-std/ReadonlyArray"
 import { pipe } from "fp-ts/lib/function"
-import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
+import { filter, mapWithIndex } from "fp-ts/lib/ReadonlyArray"
 import { chunksOf, range } from "fp-ts/lib/ReadonlyNonEmptyArray"
 import { useRef } from "react"
 import { Group } from "three"
@@ -20,8 +20,10 @@ const House = (props: Props) => {
   const houseId = props.id
   const groupRef = useRef<Group>()
   const modules = useHouseModules(houseId)
-  const gltfs = useGLTF(modules.map((module) => module.modelUrl))
+  const modelUrls = modules.map((module) => module.modelUrl)
+  const gltfs = useGLTF(modelUrls)
   const layout = moduleLayout(modules)
+
   // const layout2 = getPositions(modules)
 
   const onDrag = useUpdatePosition(houseId, groupRef)

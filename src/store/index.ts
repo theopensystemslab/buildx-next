@@ -1,10 +1,10 @@
 import { Houses } from "@/data/house"
 import CameraControls from "camera-controls"
-import { boolean } from "fp-ts-std"
 import { MutableRefObject } from "react"
 import { Object3D } from "three"
-import { proxy, ref, useSnapshot } from "valtio"
+import { proxy, ref } from "valtio"
 import { Scope, ScopeTypeEnum } from "./scope"
+import { finalSystems } from "./systems"
 
 type Store = {
   houses: Houses
@@ -16,6 +16,7 @@ type Store = {
   horizontalPointer: [number, number]
   contextMenu: [number, number] | null
   outlined: Array<MutableRefObject<Object3D | undefined>>
+  systems: typeof finalSystems
 }
 
 export const store = proxy<Store>({
@@ -32,8 +33,9 @@ export const store = proxy<Store>({
   lastLookAt: [0, 0, 0, 0, 0, 0],
   contextMenu: null,
   outlined: ref([]),
+  systems: finalSystems,
 })
 
+export * from "./camera"
 export * from "./houses"
 export * from "./scope"
-export * from "./camera"
