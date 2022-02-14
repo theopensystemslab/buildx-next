@@ -15,6 +15,7 @@ import { MutableRefObject, useCallback, useEffect, useMemo } from "react"
 import { Group, Plane } from "three"
 import { subscribe, useSnapshot } from "valtio"
 import { ScopeTypeEnum, setCameraEnabled, store } from "."
+import { useSystems } from "./systems"
 
 export type HorizontalSectionCut = {
   levelType: string
@@ -122,4 +123,12 @@ export const useUpdatePosition = (
 
     if (last) setCameraEnabled(true)
   }
+}
+
+export const useHouseType = (houseId: string) => {
+  const house = useHouse(houseId)
+  const { houseTypes } = useSystems()
+  const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
+  if (!houseType) throw new Error("houseType not found")
+  return houseType
 }

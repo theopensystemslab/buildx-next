@@ -3,6 +3,7 @@ import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import { useSystemsData } from "@/context/SystemsData"
 import { ScopeTypeEnum, store, useHouse } from "@/store"
+import { useResetHouse } from "@/store/actions"
 import React from "react"
 
 const HouseContextMenu = (props: ContextMenuProps) => {
@@ -13,16 +14,7 @@ const HouseContextMenu = (props: ContextMenuProps) => {
 
   const houseId = store.scope.selected[0]
 
-  const house = useHouse(houseId)
-
-  const { houseTypes } = useSystemsData()
-
-  const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
-
-  const resetHouse = () => {
-    if (!houseType) return
-    store.houses[houseId].dna = houseType.dna
-  }
+  const resetHouse = useResetHouse(houseId)
 
   return (
     <ContextMenu {...props}>

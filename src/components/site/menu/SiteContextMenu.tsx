@@ -6,7 +6,11 @@ import LevelContextMenu from "./LevelContextMenu"
 import ModuleContextMenu from "./ModuleContextMenu"
 
 const SiteContextMenu = () => {
-  const { contextMenu } = useSnapshot(store)
+  const {
+    contextMenu,
+    scope: { type: scopeType },
+  } = useSnapshot(store)
+
   if (!contextMenu) return null
 
   const [pageX, pageY] = contextMenu
@@ -15,7 +19,7 @@ const SiteContextMenu = () => {
 
   const props = { pageX, pageY, onClose }
 
-  switch (store.scope.type) {
+  switch (scopeType) {
     case ScopeTypeEnum.Enum.LEVEL:
       return <LevelContextMenu {...props} />
     case ScopeTypeEnum.Enum.HOUSE:

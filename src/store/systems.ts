@@ -8,7 +8,7 @@ import { System } from "@/data/system"
 import { getWindowTypes } from "@/data/windowType"
 import { flatten, map } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { proxy } from "valtio"
+import { proxy, useSnapshot } from "valtio"
 import { derive } from "valtio/utils"
 
 const systems: Array<System> = [
@@ -63,3 +63,5 @@ export const finalSystems = proxy({
   ...baseSystems,
   ...derivedSystems,
 })
+
+export const useSystems = () => useSnapshot(finalSystems)

@@ -9,7 +9,6 @@ import { moduleLayout, ModuleLayoutItem } from "@/data/moduleLayout"
 import { ScopeTypeEnum, store, useHouseModules } from "@/store"
 import {
   chunksOf,
-  filter,
   filterMap,
   filterWithIndex,
   findFirstMap,
@@ -29,13 +28,18 @@ import { contramap } from "fp-ts/lib/Ord"
 import { Eq, Ord as StrOrd } from "fp-ts/lib/string"
 import React from "react"
 
-const LevelContextMenu = (props: ContextMenuProps) => {
+const SingleLevelContextMenu = (props: ContextMenuProps) => {
   if (store.scope.type !== ScopeTypeEnum.Enum.LEVEL) {
     console.error("LevelContextMenu called with different scope type")
     return null
   }
+  if (store.scope.selected.length !== 1) {
+    console.error(
+      `SingleLevelContextMenu called but ${store.scope.selected.length} selected`
+    )
+    return null
+  }
 
-  const levels = store.scope.selected.length
   const levelIndex = store.scope.selected[0].levelModuleIndices[0]
   const { modules: allModules } = useSystemsData()
 
@@ -49,10 +53,7 @@ const LevelContextMenu = (props: ContextMenuProps) => {
   const levelModuleIndices = store.scope.selected[0].levelModuleIndices
   const levelModule = houseModules[levelModuleIndices[0]]
 
-  const heading =
-    levels === 1
-      ? `Level ${store.scope.selected[0].levelModuleIndices[0]}`
-      : `Levels ${store.scope.selected.map((x) => x.levelModuleIndices[0])}`
+  const heading = `Level ${store.scope.selected[0].levelModuleIndices[0]}`
 
   const height = layout.gridBounds[1] + 1
 
@@ -119,23 +120,6 @@ const LevelContextMenu = (props: ContextMenuProps) => {
     )
   }
 
-  // strip the level type out of the dna
-
-  // compute hamming
-
-  // distance between module algorithm
-  // ---------------------------------
-  // split into tokens
-  // parseDna
-  // GRID0 GRID1 SIDE0 SIDE1
-  // split to str vs. number parts
-
-  // could just like...
-  // match the first bit
-  // check level type LETTER same
-  // level type NUMBER different
-  // sort string
-
   const levelTypeOptions = pipe(
     systemModules,
     filterCompatibleModules(["sectionType", "positionType", "level"])(
@@ -201,30 +185,14 @@ const LevelContextMenu = (props: ContextMenuProps) => {
 
     if (!guard(next)) return
 
-    // const diff = pipe(
-    //   store.houses[houseId].dna,
-    //   zip(next),
-    //   filter(([l, r]) => l !== r)
-    // )
-    // console.log(diff)
-
     store.houses[houseId].dna = next
-
-    // for each module in levelModuleIndices
-    // find either
-    //    a) same dna except level type change
-    //    b) same section, position; incoming level; vanilla rest
   }
 
   return (
     <ContextMenu {...props}>
       <ContextMenuHeading>{heading}</ContextMenuHeading>
       <ContextMenuButton onClick={addFloor}>Add floor above</ContextMenuButton>
-      {/* <ContextMenuButton onClick={() => addFloorAbove(i - 1)}>
-        Add floor below
-      </ContextMenuButton> */}
       <ContextMenuButton onClick={removeFloor}>Remove floor</ContextMenuButton>
-      {/* <ContextMenuButton onClick={getLevelTypeOptions}>foo</ContextMenuButton> */}
       <ContextMenuNested label="Change Level Type">
         <Radio
           options={levelTypeOptions.map((value) => ({ label: value, value }))}
@@ -233,6 +201,38 @@ const LevelContextMenu = (props: ContextMenuProps) => {
         />
       </ContextMenuNested>
     </ContextMenu>
+  )
+}
+
+const ManyLevelsContextMenu = (props: ContextMenuProps) => {
+  if (store.scope.type !== ScopeTypeEnum.Enum.LEVEL) {
+    console.error("LevelContextMenu called with different scope type")
+    return null
+  }
+
+  return (
+    <ContextMenu {...props}>
+      {/* <ContextMenuHeading>{heading}</ContextMenuHeading>
+      <ContextMenuButton onClick={addFloor}>Add floor above</ContextMenuButton>
+      <ContextMenuButton onClick={removeFloor}>Remove floor</ContextMenuButton>
+      <ContextMenuNested label="Change Level Type">
+        <Radio
+          options={levelTypeOptions.map((value) => ({ label: value, value }))}
+          selected={levelType}
+          onChange={changeLevelType}
+        />
+      </ContextMenuNested> */}
+    </ContextMenu>
+  )
+}
+
+const LevelContextMenu = (props: ContextMenuProps) => {
+  const levels = store.scope.selected.length
+
+  return levels > 1 ? (
+    <ManyLevelsContextMenu {...props} />
+  ) : (
+    <SingleLevelContextMenu {...props} />
   )
 }
 
