@@ -1,13 +1,9 @@
-import { useSystemsData } from "@/context/SystemsData"
 import { Module } from "@/data/module"
-import defaultMaterial from "@/materials/defaultMaterial"
-import glassMaterial from "@/materials/glassMaterial"
-import { useHouse } from "@/store"
+import { useSystemsData } from "@/store/systems"
 import { fuzzyMatch, GltfT, isMesh } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"
-import { flatten, getOrElse, none, some } from "fp-ts/lib/Option"
-import { findFirstMap, map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
+import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
 import {
   filter,
   filterWithIndex,
@@ -17,7 +13,7 @@ import {
 } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
 import React from "react"
-import { BufferGeometry, Material, Mesh } from "three"
+import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import HouseModuleElement from "./HouseModuleElement"
 
@@ -27,10 +23,6 @@ type Props = GroupProps & {
   gltf: GltfT
   houseId: string
   levelModuleIndices: number[]
-}
-
-const builtInMaterials: Record<string, Material> = {
-  Glazing: glassMaterial,
 }
 
 const HouseModule = (props: Props) => {
@@ -43,56 +35,13 @@ const HouseModule = (props: Props) => {
     ...groupProps
   } = props
 
-  const { elements, materials } = useSystemsData()
-  const house = useHouse(houseId)
+  const { elements } = useSystemsData()
 
   const getElement = (nodeType: string) =>
     fuzzyMatch(elements, {
       keys: ["ifc4Variable"],
       threshold: 0.5,
     })(nodeType)
-
-  const getMaterial = (elementName: string) => {
-    if (house.modifiedMaterials?.[elementName]) {
-      return pipe(
-        materials,
-        findFirstMap((m) =>
-          m.name === house.modifiedMaterials[elementName] && m.threeMaterial
-            ? some(m.threeMaterial)
-            : none
-        ),
-        getOrElse(() =>
-          elementName in builtInMaterials
-            ? builtInMaterials[elementName]
-            : defaultMaterial
-        )
-      )
-    } else {
-      return pipe(
-        elements,
-        findFirstMap((e) =>
-          e.name === elementName
-            ? some(
-                pipe(
-                  materials,
-                  findFirstMap((m) =>
-                    m.name === e.defaultMaterial && m.threeMaterial
-                      ? some(m.threeMaterial)
-                      : none
-                  )
-                )
-              )
-            : none
-        ),
-        flatten,
-        getOrElse(() =>
-          elementName in builtInMaterials
-            ? builtInMaterials[elementName]
-            : defaultMaterial
-        )
-      )
-    }
-  }
 
   const meshes = pipe(
     gltf.nodes,
@@ -118,7 +67,6 @@ const HouseModule = (props: Props) => {
         {...{
           elementName,
           geometry,
-          material: getMaterial(elementName),
           houseId,
           moduleIndex,
           levelModuleIndices,

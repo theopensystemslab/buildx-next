@@ -1,16 +1,27 @@
+import defaultMaterial from "@/materials/defaultMaterial"
+import glassMaterial from "@/materials/glassMaterial"
 import {
   ElementScopeItem,
   LevelScopeItem,
   ModuleScopeItem,
   ScopeTypeEnum,
   store,
+  useHouse,
 } from "@/store"
+import { useSystemsData } from "@/store/systems"
 import { all, any, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
-import React, { useEffect, useRef, useState } from "react"
+import { pipe } from "fp-ts/lib/function"
+import { flatten, getOrElse, none, some } from "fp-ts/lib/Option"
+import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
+import React, { useEffect, useMemo, useRef } from "react"
 import { BufferGeometry, Material, Mesh } from "three"
 import { ref, subscribe } from "valtio"
+
+const builtInMaterials: Record<string, Material> = {
+  Glazing: glassMaterial,
+}
 
 type Props = MeshProps & {
   elementName: string
@@ -18,19 +29,58 @@ type Props = MeshProps & {
   levelModuleIndices: number[]
   houseId: string
   geometry: BufferGeometry
-  material: Material
 }
 
 const HouseModuleElement = (props: Props) => {
-  const {
-    geometry,
-    material,
-    elementName,
-    moduleIndex,
-    houseId,
-    levelModuleIndices,
-  } = props
+  const { geometry, elementName, moduleIndex, houseId, levelModuleIndices } =
+    props
   const meshRef = useRef<Mesh>()
+
+  const house = useHouse(houseId)
+
+  const { materials, elements } = useSystemsData()
+
+  const material = useMemo(() => {
+    if (house.modifiedMaterials?.[elementName]) {
+      return pipe(
+        materials,
+        findFirstMap((m) =>
+          m.name === house.modifiedMaterials[elementName] && m.threeMaterial
+            ? some(m.threeMaterial)
+            : none
+        ),
+        getOrElse(() =>
+          elementName in builtInMaterials
+            ? builtInMaterials[elementName]
+            : defaultMaterial
+        )
+      )
+    } else {
+      return pipe(
+        elements,
+        findFirstMap((e) =>
+          e.name === elementName
+            ? some(
+                pipe(
+                  materials,
+                  findFirstMap((m) =>
+                    m.name === e.defaultMaterial && m.threeMaterial
+                      ? some(m.threeMaterial)
+                      : none
+                  )
+                )
+              )
+            : none
+        ),
+        flatten,
+        getOrElse(() =>
+          elementName in builtInMaterials
+            ? builtInMaterials[elementName]
+            : defaultMaterial
+        )
+      )
+    }
+  }, [elementName, materials])
 
   useEffect(() =>
     subscribe(store.scope, () => {

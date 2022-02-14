@@ -1,8 +1,8 @@
-import type { System } from "./system"
 import { getAirtableEntries } from "./utils"
 import type { StructuredDna } from "./moduleLayout"
 import { parseDna } from "./moduleLayout"
 import { filter } from "fp-ts/lib/Array"
+import type { BuildSystem } from "@/store/systems"
 
 export interface Module {
   id: string
@@ -18,7 +18,7 @@ export interface Module {
   visualReference?: string
 }
 
-export const getModules = (system: System): Promise<Array<Module>> =>
+export const getModules = (system: BuildSystem): Promise<Array<Module>> =>
   getAirtableEntries({ tableId: system.airtableId, tab: "modules" })
     .then((res) =>
       res.records.map((record: any) => {

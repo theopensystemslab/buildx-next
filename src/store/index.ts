@@ -4,7 +4,7 @@ import { MutableRefObject } from "react"
 import { Object3D } from "three"
 import { proxy, ref } from "valtio"
 import { Scope, ScopeTypeEnum } from "./scope"
-import { finalSystems } from "./systems"
+import { systemsData } from "./systems"
 
 type Store = {
   houses: Houses
@@ -16,7 +16,7 @@ type Store = {
   horizontalPointer: [number, number]
   contextMenu: [number, number] | null
   outlined: Array<MutableRefObject<Object3D | undefined>>
-  systems: typeof finalSystems
+  systems: typeof systemsData
 }
 
 export const store = proxy<Store>({
@@ -33,7 +33,7 @@ export const store = proxy<Store>({
   lastLookAt: [0, 0, 0, 0, 0, 0],
   contextMenu: null,
   outlined: ref([]),
-  systems: finalSystems,
+  systems: systemsData,
 })
 
 export * from "./camera"

@@ -3,14 +3,14 @@ import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
-import { useSystemsData } from "@/context/SystemsData"
 import { filterCompatibleModules } from "@/data/module"
 import { ScopeTypeEnum, store, useHouse, useHouseModules } from "@/store"
-import { map, modifyAt, uniq } from "fp-ts/lib/ReadonlyArray"
+import { useSystemsData } from "@/store/systems"
 import { pipe } from "fp-ts/lib/function"
+import { toNullable } from "fp-ts/lib/Option"
+import { map, modifyAt, uniq } from "fp-ts/lib/ReadonlyArray"
 import { Eq } from "fp-ts/lib/string"
 import React from "react"
-import { toNullable } from "fp-ts/lib/Option"
 
 const ModuleContextMenu = (props: ContextMenuProps) => {
   if (store.scope.type !== ScopeTypeEnum.Enum.MODULE) {
@@ -30,7 +30,7 @@ const ModuleContextMenu = (props: ContextMenuProps) => {
 
   const resetModule = () => {
     if (!houseType) return
-    store.houses[houseId].dna = houseType.dna
+    store.houses[houseId].dna = houseType.dna as string[]
   }
 
   const systemModules = allModules.filter(

@@ -31,5 +31,11 @@ export const snapToGrid = (x: number) => {
 export const undef = <T extends unknown>(t: T | undefined): t is undefined =>
   typeof t === "undefined"
 
+export type DeepReadonly<T> = T extends (...a: any[]) => any
+  ? T
+  : {
+      readonly [P in keyof T]: DeepReadonly<T[P]>
+    }
+
 export * from "./three"
 export * from "./fp"

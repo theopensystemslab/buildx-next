@@ -1,4 +1,3 @@
-import { SystemsDataProvider, useSystemsData } from "@/context/SystemsData"
 import { ScopeTypeEnum, setOrthographic, setScopeType, store } from "@/store"
 import { upperFirst } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
@@ -6,7 +5,7 @@ import { getOrElse } from "fp-ts/lib/Option"
 import { map } from "fp-ts/lib/ReadonlyArray"
 import { toLowerCase } from "fp-ts/lib/string"
 import dynamic from "next/dynamic"
-import React, { Fragment, ReactElement, useState } from "react"
+import React, { Fragment, ReactElement, Suspense, useState } from "react"
 import { useSnapshot } from "valtio"
 import Layout from "../layouts"
 import { IconButton, IconMenu, Loader, Radio } from "../ui"
@@ -95,29 +94,16 @@ const SitePageIndex = () => {
           />
         </IconMenu> */}
       </div>
-      <SiteSidebar open={sidebar} close={() => setSidebar(false)} />
-      <ThreeInit />
-      <SiteContextMenu />
+      <Suspense fallback={<Loader />}>
+        <SiteSidebar open={sidebar} close={() => setSidebar(false)} />
+      </Suspense>
+      <Layout>
+        <ThreeInit />
+      </Layout>
+      <Suspense fallback={<Loader />}>
+        <SiteContextMenu />
+      </Suspense>
     </Fragment>
-  )
-}
-
-SitePageIndex.getLayout = (page: ReactElement) => {
-  return (
-    <SystemsDataProvider
-      onError={
-        <Container>
-          <p>Something went wrong.</p>
-        </Container>
-      }
-      onLoading={
-        <Container>
-          <Loader />
-        </Container>
-      }
-    >
-      <Layout>{page}</Layout>
-    </SystemsDataProvider>
   )
 }
 

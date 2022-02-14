@@ -1,9 +1,9 @@
+import type { BuildSystem } from "@/store/systems"
 import { find } from "ramda"
 import type { House } from "./house"
 import type { HouseType } from "./houseType"
 import type { Module } from "./module"
 import { moduleLayout } from "./moduleLayout"
-import type { System } from "./system"
 import { getAirtableEntries } from "./utils"
 
 export interface EnergyInfo {
@@ -26,7 +26,9 @@ const getEnergyEntry = (fieldName: string, records: Array<any>): number => {
   )
 }
 
-export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
+export const getEnergyInfo = async (
+  system: BuildSystem
+): Promise<EnergyInfo> => {
   try {
     const records: Array<any> = (
       await getAirtableEntries({

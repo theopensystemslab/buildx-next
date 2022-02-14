@@ -1,10 +1,13 @@
-import React from "react"
-import type { FC } from "react"
 import type { HouseType } from "@/data/houseType"
+import { DeepReadonly } from "@/utils"
+import React from "react"
 
-const HouseThumbnail: FC<{ houseType: HouseType; onAdd: () => void }> = (
-  props
-) => (
+type Props = {
+  houseType: DeepReadonly<HouseType>
+  onAdd: () => void
+}
+
+const HouseThumbnail = (props: Props) => (
   <div className="flex items-center space-x-2 border-b border-gray-200 px-4 py-4">
     <div
       className="h-20 w-20 flex-none rounded-full bg-gray-200"

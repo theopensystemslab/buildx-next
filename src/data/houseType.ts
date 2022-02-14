@@ -1,4 +1,4 @@
-import type { System } from "./system"
+import { BuildSystem } from "@/store/systems"
 import { getAirtableEntries } from "./utils"
 
 export interface HouseType {
@@ -12,7 +12,7 @@ export interface HouseType {
 }
 
 export const getHouseTypes = async (
-  system: System
+  system: BuildSystem
 ): Promise<Array<HouseType>> => {
   try {
     const modulesByHouseType: Array<any> = (

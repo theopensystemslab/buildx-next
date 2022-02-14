@@ -1,7 +1,8 @@
 import Sidebar from "@/components/ui/Sidebar"
-import { useSystemsData } from "@/context/SystemsData"
-import { System, systems } from "@/data/system"
 import { addHouse } from "@/store"
+import { BuildSystem, buildSystems, useSystemsData } from "@/store/systems"
+import { pipe } from "fp-ts/lib/function"
+import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
 import { nanoid } from "nanoid"
 import React, { useMemo, useState } from "react"
 import HouseThumbnail from "./HouseThumbnail"
@@ -14,18 +15,18 @@ type Props = {
 const SiteSidebar = ({ open, close }: Props) => {
   const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null)
 
-  const selectedSystem: System | undefined = useMemo(() => {
-    return systems.find((system) => system.id === selectedSystemId)
+  const selectedSystem: BuildSystem | undefined = useMemo(() => {
+    return buildSystems.find((system) => system.id === selectedSystemId)
   }, [selectedSystemId])
 
-  const systemsData = useSystemsData()
+  const { houseTypes } = useSystemsData()
 
   return (
     <Sidebar expanded={open} onClose={close}>
       {!selectedSystem ? (
         <div className="space-y-2">
           <p className="px-4 font-bold">Systems</p>
-          {systems.map((system) => (
+          {buildSystems.map((system) => (
             <button
               key={system.id}
               className="block w-full cursor-pointer px-4 py-2 text-left hover:bg-gray-100"
@@ -48,28 +49,31 @@ const SiteSidebar = ({ open, close }: Props) => {
             ← Back
           </button>
           <p className="px-4 font-bold">{selectedSystem.name} House types</p>
-          {systemsData.houseTypes.map((houseType, index) => {
-            return houseType.systemId === selectedSystem.id ? (
-              <HouseThumbnail
-                key={index}
-                houseType={houseType}
-                onAdd={() =>
-                  addHouse({
-                    id: nanoid(),
-                    houseTypeId: houseType.id,
-                    systemId: houseType.systemId,
-                    position: [0, 0],
-                    // addNewPoint(
-                    //   Object.values(prevHouses).map((house) => house.position)
-                    // ),
-                    rotation: 0,
-                    dna: houseType.dna,
-                    modifiedMaterials: {},
-                  })
-                }
-              />
-            ) : null
-          })}
+          {pipe(
+            houseTypes,
+            mapWithIndex((index, houseType) => {
+              return houseType.systemId === selectedSystem.id ? (
+                <HouseThumbnail
+                  key={index}
+                  houseType={houseType}
+                  onAdd={() =>
+                    addHouse({
+                      id: nanoid(),
+                      houseTypeId: houseType.id,
+                      systemId: houseType.systemId,
+                      position: [0, 0],
+                      // addNewPoint(
+                      //   Object.values(prevHouses).map((house) => house.position)
+                      // ),
+                      rotation: 0,
+                      dna: houseType.dna as string[],
+                      modifiedMaterials: {},
+                    })
+                  }
+                />
+              ) : null
+            })
+          )}
         </div>
       )}
     </Sidebar>

@@ -4,14 +4,21 @@ import { getHouseTypes } from "@/data/houseType"
 import { getInternalLayoutTypes } from "@/data/internalLayoutType"
 import { getMaterials } from "@/data/material"
 import { getModules } from "@/data/module"
-import { System } from "@/data/system"
 import { getWindowTypes } from "@/data/windowType"
+import defaultMaterial from "@/materials/defaultMaterial"
+import { createMaterial } from "@/utils"
 import { flatten, map } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { proxy, useSnapshot } from "valtio"
 import { derive } from "valtio/utils"
 
-const systems: Array<System> = [
+export interface BuildSystem {
+  id: string
+  name: string
+  airtableId: string
+}
+
+export const buildSystems: Array<BuildSystem> = [
   {
     id: "sample",
     name: "Sample",
@@ -24,44 +31,46 @@ const systems: Array<System> = [
   },
 ]
 
-export const baseSystems = proxy({
-  modules: Promise.all(pipe(systems, map(getModules))).then(flatten),
-
-  windowTypes: Promise.all(pipe(systems, map(getWindowTypes))).then(flatten),
-
-  internalLayoutTypes: Promise.all(systems.map(getInternalLayoutTypes)).then(
+export const baseSystemsData = proxy({
+  modules: Promise.all(pipe(buildSystems, map(getModules))).then(flatten),
+  windowTypes: Promise.all(pipe(buildSystems, map(getWindowTypes))).then(
     flatten
   ),
-
-  houseTypes: Promise.all(pipe(systems, map(getHouseTypes)))
+  internalLayoutTypes: Promise.all(
+    buildSystems.map(getInternalLayoutTypes)
+  ).then(flatten),
+  houseTypes: Promise.all(pipe(buildSystems, map(getHouseTypes)))
     .then(flatten)
     .then((houseTypes) =>
       houseTypes.filter((houseType) => houseType.dna.length > 0)
     ),
-
-  energyInfo: Promise.all(pipe(systems, map(getEnergyInfo))),
-
-  materials: Promise.all(pipe(systems, map(getMaterials))).then(flatten),
-
-  // elements: Promise.all(
+  energyInfo: Promise.all(pipe(buildSystems, map(getEnergyInfo))),
+  materials: Promise.all(pipe(buildSystems, map(getMaterials))).then(flatten),
 })
-// export const systems = proxy({})
 
-const derivedSystems = derive({
+const derivedSystemsData = derive({
   elements: (get) =>
     Promise.all(
       pipe(
-        systems,
+        buildSystems,
         map(async (system) =>
-          getElements(system, await get(baseSystems).materials)
+          getElements(system, await get(baseSystemsData).materials)
         )
       )
     ).then(flatten),
+  materials: async (get) =>
+    (await get(baseSystemsData).materials).map((material) => {
+      const threeMaterial =
+        typeof document === "undefined"
+          ? defaultMaterial
+          : createMaterial(material)
+      return { ...material, threeMaterial }
+    }),
 })
 
-export const finalSystems = proxy({
-  ...baseSystems,
-  ...derivedSystems,
+export const systemsData = proxy({
+  ...baseSystemsData,
+  ...derivedSystemsData,
 })
 
-export const useSystems = () => useSnapshot(finalSystems)
+export const useSystemsData = () => useSnapshot(systemsData)

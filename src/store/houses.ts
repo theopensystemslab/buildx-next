@@ -1,4 +1,3 @@
-import { useSystemsData } from "@/context/SystemsData"
 import { findCollisions, House } from "@/data/house"
 import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
@@ -15,7 +14,7 @@ import { MutableRefObject, useCallback, useEffect, useMemo } from "react"
 import { Group, Plane } from "three"
 import { subscribe, useSnapshot } from "valtio"
 import { ScopeTypeEnum, setCameraEnabled, store } from "."
-import { useSystems } from "./systems"
+import { useSystemsData } from "./systems"
 
 export type HorizontalSectionCut = {
   levelType: string
@@ -48,7 +47,7 @@ export const useHouseModules = (houseId: string) => {
     ? []
     : pipe(
         houseTypes,
-        findFirst((ht: HouseType) => ht.id === house.houseTypeId),
+        findFirst((ht) => ht.id === house.houseTypeId),
         mapO((houseType) => house.dna ?? houseType.dna),
         mapO(
           flow(
@@ -127,7 +126,7 @@ export const useUpdatePosition = (
 
 export const useHouseType = (houseId: string) => {
   const house = useHouse(houseId)
-  const { houseTypes } = useSystems()
+  const { houseTypes } = useSystemsData()
   const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
   if (!houseType) throw new Error("houseType not found")
   return houseType

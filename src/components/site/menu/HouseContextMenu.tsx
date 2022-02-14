@@ -1,8 +1,7 @@
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
-import { useSystemsData } from "@/context/SystemsData"
-import { ScopeTypeEnum, store, useHouse } from "@/store"
+import { ScopeTypeEnum, store } from "@/store"
 import { useResetHouse } from "@/store/actions"
 import React from "react"
 

@@ -1,9 +1,7 @@
-import { safeLocalStorageGet } from "@/utils"
+import { DeepReadonly, safeLocalStorageGet } from "@/utils"
 import { filterMap, findFirst } from "fp-ts/lib/Array"
-import { flow, pipe } from "fp-ts/lib/function"
-import { getOrElse, map as optMap } from "fp-ts/lib/Option"
+import { pipe } from "fp-ts/lib/function"
 import { map } from "fp-ts/lib/ReadonlyRecord"
-import { Material } from "three"
 import type { Rectangle } from "./collisions"
 import { checkRectangleIntersection } from "./collisions"
 import type { HouseType } from "./houseType"
@@ -24,8 +22,8 @@ export type Houses = Record<string, House>
 
 export const findCollisions = (
   houses: Houses,
-  houseTypes: Array<HouseType>,
-  modules: Array<Module>
+  houseTypes: ReadonlyArray<DeepReadonly<HouseType>>,
+  modules: ReadonlyArray<DeepReadonly<Module>>
 ): Record<string, boolean> => {
   const rectangles: Record<string, Rectangle> = {}
   const collisions: Record<string, boolean> = {}
