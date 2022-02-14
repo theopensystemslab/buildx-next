@@ -1,8 +1,8 @@
+import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
 import { findCollisions, House } from "@/data/house"
-import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
 import { moduleLayout } from "@/data/moduleLayout"
-import { mapO, snapToGrid } from "@/utils"
+import { mapO, snapToGrid, SSR } from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
 import { transpose } from "fp-ts-std/Array"
@@ -130,4 +130,20 @@ export const useHouseType = (houseId: string) => {
   const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
   if (!houseType) throw new Error("houseType not found")
   return houseType
+}
+
+export const initialHouses = SSR
+  ? {}
+  : JSON.parse(localStorage.getItem(BUILDX_LOCAL_STORAGE_HOUSES_KEY) ?? "{}")
+
+export const useHousesLocalStore = () => {
+  useEffect(
+    subscribe(store.houses, () => {
+      localStorage.setItem(
+        BUILDX_LOCAL_STORAGE_HOUSES_KEY,
+        JSON.stringify(store.houses)
+      )
+    }),
+    []
+  )
 }

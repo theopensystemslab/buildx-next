@@ -1,16 +1,21 @@
-import { ScopeTypeEnum, setOrthographic, setScopeType, store } from "@/store"
+import {
+  ScopeTypeEnum,
+  setOrthographic,
+  setScopeType,
+  store,
+  useHousesLocalStore,
+} from "@/store"
 import { upperFirst } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse } from "fp-ts/lib/Option"
 import { map } from "fp-ts/lib/ReadonlyArray"
 import { toLowerCase } from "fp-ts/lib/string"
 import dynamic from "next/dynamic"
-import React, { Fragment, ReactElement, Suspense, useState } from "react"
+import React, { Fragment, Suspense, useState } from "react"
 import { useSnapshot } from "valtio"
 import Layout from "../layouts"
 import { IconButton, IconMenu, Loader, Radio } from "../ui"
 import { Crosshair, Environment, Menu } from "../ui/icons"
-import Container from "./Container"
 import { SiteContextMenu } from "./menu"
 import SiteSidebar from "./SiteSidebar"
 
@@ -22,6 +27,8 @@ const SitePageIndex = () => {
     orthographic,
     scope: { type: scopeType },
   } = useSnapshot(store)
+
+  useHousesLocalStore()
 
   return (
     <Fragment>
