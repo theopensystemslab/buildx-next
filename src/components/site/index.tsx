@@ -11,7 +11,7 @@ import { getOrElse } from "fp-ts/lib/Option"
 import { map } from "fp-ts/lib/ReadonlyArray"
 import { toLowerCase } from "fp-ts/lib/string"
 import dynamic from "next/dynamic"
-import React, { Fragment, Suspense, useState } from "react"
+import React, { Fragment, ReactElement, Suspense, useState } from "react"
 import { useSnapshot } from "valtio"
 import Layout from "../layouts"
 import { IconButton, IconMenu, Loader, Radio } from "../ui"
@@ -112,6 +112,10 @@ const SitePageIndex = () => {
       </Suspense>
     </Fragment>
   )
+}
+
+SitePageIndex.getLayout = (page: ReactElement) => {
+  return <Layout>{page}</Layout>
 }
 
 export default SitePageIndex
