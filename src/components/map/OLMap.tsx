@@ -103,7 +103,6 @@ const OLMap = ({
     }
 
     return subscribeKey(store, "mapPolygon", () => {
-      console.log(store.mapPolygon)
       localStorage.setItem(
         BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
         JSON.stringify(store.mapPolygon)

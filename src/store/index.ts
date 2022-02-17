@@ -6,6 +6,7 @@ import { Object3D } from "three"
 import { proxy, ref } from "valtio"
 import { initialHouses as houses } from "./houses"
 import { Scope, ScopeTypeEnum } from "./scope"
+import { initialMapPolygon } from "./map"
 
 type Store = {
   houses: Houses
@@ -34,10 +35,7 @@ export const store = proxy<Store>({
   lastLookAt: [0, 0, 0, 0, 0, 0],
   contextMenu: null,
   outlined: ref([]),
-  mapPolygon: {
-    coordinates: [],
-    type: "Polygon",
-  },
+  mapPolygon: initialMapPolygon,
 })
 
 export * from "./camera"
