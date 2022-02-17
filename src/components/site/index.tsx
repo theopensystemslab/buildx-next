@@ -3,7 +3,7 @@ import {
   setOrthographic,
   setScopeType,
   store,
-  useHousesLocalStore,
+  useLocallyStoredHouses,
 } from "@/store"
 import { upperFirst } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
@@ -28,7 +28,7 @@ const SitePageIndex = () => {
     scope: { type: scopeType },
   } = useSnapshot(store)
 
-  useHousesLocalStore()
+  useLocallyStoredHouses()
 
   return (
     <Fragment>

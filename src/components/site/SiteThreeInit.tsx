@@ -1,5 +1,5 @@
 import { RaycasterLayer } from "@/CONSTANTS"
-import { store } from "@/store"
+import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
 import React, { useEffect, useState } from "react"
 import { BasicShadowMap } from "three"
@@ -26,6 +26,8 @@ const SiteThreeInit = () => {
       setUnmountToReinitialize(false)
     }, 100)
   }, [orthographic, setUnmountToReinitialize])
+
+  const [boundary, boundaryMaterial] = useMapBoundary()
 
   if (unmountToReinitialize) {
     return (
@@ -69,7 +71,7 @@ const SiteThreeInit = () => {
         </>
       )}
 
-      {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
+      {boundary && <lineLoop args={[boundary, boundaryMaterial]} />}
       <SiteThreeApp />
       <SiteCamControls />
       <Effects />

@@ -1,27 +1,12 @@
 import Layout from "@/components/layouts"
-import type { MapPolygons } from "@/data/mapPolygon"
-import {
-  degreeToMeters,
-  getMapPolygons,
-  maxMeters,
-  saveMapPolygons,
-} from "@/data/mapPolygon"
-import React, {
-  Fragment,
-  ReactElement,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-import useOpenLayersMap from "../../hooks/useOpenLayersMap"
+import { degreeToMeters, maxMeters } from "@/data/mapPolygon"
+import { setMapPolygon } from "@/store/map"
+import React, { Fragment, ReactElement, Suspense } from "react"
+import OLMap from "./OLMap"
 
 const maxAllowedBound = maxMeters / degreeToMeters
 
 const MapPageIndex = () => {
-  const [mapPolygons, setMapPolygons] = useState<MapPolygons | null>(
-    getMapPolygons()
-  )
-
   // const [position, setPosition] = useState<{
   //   longitude: number
   //   latitude: number
@@ -33,9 +18,6 @@ const MapPageIndex = () => {
   // const [warningModal, setWarningModal] = useState(false)
 
   // probably ref the map
-  const mapRef = useOpenLayersMap({
-    onPolygonCoordinates: (polygon) => setMapPolygons([polygon]),
-  })
 
   // const centerFirst = () => {
   //   const map = mapRef.current
@@ -109,10 +91,6 @@ const MapPageIndex = () => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [])
 
-  useEffect(() => {
-    saveMapPolygons(mapPolygons)
-  }, [mapPolygons])
-
   // const maxBound: number = useMemo(() => {
   //   const bounds = mapPolygons
   //     ? mapPolygons.map((polygon) => {
@@ -178,13 +156,15 @@ const MapPageIndex = () => {
           <Crosshair />
         </IconButton>
       </div> */}
-      <div ref={mapRef} className="w-full flex-1"></div>
       {/* <input
         id="track"
         type="checkbox"
         className="absolute top-0 right-0 z-50"
         onChange={(e) => setTracking(Boolean(e.target.value))}
       /> */}
+      <Suspense fallback={null}>
+        <OLMap onPolygonCoordinates={setMapPolygon} />
+      </Suspense>
     </Fragment>
   )
 }

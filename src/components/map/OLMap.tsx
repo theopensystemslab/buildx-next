@@ -1,6 +1,9 @@
+import { setMapPolygon, store } from "@/store"
 import { Feature, Polygon } from "geojson"
 import { Geolocation, Map, View } from "ol"
-import OLGeoJson from "ol/format/GeoJSON"
+import OLFeature from "ol/Feature"
+import GeoJson from "ol/format/GeoJSON"
+import OLPolygon from "ol/geom/Polygon"
 import { Draw, Modify, Snap } from "ol/interaction"
 import TileLayer from "ol/layer/Tile"
 import VectorLayer from "ol/layer/Vector"
@@ -8,19 +11,21 @@ import "ol/ol.css"
 import OSM from "ol/source/OSM"
 import VectorSource from "ol/source/Vector"
 import { Fill, Stroke, Style } from "ol/style"
-import { useEffect, useRef } from "react"
+import React, { useEffect, useRef } from "react"
+import { subscribeKey } from "valtio/utils"
+import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "../../CONSTANTS"
 
-const useOpenLayersMap = ({
+const OLMap = ({
   onPolygonCoordinates,
 }: {
-  onPolygonCoordinates?: (x: Feature<Polygon>) => void
+  onPolygonCoordinates?: (x: Polygon) => void
 } = {}) => {
-  const mapRef = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const source = new VectorSource()
+  const GeoJSON = new GeoJson()
 
   useEffect(() => {
-    if (!mapRef.current) return
-
-    const source = new VectorSource()
+    if (!ref.current) return
 
     const view = new View({
       center: [0, 0],
@@ -28,7 +33,7 @@ const useOpenLayersMap = ({
     })
 
     const map = new Map({
-      target: mapRef.current,
+      target: ref.current,
       layers: [
         new TileLayer({
           source: new OSM(),
@@ -60,12 +65,11 @@ const useOpenLayersMap = ({
       source.clear()
     })
     draw.on("drawend", ({ feature }) => {
-      const GeoJSON = new OLGeoJson()
-      const polygon = JSON.parse(
+      const polyFeature = JSON.parse(
         GeoJSON.writeFeature(feature)
       ) as Feature<Polygon>
 
-      onPolygonCoordinates?.(polygon)
+      onPolygonCoordinates?.(polyFeature.geometry)
     })
     map.addInteraction(draw)
 
@@ -84,7 +88,30 @@ const useOpenLayersMap = ({
     })
   }, [])
 
-  return mapRef
+  useEffect(() => {
+    const rawStoragePayload = localStorage.getItem(
+      BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY
+    )
+    if (rawStoragePayload) {
+      setMapPolygon(JSON.parse(rawStoragePayload))
+      source.clear()
+      source.addFeature(
+        new OLFeature({
+          geometry: new OLPolygon(store.mapPolygon.coordinates),
+        })
+      )
+    }
+
+    return subscribeKey(store, "mapPolygon", () => {
+      console.log(store.mapPolygon)
+      localStorage.setItem(
+        BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
+        JSON.stringify(store.mapPolygon)
+      )
+    })
+  }, [])
+
+  return <div ref={ref} className="w-full flex-1" />
 }
 
-export default useOpenLayersMap
+export default OLMap

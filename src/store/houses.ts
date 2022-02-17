@@ -136,7 +136,7 @@ export const initialHouses = SSR
   ? {}
   : JSON.parse(localStorage.getItem(BUILDX_LOCAL_STORAGE_HOUSES_KEY) ?? "{}")
 
-export const useHousesLocalStore = () => {
+export const useLocallyStoredHouses = () => {
   useEffect(
     subscribe(store.houses, () => {
       localStorage.setItem(
