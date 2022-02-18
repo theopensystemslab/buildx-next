@@ -2,7 +2,7 @@ import { getAirtableEntries } from "./utils"
 import type { StructuredDna } from "./moduleLayout"
 import { parseDna } from "./moduleLayout"
 import { filter } from "fp-ts/lib/Array"
-import type { BuildSystem } from "@/store/systems"
+import type { BuildSystem } from "@/data/buildSystem"
 
 export interface Module {
   id: string

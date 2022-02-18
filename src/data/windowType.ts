@@ -1,4 +1,4 @@
-import type { BuildSystem } from "@/store/systems"
+import type { BuildSystem } from "@/data/buildSystem"
 import { getAirtableEntries } from "./utils"
 
 export interface WindowType {
