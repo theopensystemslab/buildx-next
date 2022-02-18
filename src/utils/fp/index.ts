@@ -1,11 +1,33 @@
 import { flow } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
+import { map as mapO } from "fp-ts/lib/Option"
 import { modifyAt } from "fp-ts/lib/ReadonlyArray"
 import { Monoid, split, toUpperCase } from "fp-ts/lib/string"
-import { map as mapO } from "fp-ts/lib/Option"
-import { MonoidAll, MonoidAny } from "fp-ts/boolean"
 
 export { mapO }
+
+export {
+  map as mapRR,
+  filter as filterRR,
+  reduce as reduceRR,
+} from "fp-ts/lib/ReadonlyRecord"
+export {
+  map as mapR,
+  filter as filterR,
+  reduce as reduceR,
+} from "fp-ts/lib/Record"
+export {
+  map as mapRA,
+  filter as filterRA,
+  reduce as reduceRA,
+} from "fp-ts/lib/ReadonlyArray"
+export {
+  map as mapA,
+  filter as filterA,
+  reduce as reduceA,
+} from "fp-ts/lib/Array"
+
+export { map as mapT } from "fp-ts/lib/Task"
 
 export const pipeLog = <T extends unknown>(x: T): T => (console.log(x), x)
 
