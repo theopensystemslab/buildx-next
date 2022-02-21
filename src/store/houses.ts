@@ -2,7 +2,18 @@ import { BUILDX_LOCAL_STORAGE_HOUSES_KEY, setTypeSpecs } from "@/CONSTANTS"
 import { findCollisions, House } from "@/data/house"
 import { Module } from "@/data/module"
 import { moduleLayout } from "@/data/moduleLayout"
-import { filterRR, mapO, mapRA, mapRR, snapToGrid, SSR } from "@/utils"
+import {
+  chunksOfRNA,
+  filterMapWithIndexRR,
+  filterRR,
+  mapO,
+  mapRA,
+  mapWithIndexRA,
+  mapRR,
+  snapToGrid,
+  SSR,
+  chunksOfRA,
+} from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
 import { transpose } from "fp-ts-std/Array"
@@ -159,9 +170,7 @@ export const houseLayouts = derive({
     const houses = get(store.houses)
     const sysData = await get(systemsData)
     const sysModules = await sysData.modules
-    // const modules = pipe(
-    //         )
-    // const layout =
+
     return pipe(
       houses,
       mapRR((house) => {
@@ -176,10 +185,43 @@ export const houseLayouts = derive({
               )
             )
           )
-
-          // add set transforms per module?
         )
+
         const layout = moduleLayout(modules)
+
+        const layoutHeight = layout.gridBounds[1] + 1
+
+        const moduleChunks = pipe(
+          modules,
+          // mapWithIndexRA((index, module) => ({ ...module, index })),
+          chunksOfRA(layoutHeight)
+        )
+
+        // for each target module 0
+        // find in module chunks
+        // zip from those indices
+        // true if all match
+        // return info
+
+        const foo = pipe(setTypeSpecs)
+
+        // const targetWithIndex = pipe(
+        //   target,
+        //   mapWithIndexRA((verticalIndex, dnas) =>
+        //     pipe(
+        //       dnas,
+        //       mapWithIndexRA((horizontalIndex, dna) => ({
+        //         dna,
+        //         horizontalIndex,
+        //         verticalIndex,
+        //       }))
+        //     )
+        //   )
+        // )
+
+        // const setOptions = pipe(setTypeSpecs,
+
+        //   )
 
         // ST: {
         //   target: [["S1-MID-G1"], ["S1-MID-M1"]],

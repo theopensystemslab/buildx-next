@@ -18,22 +18,42 @@ export const BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY =
 //   [key: string]: string[][][]
 // }
 
-type SetTypeOption = Record<string, string[][]>
+type SetTypeOption = {
+  label: string
+  modules: Record<string, [number, number]>
+}
 
 type SetTypeSpec = {
-  target: string[][]
-  options: SetTypeOption
+  label: string
+  target: Record<string, [number, number]>
+  options: Array<SetTypeOption>
 }
 
 type SetTypeSpecs = Record<string, SetTypeSpec>
 
 export const setTypeSpecs: SetTypeSpecs = {
   ST: {
-    target: [["S1-MID-G1"], ["S1-MID-M1"]],
-    options: {
-      ST0: [["S1-MID-G1-ST0"], ["S1-MID-M1-ST0"]],
-      ST2: [["S1-MID-G1-ST2"], ["S1-MID-M1-ST2"]],
+    label: "Change stair type",
+    target: {
+      "S1-MID-G1": [0, 0],
+      "S1-MID-M1": [0, 1],
     },
+    options: [
+      {
+        label: "ST0",
+        modules: {
+          "S1-MID-G1-ST0": [0, 0],
+          "S1-MID-M1-ST0": [0, 1],
+        },
+      },
+      {
+        label: "ST2",
+        modules: {
+          "S1-MID-G1-ST2": [0, 0],
+          "S1-MID-M1-ST2": [0, 1],
+        },
+      },
+    ],
   },
 }
 
