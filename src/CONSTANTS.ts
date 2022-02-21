@@ -14,13 +14,28 @@ export const BUILDX_LOCAL_STORAGE_HOUSES_KEY = "BUILDX_LOCAL_STORAGE_HOUSES_KEY"
 export const BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY =
   "BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY"
 
-type SetTypes = {
-  [key: string]: string[][]
+// type SetTypes = {
+//   [key: string]: string[][][]
+// }
+
+type SetTypeOption = Record<string, string[][]>
+
+type SetTypeSpec = {
+  target: string[][]
+  options: SetTypeOption
 }
 
-export const setTypes: SetTypes = {
-  ST2: [
-    ["S1-MID-G1-ST2-L2-GRID2-SIDE0-SIDE0-SIDE0-SIDE0"],
-    ["S1-MID-M1-ST2-L2-GRID2-SIDE0-SIDE0-SIDE0-SIDE0"],
-  ],
+type SetTypeSpecs = Record<string, SetTypeSpec>
+
+export const setTypeSpecs: SetTypeSpecs = {
+  ST: {
+    target: [["S1-MID-G1"], ["S1-MID-M1"]],
+    options: {
+      ST0: [["S1-MID-G1-ST0"], ["S1-MID-M1-ST0"]],
+      ST2: [["S1-MID-G1-ST2"], ["S1-MID-M1-ST2"]],
+    },
+  },
 }
+
+// export const setTypes: = {
+// }

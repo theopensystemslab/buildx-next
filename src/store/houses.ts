@@ -1,20 +1,26 @@
-import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
+import { BUILDX_LOCAL_STORAGE_HOUSES_KEY, setTypeSpecs } from "@/CONSTANTS"
 import { findCollisions, House } from "@/data/house"
 import { Module } from "@/data/module"
 import { moduleLayout } from "@/data/moduleLayout"
-import { mapO, snapToGrid, SSR } from "@/utils"
+import { filterRR, mapO, mapRA, mapRR, snapToGrid, SSR } from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
 import { transpose } from "fp-ts-std/Array"
 import { flow, pipe } from "fp-ts/lib/function"
 import { chunksOf, range } from "fp-ts/lib/NonEmptyArray"
-import { getOrElse } from "fp-ts/lib/Option"
-import { filterMap, findFirst } from "fp-ts/lib/ReadonlyArray"
+import { getOrElse, none, some } from "fp-ts/lib/Option"
+import {
+  filterMap,
+  filterMapWithIndex,
+  filterWithIndex,
+  findFirst,
+} from "fp-ts/lib/ReadonlyArray"
 import { MutableRefObject, useCallback, useEffect, useMemo } from "react"
 import { Group, Plane } from "three"
 import { subscribe, useSnapshot } from "valtio"
+import { derive } from "valtio/utils"
 import { ScopeTypeEnum, setCameraEnabled, store } from "."
-import { useSystemsData } from "./systems"
+import { systemsData, useSystemsData } from "./systems"
 
 export type HorizontalSectionCut = {
   levelType: string
@@ -147,3 +153,61 @@ export const useLocallyStoredHouses = () => {
     []
   )
 }
+
+export const houseLayouts = derive({
+  houses: async (get) => {
+    const houses = get(store.houses)
+    const sysData = await get(systemsData)
+    const sysModules = await sysData.modules
+    // const modules = pipe(
+    //         )
+    // const layout =
+    return pipe(
+      houses,
+      mapRR((house) => {
+        const modules = pipe(
+          house.dna,
+          filterMap((dna) =>
+            pipe(
+              sysModules,
+              findFirst(
+                (sysM: Module) =>
+                  sysM.systemId === house.systemId && sysM.dna === dna
+              )
+            )
+          )
+
+          // add set transforms per module?
+        )
+        const layout = moduleLayout(modules)
+
+        // ST: {
+        //   target: [["S1-MID-G1"], ["S1-MID-M1"]],
+        //   options: {
+        //     ST0: [["S1-MID-G1-ST0"], ["S1-MID-M1-ST0"]],
+        //     ST2: [["S1-MID-G1-ST2"], ["S1-MID-M1-ST2"]],
+        //   },
+        // },
+
+        // const sets = pipe(
+        //   setTypeSpecs,
+        //   filterRR(({ target }) => {
+        //     const indices = pipe(
+        //       house.dna,
+        //       filterMapWithIndex((i, dna: string) =>
+        //         dna === target[0][0] ? some(i) : none
+        //       )
+        //     )
+        //     return true
+        //   })
+        // )
+
+        return {
+          ...house,
+          modules,
+          layout,
+        }
+      })
+    )
+  },
+})
