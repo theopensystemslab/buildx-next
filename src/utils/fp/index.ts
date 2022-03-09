@@ -1,3 +1,4 @@
+import { boolean } from "fp-ts"
 import { flow } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
 import { map as mapO } from "fp-ts/lib/Option"
@@ -50,7 +51,10 @@ export const all = (...args: boolean[]) =>
 // export const all = concatAll(MonoidAll)
 
 export const findA2 =
-  <T extends unknown>(target: T[][]) =>
+  <T extends unknown>(
+    comparator: (a: T, b: T | undefined) => boolean = (a, b) => a === b
+  ) =>
+  (target: T[][]) =>
   (input: T[][]): [number, number][] => {
     let indices: [number, number][] = []
     for (let x = 0; x < input.length; x++) {
@@ -59,7 +63,7 @@ export const findA2 =
           (function () {
             for (let tx = 0; tx < target.length; tx++) {
               for (let ty = 0; ty < target[tx].length; ty++) {
-                if (target[tx][ty] !== input?.[x + tx]?.[y + ty]) {
+                if (!comparator(target[tx][ty], input?.[x + tx]?.[y + ty])) {
                   return false
                 }
               }

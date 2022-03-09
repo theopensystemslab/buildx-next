@@ -1,4 +1,8 @@
-import { BUILDX_LOCAL_STORAGE_HOUSES_KEY, setTypeSpecs } from "@/CONSTANTS"
+import {
+  BUILDX_LOCAL_STORAGE_HOUSES_KEY,
+  SetTypeSpec,
+  setTypeSpecs,
+} from "@/CONSTANTS"
 import { findCollisions, House } from "@/data/house"
 import { Module } from "@/data/module"
 import { moduleLayout } from "@/data/moduleLayout"
@@ -13,6 +17,8 @@ import {
   snapToGrid,
   SSR,
   chunksOfRA,
+  filterMapRR,
+  findA2,
 } from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
@@ -25,6 +31,7 @@ import {
   filterMapWithIndex,
   filterWithIndex,
   findFirst,
+  findIndex,
 } from "fp-ts/lib/ReadonlyArray"
 import { MutableRefObject, useCallback, useEffect, useMemo } from "react"
 import { Group, Plane } from "three"
@@ -165,11 +172,12 @@ export const useLocallyStoredHouses = () => {
   )
 }
 
+// put me in a separate module maybe
 export const houseLayouts = derive({
   houses: async (get) => {
-    const houses = get(store.houses)
     const sysData = await get(systemsData)
     const sysModules = await sysData.modules
+    const houses = get(store.houses)
 
     return pipe(
       houses,
@@ -186,68 +194,42 @@ export const houseLayouts = derive({
             )
           )
         )
-
         const layout = moduleLayout(modules)
-
         const layoutHeight = layout.gridBounds[1] + 1
-
-        const moduleChunks = pipe(
+        const moduleDnaChunks = pipe(
           modules,
-          // mapWithIndexRA((index, module) => ({ ...module, index })),
+          mapRA((module) => module.dna),
           chunksOfRA(layoutHeight)
+        ) as unknown as string[][]
+
+        const sets = pipe(
+          setTypeSpecs,
+          filterMapRR((spec) => {
+            const indices = pipe(
+              moduleDnaChunks,
+              findA2<string>((a, b) => b?.startsWith(a) ?? false)(spec.target)
+            )
+            return indices.length === 0
+              ? none
+              : some({
+                  ...spec,
+                  indices,
+                })
+          })
         )
 
-        // for each target module 0
-        // find in module chunks
-        // zip from those indices
-        // true if all match
-        // return info
+        console.log({ sets })
 
-        const foo = pipe(setTypeSpecs)
-
-        // const targetWithIndex = pipe(
-        //   target,
-        //   mapWithIndexRA((verticalIndex, dnas) =>
-        //     pipe(
-        //       dnas,
-        //       mapWithIndexRA((horizontalIndex, dna) => ({
-        //         dna,
-        //         horizontalIndex,
-        //         verticalIndex,
-        //       }))
-        //     )
-        //   )
-        // )
-
-        // const setOptions = pipe(setTypeSpecs,
-
-        //   )
-
-        // ST: {
-        //   target: [["S1-MID-G1"], ["S1-MID-M1"]],
-        //   options: {
-        //     ST0: [["S1-MID-G1-ST0"], ["S1-MID-M1-ST0"]],
-        //     ST2: [["S1-MID-G1-ST2"], ["S1-MID-M1-ST2"]],
-        //   },
-        // },
-
-        // const sets = pipe(
-        //   setTypeSpecs,
-        //   filterRR(({ target }) => {
-        //     const indices = pipe(
-        //       house.dna,
-        //       filterMapWithIndex((i, dna: string) =>
-        //         dna === target[0][0] ? some(i) : none
-        //       )
-        //     )
-        //     return true
-        //   })
-        // )
+        // filterMapRR your set types structure
+        // startIndices: number[]
+        // map targets from chunked to flat
+        //    i.e. couplets [dna, index]
 
         return {
           ...house,
           modules,
           layout,
+          sets,
         }
       })
     )
