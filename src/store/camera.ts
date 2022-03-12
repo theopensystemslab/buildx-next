@@ -1,4 +1,3 @@
-import { useSnapshot } from "valtio"
 import { store } from "."
 
 export const setCameraEnabled = (b: boolean) => {

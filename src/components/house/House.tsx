@@ -1,15 +1,18 @@
-import { moduleLayout } from "@/data/moduleLayout"
-import { useHouseModules, useUpdatePosition } from "@/store"
-import { useGLTF } from "@/utils"
-import { ThreeEvent } from "@react-three/fiber"
-import { useGesture } from "@use-gesture/react"
-import { transpose } from "fp-ts-std/ReadonlyArray"
-import { pipe } from "fp-ts/lib/function"
-import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
-import { chunksOf, range } from "fp-ts/lib/ReadonlyNonEmptyArray"
+import { useHouse } from "@/stores/houses"
 import { useRef } from "react"
 import { Group } from "three"
-import HouseModule from "./HouseModule"
+
+// change house type in airtable
+// hard code the house type for now
+
+// or not?
+// it still goes END to END
+// our prev heuristic was F < R etc
+// new heuristic is ...
+
+// which modules are in house type A?
+// dup those modules over to new airtable
+// but with unit type / length
 
 type Props = {
   id: string
@@ -18,26 +21,30 @@ type Props = {
 const House = (props: Props) => {
   const houseId = props.id
   const groupRef = useRef<Group>()
-  const modules = useHouseModules(houseId)
-  const modelUrls = modules.map((module) => module.modelUrl)
-  const gltfs = useGLTF(modelUrls)
-  const layout = moduleLayout(modules)
+  const foo = useHouse(houseId)
+  // const modelUrls = modules.map((module) => module.modelUrl)
+  // const gltfs = useGLTF(modelUrls)
+
+  // const layout = moduleLayout(modules)
 
   // const layout2 = getPositions(modules)
 
-  const onDrag = useUpdatePosition(houseId, groupRef)
+  // const onDrag = useUpdatePosition(houseId, groupRef)
   // const invalidate = useThree((three) => three.invalidate)
 
-  const bind = useGesture<{
-    drag: ThreeEvent<PointerEvent>
-    hover: ThreeEvent<PointerEvent>
-  }>({
-    onDrag,
-  })
+  // const bind = useGesture<{
+  //   drag: ThreeEvent<PointerEvent>
+  //   hover: ThreeEvent<PointerEvent>
+  // }>({
+  //   onDrag,
+  // })
 
   return (
-    <group ref={groupRef} {...(bind() as any)}>
-      {pipe(
+    <group
+      ref={groupRef}
+      // {...(bind() as any)}
+    >
+      {/* {pipe(
         modules,
         mapWithIndex((moduleIndex, module) => {
           const gltf = gltfs[moduleIndex]
@@ -73,7 +80,7 @@ const House = (props: Props) => {
             />
           )
         })
-      )}
+      )} */}
     </group>
   )
 }

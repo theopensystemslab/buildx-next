@@ -1,13 +1,14 @@
 import { CamControls } from "@/components/ui-3d/CamControls"
-import { defaultCamPos, store } from "@/store"
+import camera, { defaultCamPos } from "@/stores/camera"
+import { useSettings } from "@/stores/settings"
 import { useUserAgent } from "@oieduardorabelo/use-user-agent"
 import { OrthographicCamera, PerspectiveCamera } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
 import React, { Fragment } from "react"
-import { ref, useSnapshot } from "valtio"
+import { ref } from "valtio"
 
 const SiteCamControls = () => {
-  const { orthographic, shadows } = useSnapshot(store)
+  const { orthographic, shadows } = useSettings()
   const size = useThree(({ size }) => size)
   const ratio = 10
   const userAgent = useUserAgent()
@@ -42,7 +43,7 @@ const SiteCamControls = () => {
           restThreshold: 0.01,
           dampingFactor: 0.25,
         }}
-        setControls={(controls) => void (store.camControls = ref(controls))}
+        setControls={(controls) => void (camera.controls = ref(controls))}
       />
     </Fragment>
   )

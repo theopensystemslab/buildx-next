@@ -1,4 +1,4 @@
-import { setMapPolygon, store } from "@/store"
+// import { setMapPolygon, store } from "@/store"
 import { Feature, Polygon } from "geojson"
 import { Geolocation, Map, View } from "ol"
 import OLFeature from "ol/Feature"

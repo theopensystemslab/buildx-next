@@ -1,13 +1,12 @@
-import { store } from "@/store"
+import { useOutlined } from "@/stores/outlined"
 import { useThree } from "@react-three/fiber"
 import { EffectComposer, Outline, SMAA } from "@react-three/postprocessing"
 import { EdgeDetectionMode } from "postprocessing"
-import React, { Suspense, useEffect } from "react"
-import { useSnapshot } from "valtio"
+import React, { Suspense } from "react"
 
 const Effects = () => {
   const size = useThree((three) => three.size)
-  const { outlined } = useSnapshot(store)
+  const outlined = useOutlined()
 
   return (
     <Suspense fallback={null}>

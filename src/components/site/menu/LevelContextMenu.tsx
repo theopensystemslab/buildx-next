@@ -5,8 +5,8 @@ import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { filterCompatibleModules, Module } from "@/data/module"
 import { moduleLayout, ModuleLayoutItem } from "@/data/moduleLayout"
-import { ScopeTypeEnum, store, useHouseModules } from "@/store"
-import { useSystemsData } from "@/store/systems"
+// import { ScopeTypeEnum, store, useHouseModules } from "@/store"
+// import { useSystemsData } from "@/store/systems"
 import {
   chunksOf,
   filterMap,

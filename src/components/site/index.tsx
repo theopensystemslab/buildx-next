@@ -1,10 +1,6 @@
-import {
-  ScopeTypeEnum,
-  setOrthographic,
-  setScopeType,
-  store,
-  useLocallyStoredHouses,
-} from "@/store"
+import { useLocallyStoredHouses } from "@/stores/houses"
+import { ScopeType, ScopeTypeEnum, setScopeType } from "@/stores/scope"
+import settings, { setOrthographic } from "@/stores/settings"
 import { upperFirst } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse } from "fp-ts/lib/Option"
@@ -13,20 +9,43 @@ import { toLowerCase } from "fp-ts/lib/string"
 import dynamic from "next/dynamic"
 import React, { Fragment, ReactElement, Suspense, useState } from "react"
 import { useSnapshot } from "valtio"
-import Layout from "../layouts"
-import { IconButton, IconMenu, Loader, Radio } from "../ui"
-import { Crosshair, Environment, Menu } from "../ui/icons"
-import { SiteContextMenu } from "./menu"
-import SiteSidebar from "./SiteSidebar"
+import Layout from "@/components/layouts"
+import { IconButton, IconMenu, Loader, Radio } from "@/components/ui"
+import { Crosshair, Environment, Menu } from "@/components/ui/icons"
+import { SiteContextMenu } from "@/components/site/menu"
+import SiteSidebar from "@/components/site/SiteSidebar"
 
-const ThreeInit = dynamic(() => import("./SiteThreeInit"), { ssr: false })
+const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
+  ssr: false,
+})
 
-const SitePageIndex = () => {
+// even scopes needs re-thinking
+// cannot use levelModuleIndices
+// easier though, just 1 row index
+//
+// can try doing row layout even without variable len first
+//
+// separate stores (exports)
+//
+// module scope item is like moduleIndex
+// number -> [number,number] ?
+//
+// when do you need moduleIndex?
+// dna -> dna
+// hover/select
+
+const mock_house = [
+  ["F-END-1", "F-MID-1", "F-MID-1", "F-MID-1", "F-END-1"],
+  ["G-END-1", "G-MID-3", "G-END-1"],
+  ["R-END-1", "R-MID-1", "R-MID-1", "R-MID-1", "R-END-1"],
+]
+
+const Test = () => {
   const [sidebar, setSidebar] = useState(false)
   const {
     orthographic,
     scope: { type: scopeType },
-  } = useSnapshot(store)
+  } = useSnapshot(settings)
 
   useLocallyStoredHouses()
 
@@ -72,7 +91,7 @@ const SitePageIndex = () => {
                 value,
               }))
             )}
-            selected={scopeType}
+            selected={scopeType as ScopeType}
             onChange={setScopeType}
           />
         </IconMenu>
@@ -105,7 +124,8 @@ const SitePageIndex = () => {
         <SiteSidebar open={sidebar} close={() => setSidebar(false)} />
       </Suspense>
       <Layout>
-        <ThreeInit />
+        {/* <ThreeInit /> */}
+        <SiteThreeInit />
       </Layout>
       <Suspense fallback={<Loader />}>
         <SiteContextMenu />
@@ -114,8 +134,8 @@ const SitePageIndex = () => {
   )
 }
 
-SitePageIndex.getLayout = (page: ReactElement) => {
+Test.getLayout = (page: ReactElement) => {
   return <Layout>{page}</Layout>
 }
 
-export default SitePageIndex
+export default Test

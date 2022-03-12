@@ -1,9 +1,11 @@
 import { RaycasterLayer } from "@/CONSTANTS"
-import { store, useMapBoundary } from "@/store"
+import { setPointer } from "@/stores/pointer"
+import scope from "@/stores/scope"
+import { useSettings } from "@/stores/settings"
+// import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
 import React, { useEffect, useState } from "react"
 import { BasicShadowMap } from "three"
-import { useSnapshot } from "valtio"
 import { Loader } from "../ui"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
@@ -15,7 +17,7 @@ import SiteCamControls from "./SiteCamControls"
 import SiteThreeApp from "./SiteThreeApp"
 
 const SiteThreeInit = () => {
-  const { orthographic, shadows } = useSnapshot(store)
+  const { orthographic, shadows } = useSettings()
 
   // Re-initialize canvas if settings like orthographic camera are changed
   const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)
@@ -27,7 +29,7 @@ const SiteThreeInit = () => {
     }, 100)
   }, [orthographic, setUnmountToReinitialize])
 
-  const [boundary, boundaryMaterial] = useMapBoundary()
+  // const [boundary, boundaryMaterial] = useMapBoundary()
 
   if (unmountToReinitialize) {
     return (
@@ -57,12 +59,12 @@ const SiteThreeInit = () => {
       />
       {/* </group> */}
       <HorizontalPlane
-        onChange={(xy) => void (store.horizontalPointer = xy)}
+        onChange={setPointer}
         onNearClick={() => {
-          store.scope.selected = []
-          store.contextMenu = null
+          scope.selected = []
+          // store.contextMenu = null
         }}
-        onNearHover={() => void (store.scope.hovered = null)}
+        onNearHover={() => void (scope.hovered = null)}
       />
       {shadows && (
         <>
@@ -70,8 +72,7 @@ const SiteThreeInit = () => {
           <ShadowPlane />
         </>
       )}
-
-      {boundary && <lineLoop args={[boundary, boundaryMaterial]} />}
+      {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
       <SiteThreeApp />
       <SiteCamControls />
       <Effects />

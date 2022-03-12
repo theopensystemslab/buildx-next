@@ -1,14 +1,14 @@
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
-import {
-  ElementScopeItem,
-  LevelScopeItem,
-  ModuleScopeItem,
-  ScopeTypeEnum,
-  store,
-  useHouse,
-} from "@/store"
-import { useSystemsData } from "@/store/systems"
+// import {
+//   ElementScopeItem,
+//   LevelScopeItem,
+//   ModuleScopeItem,
+//   ScopeTypeEnum,
+//   store,
+//   useHouse,
+// } from "@/store"
+// import { useSystemsData } from "@/store/systems"
 import { all, any, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"

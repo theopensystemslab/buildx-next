@@ -1,6 +1,8 @@
 import Sidebar from "@/components/ui/Sidebar"
-import { addHouse } from "@/store"
-import { BuildSystem, buildSystems, useSystemsData } from "@/store/systems"
+import houses from "@/stores/houses"
+import { BuildSystem, buildSystems, useSystemsData } from "@/stores/systems"
+// import { addHouse } from "@/store"
+// import { BuildSystem, buildSystems, useSystemsData } from "@/store/systems"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
 import { nanoid } from "nanoid"
@@ -56,8 +58,9 @@ const SiteSidebar = ({ open, close }: Props) => {
                 <HouseThumbnail
                   key={index}
                   houseType={houseType}
-                  onAdd={() =>
-                    addHouse({
+                  onAdd={() => {
+                    const id = nanoid()
+                    houses[id] = {
                       id: nanoid(),
                       houseTypeId: houseType.id,
                       systemId: houseType.systemId,
@@ -68,8 +71,8 @@ const SiteSidebar = ({ open, close }: Props) => {
                       rotation: 0,
                       dna: houseType.dna as string[],
                       modifiedMaterials: {},
-                    })
-                  }
+                    }
+                  }}
                 />
               ) : null
             })

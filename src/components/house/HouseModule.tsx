@@ -1,5 +1,5 @@
 import { Module } from "@/data/module"
-import { useSystemsData } from "@/store/systems"
+// import { useSystemsData } from "@/store/systems"
 import { fuzzyMatch, GltfT, isMesh } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"

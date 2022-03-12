@@ -1,6 +1,6 @@
 import Layout from "@/components/layouts"
 import { degreeToMeters, maxMeters } from "@/data/mapPolygon"
-import { setMapPolygon } from "@/store/map"
+// import { setMapPolygon } from "@/store/map"
 import React, { Fragment, ReactElement, Suspense } from "react"
 import OLMap from "./OLMap"
 
