@@ -22,13 +22,14 @@ export const buildSystems: Array<BuildSystem> = [
   {
     id: "sample",
     name: "Sample",
-    airtableId: "appXYQYWjUiAT1Btm",
+    // airtableId: "appXYQYWjUiAT1Btm",
+    airtableId: "appgVlfhT0anmqi5a",
   },
-  {
-    id: "mobble",
-    name: "Mobble",
-    airtableId: "appYkSYalupnJmUA2",
-  },
+  // {
+  //   id: "mobble",
+  //   name: "Mobble",
+  //   airtableId: "appYkSYalupnJmUA2",
+  // },
 ]
 
 export const baseSystemsData = proxy({

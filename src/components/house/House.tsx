@@ -1,4 +1,4 @@
-import { useHouse } from "@/stores/houses"
+import { useModuleRows } from "@/stores/houses"
 import { useRef } from "react"
 import { Group } from "three"
 
@@ -21,7 +21,7 @@ type Props = {
 const House = (props: Props) => {
   const houseId = props.id
   const groupRef = useRef<Group>()
-  const foo = useHouse(houseId)
+  const rows = useModuleRows(houseId)
   // const modelUrls = modules.map((module) => module.modelUrl)
   // const gltfs = useGLTF(modelUrls)
 
