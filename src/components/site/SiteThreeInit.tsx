@@ -1,4 +1,5 @@
 import { RaycasterLayer } from "@/CONSTANTS"
+import outlined from "@/stores/outlined"
 import { setPointer } from "@/stores/pointer"
 import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
@@ -64,7 +65,9 @@ const SiteThreeInit = () => {
           scope.selected = []
           // store.contextMenu = null
         }}
-        onNearHover={() => void (scope.hovered = null)}
+        onNearHover={() => {
+          scope.hovered = null
+        }}
       />
       {shadows && (
         <>

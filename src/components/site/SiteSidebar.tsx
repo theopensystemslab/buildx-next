@@ -61,7 +61,7 @@ const SiteSidebar = ({ open, close }: Props) => {
                   onAdd={() => {
                     const id = nanoid()
                     houses[id] = {
-                      id: nanoid(),
+                      id,
                       houseTypeId: houseType.id,
                       systemId: houseType.systemId,
                       position: [0, 0],

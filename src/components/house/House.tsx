@@ -1,6 +1,6 @@
 import { House } from "@/data/house"
-import { useModuleRows } from "@/stores/houses"
-import { mapWithIndexRA } from "@/utils"
+import { useHouseRows } from "@/stores/housesRows"
+import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { flatten } from "fp-ts/lib/ReadonlyArray"
 import { useRef } from "react"
@@ -26,7 +26,10 @@ type Props = {
 const House = (props: Props) => {
   const { house } = props
   const groupRef = useRef<Group>()
-  const rows = useModuleRows(house)
+
+  const rows = useHouseRows(house.id)
+
+  // const rows = useModuleRows(house)
 
   // const modelUrls = modules.map((module) => module.modelUrl)
   // const gltfs = useGLTF(modelUrls)
@@ -79,35 +82,53 @@ const House = (props: Props) => {
   //   )
   // })
 
-  const content = pipe(
+  const gltfs = pipe(
+    rows,
+    mapRA((row) =>
+      pipe(
+        row.row,
+        mapRA((r) => r.module.modelUrl)
+      )
+    ),
+    flatten,
+    (modelUrls) => useGLTF(modelUrls as string[])
+  )
+
+  let moduleIndex = -1
+  const modules = pipe(
     rows,
     mapWithIndexRA((columnIndex, { row, y }) => (
       <group>
         {pipe(
           row,
-          mapWithIndexRA((rowIndex, { module, gltf, z }) => (
-            <HouseModule
-              key={`${columnIndex},${rowIndex}`}
-              module={module}
-              columnIndex={columnIndex}
-              rowIndex={rowIndex}
-              gltf={gltf}
-              house={house}
-              position={[0, y, z]}
-            />
-          ))
+          mapWithIndexRA((rowIndex, { module, z }) => {
+            moduleIndex++
+            console.log({ moduleIndex, z, y })
+            return (
+              <HouseModule
+                key={`${columnIndex},${rowIndex}`}
+                module={module}
+                columnIndex={columnIndex}
+                rowIndex={rowIndex}
+                gltf={gltfs[moduleIndex]}
+                house={house}
+                position={[0, y, z]}
+                scale={[1, 1, rowIndex === row.length - 1 ? -1 : 1]}
+              />
+            )
+          })
         )}
       </group>
-      // <HouseRow key={i} modules={row} index={i} y={y}/>
     ))
   )
+  moduleIndex = -1
 
   return (
     <group
       ref={groupRef}
       // {...(bind() as any)}
     >
-      {content}
+      {modules}
     </group>
   )
 }
