@@ -1,6 +1,5 @@
 import { RaycasterLayer } from "@/CONSTANTS"
-import outlined from "@/stores/outlined"
-import { setPointer } from "@/stores/pointer"
+import { setPointer } from "@/stores/context"
 import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
 // import { store, useMapBoundary } from "@/store"

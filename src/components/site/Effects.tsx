@@ -1,4 +1,4 @@
-import { useOutlined } from "@/stores/outlined"
+import { useContext } from "@/stores/context"
 import { useThree } from "@react-three/fiber"
 import { EffectComposer, Outline, SMAA } from "@react-three/postprocessing"
 import { EdgeDetectionMode } from "postprocessing"
@@ -6,7 +6,7 @@ import React, { Suspense } from "react"
 
 const Effects = () => {
   const size = useThree((three) => three.size)
-  const outlined = useOutlined()
+  const { outlined } = useContext()
 
   return (
     <Suspense fallback={null}>

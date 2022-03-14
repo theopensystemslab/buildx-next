@@ -2,7 +2,6 @@ import { House } from "@/data/house"
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
 import context from "@/stores/context"
-import outlined from "@/stores/outlined"
 import scope, {
   ElementScopeItem,
   LevelScopeItem,
@@ -84,7 +83,7 @@ const HouseModuleElement = (props: Props) => {
 
   useEffect(() =>
     subscribe(scope, () => {
-      let isOutlined = outlined.includes(meshRef),
+      let isOutlined = context.outlined.includes(meshRef),
         isHovered = false,
         isSelected = false
       switch (scope.type) {
@@ -132,12 +131,13 @@ const HouseModuleElement = (props: Props) => {
       }
 
       if ((isHovered || isSelected) && !isOutlined) {
-        outlined.push(ref(meshRef))
-        // outlined = ref([...outlined, meshRef])
+        context.outlined = ref([...context.outlined, meshRef])
         invalidate()
       }
       if (all(isOutlined, !isHovered, !isSelected)) {
-        outlined.filter((x) => x.current?.id !== meshRef.current?.id)
+        context.outlined = ref(
+          context.outlined.filter((x) => x.current?.id !== meshRef.current?.id)
+        )
         invalidate()
       }
     })
