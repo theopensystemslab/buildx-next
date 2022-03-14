@@ -103,7 +103,7 @@ const House = (props: Props) => {
           row,
           mapWithIndexRA((rowIndex, { module, z }) => {
             moduleIndex++
-            console.log({ moduleIndex, z, y })
+            const mirror = rowIndex === row.length
             return (
               <HouseModule
                 key={`${columnIndex},${rowIndex}`}
@@ -112,8 +112,14 @@ const House = (props: Props) => {
                 rowIndex={rowIndex}
                 gltf={gltfs[moduleIndex]}
                 house={house}
-                position={[0, y, z]}
-                scale={[1, 1, rowIndex === row.length - 1 ? -1 : 1]}
+                position={[
+                  0,
+                  y,
+                  !mirror
+                    ? z + module.length / 2
+                    : z - module.length + module.length / 2,
+                ]}
+                scale={[1, 1, !mirror ? 1 : -1]}
               />
             )
           })

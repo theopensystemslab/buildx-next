@@ -1,4 +1,4 @@
-import { mapRR } from "@/utils"
+import { mapRR, pipeLog } from "@/utils"
 import { derive } from "valtio/utils"
 import { default as baseHouses } from "./houses"
 import systemsData from "./systems"
@@ -12,6 +12,7 @@ import {
   filterWithIndex,
   findFirst,
   reduceWithIndex,
+  takeLeft,
 } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useSnapshot } from "valtio"
@@ -70,7 +71,7 @@ const housesRows = derive({
                 [],
                 (
                   i,
-                  b: {
+                  prevs: {
                     module: Module
                     z: number
                   }[],
@@ -78,19 +79,22 @@ const housesRows = derive({
                 ) => {
                   const isFirst: boolean = i === 0
 
-                  const z: number = isFirst
-                    ? 0
-                    : b[i - 1].z + b[i - 1].module.length
+                  const z = isFirst
+                    ? module.length / 2
+                    : prevs[i - 1].z +
+                      prevs[i - 1].module.length / 2 +
+                      module.length / 2
 
                   return [
-                    ...b,
+                    ...prevs,
                     {
                       module,
                       z,
                     },
                   ]
                 }
-              )
+              ),
+              pipeLog
             )
           ),
           reduceWithIndex(
@@ -127,18 +131,3 @@ export const useHouseRows = (houseId: string) => {
   const snap = useSnapshot(housesRows)
   return snap.housesRows[houseId]
 }
-
-// export default housesLayouts
-
-// export const useModuleRows = (house: House) => {
-//   const { houseTypes, modules: sysModules } = useSystemsData()
-
-//   const modules =
-
-//   const modelUrls = modules.map((module) => module.modelUrl)
-//   const gltfs = useGLTF(modelUrls)
-
-//   // could just chunksOf(2) to get END to END
-
-//   return
-// }

@@ -1,7 +1,7 @@
 import { House } from "@/data/house"
 import { Module } from "@/data/module"
 import { useSystemsData } from "@/stores/systems"
-import { fuzzyMatch, GltfT, isMesh } from "@/utils"
+import { fuzzyMatch, GltfT, isMesh, mapRA } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"
 import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
@@ -23,8 +23,6 @@ type Props = GroupProps & {
   columnIndex: number
   rowIndex: number
   gltf: GltfT
-  // z: number
-  // y: number
   house: House
 }
 

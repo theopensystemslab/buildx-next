@@ -4,7 +4,7 @@ import scope from "./scope"
 const settings = proxy({
   scope,
   orthographic: false,
-  shadows: true,
+  shadows: false,
 })
 
 export const setOrthographic = (b: boolean) => {
