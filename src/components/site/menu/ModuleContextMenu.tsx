@@ -4,40 +4,41 @@ import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { filterCompatibleModules } from "@/data/module"
-// import { ScopeTypeEnum, store, useHouse, useHouseModules } from "@/store"
-// import { useSystemsData } from "@/store/systems"
+import houses, { useHouse } from "@/stores/houses"
+import { useHouseRows } from "@/stores/housesRows"
+import scope, { ScopeTypeEnum } from "@/stores/scope"
+import { useSystemsData } from "@/stores/systems"
 import { pipe } from "fp-ts/lib/function"
-import { toNullable } from "fp-ts/lib/Option"
-import { map, modifyAt, uniq } from "fp-ts/lib/ReadonlyArray"
+import { map, uniq } from "fp-ts/lib/ReadonlyArray"
 import { Eq } from "fp-ts/lib/string"
 import React from "react"
 
 const ModuleContextMenu = (props: ContextMenuProps) => {
-  if (store.scope.type !== ScopeTypeEnum.Enum.MODULE) {
+  if (scope.type !== ScopeTypeEnum.Enum.MODULE) {
     console.error("LevelContextMenu called with different scope type")
     return null
   }
 
-  const { houseId, moduleIndex } = store.scope.selected[0]
+  const { houseId, columnIndex, rowIndex } = scope.selected[0]
 
   const house = useHouse(houseId)
 
   const { houseTypes, modules: allModules } = useSystemsData()
 
-  const houseModules = useHouseModules(houseId)
+  const houseRows = useHouseRows(houseId)
 
   const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
 
   const resetModule = () => {
     if (!houseType) return
-    store.houses[houseId].dna = houseType.dna as string[]
+    houses[houseId].dna = houseType.dna as string[]
   }
 
   const systemModules = allModules.filter(
-    (m) => m.systemId === houseModules[0].systemId
+    (m) => m.systemId === houseRows[0].row[0].module.systemId
   )
 
-  const thisModule = houseModules[store.scope.selected[0].moduleIndex]
+  const thisModule = houseRows[columnIndex].row[rowIndex].module
 
   const moduleOptions = pipe(
     systemModules,
@@ -49,16 +50,15 @@ const ModuleContextMenu = (props: ContextMenuProps) => {
   )
 
   const changeModule = (selectedDna: string) => {
-    const next = pipe(
-      houseModules,
-      map((x) => x.dna),
-      modifyAt(moduleIndex, () => selectedDna),
-      toNullable
-    )
-
-    if (next !== null) {
-      store.houses[houseId].dna = next as string[]
-    }
+    // const next = pipe(
+    //   houseModules,
+    //   map((x) => x.dna),
+    //   modifyAt(moduleIndex, () => selectedDna),
+    //   toNullable
+    // )
+    // if (next !== null) {
+    //   store.houses[houseId].dna = next as string[]
+    // }
   }
 
   return (
