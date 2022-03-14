@@ -1,5 +1,6 @@
+import { House } from "@/data/house"
 import { Module } from "@/data/module"
-// import { useSystemsData } from "@/store/systems"
+import { useSystemsData } from "@/stores/systems"
 import { fuzzyMatch, GltfT, isMesh } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"
@@ -19,21 +20,16 @@ import HouseModuleElement from "./HouseModuleElement"
 
 type Props = GroupProps & {
   module: Module
-  moduleIndex: number
+  columnIndex: number
+  rowIndex: number
   gltf: GltfT
-  houseId: string
-  levelModuleIndices: number[]
+  // z: number
+  // y: number
+  house: House
 }
 
 const HouseModule = (props: Props) => {
-  const {
-    module,
-    moduleIndex,
-    gltf,
-    houseId,
-    levelModuleIndices,
-    ...groupProps
-  } = props
+  const { module, columnIndex, gltf, house, rowIndex, ...groupProps } = props
 
   const { elements } = useSystemsData()
 
@@ -67,9 +63,9 @@ const HouseModule = (props: Props) => {
         {...{
           elementName,
           geometry,
-          houseId,
-          moduleIndex,
-          levelModuleIndices,
+          house,
+          columnIndex,
+          rowIndex,
         }}
       />
     )),

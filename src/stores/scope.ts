@@ -12,7 +12,8 @@ export type HouseScope = {
 }
 
 export type ModuleScopeItem = {
-  moduleIndex: number
+  columnIndex: number
+  rowIndex: number
   houseId: string
 }
 
@@ -35,7 +36,7 @@ export type ElementScope = {
 
 export type LevelScopeItem = {
   houseId: string
-  levelModuleIndices: readonly number[]
+  columnIndex: number
 }
 
 export type LevelScope = {

@@ -19,28 +19,7 @@ const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
   ssr: false,
 })
 
-// even scopes needs re-thinking
-// cannot use levelModuleIndices
-// easier though, just 1 row index
-//
-// can try doing row layout even without variable len first
-//
-// separate stores (exports)
-//
-// module scope item is like moduleIndex
-// number -> [number,number] ?
-//
-// when do you need moduleIndex?
-// dna -> dna
-// hover/select
-
-const mock_house = [
-  ["F-END-1", "F-MID-1", "F-MID-1", "F-MID-1", "F-END-1"],
-  ["G-END-1", "G-MID-3", "G-END-1"],
-  ["R-END-1", "R-MID-1", "R-MID-1", "R-MID-1", "R-END-1"],
-]
-
-const Test = () => {
+const SiteIndex = () => {
   const [sidebar, setSidebar] = useState(false)
   const {
     orthographic,
@@ -134,8 +113,8 @@ const Test = () => {
   )
 }
 
-Test.getLayout = (page: ReactElement) => {
+SiteIndex.getLayout = (page: ReactElement) => {
   return <Layout>{page}</Layout>
 }
 
-export default Test
+export default SiteIndex

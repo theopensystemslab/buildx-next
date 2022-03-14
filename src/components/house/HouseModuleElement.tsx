@@ -1,14 +1,15 @@
+import { House } from "@/data/house"
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
-// import {
-//   ElementScopeItem,
-//   LevelScopeItem,
-//   ModuleScopeItem,
-//   ScopeTypeEnum,
-//   store,
-//   useHouse,
-// } from "@/store"
-// import { useSystemsData } from "@/store/systems"
+import context from "@/stores/context"
+import outlined from "@/stores/outlined"
+import scope, {
+  ElementScopeItem,
+  LevelScopeItem,
+  ModuleScopeItem,
+  ScopeTypeEnum,
+} from "@/stores/scope"
+import { useSystemsData } from "@/stores/systems"
 import { all, any, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
@@ -25,18 +26,15 @@ const builtInMaterials: Record<string, Material> = {
 
 type Props = MeshProps & {
   elementName: string
-  moduleIndex: number
-  levelModuleIndices: number[]
-  houseId: string
+  columnIndex: number
+  rowIndex: number
+  house: House
   geometry: BufferGeometry
 }
 
 const HouseModuleElement = (props: Props) => {
-  const { geometry, elementName, moduleIndex, houseId, levelModuleIndices } =
-    props
+  const { geometry, elementName, columnIndex, rowIndex, house } = props
   const meshRef = useRef<Mesh>()
-
-  const house = useHouse(houseId)
 
   const { materials, elements } = useSystemsData()
 
@@ -82,61 +80,64 @@ const HouseModuleElement = (props: Props) => {
     }
   }, [elementName, materials])
 
+  // how are we going to do module index
+
   useEffect(() =>
-    subscribe(store.scope, () => {
-      let isOutlined = store.outlined.includes(meshRef),
+    subscribe(scope, () => {
+      let isOutlined = outlined.includes(meshRef),
         isHovered = false,
         isSelected = false
-      switch (store.scope.type) {
+      switch (scope.type) {
         case ScopeTypeEnum.Enum.HOUSE:
-          isHovered = store.scope.hovered === houseId
-          isSelected = store.scope.selected.includes(houseId)
+          isHovered = scope.hovered === house.id
+          isSelected = scope.selected.includes(house.id)
           break
 
         case ScopeTypeEnum.Enum.ELEMENT:
           isHovered =
-            store.scope.hovered?.houseId === houseId &&
-            store.scope.hovered.elementName === elementName
+            scope.hovered?.houseId === house.id &&
+            scope.hovered.elementName === elementName
           isSelected = !undef(
-            store.scope.selected.find(
-              (x) => x.houseId === houseId && x.elementName === elementName
+            scope.selected.find(
+              (x) => x.houseId === house.id && x.elementName === elementName
             )
           )
           break
 
         case ScopeTypeEnum.Enum.MODULE:
           isHovered =
-            store.scope.hovered?.houseId === houseId &&
-            store.scope.hovered.moduleIndex === moduleIndex
+            scope.hovered?.houseId === house.id &&
+            scope.hovered.columnIndex === columnIndex &&
+            scope.hovered.rowIndex === rowIndex
           isSelected = !undef(
-            store.scope.selected.find(
-              (x) => x.houseId === houseId && x.moduleIndex === moduleIndex
+            scope.selected.find(
+              (x) =>
+                x.houseId === house.id &&
+                x.columnIndex === columnIndex &&
+                x.rowIndex === rowIndex
             )
           )
           break
 
         case ScopeTypeEnum.Enum.LEVEL:
           isHovered =
-            store.scope.hovered?.houseId === houseId &&
-            store.scope.hovered.levelModuleIndices.includes(moduleIndex)
+            scope.hovered?.houseId === house.id &&
+            scope.hovered.columnIndex === columnIndex
           isSelected = !undef(
-            store.scope.selected.find(
-              (x) =>
-                x.houseId === houseId &&
-                x.levelModuleIndices.includes(moduleIndex)
+            scope.selected.find(
+              (x) => x.houseId === house.id && x.columnIndex === columnIndex
             )
           )
           break
       }
 
       if ((isHovered || isSelected) && !isOutlined) {
-        store.outlined = ref([...store.outlined, meshRef])
+        outlined.push(ref(meshRef))
+        // outlined = ref([...outlined, meshRef])
         invalidate()
       }
       if (all(isOutlined, !isHovered, !isSelected)) {
-        store.outlined = ref(
-          store.outlined.filter((x) => x.current?.id !== meshRef.current?.id)
-        )
+        outlined.filter((x) => x.current?.id !== meshRef.current?.id)
         invalidate()
       }
     })
@@ -149,24 +150,25 @@ const HouseModuleElement = (props: Props) => {
       React.MouseEvent<EventTarget, MouseEvent>
   }>({
     onHover: ({ event: { intersections } }) => {
-      if (store.contextMenu) return
+      if (context.menu) return
       if (undef(intersections[0])) return
       if (undef(meshRef.current)) return
       const obj = intersections[0].object ?? intersections[0].eventObject
       if (obj.id !== meshRef.current.id) return
 
-      switch (store.scope.type) {
+      switch (scope.type) {
         case ScopeTypeEnum.Enum.HOUSE:
-          store.scope.hovered = houseId
+          scope.hovered = house.id
           break
         case ScopeTypeEnum.Enum.ELEMENT:
-          store.scope.hovered = { houseId, elementName }
+          scope.hovered = { houseId: house.id, elementName }
           break
         case ScopeTypeEnum.Enum.MODULE:
-          store.scope.hovered = { houseId, moduleIndex }
+          scope.hovered = { houseId: house.id, columnIndex, rowIndex }
           break
         case ScopeTypeEnum.Enum.LEVEL:
-          store.scope.hovered = { houseId, levelModuleIndices }
+          scope.hovered = { houseId: house.id, columnIndex }
+          break
       }
     },
     onContextMenu: ({ event: { intersections, pageX, pageY } }) => {
@@ -175,7 +177,7 @@ const HouseModuleElement = (props: Props) => {
         intersections[0].object.id !== meshRef.current?.id
       )
       if (returnIf) return
-      store.contextMenu = [pageX, pageY]
+      context.menu = [pageX, pageY]
     },
     onPointerDown: ({ event: { intersections }, shiftKey }) => {
       const returnIf = any(
@@ -187,42 +189,47 @@ const HouseModuleElement = (props: Props) => {
       let isSelected = false
       let payload: any
 
-      switch (store.scope.type) {
+      switch (scope.type) {
         case ScopeTypeEnum.Enum.HOUSE:
-          isSelected = store.scope.selected.includes(houseId)
-          payload = houseId
+          isSelected = scope.selected.includes(house.id)
+          payload = house.id
           break
         case ScopeTypeEnum.Enum.MODULE:
           isSelected = !undef(
-            store.scope.selected.find(
-              (x) => x.houseId === houseId && x.moduleIndex === moduleIndex
+            scope.selected.find(
+              (x) =>
+                x.houseId === house.id &&
+                x.columnIndex === columnIndex &&
+                x.rowIndex === rowIndex
             )
           )
-          payload = { houseId, moduleIndex } as ModuleScopeItem
+          payload = {
+            houseId: house.id,
+            columnIndex,
+            rowIndex,
+          } as ModuleScopeItem
           break
         case ScopeTypeEnum.Enum.ELEMENT:
           isSelected = !undef(
-            store.scope.selected.find(
-              (x) => x.houseId === houseId && x.elementName === elementName
+            scope.selected.find(
+              (x) => x.houseId === house.id && x.elementName === elementName
             )
           )
-          payload = { houseId, elementName } as ElementScopeItem
+          payload = { houseId: house.id, elementName } as ElementScopeItem
           break
         case ScopeTypeEnum.Enum.LEVEL:
           isSelected = !undef(
-            store.scope.selected.find(
-              (x) =>
-                x.houseId === houseId &&
-                x.levelModuleIndices.includes(moduleIndex)
+            scope.selected.find(
+              (x) => x.houseId === house.id && x.columnIndex === columnIndex
             )
           )
-          payload = { houseId, levelModuleIndices } as LevelScopeItem
+          payload = { houseId: house.id, columnIndex } as LevelScopeItem
           break
       }
 
       if (!isSelected) {
-        if (shiftKey) store.scope.selected.push(payload)
-        else store.scope.selected = [payload]
+        if (shiftKey) scope.selected.push(payload)
+        else scope.selected = [payload]
       }
     },
   })

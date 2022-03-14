@@ -218,8 +218,6 @@ export const houseLayouts = derive({
           })
         )
 
-        console.log({ sets })
-
         // filterMapRR your set types structure
         // startIndices: number[]
         // map targets from chunked to flat
