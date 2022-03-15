@@ -16,6 +16,7 @@ export interface House {
   rotation: number
   dna: string[]
   modifiedMaterials: Record<string, string>
+  friendlyName: string
 }
 
 export type Houses = Record<string, House>

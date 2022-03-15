@@ -1,10 +1,9 @@
 import Sidebar from "@/components/ui/Sidebar"
 import houses from "@/stores/houses"
 import { BuildSystem, buildSystems, useSystemsData } from "@/stores/systems"
-// import { addHouse } from "@/store"
-// import { BuildSystem, buildSystems, useSystemsData } from "@/store/systems"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
+import { keys } from "fp-ts/lib/ReadonlyRecord"
 import { nanoid } from "nanoid"
 import React, { useMemo, useState } from "react"
 import HouseThumbnail from "./HouseThumbnail"
@@ -71,6 +70,7 @@ const SiteSidebar = ({ open, close }: Props) => {
                       rotation: 0,
                       dna: houseType.dna as string[],
                       modifiedMaterials: {},
+                      friendlyName: `Building ${keys(houses).length + 1}`,
                     }
                   }}
                 />

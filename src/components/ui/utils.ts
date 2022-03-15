@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import type { RefObject } from "react";
+import { useEffect } from "react"
+import type { RefObject } from "react"
 
 export const useClickAway = (
   ref: RefObject<HTMLElement | null>,
@@ -8,27 +8,28 @@ export const useClickAway = (
   useEffect(() => {
     const listener = (event: MouseEvent) => {
       if (!ref || !ref.current || ref.current.contains(event.target as any)) {
-        return;
+        return
       }
-      callback && callback();
-    };
-    document.addEventListener("click", listener);
+      console.log("clickaway")
+      callback && callback()
+    }
+    document.addEventListener("click", listener)
     return () => {
-      document.removeEventListener("click", listener);
-    };
-  }, [ref, callback]);
-};
+      document.removeEventListener("click", listener)
+    }
+  }, [ref, callback])
+}
 
 export const useEscape = (callback?: () => void) => {
   useEffect(() => {
     const handleKeyDown = (ev: any) => {
       if (ev.key === "Escape") {
-        callback && callback();
+        callback && callback()
       }
-    };
-    document.addEventListener("keydown", handleKeyDown);
+    }
+    document.addEventListener("keydown", handleKeyDown)
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [callback]);
-};
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [callback])
+}
