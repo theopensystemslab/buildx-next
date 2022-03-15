@@ -5,15 +5,15 @@ import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { filterCompatibleModules, Module } from "@/data/module"
 import { ModuleLayoutItem } from "@/data/moduleLayout"
+import houses from "@/stores/houses"
 import { useHouseRows } from "@/stores/housesRows"
 import scope, { ScopeTypeEnum } from "@/stores/scope"
 import { useSystemsData } from "@/stores/systems"
-// import { ScopeTypeEnum, store, useHouseModules } from "@/store"
-// import { useSystemsData } from "@/store/systems"
 import { filterMap, head, map, sort, uniq } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { none, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
+import { modifyAt } from "fp-ts/lib/ReadonlyArray"
 import { Eq, Ord as StrOrd } from "fp-ts/lib/string"
 import React from "react"
 
@@ -41,53 +41,62 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
 
   const heading = `Level ${scope.selected[0].columnIndex}`
 
-  const height = columnIndex + 1
+  // const height = columnIndex + 1
+
+  // only allow "add floor above"
+  // and only allow on... hmm...
+  // what about extrude?
+
+  // need some way to "fill vanilla modules here"
+  // both with level extrude
+  // and end-module extrude
 
   const addFloor = () => {
-    const getIntermediateModule = (
-      moduleLayoutItem: ModuleLayoutItem
-    ): ModuleLayoutItem | null => {
-      const targetType = height - columnIndex <= 3 ? "T" : "M"
-
-      return pipe(
-        systemModules,
-        filterMap<Module, ModuleLayoutItem>((module) =>
-          module.dna.slice(0, 6) === moduleLayoutItem.dna.slice(0, 6) &&
-          module.structuredDna.levelType.startsWith(targetType)
-            ? some({
-                dna: module.dna,
-                position: moduleLayoutItem.position,
-                grid: moduleLayoutItem.grid,
-              })
-            : none
-        ),
-        sort(
-          pipe(
-            StrOrd,
-            contramap((m: ModuleLayoutItem) => m.dna)
-          )
-        ),
-        head,
-        toNullable
-      )
-    }
-
+    // const targetLevelType = columnIndex ===
+    // console.log(houseRows)
     // houses[houseId].dna = pipe(
-    //   layout.modules,
-    //   chunksOf(height),
-    //   map(
-    //     flow(
-    //       splitAt(levelIndex + 1),
-    //       ([init, rest]) => [
-    //         ...init,
-    //         getIntermediateModule(init[init.length - 1]),
-    //         ...rest,
-    //       ],
-    //       filterMap((x) => (x !== null ? some(x.dna) : none))
-    //     )
-    //   ),
-    //   flatten
+    //   houseRows,
+    //   map(col => pipe(col.row, map(row => row.module.dna))),
+    //   modifyAt(columnIndex, row => row.row)
+    // map(
+    //   flow(
+    //     splitAt(levelIndex + 1),
+    //     ([init, rest]) => [
+    //       ...init,
+    //       getIntermediateModule(init[init.length - 1]),
+    //       ...rest,
+    //     ],
+    //     filterMap((x) => (x !== null ? some(x.dna) : none))
+    //   )
+    // ),
+    // flatten
     // )
+    // const getIntermediateModule = (
+    //   moduleLayoutItem: ModuleLayoutItem
+    // ): ModuleLayoutItem | null => {
+    //   const targetType = height - columnIndex <= 3 ? "T" : "M"
+    //   return pipe(
+    //     systemModules,
+    //     filterMap<Module, ModuleLayoutItem>((module) =>
+    //       module.dna.slice(0, 6) === moduleLayoutItem.dna.slice(0, 6) &&
+    //       module.structuredDna.levelType.startsWith(targetType)
+    //         ? some({
+    //             dna: module.dna,
+    //             position: moduleLayoutItem.position,
+    //             grid: moduleLayoutItem.grid,
+    //           })
+    //         : none
+    //     ),
+    //     sort(
+    //       pipe(
+    //         StrOrd,
+    //         contramap((m: ModuleLayoutItem) => m.dna)
+    //       )
+    //     ),
+    //     head,
+    //     toNullable
+    //   )
+    // }
   }
 
   const removeFloor = () => {

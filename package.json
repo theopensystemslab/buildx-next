@@ -13,6 +13,7 @@
     "@react-three/drei": "^8.10.1",
     "@react-three/fiber": "^7.0.26",
     "@react-three/postprocessing": "^2.1.2",
+    "@use-gesture/react": "^10.2.10",
     "camera-controls": "^1.34.1",
     "fp-ts": "^2.11.8",
     "fp-ts-std": "^0.13.1",

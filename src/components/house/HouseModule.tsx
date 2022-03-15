@@ -54,7 +54,7 @@ const HouseModule = (props: Props) => {
     }),
     map((meshes) => mergeBufferGeometries(meshes.map((mesh) => mesh.geometry))),
     filter((bg: BufferGeometry | null): bg is BufferGeometry => Boolean(bg)),
-    filterWithIndex((k) => k !== "Appliance"), // model needs clean-up??
+    // filterWithIndex((k) => k !== "Appliance"), // model needs clean-up??
     mapWithIndex((elementName, geometry) => (
       <HouseModuleElement
         key={elementName}

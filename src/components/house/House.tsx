@@ -1,6 +1,10 @@
 import { House } from "@/data/house"
+import { useUpdatePosition } from "@/stores/houses"
 import { useHouseRows } from "@/stores/housesRows"
+import { useScopeType } from "@/stores/scope"
 import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
+import { ThreeEvent } from "@react-three/fiber"
+import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { flatten } from "fp-ts/lib/ReadonlyArray"
 import { useRef } from "react"
@@ -29,58 +33,15 @@ const House = (props: Props) => {
 
   const rows = useHouseRows(house.id)
 
-  // const rows = useModuleRows(house)
-
-  // const modelUrls = modules.map((module) => module.modelUrl)
-  // const gltfs = useGLTF(modelUrls)
-
-  // const layout = moduleLayout(modules)
-
-  // const layout2 = getPositions(modules)
-
-  // const onDrag = useUpdatePosition(houseId, groupRef)
+  const onDrag = useUpdatePosition(house.id, groupRef)
   // const invalidate = useThree((three) => three.invalidate)
 
-  // const bind = useGesture<{
-  //   drag: ThreeEvent<PointerEvent>
-  //   hover: ThreeEvent<PointerEvent>
-  // }>({
-  //   onDrag,
-  // })
-
-  //   const gltf = gltfs[moduleIndex]
-
-  //   const {
-  //     grid,
-  //     position: [x, y, z0],
-  //   } = layout.modules[moduleIndex]
-
-  //   const mirror = grid[0] !== 0
-
-  //   const z = !mirror
-  //     ? z0 + module.length / 2
-  //     : z0 + (-module.length + module.length / 2)
-
-  //   const layoutHeight = layout.gridBounds[1] + 1
-
-  //   const chunks = pipe(
-  //     range(0, modules.length - 1),
-  //     chunksOf(layoutHeight),
-  //     transpose
-  //   ) as number[][]
-
-  //   const heightIndex = moduleIndex % layoutHeight
-
-  //   return (
-  //     <HouseModule
-  //       key={moduleIndex}
-  //       {...{ module, gltf, moduleIndex, houseId }}
-  //       position={[x, y - (layout.cellHeights[0] || 0), z]}
-  //       scale={!mirror ? [1, 1, 1] : [1, 1, -1]}
-  //       levelModuleIndices={chunks[heightIndex]}
-  //     />
-  //   )
-  // })
+  const bind = useGesture<{
+    drag: ThreeEvent<PointerEvent>
+    hover: ThreeEvent<PointerEvent>
+  }>({
+    onDrag,
+  })
 
   const gltfs = pipe(
     rows,
@@ -94,46 +55,56 @@ const House = (props: Props) => {
     (modelUrls) => useGLTF(modelUrls as string[])
   )
 
+  // store moduleIndex in the rows store maybe?
   let moduleIndex = -1
+
   const modules = pipe(
     rows,
-    mapWithIndexRA((columnIndex, { row, y }) => (
-      <group>
-        {pipe(
-          row,
-          mapWithIndexRA((rowIndex, { module, z }) => {
-            moduleIndex++
-            const mirror = rowIndex === row.length
-            return (
-              <HouseModule
-                key={`${columnIndex},${rowIndex}`}
-                module={module}
-                columnIndex={columnIndex}
-                rowIndex={rowIndex}
-                gltf={gltfs[moduleIndex]}
-                house={house}
-                position={[
-                  0,
-                  y,
-                  !mirror
-                    ? z + module.length / 2
-                    : z - module.length + module.length / 2,
-                ]}
-                scale={[1, 1, !mirror ? 1 : -1]}
-              />
-            )
-          })
-        )}
-      </group>
-    ))
+    mapWithIndexRA((columnIndex, { row, y }) => {
+      // console.log(
+      //   row.map((r) => [
+      //     r.module.structuredDna.level,
+      //     r.module.structuredDna.levelType,
+      //   ])
+      // )
+
+      // might need a component here for rows
+      // we need to bind gesture handling
+      // if the level is R
+
+      const children = pipe(
+        row,
+        mapWithIndexRA((rowIndex, { module, z }) => {
+          moduleIndex++
+          const mirror = rowIndex === row.length - 1
+          return (
+            <HouseModule
+              key={`${columnIndex},${rowIndex}`}
+              module={module}
+              columnIndex={columnIndex}
+              rowIndex={rowIndex}
+              gltf={gltfs[moduleIndex]}
+              house={house}
+              position={[
+                0,
+                0,
+                mirror
+                  ? z + module.length / 2
+                  : z - module.length + module.length / 2,
+              ]}
+              scale={[1, 1, mirror ? 1 : -1]}
+            />
+          )
+        })
+      )
+
+      return <group position={[0, y, 0]}>{children}</group>
+    })
   )
   moduleIndex = -1
 
   return (
-    <group
-      ref={groupRef}
-      // {...(bind() as any)}
-    >
+    <group ref={groupRef} {...(bind() as any)}>
       {modules}
     </group>
   )

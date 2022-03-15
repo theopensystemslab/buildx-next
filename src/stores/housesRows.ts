@@ -1,9 +1,5 @@
-import { mapRR, pipeLog } from "@/utils"
-import { derive } from "valtio/utils"
-import { default as baseHouses } from "./houses"
-import systemsData from "./systems"
 import { Module } from "@/data/module"
-import { GltfT, mapO, mapRA, SSR, useGLTF } from "@/utils"
+import { mapO, mapRA, mapRR } from "@/utils"
 import { flow, pipe } from "fp-ts/lib/function"
 import { getOrElse, none, some } from "fp-ts/lib/Option"
 import {
@@ -12,10 +8,12 @@ import {
   filterWithIndex,
   findFirst,
   reduceWithIndex,
-  takeLeft,
 } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useSnapshot } from "valtio"
+import { derive } from "valtio/utils"
+import { default as baseHouses } from "./houses"
+import systemsData from "./systems"
 
 const housesRows = derive({
   housesRows: async (get) => {
@@ -93,8 +91,7 @@ const housesRows = derive({
                     },
                   ]
                 }
-              ),
-              pipeLog
+              )
             )
           ),
           reduceWithIndex(
