@@ -19,7 +19,7 @@ const ModuleContextMenu = (props: ContextMenuProps) => {
     return null
   }
 
-  const { houseId, columnIndex, rowIndex } = scope.selected[0]
+  const { houseId, rowIndex, gridIndex: gridIndex } = scope.selected[0]
 
   const house = useHouse(houseId)
 
@@ -38,7 +38,7 @@ const ModuleContextMenu = (props: ContextMenuProps) => {
     (m) => m.systemId === houseRows[0].row[0].module.systemId
   )
 
-  const thisModule = houseRows[columnIndex].row[rowIndex].module
+  const thisModule = houseRows[rowIndex].row[gridIndex].module
 
   const moduleOptions = pipe(
     systemModules,

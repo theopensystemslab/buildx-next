@@ -2,12 +2,18 @@ import { MutableRefObject } from "react"
 import { Object3D } from "three"
 import { proxy, useSnapshot } from "valtio"
 import scope, { Scope } from "./scope"
+import * as z from "zod"
+
+export const EditModeEnum = z.enum(["MOVE", "ROTATE", "STRETCH"])
+export type EditMode = z.infer<typeof EditModeEnum>
 
 type ContextProxy = {
   scope: Scope
   menu: [number, number] | null
   outlined: Array<MutableRefObject<Object3D | undefined>>
   pointer: [number, number]
+  buildingId: string | null
+  editMode: EditMode | null
 }
 
 const context = proxy<ContextProxy>({
@@ -15,6 +21,8 @@ const context = proxy<ContextProxy>({
   menu: null,
   outlined: [],
   pointer: [0, 0],
+  buildingId: null,
+  editMode: null,
 })
 
 export const useContext = () => useSnapshot(context)

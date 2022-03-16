@@ -29,7 +29,7 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
     return null
   }
 
-  const { houseId, columnIndex } = scope.selected[0]
+  const { houseId, rowIndex } = scope.selected[0]
   const { modules: allModules } = useSystemsData()
   const houseRows = useHouseRows(houseId)
 
@@ -37,11 +37,11 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
     (m) => m.systemId === houseRows[0].row[0].module.systemId
   )
 
-  const levelModule = houseRows[columnIndex].row[0].module
+  const levelModule = houseRows[rowIndex].row[0].module
 
-  const heading = `Level ${scope.selected[0].columnIndex}`
+  const heading = `Level ${scope.selected[0].rowIndex}`
 
-  // const height = columnIndex + 1
+  // const height = rowIndex + 1
 
   // only allow "add floor above"
   // and only allow on... hmm...
@@ -52,12 +52,12 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
   // and end-module extrude
 
   const addFloor = () => {
-    // const targetLevelType = columnIndex ===
+    // const targetLevelType = rowIndex ===
     // console.log(houseRows)
     // houses[houseId].dna = pipe(
     //   houseRows,
     //   map(col => pipe(col.row, map(row => row.module.dna))),
-    //   modifyAt(columnIndex, row => row.row)
+    //   modifyAt(rowIndex, row => row.row)
     // map(
     //   flow(
     //     splitAt(levelIndex + 1),
@@ -74,7 +74,7 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
     // const getIntermediateModule = (
     //   moduleLayoutItem: ModuleLayoutItem
     // ): ModuleLayoutItem | null => {
-    //   const targetType = height - columnIndex <= 3 ? "T" : "M"
+    //   const targetType = height - rowIndex <= 3 ? "T" : "M"
     //   return pipe(
     //     systemModules,
     //     filterMap<Module, ModuleLayoutItem>((module) =>

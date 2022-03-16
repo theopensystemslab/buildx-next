@@ -12,8 +12,8 @@ export type HouseScope = {
 }
 
 export type ModuleScopeItem = {
-  columnIndex: number
   rowIndex: number
+  gridIndex: number
   houseId: string
 }
 
@@ -36,7 +36,7 @@ export type ElementScope = {
 
 export type LevelScopeItem = {
   houseId: string
-  columnIndex: number
+  rowIndex: number
 }
 
 export type LevelScope = {
@@ -45,9 +45,9 @@ export type LevelScope = {
   hovered: LevelScopeItem | null
 }
 
-export type Scope = HouseScope | ModuleScope | ElementScope | LevelScope
+export type Scope = HouseScope | LevelScope | ModuleScope | ElementScope
 
-export type FocusedHouseScope = ModuleScope | ElementScope
+export type FocusedHouseScope = LevelScope | ModuleScope | ElementScope
 
 const getInitScope = (): HouseScope => ({
   type: ScopeTypeEnum.enum.HOUSE,

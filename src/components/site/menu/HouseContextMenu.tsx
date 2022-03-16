@@ -1,6 +1,7 @@
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
+import context from "@/stores/context"
 import houses, { useHouse, useResetHouse } from "@/stores/houses"
 import scope, { ScopeTypeEnum } from "@/stores/scope"
 import { Html } from "@react-three/drei"
@@ -23,6 +24,10 @@ const HouseContextMenu = (props: ContextMenuProps) => {
 
   const rename = () => setRenaming(true)
 
+  const editBuilding = () => {
+    context.buildingId = houseId
+  }
+
   return (
     <ContextMenu {...props}>
       <ContextMenuHeading>{house.friendlyName}</ContextMenuHeading>
@@ -30,7 +35,7 @@ const HouseContextMenu = (props: ContextMenuProps) => {
         <Fragment>
           <ContextMenuButton onClick={resetHouse}>Reset</ContextMenuButton>
           <ContextMenuButton onClick={resetHouse}>Delete</ContextMenuButton>
-          <ContextMenuButton onClick={resetHouse}>
+          <ContextMenuButton onClick={editBuilding}>
             Edit Building
           </ContextMenuButton>
         </Fragment>

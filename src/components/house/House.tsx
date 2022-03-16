@@ -1,4 +1,5 @@
 import { House } from "@/data/house"
+import { useCameraFocus } from "@/stores/camera"
 import { useUpdatePosition } from "@/stores/houses"
 import { useHouseRows } from "@/stores/housesRows"
 import { useScopeType } from "@/stores/scope"
@@ -11,18 +12,6 @@ import { useRef } from "react"
 import { Group } from "three"
 import HouseModule from "./HouseModule"
 
-// change house type in airtable
-// hard code the house type for now
-
-// or not?
-// it still goes END to END
-// our prev heuristic was F < R etc
-// new heuristic is ...
-
-// which modules are in house type A?
-// dup those modules over to new airtable
-// but with unit type / length
-
 type Props = {
   house: House
 }
@@ -34,7 +23,8 @@ const House = (props: Props) => {
   const rows = useHouseRows(house.id)
 
   const onDrag = useUpdatePosition(house.id, groupRef)
-  // const invalidate = useThree((three) => three.invalidate)
+
+  useCameraFocus(house)
 
   const bind = useGesture<{
     drag: ThreeEvent<PointerEvent>
@@ -60,29 +50,18 @@ const House = (props: Props) => {
 
   const modules = pipe(
     rows,
-    mapWithIndexRA((columnIndex, { row, y }) => {
-      // console.log(
-      //   row.map((r) => [
-      //     r.module.structuredDna.level,
-      //     r.module.structuredDna.levelType,
-      //   ])
-      // )
-
-      // might need a component here for rows
-      // we need to bind gesture handling
-      // if the level is R
-
+    mapWithIndexRA((rowIndex, { row, y }) => {
       const children = pipe(
         row,
-        mapWithIndexRA((rowIndex, { module, z }) => {
+        mapWithIndexRA((gridIndex, { module, z }) => {
           moduleIndex++
-          const mirror = rowIndex === row.length - 1
+          const mirror = gridIndex === row.length - 1
           return (
             <HouseModule
-              key={`${columnIndex},${rowIndex}`}
+              key={`${rowIndex},${gridIndex}`}
               module={module}
-              columnIndex={columnIndex}
               rowIndex={rowIndex}
+              gridIndex={gridIndex}
               gltf={gltfs[moduleIndex]}
               house={house}
               position={[
@@ -98,7 +77,11 @@ const House = (props: Props) => {
         })
       )
 
-      return <group position={[0, y, 0]}>{children}</group>
+      return (
+        <group key={rowIndex} position={[0, y, 0]}>
+          {children}
+        </group>
+      )
     })
   )
   moduleIndex = -1

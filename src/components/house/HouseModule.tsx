@@ -20,14 +20,14 @@ import HouseModuleElement from "./HouseModuleElement"
 
 type Props = GroupProps & {
   module: Module
-  columnIndex: number
   rowIndex: number
+  gridIndex: number
   gltf: GltfT
   house: House
 }
 
 const HouseModule = (props: Props) => {
-  const { module, columnIndex, gltf, house, rowIndex, ...groupProps } = props
+  const { module, rowIndex, gltf, house, gridIndex, ...groupProps } = props
 
   const { elements } = useSystemsData()
 
@@ -62,8 +62,8 @@ const HouseModule = (props: Props) => {
           elementName,
           geometry,
           house,
-          columnIndex,
           rowIndex,
+          gridIndex,
         }}
       />
     )),

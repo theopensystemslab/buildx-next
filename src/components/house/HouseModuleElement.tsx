@@ -25,14 +25,14 @@ const builtInMaterials: Record<string, Material> = {
 
 type Props = MeshProps & {
   elementName: string
-  columnIndex: number
   rowIndex: number
+  gridIndex: number
   house: House
   geometry: BufferGeometry
 }
 
 const HouseModuleElement = (props: Props) => {
-  const { geometry, elementName, columnIndex, rowIndex, house } = props
+  const { geometry, elementName, rowIndex, gridIndex, house } = props
   const meshRef = useRef<Mesh>()
 
   const { materials, elements } = useSystemsData()
@@ -106,14 +106,14 @@ const HouseModuleElement = (props: Props) => {
         case ScopeTypeEnum.Enum.MODULE:
           isHovered =
             scope.hovered?.houseId === house.id &&
-            scope.hovered.columnIndex === columnIndex &&
-            scope.hovered.rowIndex === rowIndex
+            scope.hovered.rowIndex === rowIndex &&
+            scope.hovered.gridIndex === gridIndex
           isSelected = !undef(
             scope.selected.find(
               (x) =>
                 x.houseId === house.id &&
-                x.columnIndex === columnIndex &&
-                x.rowIndex === rowIndex
+                x.rowIndex === rowIndex &&
+                x.gridIndex === gridIndex
             )
           )
           break
@@ -121,10 +121,10 @@ const HouseModuleElement = (props: Props) => {
         case ScopeTypeEnum.Enum.LEVEL:
           isHovered =
             scope.hovered?.houseId === house.id &&
-            scope.hovered.columnIndex === columnIndex
+            scope.hovered.rowIndex === rowIndex
           isSelected = !undef(
             scope.selected.find(
-              (x) => x.houseId === house.id && x.columnIndex === columnIndex
+              (x) => x.houseId === house.id && x.rowIndex === rowIndex
             )
           )
           break
@@ -164,10 +164,14 @@ const HouseModuleElement = (props: Props) => {
           scope.hovered = { houseId: house.id, elementName }
           break
         case ScopeTypeEnum.Enum.MODULE:
-          scope.hovered = { houseId: house.id, columnIndex, rowIndex }
+          scope.hovered = {
+            houseId: house.id,
+            rowIndex,
+            gridIndex: gridIndex,
+          }
           break
         case ScopeTypeEnum.Enum.LEVEL:
-          scope.hovered = { houseId: house.id, columnIndex }
+          scope.hovered = { houseId: house.id, rowIndex }
           break
       }
     },
@@ -199,14 +203,14 @@ const HouseModuleElement = (props: Props) => {
             scope.selected.find(
               (x) =>
                 x.houseId === house.id &&
-                x.columnIndex === columnIndex &&
-                x.rowIndex === rowIndex
+                x.rowIndex === rowIndex &&
+                x.gridIndex === gridIndex
             )
           )
           payload = {
             houseId: house.id,
-            columnIndex,
             rowIndex,
+            gridIndex: gridIndex,
           } as ModuleScopeItem
           break
         case ScopeTypeEnum.Enum.ELEMENT:
@@ -220,10 +224,10 @@ const HouseModuleElement = (props: Props) => {
         case ScopeTypeEnum.Enum.LEVEL:
           isSelected = !undef(
             scope.selected.find(
-              (x) => x.houseId === house.id && x.columnIndex === columnIndex
+              (x) => x.houseId === house.id && x.rowIndex === rowIndex
             )
           )
-          payload = { houseId: house.id, columnIndex } as LevelScopeItem
+          payload = { houseId: house.id, rowIndex } as LevelScopeItem
           break
       }
 
