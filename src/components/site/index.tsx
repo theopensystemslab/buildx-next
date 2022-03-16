@@ -2,7 +2,8 @@ import Layout from "@/components/layouts"
 import { SiteContextMenu } from "@/components/menu"
 import SiteSidebar from "@/components/site/SiteSidebar"
 import { IconButton, IconMenu, Loader, Radio } from "@/components/ui"
-import { Environment, Menu } from "@/components/ui/icons"
+import { Check, Environment, Menu } from "@/components/ui/icons"
+import context, { useContext } from "@/stores/context"
 import { useLocallyStoredHouses } from "@/stores/houses"
 import { setOrthographic, useSettings } from "@/stores/settings"
 import dynamic from "next/dynamic"
@@ -12,11 +13,11 @@ const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
   ssr: false,
 })
 
-const SiteIndex = () => {
+const HtmlUi = () => {
   const [sidebar, setSidebar] = useState(false)
   const { orthographic } = useSettings()
-
-  useLocallyStoredHouses()
+  const { buildingId } = useContext()
+  const buildingMode = buildingId !== null
 
   return (
     <Fragment>
@@ -48,7 +49,27 @@ const SiteIndex = () => {
       <Suspense fallback={<Loader />}>
         <SiteSidebar open={sidebar} close={() => setSidebar(false)} />
       </Suspense>
+      {buildingMode ? (
+        <div className="absolute left-1/2 top-16 z-10 flex -translate-x-1/2 transform justify-center">
+          <button
+            onClick={() => void (context.buildingId = null)}
+            className="block h-12 w-12 rounded-full bg-white p-2 text-green-500 shadow-lg hover:bg-gray-100"
+          >
+            <Check />
+          </button>
+        </div>
+      ) : null}
+    </Fragment>
+  )
+}
+
+const SiteIndex = () => {
+  useLocallyStoredHouses()
+
+  return (
+    <Fragment>
       <Layout>
+        <HtmlUi />
         <SiteThreeInit />
       </Layout>
       <Suspense fallback={<Loader />}>

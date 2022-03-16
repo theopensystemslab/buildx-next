@@ -53,7 +53,6 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
 
   const addFloor = () => {
     // const targetLevelType = rowIndex ===
-    // console.log(houseRows)
     // houses[houseId].dna = pipe(
     //   houseRows,
     //   map(col => pipe(col.row, map(row => row.module.dna))),

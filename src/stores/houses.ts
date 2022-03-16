@@ -7,7 +7,7 @@ import { MutableRefObject, useCallback, useEffect } from "react"
 import { Group } from "three"
 import { proxy, subscribe, useSnapshot } from "valtio"
 import { setCameraEnabled } from "./camera"
-import context from "./context"
+import context, { useContext } from "./context"
 import scope, { ScopeTypeEnum } from "./scope"
 import { useSystemsData } from "./systems"
 
@@ -90,6 +90,12 @@ export const useUpdatePosition = (
 
     if (last) setCameraEnabled(true)
   }
+}
+
+export const useFocusedBuilding = () => {
+  const houses = useHouses()
+  const { buildingId } = useContext()
+  return buildingId ? houses[buildingId] : null
 }
 
 export default houses

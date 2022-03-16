@@ -18,11 +18,17 @@ export interface BuildSystem {
   airtableId: string
 }
 
+// oldest
+// airtableId: "appXYQYWjUiAT1Btm",
+
+// clayton
+// airtableId: "app7ApkBWMj8Z8gdV",
+
 export const buildSystems: Array<BuildSystem> = [
   {
     id: "sample",
     name: "Sample",
-    // airtableId: "appXYQYWjUiAT1Btm",
+    // tom
     airtableId: "appgVlfhT0anmqi5a",
   },
   // {

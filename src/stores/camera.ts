@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { Vector3 } from "three"
 import { proxy } from "valtio"
 import { useContext } from "./context"
+import { useFocusedBuilding } from "./houses"
 
 type CameraProxy = {
   controls: CameraControls | null
@@ -22,23 +23,28 @@ export const setCameraEnabled = (b: boolean) => {
   if (camera.controls) camera.controls.enabled = b
 }
 
-export const useCameraFocus = (house: House) => {
-  const { buildingId } = useContext()
-  const focused = buildingId === house.id
-  const {
-    position: [x, z],
-  } = house
+export const useCameraFocus = () => {
+  const building = useFocusedBuilding()
 
   useEffect(() => {
-    if (!focused || !camera.controls) return
+    if (!camera.controls) return
+
     setCameraEnabled(true)
-    const v3Pos = new Vector3()
-    const v3Tgt = new Vector3()
-    camera.controls.getPosition(v3Pos)
-    camera.controls.getTarget(v3Tgt)
-    camera.lastLookAt = [...v3Pos.toArray(), ...v3Tgt.toArray()]
-    camera.controls.setLookAt(x + 12, 24, z + 12, x, 0, z, true)
-  }, [focused])
+
+    if (!building) {
+      camera.controls.setLookAt(...camera.lastLookAt, true)
+    } else {
+      const {
+        position: [x, z],
+      } = building
+      const v3Pos = new Vector3()
+      const v3Tgt = new Vector3()
+      camera.controls.getPosition(v3Pos)
+      camera.controls.getTarget(v3Tgt)
+      camera.lastLookAt = [...v3Pos.toArray(), ...v3Tgt.toArray()]
+      camera.controls.setLookAt(x + 12, 24, z + 12, x, 0, z, true)
+    }
+  }, [building])
 }
 
 export default camera

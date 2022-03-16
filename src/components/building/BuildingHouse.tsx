@@ -1,13 +1,9 @@
 import { House } from "@/data/house"
-import { useCameraFocus } from "@/stores/camera"
-import { useUpdatePosition } from "@/stores/houses"
 import { useHouseRows } from "@/stores/housesRows"
 import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
-import { ThreeEvent } from "@react-three/fiber"
-import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { flatten } from "fp-ts/lib/ReadonlyArray"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import { Group } from "three"
 import SiteHouseModule from "../site/SiteHouseModule"
 
@@ -19,18 +15,22 @@ const BuildingHouse = (props: Props) => {
   const { house } = props
   const groupRef = useRef<Group>()
 
+  const {
+    position: [x, z],
+  } = house
+
   const rows = useHouseRows(house.id)
 
-  const onDrag = useUpdatePosition(house.id, groupRef)
+  // const onDrag = useUpdatePosition(house.id, groupRef)
 
-  useCameraFocus(house)
+  // useCameraFocus(house)
 
-  const bind = useGesture<{
-    drag: ThreeEvent<PointerEvent>
-    hover: ThreeEvent<PointerEvent>
-  }>({
-    onDrag,
-  })
+  // const bind = useGesture<{
+  //   drag: ThreeEvent<PointerEvent>
+  //   hover: ThreeEvent<PointerEvent>
+  // }>({
+  //   onDrag,
+  // })
 
   const gltfs = pipe(
     rows,
@@ -86,7 +86,11 @@ const BuildingHouse = (props: Props) => {
   moduleIndex = -1
 
   return (
-    <group ref={groupRef} {...(bind() as any)}>
+    <group
+      ref={groupRef}
+      position={[x, 0, z]}
+      // {...(bind() as any)}
+    >
       {modules}
     </group>
   )

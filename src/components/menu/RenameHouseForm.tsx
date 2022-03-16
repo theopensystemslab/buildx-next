@@ -13,7 +13,6 @@ const RenameHouseForm = (props: Props) => {
     onNewName(newName)
   }
 
-  console.log({ restProps })
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <input type="text" defaultValue={currentName} {...register("newName")} />

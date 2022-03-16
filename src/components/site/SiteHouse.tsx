@@ -1,5 +1,4 @@
 import { House } from "@/data/house"
-import { useCameraFocus } from "@/stores/camera"
 import { useUpdatePosition } from "@/stores/houses"
 import { useHouseRows } from "@/stores/housesRows"
 import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
@@ -7,7 +6,7 @@ import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { flatten } from "fp-ts/lib/ReadonlyArray"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import { Group } from "three"
 import SiteHouseModule from "./SiteHouseModule"
 
@@ -19,11 +18,15 @@ const SiteHouse = (props: Props) => {
   const { house } = props
   const groupRef = useRef<Group>()
 
+  const {
+    position: [x, z],
+  } = house
+
+  useEffect(() => void console.log({ x, z }, "site"), [x, z])
+
   const rows = useHouseRows(house.id)
 
   const onDrag = useUpdatePosition(house.id, groupRef)
-
-  useCameraFocus(house)
 
   const bind = useGesture<{
     drag: ThreeEvent<PointerEvent>
