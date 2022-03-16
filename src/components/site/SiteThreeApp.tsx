@@ -5,15 +5,16 @@ import { mapRR } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import React, { Suspense } from "react"
-import { House } from "../house"
+import BuildingHouse from "../building/BuildingHouse"
 import Loader3D from "../ui-3d/Loader3D"
+import SiteHouse from "./SiteHouse"
 
 const BuildingMode = ({ buildingId }: { buildingId: string }) => {
   const house = useHouse(buildingId)
 
   return (
     <Suspense key={house.id} fallback={<Loader3D />}>
-      <House house={house as HouseT} />
+      <BuildingHouse house={house as HouseT} />
     </Suspense>
   )
 }
@@ -27,7 +28,7 @@ const SiteMode = () => {
         houses,
         mapRR((house) => (
           <Suspense key={house.id} fallback={<Loader3D />}>
-            <House house={house as HouseT} />
+            <SiteHouse house={house as HouseT} />
           </Suspense>
         )),
         toReadonlyArray

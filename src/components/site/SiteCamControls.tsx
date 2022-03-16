@@ -5,7 +5,8 @@ import { useSettings } from "@/stores/settings"
 import { useUserAgent } from "@oieduardorabelo/use-user-agent"
 import { OrthographicCamera, PerspectiveCamera } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
-import React, { Fragment } from "react"
+import CameraControls from "camera-controls"
+import React, { Fragment, useEffect } from "react"
 import { ref } from "valtio"
 
 const SiteCamControls = () => {
@@ -17,6 +18,14 @@ const SiteCamControls = () => {
   const buildingMode = buildingId !== null
   const dollyToCursor = !buildingMode
   const truckSpeed = !buildingMode ? 2.0 : 0.0
+
+  useEffect(() => {
+    if (!camera.controls) return
+    camera.controls.mouseButtons.right = buildingMode
+      ? CameraControls.ACTION.NONE
+      : CameraControls.ACTION.TRUCK
+    console.log(camera.controls.mouseButtons)
+  }, [buildingMode, orthographic])
 
   return (
     <Fragment>

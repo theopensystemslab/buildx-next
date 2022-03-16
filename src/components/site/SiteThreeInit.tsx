@@ -20,24 +20,24 @@ const SiteThreeInit = () => {
   const { orthographic, shadows } = useSettings()
 
   // Re-initialize canvas if settings like orthographic camera are changed
-  const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)
+  // const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)
 
-  useEffect(() => {
-    setUnmountToReinitialize(true)
-    setTimeout(() => {
-      setUnmountToReinitialize(false)
-    }, 100)
-  }, [orthographic, setUnmountToReinitialize])
+  // useEffect(() => {
+  //   setUnmountToReinitialize(true)
+  //   setTimeout(() => {
+  //     setUnmountToReinitialize(false)
+  //   }, 100)
+  // }, [orthographic, setUnmountToReinitialize])
 
   // const [boundary, boundaryMaterial] = useMapBoundary()
 
-  if (unmountToReinitialize) {
-    return (
-      <div className="relative flex h-full w-full items-center justify-center">
-        <Loader />
-      </div>
-    )
-  }
+  // if (unmountToReinitialize) {
+  //   return (
+  //     <div className="relative flex h-full w-full items-center justify-center">
+  //       <Loader />
+  //     </div>
+  //   )
+  // }
   return (
     <Canvas
       frameloop="demand"

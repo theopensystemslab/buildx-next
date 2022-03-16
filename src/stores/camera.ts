@@ -28,6 +28,7 @@ export const useCameraFocus = (house: House) => {
   const {
     position: [x, z],
   } = house
+
   useEffect(() => {
     if (!focused || !camera.controls) return
     setCameraEnabled(true)

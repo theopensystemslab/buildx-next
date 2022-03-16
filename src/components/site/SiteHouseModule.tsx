@@ -1,13 +1,12 @@
 import { House } from "@/data/house"
 import { Module } from "@/data/module"
 import { useSystemsData } from "@/stores/systems"
-import { fuzzyMatch, GltfT, isMesh, mapRA } from "@/utils"
+import { fuzzyMatch, GltfT, isMesh } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"
 import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
 import {
   filter,
-  filterWithIndex,
   map,
   mapWithIndex,
   toReadonlyArray,
@@ -16,7 +15,7 @@ import produce from "immer"
 import React from "react"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
-import HouseModuleElement from "./HouseModuleElement"
+import SiteHouseElement from "./SiteHouseElement"
 
 type Props = GroupProps & {
   module: Module
@@ -26,7 +25,7 @@ type Props = GroupProps & {
   house: House
 }
 
-const HouseModule = (props: Props) => {
+const SiteHouseModule = (props: Props) => {
   const { module, rowIndex, gltf, house, gridIndex, ...groupProps } = props
 
   const { elements } = useSystemsData()
@@ -56,7 +55,7 @@ const HouseModule = (props: Props) => {
     filter((bg: BufferGeometry | null): bg is BufferGeometry => Boolean(bg)),
     // filterWithIndex((k) => k !== "Appliance"), // model needs clean-up??
     mapWithIndex((elementName, geometry) => (
-      <HouseModuleElement
+      <SiteHouseElement
         key={elementName}
         {...{
           elementName,
@@ -74,4 +73,4 @@ const HouseModule = (props: Props) => {
   return <group {...groupProps}>{meshes}</group>
 }
 
-export default HouseModule
+export default SiteHouseModule

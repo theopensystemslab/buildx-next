@@ -10,7 +10,6 @@ export const useClickAway = (
       if (!ref || !ref.current || ref.current.contains(event.target as any)) {
         return
       }
-      console.log("clickaway")
       callback && callback()
     }
     document.addEventListener("click", listener)

@@ -1,13 +1,12 @@
 import Layout from "@/components/layouts"
-import { SiteContextMenu } from "@/components/site/menu"
+import { SiteContextMenu } from "@/components/menu"
 import SiteSidebar from "@/components/site/SiteSidebar"
 import { IconButton, IconMenu, Loader, Radio } from "@/components/ui"
 import { Environment, Menu } from "@/components/ui/icons"
 import { useLocallyStoredHouses } from "@/stores/houses"
-import settings, { setOrthographic } from "@/stores/settings"
+import { setOrthographic, useSettings } from "@/stores/settings"
 import dynamic from "next/dynamic"
 import React, { Fragment, ReactElement, Suspense, useState } from "react"
-import { useSnapshot } from "valtio"
 
 const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
   ssr: false,
@@ -15,10 +14,7 @@ const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
 
 const SiteIndex = () => {
   const [sidebar, setSidebar] = useState(false)
-  const {
-    orthographic,
-    scope: { type: scopeType },
-  } = useSnapshot(settings)
+  const { orthographic } = useSettings()
 
   useLocallyStoredHouses()
 

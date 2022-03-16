@@ -2,7 +2,6 @@ import { House } from "@/data/house"
 import { useCameraFocus } from "@/stores/camera"
 import { useUpdatePosition } from "@/stores/houses"
 import { useHouseRows } from "@/stores/housesRows"
-import { useScopeType } from "@/stores/scope"
 import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
 import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
@@ -10,13 +9,13 @@ import { pipe } from "fp-ts/lib/function"
 import { flatten } from "fp-ts/lib/ReadonlyArray"
 import { useRef } from "react"
 import { Group } from "three"
-import HouseModule from "./HouseModule"
+import SiteHouseModule from "../site/SiteHouseModule"
 
 type Props = {
   house: House
 }
 
-const House = (props: Props) => {
+const BuildingHouse = (props: Props) => {
   const { house } = props
   const groupRef = useRef<Group>()
 
@@ -57,7 +56,7 @@ const House = (props: Props) => {
           moduleIndex++
           const mirror = gridIndex === row.length - 1
           return (
-            <HouseModule
+            <SiteHouseModule
               key={`${rowIndex},${gridIndex}`}
               module={module}
               rowIndex={rowIndex}
@@ -93,4 +92,4 @@ const House = (props: Props) => {
   )
 }
 
-export default House
+export default BuildingHouse
