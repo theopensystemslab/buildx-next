@@ -20,10 +20,12 @@ const SiteContextMenu = () => {
   const props = { pageX, pageY, onClose }
 
   switch (scopeType) {
-    case ScopeTypeEnum.Enum.LEVEL:
-      return <LevelContextMenu {...props} />
     case ScopeTypeEnum.Enum.HOUSE:
       return <HouseContextMenu {...props} />
+    case ScopeTypeEnum.Enum.LEVEL:
+      return <LevelContextMenu {...props} />
+    // case ScopeTypeEnum.Enum.ELEMENT:
+    //   return <ElementContextMenu {...props} />
     case ScopeTypeEnum.Enum.MODULE:
       return <ModuleContextMenu {...props} />
     default:

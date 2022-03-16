@@ -86,6 +86,7 @@ const HouseModuleElement = (props: Props) => {
       let isOutlined = context.outlined.includes(meshRef),
         isHovered = false,
         isSelected = false
+
       switch (scope.type) {
         case ScopeTypeEnum.Enum.HOUSE:
           isHovered = scope.hovered === house.id

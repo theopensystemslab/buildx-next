@@ -22,8 +22,6 @@ const SiteHouse = (props: Props) => {
     position: [x, z],
   } = house
 
-  useEffect(() => void console.log({ x, z }, "site"), [x, z])
-
   const rows = useHouseRows(house.id)
 
   const onDrag = useUpdatePosition(house.id, groupRef)

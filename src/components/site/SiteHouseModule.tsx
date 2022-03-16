@@ -7,6 +7,7 @@ import { pipe } from "fp-ts/lib/function"
 import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
 import {
   filter,
+  filterWithIndex,
   map,
   mapWithIndex,
   toReadonlyArray,
@@ -53,7 +54,7 @@ const SiteHouseModule = (props: Props) => {
     }),
     map((meshes) => mergeBufferGeometries(meshes.map((mesh) => mesh.geometry))),
     filter((bg: BufferGeometry | null): bg is BufferGeometry => Boolean(bg)),
-    // filterWithIndex((k) => k !== "Appliance"), // model needs clean-up??
+    filterWithIndex((k) => k !== "Appliance"), // model needs clean-up??
     mapWithIndex((elementName, geometry) => (
       <SiteHouseElement
         key={elementName}

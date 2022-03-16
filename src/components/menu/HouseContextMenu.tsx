@@ -26,6 +26,7 @@ const HouseContextMenu = (props: ContextMenuProps) => {
 
   const editBuilding = () => {
     context.buildingId = houseId
+    props?.onClose?.()
   }
 
   return (
