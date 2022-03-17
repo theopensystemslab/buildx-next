@@ -45,14 +45,6 @@ export const useHouseType = (houseId: string) => {
   return houseType
 }
 
-export const useResetHouse = (houseId: string) => {
-  const houseType = useHouseType(houseId)
-
-  return () => {
-    houses[houseId].dna = houseType.dna as string[]
-  }
-}
-
 export const useUpdatePosition = (
   houseId: string,
   groupRef: MutableRefObject<Group | undefined>

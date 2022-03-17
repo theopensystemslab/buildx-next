@@ -1,12 +1,8 @@
-import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
-import ContextMenuButton from "@/components/ui/ContextMenuButton"
-import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
+import { ContextMenuProps } from "@/components/ui/ContextMenu"
 import context from "@/stores/context"
-import houses, { useHouse, useResetHouse } from "@/stores/houses"
+import { useHouse } from "@/stores/houses"
 import scope, { ScopeTypeEnum } from "@/stores/scope"
-import { Html } from "@react-three/drei"
-import React, { Fragment, useState } from "react"
-import RenameHouseForm from "./RenameHouseForm"
+import { useState } from "react"
 
 const HouseContextMenu = (props: ContextMenuProps) => {
   if (scope.type !== ScopeTypeEnum.Enum.HOUSE) {
@@ -18,7 +14,7 @@ const HouseContextMenu = (props: ContextMenuProps) => {
 
   const house = useHouse(houseId)
 
-  const resetHouse = useResetHouse(houseId)
+  // const resetHouse = useResetBuildings(houseId)
 
   const [renaming, setRenaming] = useState(false)
 
@@ -28,32 +24,6 @@ const HouseContextMenu = (props: ContextMenuProps) => {
     context.buildingId = houseId
     props?.onClose?.()
   }
-
-  return (
-    <ContextMenu {...props}>
-      <ContextMenuHeading>{house.friendlyName}</ContextMenuHeading>
-      {!renaming && (
-        <Fragment>
-          <ContextMenuButton onClick={resetHouse}>Reset</ContextMenuButton>
-          <ContextMenuButton onClick={resetHouse}>Delete</ContextMenuButton>
-          <ContextMenuButton onClick={editBuilding}>
-            Edit Building
-          </ContextMenuButton>
-        </Fragment>
-      )}
-      <ContextMenuButton onClick={rename}>Rename Building</ContextMenuButton>
-      {renaming && (
-        <RenameHouseForm
-          {...props}
-          currentName={house.friendlyName}
-          onNewName={(newName) => {
-            houses[houseId].friendlyName = newName
-            setRenaming(false)
-          }}
-        />
-      )}
-    </ContextMenu>
-  )
 }
 
 export default HouseContextMenu
