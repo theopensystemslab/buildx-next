@@ -75,9 +75,9 @@ const SiteThreeInit = () => {
         </>
       )}
       {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
+      <Effects />
       <SiteThreeApp />
       <SiteCamControls />
-      <Effects />
     </Canvas>
   )
 }

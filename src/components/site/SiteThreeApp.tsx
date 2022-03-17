@@ -1,5 +1,5 @@
 import { House as HouseT } from "@/data/house"
-import { useContext } from "@/stores/context"
+import context, { useContext } from "@/stores/context"
 import { useHouse, useHouses } from "@/stores/houses"
 import scope, { ScopeTypeEnum, setScopeType } from "@/stores/scope"
 import { mapRR } from "@/utils"
@@ -47,6 +47,7 @@ const SiteThreeApp = () => {
     } else {
       setScopeType(ScopeTypeEnum.Enum.ELEMENT)
     }
+    context.outlined = []
   }, [buildingId])
 
   return !buildingId ? <SiteMode /> : <BuildingMode buildingId={buildingId} />

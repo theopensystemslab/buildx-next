@@ -79,8 +79,6 @@ const HouseModuleElement = (props: Props) => {
     }
   }, [elementName, materials])
 
-  // how are we going to do module index
-
   useEffect(() =>
     subscribe(scope, () => {
       let isOutlined = context.outlined.includes(meshRef),
@@ -131,13 +129,13 @@ const HouseModuleElement = (props: Props) => {
           break
       }
 
-      if ((isHovered || isSelected) && !isOutlined) {
-        context.outlined = ref([...context.outlined, meshRef])
+      if (context.menu === null && (isHovered || isSelected) && !isOutlined) {
+        context.outlined.push(ref(meshRef)) // ref([...context.outlined, meshRef])
         invalidate()
       }
-      if (all(isOutlined, !isHovered, !isSelected)) {
-        context.outlined = ref(
-          context.outlined.filter((x) => x.current?.id !== meshRef.current?.id)
+      if (all(context.menu === null, isOutlined, !isHovered, !isSelected)) {
+        context.outlined = context.outlined.filter(
+          (x) => x.current?.id !== meshRef.current?.id
         )
         invalidate()
       }
@@ -182,6 +180,33 @@ const HouseModuleElement = (props: Props) => {
         intersections[0].object.id !== meshRef.current?.id
       )
       if (returnIf) return
+      switch (scope.type) {
+        case ScopeTypeEnum.Enum.HOUSE:
+          if (!scope.selected.includes(house.id)) scope.selected.push(house.id)
+          break
+        case ScopeTypeEnum.Enum.LEVEL:
+          if (scope.selected.filter((x) => x.houseId === house.id).length < 1)
+            scope.selected.push({
+              houseId: house.id,
+              rowIndex,
+            })
+          break
+        case ScopeTypeEnum.Enum.MODULE:
+          if (scope.selected.filter((x) => x.houseId === house.id).length < 1)
+            scope.selected.push({
+              houseId: house.id,
+              gridIndex,
+              rowIndex,
+            })
+          break
+        case ScopeTypeEnum.Enum.ELEMENT:
+          if (scope.selected.filter((x) => x.houseId === house.id).length < 1)
+            scope.selected.push({
+              houseId: house.id,
+              elementName,
+            })
+          break
+      }
       context.menu = [pageX, pageY]
     },
     onPointerDown: ({ event: { intersections }, shiftKey }) => {

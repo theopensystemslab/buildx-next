@@ -1,6 +1,6 @@
 import { MutableRefObject } from "react"
 import { Object3D } from "three"
-import { proxy, useSnapshot } from "valtio"
+import { proxy, ref, useSnapshot } from "valtio"
 import scope, { Scope } from "./scope"
 import * as z from "zod"
 

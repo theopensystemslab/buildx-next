@@ -99,7 +99,10 @@ const SiteContextMenu = () => {
 
   const [pageX, pageY] = menu
 
-  const onClose = () => void (context.menu = null)
+  const onClose = () => {
+    // scope.selected = []
+    context.menu = null
+  }
 
   const props = { pageX, pageY, onClose }
 
