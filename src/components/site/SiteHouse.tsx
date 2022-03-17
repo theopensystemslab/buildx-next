@@ -6,7 +6,7 @@ import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { flatten } from "fp-ts/lib/ReadonlyArray"
-import { useEffect, useRef } from "react"
+import { useRef } from "react"
 import { Group } from "three"
 import SiteHouseModule from "./SiteHouseModule"
 

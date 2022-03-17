@@ -21,15 +21,14 @@ export interface BuildSystem {
 // oldest
 // airtableId: "appXYQYWjUiAT1Btm",
 
-// clayton
-// airtableId: "app7ApkBWMj8Z8gdV",
-
+// tom
+// airtableId: "appgVlfhT0anmqi5a",
 export const buildSystems: Array<BuildSystem> = [
   {
     id: "sample",
     name: "Sample",
-    // tom
-    airtableId: "appgVlfhT0anmqi5a",
+    // clayton
+    airtableId: "app7ApkBWMj8Z8gdV",
   },
   // {
   //   id: "mobble",

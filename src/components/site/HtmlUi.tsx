@@ -1,17 +1,9 @@
-import Layout from "@/components/layouts"
-import { SiteContextMenu } from "@/components/menu"
 import SiteSidebar from "@/components/site/SiteSidebar"
 import { IconButton, IconMenu, Loader, Radio } from "@/components/ui"
 import { Check, Environment, Menu } from "@/components/ui/icons"
 import context, { useContext } from "@/stores/context"
-import { useLocallyStoredHouses } from "@/stores/houses"
 import { setOrthographic, useSettings } from "@/stores/settings"
-import dynamic from "next/dynamic"
-import React, { Fragment, ReactElement, Suspense, useState } from "react"
-
-const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
-  ssr: false,
-})
+import React, { Fragment, Suspense, useState } from "react"
 
 const HtmlUi = () => {
   const [sidebar, setSidebar] = useState(false)
@@ -62,25 +54,4 @@ const HtmlUi = () => {
     </Fragment>
   )
 }
-
-const SiteIndex = () => {
-  useLocallyStoredHouses()
-
-  return (
-    <Fragment>
-      <Layout>
-        <HtmlUi />
-        <SiteThreeInit />
-      </Layout>
-      <Suspense fallback={<Loader />}>
-        <SiteContextMenu />
-      </Suspense>
-    </Fragment>
-  )
-}
-
-SiteIndex.getLayout = (page: ReactElement) => {
-  return <Layout>{page}</Layout>
-}
-
-export default SiteIndex
+export default HtmlUi

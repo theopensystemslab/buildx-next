@@ -4,9 +4,8 @@ import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
 // import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
-import React, { useEffect, useState } from "react"
+import React, { PropsWithChildren, Suspense } from "react"
 import { BasicShadowMap } from "three"
-import { Loader } from "../ui"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
 import RectangularGrid from "../ui-3d/RectangularGrid"
@@ -14,9 +13,11 @@ import Effects from "./Effects"
 import GroundCircle from "./GroundCircle"
 import ShadowPlane from "./ShadowPlane"
 import SiteCamControls from "./SiteCamControls"
-import SiteThreeApp from "./SiteThreeApp"
 
-const SiteThreeInit = () => {
+type Props = PropsWithChildren<{}>
+
+const SiteThreeInit = (props: Props) => {
+  const { children } = props
   const { orthographic, shadows } = useSettings()
 
   // Re-initialize canvas if settings like orthographic camera are changed
@@ -76,8 +77,8 @@ const SiteThreeInit = () => {
       )}
       {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
       <Effects />
-      <SiteThreeApp />
       <SiteCamControls />
+      <Suspense fallback={null}>{children}</Suspense>
     </Canvas>
   )
 }
