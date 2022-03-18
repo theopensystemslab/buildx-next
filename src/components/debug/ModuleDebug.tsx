@@ -42,7 +42,10 @@ const ModuleDebug = () => {
     [selection.modules.length]
   )
 
-  useEffect(() => void console.log(maxModuleIndex), [maxModuleIndex])
+  useEffect(() => {
+    console.log(selection.modules[moduleIndex].dna)
+  }, [moduleIndex])
+
   const { modules } = selection
 
   return (

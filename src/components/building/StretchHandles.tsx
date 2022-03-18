@@ -76,8 +76,6 @@ const StretchHandles = (props: Props) => {
   const z1 = row[0].z + 3
   const z2 = row[row.length - 1].z - 3
 
-  console.log({ vanillaModules })
-
   return (
     <Fragment>
       <StretchHandle position={[x0, 0, z1]} />

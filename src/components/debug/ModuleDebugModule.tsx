@@ -23,7 +23,6 @@ const ModuleDebugModule = ({ module }: { module: Module }) => {
         })
       })
     }),
-    pipeLog,
     mapWithIndex((i, node) => (
       <mesh key={i} material={defaultMaterial} geometry={node.geometry} />
     ))
