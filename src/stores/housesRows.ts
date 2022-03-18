@@ -1,24 +1,40 @@
 import { Module } from "@/data/module"
-import { mapO, mapRA, mapRR } from "@/utils"
+import { filterRA, mapO, mapRA, mapRR } from "@/utils"
 import { flow, pipe } from "fp-ts/lib/function"
-import { getOrElse, none, some } from "fp-ts/lib/Option"
+import { getOrElse, none, some, toNullable } from "fp-ts/lib/Option"
+import { contramap } from "fp-ts/lib/Ord"
 import {
   filterMap,
   filterMapWithIndex,
   filterWithIndex,
   findFirst,
+  head,
   reduceWithIndex,
+  sort,
 } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useSnapshot } from "valtio"
 import { derive } from "valtio/utils"
 import { default as baseHouses } from "./houses"
 import systemsData from "./systems"
+import { Ord as StrOrd } from "fp-ts/lib/string"
+
+export type BuildingRow = {
+  row: Array<{
+    module: Module
+    z: number
+  }>
+  vanillaModules: {
+    END: Module
+    MID: Module
+  }
+  y: number
+}
 
 const housesRows = derive({
   housesRows: async (get) => {
     const sysData = await get(systemsData)
-    const sysModules = await sysData.modules
+    const allModules = await sysData.modules
     const houseTypes = await sysData.houseTypes
     const houses = get(baseHouses)
 
@@ -33,7 +49,7 @@ const housesRows = derive({
             flow(
               filterMap((dna) =>
                 pipe(
-                  sysModules,
+                  allModules,
                   findFirst(
                     (sysM: Module) =>
                       sysM.systemId === house.systemId && sysM.dna === dna
@@ -101,6 +117,10 @@ const housesRows = derive({
               b: {
                 row: { module: Module; z: number }[]
                 y: number
+                vanillaModules: {
+                  MID: Module | null
+                  END: Module | null
+                }
               }[],
               row
             ) => {
@@ -114,6 +134,42 @@ const housesRows = derive({
                     : i === 1
                     ? 0
                     : b[i - 1].y + row[0].module.height,
+                  vanillaModules: {
+                    END: pipe(
+                      allModules,
+                      filterRA(
+                        (module) =>
+                          module.systemId === house.systemId &&
+                          module.structuredDna.levelType ===
+                            row[0].module.structuredDna.levelType
+                      ),
+                      sort(
+                        pipe(
+                          StrOrd,
+                          contramap((x: Module) => x.dna)
+                        )
+                      ),
+                      head,
+                      toNullable
+                    ),
+                    MID: pipe(
+                      allModules,
+                      filterRA(
+                        (module) =>
+                          module.systemId === house.systemId &&
+                          module.structuredDna.levelType ===
+                            row[0].module.structuredDna.levelType
+                      ),
+                      sort(
+                        pipe(
+                          StrOrd,
+                          contramap((x: Module) => x.dna)
+                        )
+                      ),
+                      head,
+                      toNullable
+                    ),
+                  },
                 },
               ]
             }

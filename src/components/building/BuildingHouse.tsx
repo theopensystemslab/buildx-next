@@ -1,11 +1,12 @@
 import { House } from "@/data/house"
-import { useHouseRows } from "@/stores/housesRows"
+import { BuildingRow, useHouseRows } from "@/stores/housesRows"
 import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { flatten } from "fp-ts/lib/ReadonlyArray"
-import { useEffect, useRef } from "react"
+import { Fragment, useEffect, useRef } from "react"
 import { Group } from "three"
 import SiteHouseModule from "../site/SiteHouseModule"
+import StretchHandles from "./StretchHandles"
 
 type Props = {
   house: House
@@ -85,14 +86,21 @@ const BuildingHouse = (props: Props) => {
   )
   moduleIndex = -1
 
+  // start with one handle
+  // place it before the house
+  // drag it around
+
   return (
-    <group
-      ref={groupRef}
-      position={[x, 0, z]}
-      // {...(bind() as any)}
-    >
-      {modules}
-    </group>
+    <Fragment>
+      <group
+        ref={groupRef}
+        position={[x, 0, z]}
+        // {...(bind() as any)}
+      >
+        {modules}
+      </group>
+      <StretchHandles house={house} row0={rows[0] as BuildingRow} />
+    </Fragment>
   )
 }
 
