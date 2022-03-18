@@ -1,36 +1,35 @@
 import { Module } from "@/data/module"
 import defaultMaterial from "@/materials/defaultMaterial"
-import { isMesh, mapRA, useGLTF } from "@/utils"
+import { isMesh, pipeLog, useGLTF } from "@/utils"
+import { values } from "fp-ts-std/ReadonlyRecord"
 import { pipe } from "fp-ts/lib/function"
+import { mapWithIndex, reduce } from "fp-ts/lib/ReadonlyArray"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
+import produce from "immer"
+import { Mesh } from "three"
 
 const ModuleDebugModule = ({ module }: { module: Module }) => {
   const gltf = useGLTF(module.modelUrl)
 
   const meshes = pipe(
     gltf.nodes,
-    toReadonlyArray,
-    mapRA(([, node]) => {
-      if (isMesh(node)) {
-        return (
-          <mesh
-            key={node.id}
-            material={defaultMaterial}
-            geometry={node.geometry}
-          ></mesh>
-        )
-      } else {
-        console.log(node)
-        return null
-      }
-    })
+    values,
+    reduce([], (acc: Mesh[], node) => {
+      return produce(acc, (draft) => {
+        node.traverse((child) => {
+          if (isMesh(child)) {
+            draft.push(child)
+          }
+        })
+      })
+    }),
+    pipeLog,
+    mapWithIndex((i, node) => (
+      <mesh key={i} material={defaultMaterial} geometry={node.geometry} />
+    ))
   )
 
   return <group>{meshes}</group>
-  // map((meshes) => mergeBufferGeometries(meshes.map((mesh) => mesh.geometry))),
-  // filter((bg: BufferGeometry | null): bg is BufferGeometry => Boolean(bg)),
-  // filterWithIndex((k) => k !== "Appliance"), // model needs clean-up??
-  // mapWithIndex((elementName, geometry) => (
 }
 
 export default ModuleDebugModule
