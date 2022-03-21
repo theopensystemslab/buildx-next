@@ -1,7 +1,7 @@
 import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
-import { mapRA, reduceRA } from "@/utils"
+import { mapRA, pipeLog, reduceRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
 import {
@@ -14,9 +14,6 @@ import { Fragment, Suspense, useEffect, useState } from "react"
 import ModuleDebugModule from "./ModuleDebugModule"
 
 const ModuleDebug = () => {
-  // const houseTypes = await get(systemsData).houseTypes
-  // const systemModules = await get(systemsData).modules
-
   const { houseTypes, modules: systemModules } = useBuildSystemsData()
 
   const houseTypeModules = pipe(

@@ -5,6 +5,7 @@ import { Module } from "@/data/module"
 import { mapRA, snapToGrid, SSR } from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
+import { left, right } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
 import {
@@ -13,7 +14,10 @@ import {
   filterWithIndex,
   findFirst,
   flatten,
+  partition,
+  partitionMap,
   reduceWithIndex,
+  replicate,
 } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { MutableRefObject, useCallback, useEffect } from "react"
@@ -105,125 +109,6 @@ export const useFocusedBuilding = () => {
   const houses = useHouses()
   const { buildingId } = useContext()
   return buildingId ? houses[buildingId] : null
-}
-
-export const useHouseRows = (buildingId: string) => {
-  // const { modules: allModules, houseTypes } = useSystemsData()
-  // const house = useHouse(buildingId)
-  const houseModules = useHouseModules(buildingId)
-
-  const jumpIndices = pipe(
-    houseModules,
-    filterMapWithIndex((i, m) =>
-      m.structuredDna.positionType === "END" ? some(i) : none
-    ),
-    filterWithIndex((i) => i % 2 === 0)
-  )
-
-  return pipe(
-    houseModules,
-    reduceWithIndex([], (i, modules: Module[][], module: Module) => {
-      return jumpIndices.includes(i)
-        ? [...modules, [module]]
-        : produce((draft) => void draft[draft.length - 1].push(module))(modules)
-    })
-    // mapRA((row) =>
-    //   pipe(
-    //     row,
-    //     reduceWithIndex(
-    //       [],
-    //       (
-    //         i,
-    //         prevs: {
-    //           module: Module
-    //           z: number
-    //         }[],
-    //         module
-    //       ) => {
-    //         const isFirst: boolean = i === 0
-
-    //         const z = isFirst
-    //           ? module.length / 2
-    //           : prevs[i - 1].z +
-    //             prevs[i - 1].module.length / 2 +
-    //             module.length / 2
-
-    //         return [
-    //           ...prevs,
-    //           {
-    //             module,
-    //             z,
-    //           },
-    //         ]
-    //       }
-    //     )
-    //   )
-    // ),
-    // reduceWithIndex(
-    //   [],
-    //   (
-    //     i,
-    //     b: {
-    //       row: { module: Module; z: number }[]
-    //       y: number
-    //       vanillaModules: {
-    //         MID: Module | null
-    //         END: Module | null
-    //       }
-    //     }[],
-    //     row
-    //   ) => {
-    //     const isFirst = i === 0
-    //     return [
-    //       ...b,
-    //       {
-    //         row,
-    //         y: isFirst
-    //           ? -row[0].module.height
-    //           : i === 1
-    //           ? 0
-    //           : b[i - 1].y + row[0].module.height,
-    //         vanillaModules: {
-    //           END: pipe(
-    //             allModules,
-    //             filterRA(
-    //               (module) =>
-    //                 module.systemId === house.systemId &&
-    //                 module.structuredDna.levelType ===
-    //                   row[0].module.structuredDna.levelType
-    //             ),
-    //             sort(
-    //               pipe(
-    //                 StrOrd,
-    //                 contramap((x: Module) => x.dna)
-    //               )
-    //             ),
-    //             head,
-    //             toNullable
-    //           ),
-    //           MID: pipe(
-    //             allModules,
-    //             filterRA(
-    //               (module) =>
-    //                 module.systemId === house.systemId &&
-    //                 module.structuredDna.levelType ===
-    //                   row[0].module.structuredDna.levelType
-    //             ),
-    //             sort(
-    //               pipe(
-    //                 StrOrd,
-    //                 contramap((x: Module) => x.dna)
-    //               )
-    //             ),
-    //             head,
-    //             toNullable
-    //           ),
-    //         },
-    //       },
-    //     ]
-    //   }
-    // )
-  )
 }
 
 export const useBuildingTransforms = () => {
@@ -350,28 +235,161 @@ export const modulesToRows = (modules: readonly Module[]): Module[][] => {
   )
 }
 
-export const rowsToColumns = (rows: Module[][]) => {
-  let bookStart = 0,
-    bookEnd = 0
+export const useHouseRows = (buildingId: string) => {
+  const houseModules = useHouseModules(buildingId)
 
-  let rowIndex = 0
-  let gridUnits = 1
-
-  let finished = false
-
-  while (!finished) {
-    // let modules = rows[rowIndex].slice(bookStart, bookEnd)
-    finished = true
-    // let gridUnits = rows[rowIndex][]
-
-    //   // const row = rows[rowIndex]
-    //   // let gridIndex = 0;
-    //   // while (gridIndex < row.length) {
-
-    //   // }
-    //   rowIndex++
-  }
-
-  return []
+  return modulesToRows(houseModules)
 }
+
+export const useRowsWithPositions = (buildingId: string) => {
+  const rows = useHouseRows(buildingId)
+
+  return pipe(
+    rows,
+
+    mapRA((row) =>
+      pipe(
+        row,
+        reduceWithIndex(
+          [],
+          (
+            i,
+            prevs: {
+              module: Module
+              z: number
+            }[],
+            module
+          ) => {
+            const isFirst: boolean = i === 0
+
+            const z = isFirst
+              ? module.length / 2
+              : prevs[i - 1].z +
+                prevs[i - 1].module.length / 2 +
+                module.length / 2
+
+            return [
+              ...prevs,
+              {
+                module,
+                z,
+              },
+            ]
+          }
+        )
+      )
+    ),
+    reduceWithIndex(
+      [],
+      (
+        i,
+        b: {
+          row: { module: Module; z: number }[]
+          y: number
+        }[],
+        row
+      ) => {
+        const isFirst = i === 0
+        return [
+          ...b,
+          {
+            row,
+            y: isFirst
+              ? -row[0].module.height
+              : i === 1
+              ? 0
+              : b[i - 1].y + row[0].module.height,
+          },
+        ]
+      }
+    )
+  )
+}
+
+export const usePartitionedRows = (buildingId: string) => {
+  const rows = useRowsWithPositions(buildingId)
+  const rows2 = pipe(
+    rows,
+    mapRA(({ row, y }) =>
+      pipe(
+        row,
+        partitionMap(({ module, z }) =>
+          module.structuredDna.positionType === "END"
+            ? left({ module, z })
+            : right({ module, z })
+        ),
+        (row) => ({ row, y })
+      )
+    )
+  )
+
+  // could return like
+  // { front, mid, back }
+
+  // could compute length by grid units
+  // or split into chunks of grid units
+
+  return {
+    rows,
+    rows2,
+  }
+}
+
+export const useBuildingColumns = (buildingId: string) => {
+  const rows = useHouseRows(buildingId)
+
+  // duplicate each multi-grid-unit module for its units
+
+  const foo = pipe(
+    rows,
+    mapRA((row) =>
+      pipe(
+        row,
+        mapRA((module) => replicate(module.structuredDna.gridUnits, module))
+        // add realIndices? position? realIndex?
+        // flatten
+      )
+    )
+  )
+
+  console.log({ foo })
+
+  const findMeAColumn = () => {}
+
+  // let [y, x] = [0, 0]
+
+  // while (true) {
+  //   if (!rows?.[y]) {
+  //     break
+  //   }
+  //   console.log(rows[y][x].structuredDna.grid)
+  //   y++
+  // }
+}
+
+// export const rowsToColumns = (rows: Module[][]) => {
+//   let bookStart = 0,
+//     bookEnd = 0
+
+//   let rowIndex = 0
+//   let gridUnits = 1
+
+//   let finished = false
+
+//   while (!finished) {
+//     // let modules = rows[rowIndex].slice(bookStart, bookEnd)
+//     finished = true
+//     // let gridUnits = rows[rowIndex][]
+
+//     //   // const row = rows[rowIndex]
+//     //   // let gridIndex = 0;
+//     //   // while (gridIndex < row.length) {
+
+//     //   // }
+//     //   rowIndex++
+//   }
+
+//   return []
+// }
+
 export default houses
