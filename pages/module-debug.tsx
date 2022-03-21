@@ -4,7 +4,7 @@ import { SiteContextMenu } from "@/components/menu"
 import Container from "@/components/site/Container"
 import HtmlUi from "@/components/site/HtmlUi"
 import { Loader } from "@/components/ui"
-import { SystemsDataProvider } from "@/contexts/SystemsData"
+import { BuildSystemsDataProvider } from "@/contexts/BuildSystemsData"
 import { useLocallyStoredHouses } from "@/stores/houses"
 import dynamic from "next/dynamic"
 import React, { Fragment, ReactElement, Suspense } from "react"
@@ -19,7 +19,7 @@ const ModuleDebugPage = () => {
   return (
     <Fragment>
       <Layout>
-        <SystemsDataProvider
+        <BuildSystemsDataProvider
           onError={
             <Container>
               <p>Something went wrong.</p>
@@ -35,7 +35,7 @@ const ModuleDebugPage = () => {
           <SiteThreeInit>
             <ModuleDebug />
           </SiteThreeInit>
-        </SystemsDataProvider>
+        </BuildSystemsDataProvider>
       </Layout>
       <Suspense fallback={<Loader />}>
         <SiteContextMenu />

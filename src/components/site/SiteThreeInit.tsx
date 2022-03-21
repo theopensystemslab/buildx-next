@@ -1,5 +1,5 @@
 import { RaycasterLayer } from "@/CONSTANTS"
-import { SystemsDataContext } from "@/contexts/SystemsData"
+import { BuildSystemsDataContext } from "@/contexts/BuildSystemsData"
 import { setPointer } from "@/stores/context"
 import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
@@ -21,7 +21,7 @@ type Props = PropsWithChildren<{}>
 const SiteThreeInit = (props: Props) => {
   const { children } = props
   const { orthographic, shadows } = useSettings()
-  const ContextBridge = useContextBridge(SystemsDataContext)
+  const ContextBridge = useContextBridge(BuildSystemsDataContext)
 
   // Re-initialize canvas if settings like orthographic camera are changed
   // const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)

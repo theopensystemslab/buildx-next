@@ -89,7 +89,6 @@ const Stretch = () => {
   const modules = useHouseModules(buildingId)
   const rows = modulesToRows(modules)
   const cols = rowsToColumns(rows)
-  console.log({ cols })
 
   return (
     <Fragment>

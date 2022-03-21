@@ -1,5 +1,5 @@
 import Sidebar from "@/components/ui/Sidebar"
-import { useSystemsData } from "@/contexts/SystemsData"
+import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { BuildSystem, buildSystems } from "@/data/buildSystem"
 import houses from "@/stores/houses"
 import { pipe } from "fp-ts/lib/function"
@@ -21,7 +21,7 @@ const SiteSidebar = ({ open, close }: Props) => {
     return buildSystems.find((system) => system.id === selectedSystemId)
   }, [selectedSystemId])
 
-  const { houseTypes } = useSystemsData()
+  const { houseTypes } = useBuildSystemsData()
 
   return (
     <Sidebar expanded={open} onClose={close}>

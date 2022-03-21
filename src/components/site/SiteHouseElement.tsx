@@ -1,4 +1,4 @@
-import { useSystemsData } from "@/contexts/SystemsData"
+import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { House } from "@/data/house"
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
@@ -35,7 +35,7 @@ const HouseModuleElement = (props: Props) => {
   const { geometry, elementName, rowIndex, gridIndex, house } = props
   const meshRef = useRef<Mesh>()
 
-  const { materials, elements } = useSystemsData()
+  const { materials, elements } = useBuildSystemsData()
 
   const material = useMemo(() => {
     if (house.modifiedMaterials?.[elementName]) {

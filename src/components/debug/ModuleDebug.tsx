@@ -1,4 +1,4 @@
-import { useSystemsData } from "@/contexts/SystemsData"
+import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
 import { mapRA, reduceRA } from "@/utils"
@@ -17,7 +17,7 @@ const ModuleDebug = () => {
   // const houseTypes = await get(systemsData).houseTypes
   // const systemModules = await get(systemsData).modules
 
-  const { houseTypes, modules: systemModules } = useSystemsData()
+  const { houseTypes, modules: systemModules } = useBuildSystemsData()
 
   const houseTypeModules = pipe(
     houseTypes,

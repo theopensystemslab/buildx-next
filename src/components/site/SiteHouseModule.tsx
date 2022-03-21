@@ -1,4 +1,4 @@
-import { useSystemsData } from "@/contexts/SystemsData"
+import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { House } from "@/data/house"
 import { Module } from "@/data/module"
 import { fuzzyMatch, GltfT, isMesh } from "@/utils"
@@ -29,7 +29,7 @@ type Props = GroupProps & {
 const SiteHouseModule = (props: Props) => {
   const { module, rowIndex, gltf, house, gridIndex, ...groupProps } = props
 
-  const { elements } = useSystemsData()
+  const { elements } = useBuildSystemsData()
 
   const getElement = (nodeType: string) =>
     fuzzyMatch(elements, {

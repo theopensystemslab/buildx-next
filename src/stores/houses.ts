@@ -1,5 +1,5 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
-import { useSystemsData } from "@/contexts/SystemsData"
+import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { Houses } from "@/data/house"
 import { Module } from "@/data/module"
 import { mapRA, snapToGrid, SSR } from "@/utils"
@@ -56,7 +56,7 @@ export const useBuildingDna = (buildingId: string) => {
 
 export const useHouseType = (houseId: string) => {
   const house = useHouse(houseId)
-  const { houseTypes } = useSystemsData()
+  const { houseTypes } = useBuildSystemsData()
   const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
   if (!houseType) throw new Error("houseType not found")
   return houseType
@@ -315,7 +315,7 @@ export const useBuildingTransforms = () => {
 }
 
 export const useHouseModules = (houseId: string) => {
-  const { modules: sysModules } = useSystemsData()
+  const { modules: sysModules } = useBuildSystemsData()
   const house = useSnapshot(houses)[houseId]
 
   return pipe(
@@ -358,11 +358,9 @@ export const rowsToColumns = (rows: Module[][]) => {
   let gridUnits = 1
 
   let finished = false
-  // console.log({ rows })
 
   while (!finished) {
     // let modules = rows[rowIndex].slice(bookStart, bookEnd)
-    // console.log(modules)
     finished = true
     // let gridUnits = rows[rowIndex][]
 
