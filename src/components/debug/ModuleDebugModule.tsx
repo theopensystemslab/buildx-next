@@ -1,10 +1,9 @@
 import { Module } from "@/data/module"
 import defaultMaterial from "@/materials/defaultMaterial"
-import { isMesh, pipeLog, useGLTF } from "@/utils"
+import { isMesh, useGLTF } from "@/utils"
 import { values } from "fp-ts-std/ReadonlyRecord"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex, reduce } from "fp-ts/lib/ReadonlyArray"
-import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
 import { Mesh } from "three"
 

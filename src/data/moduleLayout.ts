@@ -10,6 +10,8 @@ export interface StructuredDna {
   positionType: "END" | "MID"
   sectionType: string
   gridType: string
+  gridUnits: number
+  stairsType: string
   internalLayoutType: string
   windowTypeSide1: string
   windowTypeSide2: string
@@ -23,18 +25,23 @@ export const parseDna = (dna: string): StructuredDna => {
   const levelLetter = chunks[2]?.[0]
   const typeLetter = chunks[1]?.[0]?.toUpperCase()
   const sectionType = chunks[0] || "S1"
-  const gridType = chunks[5] || "GRD1"
-  const internalLayoutType = chunks[4] || "L0"
-  const windowTypeSide1 = chunks[6] || "SIDE0"
-  const windowTypeSide2 = chunks[7] || "SIDE0"
-  const windowTypeEnd = chunks[8] || "END0"
-  const windowTypeTop = chunks[9] || "TOP0"
+  const gridType = chunks[3] || "GRID1"
+  const gridUnits = Number(chunks[4]) || 1
+  const stairsType = chunks[5]
+  const internalLayoutType = chunks[6] || "L0"
+  const windowTypeSide1 = chunks[7] || "SIDE0"
+  const windowTypeSide2 = chunks[8] || "SIDE0"
+  const windowTypeEnd = chunks[9] || "END0"
+  const windowTypeTop = chunks[10] || "TOP0"
+
   return {
     positionType: typeLetter === "E" ? "END" : "MID",
     level: ["F", "G", "M", "T", "R"].indexOf(levelLetter),
     levelType,
     sectionType,
     gridType,
+    gridUnits,
+    stairsType,
     internalLayoutType,
     windowTypeSide1,
     windowTypeSide2,

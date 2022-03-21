@@ -4,16 +4,16 @@ import { flatten, map, reduce } from "fp-ts/lib/ReadonlyArray"
 import { Polygon, Position } from "geojson"
 import { useMemo } from "react"
 import { BufferAttribute, BufferGeometry, LineBasicMaterial } from "three"
-import { useSnapshot } from "valtio"
-import { store } from "."
+import { proxy, useSnapshot } from "valtio"
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "../CONSTANTS"
-import { degreeToMeters } from "../data/mapPolygon"
 import { SSR } from "../utils"
 
 const emptyMapPolygon: Polygon = {
   coordinates: [],
   type: "Polygon",
 }
+
+const mapPolygon = proxy(emptyMapPolygon)
 
 export const initialMapPolygon = ((): Polygon => {
   if (SSR) return emptyMapPolygon
@@ -27,7 +27,7 @@ export const initialMapPolygon = ((): Polygon => {
 })()
 
 export const setMapPolygon = (mapPolygon: Polygon) => {
-  store.mapPolygon = mapPolygon
+  mapPolygon = mapPolygon
 }
 
 export const getMapPolygonCentre = (polygon: Polygon) =>
@@ -61,9 +61,7 @@ export const polygonToCoordinates = (polygon: Polygon) => {
 // return { center, bound, points };
 
 export const useMapBoundary = () => {
-  const { mapPolygon } = useSnapshot(store) as unknown as {
-    mapPolygon: Polygon
-  }
+  const { coordinates, type } = useSnapshot(mapPolygon)
 
   const material = useMemo(
     () =>
@@ -76,7 +74,7 @@ export const useMapBoundary = () => {
 
   const geometry = useMemo(() => {
     const geometry = new BufferGeometry()
-    if (mapPolygon.coordinates.length > 0) {
+    if (coordinates.length > 0) {
       geometry.setAttribute(
         "position",
         new BufferAttribute(
@@ -86,7 +84,7 @@ export const useMapBoundary = () => {
       )
     }
     return geometry
-  }, [mapPolygon])
+  }, [coordinates, type])
 
   return [geometry, material] as const
 }

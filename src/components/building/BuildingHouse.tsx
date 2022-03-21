@@ -1,12 +1,12 @@
 import { House } from "@/data/house"
-import { BuildingRow, useHouseRows } from "@/stores/housesRows"
+import { useHouseRows } from "@/stores/derivations"
 import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { flatten } from "fp-ts/lib/ReadonlyArray"
-import { Fragment, useEffect, useRef } from "react"
+import { Fragment, Suspense, useRef } from "react"
 import { Group } from "three"
 import SiteHouseModule from "../site/SiteHouseModule"
-import StretchHandles from "./StretchHandles"
+import Stretch from "./Stretch"
 
 type Props = {
   house: House
@@ -21,17 +21,6 @@ const BuildingHouse = (props: Props) => {
   } = house
 
   const rows = useHouseRows(house.id)
-
-  // const onDrag = useUpdatePosition(house.id, groupRef)
-
-  // useCameraFocus(house)
-
-  // const bind = useGesture<{
-  //   drag: ThreeEvent<PointerEvent>
-  //   hover: ThreeEvent<PointerEvent>
-  // }>({
-  //   onDrag,
-  // })
 
   const gltfs = pipe(
     rows,
@@ -99,7 +88,9 @@ const BuildingHouse = (props: Props) => {
       >
         {modules}
       </group>
-      <StretchHandles house={house} row0={rows[0] as BuildingRow} />
+      <Suspense fallback={null}>
+        <Stretch />
+      </Suspense>
     </Fragment>
   )
 }

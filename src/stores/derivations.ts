@@ -184,3 +184,13 @@ export const useHouseRows = (houseId: string) => {
   const snap = useSnapshot(housesRows)
   return snap.housesRows[houseId]
 }
+
+export const useVanillaModules = (buildingId: string) => {
+  const snap = useSnapshot(housesRows)
+  return pipe(
+    snap.housesRows[buildingId],
+    mapRA(({ vanillaModules: { MID } }) => MID)
+  )
+}
+
+export default housesRows

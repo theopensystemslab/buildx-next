@@ -1,6 +1,6 @@
 import { House } from "@/data/house"
 import { useUpdatePosition } from "@/stores/houses"
-import { useHouseRows } from "@/stores/housesRows"
+import { useHouseRows } from "@/stores/derivations"
 import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
 import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
