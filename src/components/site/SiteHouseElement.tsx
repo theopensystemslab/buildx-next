@@ -1,3 +1,4 @@
+import { useSystemsData } from "@/contexts/SystemsData"
 import { House } from "@/data/house"
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
@@ -8,7 +9,6 @@ import scope, {
   ModuleScopeItem,
   ScopeTypeEnum,
 } from "@/stores/scope"
-import { useSystemsData } from "@/stores/systems"
 import { all, any, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"

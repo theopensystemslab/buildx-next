@@ -1,6 +1,7 @@
 import Sidebar from "@/components/ui/Sidebar"
+import { useSystemsData } from "@/contexts/SystemsData"
+import { BuildSystem, buildSystems } from "@/data/buildSystem"
 import houses from "@/stores/houses"
-import { BuildSystem, buildSystems, useSystemsData } from "@/stores/systems"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/ReadonlyRecord"

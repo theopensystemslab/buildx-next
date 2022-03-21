@@ -1,16 +1,8 @@
-import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
-import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
-import { filterCompatibleModules } from "@/data/module"
-import houses, { useHouse } from "@/stores/houses"
-import { useHouseRows } from "@/stores/derivations"
+import { useHouse } from "@/stores/houses"
 import scope, { ScopeTypeEnum } from "@/stores/scope"
-import { useSystemsData } from "@/stores/systems"
-import { pipe } from "fp-ts/lib/function"
-import { map, uniq } from "fp-ts/lib/ReadonlyArray"
-import { Eq } from "fp-ts/lib/string"
 import React from "react"
 
 const ModuleContextMenu = (props: ContextMenuProps) => {
@@ -23,31 +15,31 @@ const ModuleContextMenu = (props: ContextMenuProps) => {
 
   const house = useHouse(houseId)
 
-  const { houseTypes, modules: allModules } = useSystemsData()
+  // const { houseTypes, modules: allModules } = useSystemsData()
 
-  const houseRows = useHouseRows(houseId)
+  // const houseRows = useHouseRows(houseId)
 
-  const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
+  // const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
 
-  const resetModule = () => {
-    if (!houseType) return
-    houses[houseId].dna = houseType.dna as string[]
-  }
+  // const resetModule = () => {
+  //   if (!houseType) return
+  //   houses[houseId].dna = houseType.dna as string[]
+  // }
 
-  const systemModules = allModules.filter(
-    (m) => m.systemId === houseRows[0].row[0].module.systemId
-  )
+  // const systemModules = allModules.filter(
+  //   (m) => m.systemId === houseRows[0].row[0].module.systemId
+  // )
 
-  const thisModule = houseRows[rowIndex].row[gridIndex].module
+  // const thisModule = houseRows[rowIndex].row[gridIndex].module
 
-  const moduleOptions = pipe(
-    systemModules,
-    filterCompatibleModules(["sectionType", "positionType", "levelType"])(
-      thisModule
-    ),
-    map((x) => x.dna),
-    uniq(Eq)
-  )
+  // const moduleOptions = pipe(
+  //   systemModules,
+  //   filterCompatibleModules(["sectionType", "positionType", "levelType"])(
+  //     thisModule
+  //   ),
+  //   map((x) => x.dna),
+  //   uniq(Eq)
+  // )
 
   const changeModule = (selectedDna: string) => {
     // const next = pipe(
@@ -64,13 +56,13 @@ const ModuleContextMenu = (props: ContextMenuProps) => {
   return (
     <ContextMenu {...props}>
       <ContextMenuHeading>Module</ContextMenuHeading>
-      <ContextMenuButton onClick={resetModule}>Reset Module</ContextMenuButton>
+      {/* <ContextMenuButton onClick={resetModule}>Reset Module</ContextMenuButton> */}
       <ContextMenuNested label="Switch Module">
-        <Radio
+        {/* <Radio
           options={moduleOptions.map((value) => ({ label: value, value }))}
           selected={thisModule.dna}
           onChange={changeModule}
-        />
+        /> */}
       </ContextMenuNested>
     </ContextMenu>
   )

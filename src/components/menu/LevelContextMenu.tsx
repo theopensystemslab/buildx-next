@@ -6,9 +6,7 @@ import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { filterCompatibleModules, Module } from "@/data/module"
 import { ModuleLayoutItem } from "@/data/moduleLayout"
 import houses from "@/stores/houses"
-import { useHouseRows } from "@/stores/derivations"
 import scope, { ScopeTypeEnum } from "@/stores/scope"
-import { useSystemsData } from "@/stores/systems"
 import { filterMap, head, map, sort, uniq } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { none, some, toNullable } from "fp-ts/lib/Option"
@@ -30,14 +28,14 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
   }
 
   const { houseId, rowIndex } = scope.selected[0]
-  const { modules: allModules } = useSystemsData()
-  const houseRows = useHouseRows(houseId)
+  // const { modules: allModules } = useSystemsData()
+  // const houseRows = useHouseRows(houseId)
 
-  const systemModules = allModules.filter(
-    (m) => m.systemId === houseRows[0].row[0].module.systemId
-  )
+  // const systemModules = allModules.filter(
+  //   (m) => m.systemId === houseRows[0].row[0].module.systemId
+  // )
 
-  const levelModule = houseRows[rowIndex].row[0].module
+  // const levelModule = houseRows[rowIndex].row[0].module
 
   const heading = `Level ${scope.selected[0].rowIndex}`
 
@@ -113,16 +111,16 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
     // )
   }
 
-  const levelTypeOptions = pipe(
-    systemModules,
-    filterCompatibleModules(["sectionType", "positionType", "level"])(
-      levelModule
-    ),
-    map((x) => x.structuredDna.levelType),
-    uniq(Eq)
-  )
+  // const levelTypeOptions = pipe(
+  //   systemModules,
+  //   filterCompatibleModules(["sectionType", "positionType", "level"])(
+  //     levelModule
+  //   ),
+  //   map((x) => x.structuredDna.levelType),
+  //   uniq(Eq)
+  // )
 
-  const levelType = levelModule.structuredDna.levelType
+  // const levelType = levelModule.structuredDna.levelType
 
   const changeLevelType = (newLevelType: any) => {
     // const next = pipe(
@@ -184,11 +182,11 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
       <ContextMenuButton onClick={addFloor}>Add floor above</ContextMenuButton>
       <ContextMenuButton onClick={removeFloor}>Remove floor</ContextMenuButton>
       <ContextMenuNested label="Change Level Type">
-        <Radio
+        {/* <Radio
           options={levelTypeOptions.map((value) => ({ label: value, value }))}
           selected={levelType}
           onChange={changeLevelType}
-        />
+        /> */}
       </ContextMenuNested>
     </ContextMenu>
   )

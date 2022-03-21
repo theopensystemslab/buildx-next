@@ -1,7 +1,9 @@
 import { RaycasterLayer } from "@/CONSTANTS"
+import { SystemsDataContext } from "@/contexts/SystemsData"
 import { setPointer } from "@/stores/context"
 import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
+import { useContextBridge } from "@react-three/drei"
 // import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
 import React, { PropsWithChildren, Suspense } from "react"
@@ -19,6 +21,7 @@ type Props = PropsWithChildren<{}>
 const SiteThreeInit = (props: Props) => {
   const { children } = props
   const { orthographic, shadows } = useSettings()
+  const ContextBridge = useContextBridge(SystemsDataContext)
 
   // Re-initialize canvas if settings like orthographic camera are changed
   // const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)
@@ -78,7 +81,7 @@ const SiteThreeInit = (props: Props) => {
       {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
       <Effects />
       <SiteCamControls />
-      <Suspense fallback={null}>{children}</Suspense>
+      <ContextBridge>{children}</ContextBridge>
     </Canvas>
   )
 }

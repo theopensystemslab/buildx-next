@@ -17,6 +17,15 @@ import { getElements } from "./element"
 import type { WindowType } from "./windowType"
 import { getWindowTypes } from "./windowType"
 
+// oldest
+// airtableId: "appXYQYWjUiAT1Btm",
+
+// tom
+// airtableId: "appgVlfhT0anmqi5a",
+
+// clayton
+// airtableId: "app7ApkBWMj8Z8gdV",
+
 export interface System {
   id: string
   name: string

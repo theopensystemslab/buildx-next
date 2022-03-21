@@ -1,17 +1,8 @@
 import { setCameraEnabled } from "@/stores/camera"
 import context, { useContext } from "@/stores/context"
-import {
-  modulesToRows,
-  rowsToColumns,
-  useBuildingTransforms,
-  useHouseModules,
-} from "@/stores/houses"
-import { useHouseRows, useVanillaModules } from "@/stores/derivations"
-import { filterRA, mapRA } from "@/utils"
+import { modulesToRows, rowsToColumns, useHouseModules } from "@/stores/houses"
 import { useThree } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
-import { pipe } from "fp-ts/lib/function"
-import { filterWithIndex } from "fp-ts/lib/ReadonlyArray"
 import React, { Fragment, useRef } from "react"
 import { DoubleSide, Mesh } from "three"
 
@@ -37,7 +28,7 @@ const StretchHandle = () => {
 
   // const houseRows = useHouseRows(buildingId!)
 
-  const vanillaModules = useVanillaModules(buildingId)
+  // const vanillaModules = useVanillaModules(buildingId)
 
   const bind = useDrag(({ first, last }) => {
     if (!ref.current) return

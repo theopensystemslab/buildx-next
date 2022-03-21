@@ -1,7 +1,7 @@
+import { useSystemsData } from "@/contexts/SystemsData"
 import context, { useContext } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import scope, { HouseScope, ScopeTypeEnum } from "@/stores/scope"
-import { useSystemsData } from "@/stores/systems"
 import React, { Fragment, useState } from "react"
 import ContextMenu, { ContextMenuProps } from "../ui/ContextMenu"
 import ContextMenuButton from "../ui/ContextMenuButton"

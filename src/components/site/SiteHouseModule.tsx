@@ -1,6 +1,6 @@
+import { useSystemsData } from "@/contexts/SystemsData"
 import { House } from "@/data/house"
 import { Module } from "@/data/module"
-import { useSystemsData } from "@/stores/systems"
 import { fuzzyMatch, GltfT, isMesh } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"
