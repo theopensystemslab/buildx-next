@@ -8,12 +8,12 @@ type Props = {
   house: House
   columnZ: number
   columnIndex: number
-  mirror: boolean
+  mirror?: boolean
   gridGroups: readonly PositionedRow[]
 }
 
 const BuildingHouseColumn = (props: Props) => {
-  const { house, columnIndex, columnZ, gridGroups, mirror } = props
+  const { house, columnIndex, columnZ, gridGroups, mirror = false } = props
   const levels = pipe(
     gridGroups,
     mapRA(({ levelIndex, modules, y }) =>

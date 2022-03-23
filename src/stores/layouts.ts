@@ -6,7 +6,7 @@ import { reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useBuildingRows } from "./houses"
 
-type PositionedModule = {
+export type PositionedModule = {
   module: LoadedModule
   z: number
 }
@@ -103,7 +103,7 @@ export const useColumnLayout = (buildingId: string) => {
     mapRA((row) =>
       pipe(
         row,
-        // group by grid type...
+        // group by grid type
         reduceRA(
           { prev: null, acc: [] },
           (
@@ -129,11 +129,9 @@ export const useColumnLayout = (buildingId: string) => {
 
   const legit = pipe(
     columns,
-    // for each column
-    mapRA((x) =>
+    mapRA((column) =>
       pipe(
-        x,
-        // row each grid type grouping
+        column,
         mapRA((y) =>
           pipe(
             y,
@@ -157,12 +155,6 @@ export const useColumnLayout = (buildingId: string) => {
   )
 
   if (!legit) throw new Error("not legit")
-
-  // this is ok but
-  // derive from positioned rows first
-  // then don't need to re-calc for grid group local z
-
-  // no that won't work, row positions are absolute
 
   return pipe(
     columns,

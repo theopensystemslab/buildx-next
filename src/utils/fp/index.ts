@@ -16,6 +16,7 @@ export {
   map as mapRA,
   mapWithIndex as mapWithIndexRA,
   reduce as reduceRA,
+  reduceWithIndex as reduceWithIndexRA,
 } from "fp-ts/lib/ReadonlyArray"
 export {
   chunksOf as chunksOfRNA,

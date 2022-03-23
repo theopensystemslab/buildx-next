@@ -1,16 +1,27 @@
+import { House } from "@/data/house"
 import { setCameraEnabled } from "@/stores/camera"
 import context, { useContext } from "@/stores/context"
 import { modulesToRows, useBuildingModules } from "@/stores/houses"
+import { useStretchedColumns } from "@/stores/stretch"
+import { mapRA } from "@/utils"
 import { useThree } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
+import { pipe } from "fp-ts/lib/function"
 import React, { Fragment, useRef } from "react"
 import { DoubleSide, Mesh } from "three"
+import BuildingHouseColumn from "./BuildingHouseColumn"
 
-const StretchHandle = () => {
-  const { buildingId } = useContext()
-  if (!buildingId) throw new Error("No buildingId in stretch")
+type Props = {
+  house: House
+}
+
+const StretchHandle = (props: Props) => {
+  const { house } = props
+
   const ref = useRef<Mesh>()
   const invalidate = useThree((three) => three.invalidate)
+
+  const [newDeltaZ, extraCols] = useStretchedColumns(house.id, true)
 
   // const { deleteRow } = useBuildingTransforms()
 
@@ -32,32 +43,48 @@ const StretchHandle = () => {
 
   const bind = useDrag(({ first, last }) => {
     if (!ref.current) return
-    const [, dz] = context.pointer
+    const [, pz] = context.pointer
     if (first) {
       setCameraEnabled(false)
-      dragging = true
-      z0 = dz
+      z0 = pz
     }
-    ref.current.position.z = dz
-    // if (dz - z0 > )
-    invalidate()
+    ref.current.position.z = pz
+
+    newDeltaZ(pz - z0)
 
     if (last) {
       setCameraEnabled(true)
-      dragging = false
     }
+
+    invalidate()
   })
 
   return (
-    <mesh
-      ref={ref}
-      rotation-x={-Math.PI / 2}
-      {...(bind() as any)}
-      // onClick={() => deleteRow(0)}
-    >
-      <circleBufferGeometry />
-      <meshBasicMaterial color="steelblue" side={DoubleSide} />
-    </mesh>
+    <Fragment>
+      <mesh
+        ref={ref}
+        rotation-x={-Math.PI / 2}
+        {...(bind() as any)}
+        // onClick={() => deleteRow(0)}
+      >
+        <circleBufferGeometry />
+        <meshBasicMaterial color="steelblue" side={DoubleSide} />
+      </mesh>
+      <group>
+        {pipe(
+          extraCols,
+          mapRA(({ columnIndex, gridGroups, z }) => (
+            <BuildingHouseColumn
+              key={columnIndex}
+              columnIndex={columnIndex}
+              gridGroups={gridGroups}
+              columnZ={z}
+              house={house}
+            />
+          ))
+        )}
+      </group>
+    </Fragment>
   )
 }
 
@@ -83,17 +110,14 @@ const StretchHandle = () => {
 //   return null
 // }
 
-const Stretch = () => {
-  const { buildingId } = useContext()
-  if (!buildingId) throw new Error("No buildingId in stretch")
-  const modules = useBuildingModules(buildingId)
-  const rows = modulesToRows(modules)
-  // const cols = rowsToColumns(rows)
+const Stretch = (props: Props) => {
+  const { house } = props
 
   return (
     <Fragment>
-      {/* <StretchHandle />
-      <EndModules />
+      <StretchHandle house={house} />
+      {/* <group>{extraCols}</group> */}
+      {/* <EndModules />
       <ExtraModules /> */}
     </Fragment>
   )

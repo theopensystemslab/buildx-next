@@ -1,7 +1,7 @@
 import { House as HouseT } from "@/data/house"
 import context, { useContext } from "@/stores/context"
 import { useHouse, useHouses } from "@/stores/houses"
-import scope, { ScopeTypeEnum, setScopeType } from "@/stores/scope"
+import { ScopeTypeEnum, setScopeType } from "@/stores/scope"
 import { mapRR } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
