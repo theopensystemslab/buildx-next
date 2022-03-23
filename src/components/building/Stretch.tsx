@@ -1,6 +1,6 @@
 import { setCameraEnabled } from "@/stores/camera"
 import context, { useContext } from "@/stores/context"
-import { modulesToRows, useHouseModules } from "@/stores/houses"
+import { modulesToRows, useBuildingModules } from "@/stores/houses"
 import { useThree } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import React, { Fragment, useRef } from "react"
@@ -86,7 +86,7 @@ const StretchHandle = () => {
 const Stretch = () => {
   const { buildingId } = useContext()
   if (!buildingId) throw new Error("No buildingId in stretch")
-  const modules = useHouseModules(buildingId)
+  const modules = useBuildingModules(buildingId)
   const rows = modulesToRows(modules)
   // const cols = rowsToColumns(rows)
 

@@ -1,16 +1,10 @@
 import { House } from "@/data/house"
-import {
-  useBuildingColumns,
-  useHouseRows,
-  usePartitionedRows,
-  useRowsWithPositions,
-  useUpdatePosition,
-} from "@/stores/houses"
-import { mapRA, mapWithIndexRA, useGLTF } from "@/utils"
+import { useUpdatePosition } from "@/stores/houses"
+import { useRowLayout } from "@/stores/layouts"
+import { mapWithIndexRA } from "@/utils"
 import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { flatten } from "fp-ts/lib/ReadonlyArray"
 import { useRef } from "react"
 import { Group } from "three"
 import SiteHouseModule from "./SiteHouseModule"
@@ -27,12 +21,6 @@ const SiteHouse = (props: Props) => {
     position: [x, z],
   } = house
 
-  // const rows = useRowsWithPositions(house.id)
-
-  const { rows } = usePartitionedRows(house.id)
-  const foo = useBuildingColumns(house.id)
-  // console.log(rows, rows2)
-
   const onDrag = useUpdatePosition(house.id, groupRef)
 
   const bind = useGesture<{
@@ -42,36 +30,19 @@ const SiteHouse = (props: Props) => {
     onDrag,
   })
 
-  const gltfs = pipe(
-    rows,
-    mapRA((row) =>
-      pipe(
-        row.row,
-        mapRA((r) => r.module.modelUrl)
-      )
-    ),
-    flatten,
-    (modelUrls) => useGLTF(modelUrls as string[])
-  )
-
-  // store moduleIndex in the rows store maybe?
-  let moduleIndex = -1
-
-  const modules = pipe(
-    rows,
-    mapWithIndexRA((rowIndex, { row, y }) => {
+  const rows = pipe(
+    useRowLayout(house.id),
+    mapWithIndexRA((rowIndex, { modules, y }) => {
       const children = pipe(
-        row,
+        modules,
         mapWithIndexRA((gridIndex, { module, z }) => {
-          moduleIndex++
-          const mirror = gridIndex === row.length - 1
+          const mirror = gridIndex === modules.length - 1
           return (
             <SiteHouseModule
               key={`${rowIndex},${gridIndex}`}
               module={module}
               rowIndex={rowIndex}
               gridIndex={gridIndex}
-              gltf={gltfs[moduleIndex]}
               house={house}
               position={[
                 0,
@@ -93,11 +64,10 @@ const SiteHouse = (props: Props) => {
       )
     })
   )
-  moduleIndex = -1
 
   return (
     <group ref={groupRef} {...(bind() as any)}>
-      {modules}
+      {rows}
     </group>
   )
 }

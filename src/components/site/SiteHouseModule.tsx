@@ -1,7 +1,7 @@
 import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { House } from "@/data/house"
-import { Module } from "@/data/module"
-import { fuzzyMatch, GltfT, isMesh } from "@/utils"
+import { LoadedModule } from "@/data/module"
+import { fuzzyMatch, isMesh } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"
 import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
@@ -19,15 +19,14 @@ import { mergeBufferGeometries } from "three-stdlib"
 import SiteHouseElement from "./SiteHouseElement"
 
 type Props = GroupProps & {
-  module: Module
+  module: LoadedModule
   rowIndex: number
   gridIndex: number
-  gltf: GltfT
   house: House
 }
 
 const SiteHouseModule = (props: Props) => {
-  const { module, rowIndex, gltf, house, gridIndex, ...groupProps } = props
+  const { module, rowIndex, house, gridIndex, ...groupProps } = props
 
   const { elements } = useBuildSystemsData()
 
@@ -36,6 +35,8 @@ const SiteHouseModule = (props: Props) => {
       keys: ["ifc4Variable"],
       threshold: 0.5,
     })(nodeType)
+
+  const gltf = module.gltf
 
   const meshes = pipe(
     gltf.nodes,

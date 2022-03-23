@@ -1,11 +1,11 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
 import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { Houses } from "@/data/house"
-import { Module } from "@/data/module"
-import { mapRA, snapToGrid, SSR } from "@/utils"
+import { Module, LoadedModule } from "@/data/module"
+import { mapO, mapRA, reduceRA, snapToGrid, SSR, useGLTF } from "@/utils"
 import { ThreeEvent, useThree } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
-import { left, right } from "fp-ts/lib/Either"
+import { transpose } from "fp-ts-std/ReadonlyArray"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
 import {
@@ -13,11 +13,7 @@ import {
   filterMapWithIndex,
   filterWithIndex,
   findFirst,
-  flatten,
-  partition,
-  partitionMap,
   reduceWithIndex,
-  replicate,
 } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { MutableRefObject, useCallback, useEffect } from "react"
@@ -117,7 +113,7 @@ export const useBuildingTransforms = () => {
     throw new Error("useStretchTransforms called with null buildingId")
 
   const building = houses[buildingId]
-  const rows = useHouseRows(buildingId)
+  const rows = useBuildingRows(buildingId)
 
   // const rowsWithUnits = pipe(
   //   rows,
@@ -199,11 +195,11 @@ export const useBuildingTransforms = () => {
   //    i : dna -> dna // del col
 }
 
-export const useHouseModules = (houseId: string) => {
+export const useBuildingModules = (buildingId: string) => {
   const { modules: sysModules } = useBuildSystemsData()
-  const house = useSnapshot(houses)[houseId]
+  const house = useSnapshot(houses)[buildingId]
 
-  return pipe(
+  const modules = pipe(
     house.dna,
     filterMap((dna) =>
       pipe(
@@ -214,9 +210,16 @@ export const useHouseModules = (houseId: string) => {
       )
     )
   )
+  const gltfs = useGLTF(modules.map(({ modelUrl }) => modelUrl))
+  return modules.map(({ modelUrl, ...rest }, i) => ({
+    ...rest,
+    gltf: gltfs[i],
+  }))
 }
 
-export const modulesToRows = (modules: readonly Module[]): Module[][] => {
+export const modulesToRows = (
+  modules: readonly LoadedModule[]
+): LoadedModule[][] => {
   const jumpIndices = pipe(
     modules,
     filterMapWithIndex((i, m) =>
@@ -227,169 +230,23 @@ export const modulesToRows = (modules: readonly Module[]): Module[][] => {
 
   return pipe(
     modules,
-    reduceWithIndex([], (i, modules: Module[][], module: Module) => {
-      return jumpIndices.includes(i)
-        ? [...modules, [module]]
-        : produce((draft) => void draft[draft.length - 1].push(module))(modules)
-    })
-  )
-}
-
-export const useHouseRows = (buildingId: string) => {
-  const houseModules = useHouseModules(buildingId)
-
-  return modulesToRows(houseModules)
-}
-
-export const useRowsWithPositions = (buildingId: string) => {
-  const rows = useHouseRows(buildingId)
-
-  return pipe(
-    rows,
-
-    mapRA((row) =>
-      pipe(
-        row,
-        reduceWithIndex(
-          [],
-          (
-            i,
-            prevs: {
-              module: Module
-              z: number
-            }[],
-            module
-          ) => {
-            const isFirst: boolean = i === 0
-
-            const z = isFirst
-              ? module.length / 2
-              : prevs[i - 1].z +
-                prevs[i - 1].module.length / 2 +
-                module.length / 2
-
-            return [
-              ...prevs,
-              {
-                module,
-                z,
-              },
-            ]
-          }
-        )
-      )
-    ),
     reduceWithIndex(
       [],
-      (
-        i,
-        b: {
-          row: { module: Module; z: number }[]
-          y: number
-        }[],
-        row
-      ) => {
-        const isFirst = i === 0
-        return [
-          ...b,
-          {
-            row,
-            y: isFirst
-              ? -row[0].module.height
-              : i === 1
-              ? 0
-              : b[i - 1].y + row[0].module.height,
-          },
-        ]
+      (moduleIndex, modules: LoadedModule[][], module: LoadedModule) => {
+        return jumpIndices.includes(moduleIndex)
+          ? [...modules, [{ ...module, moduleIndex }]]
+          : produce(
+              (draft) =>
+                void draft[draft.length - 1].push({ ...module, moduleIndex })
+            )(modules)
       }
     )
   )
 }
 
-export const usePartitionedRows = (buildingId: string) => {
-  const rows = useRowsWithPositions(buildingId)
-  const rows2 = pipe(
-    rows,
-    mapRA(({ row, y }) =>
-      pipe(
-        row,
-        partitionMap(({ module, z }) =>
-          module.structuredDna.positionType === "END"
-            ? left({ module, z })
-            : right({ module, z })
-        ),
-        (row) => ({ row, y })
-      )
-    )
-  )
-
-  // could return like
-  // { front, mid, back }
-
-  // could compute length by grid units
-  // or split into chunks of grid units
-
-  return {
-    rows,
-    rows2,
-  }
+export const useBuildingRows = (buildingId: string) => {
+  const houseModules = useBuildingModules(buildingId)
+  return modulesToRows(houseModules)
 }
-
-export const useBuildingColumns = (buildingId: string) => {
-  const rows = useHouseRows(buildingId)
-
-  // duplicate each multi-grid-unit module for its units
-
-  const foo = pipe(
-    rows,
-    mapRA((row) =>
-      pipe(
-        row,
-        mapRA((module) => replicate(module.structuredDna.gridUnits, module))
-        // add realIndices? position? realIndex?
-        // flatten
-      )
-    )
-  )
-
-  console.log({ foo })
-
-  const findMeAColumn = () => {}
-
-  // let [y, x] = [0, 0]
-
-  // while (true) {
-  //   if (!rows?.[y]) {
-  //     break
-  //   }
-  //   console.log(rows[y][x].structuredDna.grid)
-  //   y++
-  // }
-}
-
-// export const rowsToColumns = (rows: Module[][]) => {
-//   let bookStart = 0,
-//     bookEnd = 0
-
-//   let rowIndex = 0
-//   let gridUnits = 1
-
-//   let finished = false
-
-//   while (!finished) {
-//     // let modules = rows[rowIndex].slice(bookStart, bookEnd)
-//     finished = true
-//     // let gridUnits = rows[rowIndex][]
-
-//     //   // const row = rows[rowIndex]
-//     //   // let gridIndex = 0;
-//     //   // while (gridIndex < row.length) {
-
-//     //   // }
-//     //   rowIndex++
-//   }
-
-//   return []
-// }
 
 export default houses

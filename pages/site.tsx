@@ -35,11 +35,9 @@ const SiteIndexPage = () => {
           <SiteThreeInit>
             <SiteThreeApp />
           </SiteThreeInit>
+          <SiteContextMenu />
         </BuildSystemsDataProvider>
       </Layout>
-      <Suspense fallback={<Loader />}>
-        <SiteContextMenu />
-      </Suspense>
     </Fragment>
   )
 }
