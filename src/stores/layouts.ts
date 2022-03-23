@@ -20,6 +20,14 @@ export type PositionedRow = {
 
 export type RowLayout = Array<PositionedRow>
 
+export type PositionedColumn = {
+  gridGroups: Readonly<Array<PositionedRow>>
+  z: number
+  columnIndex: number
+}
+
+export type ColumnLayout = Array<PositionedColumn>
+
 export const useRowLayout = (buildingId: string): RowLayout =>
   pipe(
     useBuildingRows(buildingId),
@@ -62,16 +70,18 @@ export const useRowLayout = (buildingId: string): RowLayout =>
       ) => {
         const levelType = row[0].module.structuredDna.levelType
         const levelLetter = levelType[0]
+        const y =
+          levelLetter === "F"
+            ? -row[0].module.height
+            : levelLetter === "G"
+            ? 0
+            : b[i - 1].y + row[0].module.height
+
         return [
           ...b,
           {
             modules: row,
-            y:
-              levelLetter === "F"
-                ? -row[0].module.height
-                : levelLetter === "G"
-                ? 0
-                : b[i - 1].y + row[0].module.height,
+            y,
             levelIndex: i,
             levelType: row[0].module.structuredDna.levelType,
           },
@@ -79,14 +89,6 @@ export const useRowLayout = (buildingId: string): RowLayout =>
       }
     )
   )
-
-export type PositionedColumn = {
-  gridGroups: Readonly<Array<PositionedRow>>
-  z: number
-  columnIndex: number
-}
-
-export type ColumnLayout = Array<PositionedColumn>
 
 export const useColumnLayout = (buildingId: string) => {
   // think you actually want to find
@@ -188,6 +190,13 @@ export const useColumnLayout = (buildingId: string) => {
                   const levelType = modules[0].structuredDna.levelType
                   const levelLetter = levelType[0]
                   const height = modules[0].height
+                  const y =
+                    levelLetter === "F"
+                      ? -height
+                      : levelLetter === "G"
+                      ? 0
+                      : positionedRows[levelIndex - 1].y + height
+
                   return [
                     ...positionedRows,
                     {
@@ -220,12 +229,7 @@ export const useColumnLayout = (buildingId: string) => {
                       ),
                       levelIndex,
                       levelType,
-                      y:
-                        levelLetter === "F"
-                          ? -height
-                          : levelLetter === "G"
-                          ? 0
-                          : positionedRows[levelIndex - 1].y + height,
+                      y,
                     },
                   ]
                 }
