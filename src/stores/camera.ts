@@ -1,9 +1,7 @@
-import { House } from "@/data/house"
 import CameraControls from "camera-controls"
 import { useEffect } from "react"
 import { Vector3 } from "three"
 import { proxy } from "valtio"
-import { useContext } from "./context"
 import { useFocusedBuilding } from "./houses"
 
 type CameraProxy = {

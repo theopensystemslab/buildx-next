@@ -1,8 +1,6 @@
 import { proxy, useSnapshot } from "valtio"
-import scope from "./scope"
 
 const settings = proxy({
-  scope,
   orthographic: false,
   shadows: false,
 })

@@ -1,8 +1,8 @@
 import { MutableRefObject } from "react"
 import { Object3D } from "three"
-import { proxy, ref, useSnapshot } from "valtio"
-import scope, { Scope } from "./scope"
+import { proxy, useSnapshot } from "valtio"
 import * as z from "zod"
+import scope, { Scope } from "./scope"
 
 export const EditModeEnum = z.enum(["MOVE", "ROTATE", "STRETCH"])
 export type EditMode = z.infer<typeof EditModeEnum>
