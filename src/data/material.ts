@@ -1,6 +1,6 @@
 import { getField, getAirtableEntries } from "./utils"
 import type { MeshStandardMaterial } from "three"
-import type { BuildSystem } from "@/store/systems"
+import type { BuildSystem } from "@/data/buildSystem"
 
 export interface Material {
   id: string

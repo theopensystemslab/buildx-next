@@ -1,5 +1,5 @@
+import { proxy, useSnapshot } from "valtio"
 import * as z from "zod"
-import { store } from "."
 
 export const ScopeTypeEnum = z.enum(["HOUSE", "LEVEL", "MODULE", "ELEMENT"])
 
@@ -12,7 +12,8 @@ export type HouseScope = {
 }
 
 export type ModuleScopeItem = {
-  moduleIndex: number
+  rowIndex: number
+  gridIndex: number
   houseId: string
 }
 
@@ -35,7 +36,7 @@ export type ElementScope = {
 
 export type LevelScopeItem = {
   houseId: string
-  levelModuleIndices: readonly number[]
+  rowIndex: number
 }
 
 export type LevelScope = {
@@ -44,14 +45,32 @@ export type LevelScope = {
   hovered: LevelScopeItem | null
 }
 
-export type Scope = HouseScope | ModuleScope | ElementScope | LevelScope
+export type Scope = HouseScope | LevelScope | ModuleScope | ElementScope
 
-export type FocusedHouseScope = ModuleScope | ElementScope
+export type FocusedHouseScope = LevelScope | ModuleScope | ElementScope
+
+const getInitScope = (): HouseScope => ({
+  type: ScopeTypeEnum.enum.HOUSE,
+  selected: [],
+  hovered: null,
+})
+
+const scope = proxy<Scope>(getInitScope())
 
 export const setScopeType = (type: ScopeType) => {
-  store.scope = {
-    type,
-    selected: [],
-    hovered: null,
-  }
+  scope.type = type
+  scope.selected = []
+  scope.hovered = null
 }
+
+export const useScopeType = () => {
+  const { type: scopeType } = useSnapshot(scope)
+  return scopeType
+}
+
+export const useSelected = () => {
+  const { selected } = useSnapshot(scope)
+  return selected
+}
+
+export default scope

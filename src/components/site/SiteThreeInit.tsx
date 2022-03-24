@@ -1,10 +1,13 @@
 import { RaycasterLayer } from "@/CONSTANTS"
-import { store, useMapBoundary } from "@/store"
+import { BuildSystemsDataContext } from "@/contexts/BuildSystemsData"
+import { setPointer } from "@/stores/context"
+import scope from "@/stores/scope"
+import { useSettings } from "@/stores/settings"
+import { useContextBridge } from "@react-three/drei"
+// import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
-import React, { useEffect, useState } from "react"
+import React, { PropsWithChildren, Suspense } from "react"
 import { BasicShadowMap } from "three"
-import { useSnapshot } from "valtio"
-import { Loader } from "../ui"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
 import RectangularGrid from "../ui-3d/RectangularGrid"
@@ -12,30 +15,33 @@ import Effects from "./Effects"
 import GroundCircle from "./GroundCircle"
 import ShadowPlane from "./ShadowPlane"
 import SiteCamControls from "./SiteCamControls"
-import SiteThreeApp from "./SiteThreeApp"
 
-const SiteThreeInit = () => {
-  const { orthographic, shadows } = useSnapshot(store)
+type Props = PropsWithChildren<{}>
+
+const SiteThreeInit = (props: Props) => {
+  const { children } = props
+  const { orthographic, shadows } = useSettings()
+  const ContextBridge = useContextBridge(BuildSystemsDataContext)
 
   // Re-initialize canvas if settings like orthographic camera are changed
-  const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)
+  // const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)
 
-  useEffect(() => {
-    setUnmountToReinitialize(true)
-    setTimeout(() => {
-      setUnmountToReinitialize(false)
-    }, 100)
-  }, [orthographic, setUnmountToReinitialize])
+  // useEffect(() => {
+  //   setUnmountToReinitialize(true)
+  //   setTimeout(() => {
+  //     setUnmountToReinitialize(false)
+  //   }, 100)
+  // }, [orthographic, setUnmountToReinitialize])
 
-  const [boundary, boundaryMaterial] = useMapBoundary()
+  // const [boundary, boundaryMaterial] = useMapBoundary()
 
-  if (unmountToReinitialize) {
-    return (
-      <div className="relative flex h-full w-full items-center justify-center">
-        <Loader />
-      </div>
-    )
-  }
+  // if (unmountToReinitialize) {
+  //   return (
+  //     <div className="relative flex h-full w-full items-center justify-center">
+  //       <Loader />
+  //     </div>
+  //   )
+  // }
   return (
     <Canvas
       frameloop="demand"
@@ -57,12 +63,14 @@ const SiteThreeInit = () => {
       />
       {/* </group> */}
       <HorizontalPlane
-        onChange={(xy) => void (store.horizontalPointer = xy)}
+        onChange={setPointer}
         onNearClick={() => {
-          store.scope.selected = []
-          store.contextMenu = null
+          scope.selected = []
+          // store.contextMenu = null
         }}
-        onNearHover={() => void (store.scope.hovered = null)}
+        onNearHover={() => {
+          scope.hovered = null
+        }}
       />
       {shadows && (
         <>
@@ -70,11 +78,10 @@ const SiteThreeInit = () => {
           <ShadowPlane />
         </>
       )}
-
-      {boundary && <lineLoop args={[boundary, boundaryMaterial]} />}
-      <SiteThreeApp />
-      <SiteCamControls />
+      {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
       <Effects />
+      <SiteCamControls />
+      <ContextBridge>{children}</ContextBridge>
     </Canvas>
   )
 }

@@ -2,7 +2,7 @@ import { filter, map } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { map as mapR, toArray } from "fp-ts/lib/Record"
 import { drop, flatten, last, mapAccum, range, repeat, slice } from "ramda"
-import type { Module } from "../data/module"
+import type { LoadedModule, Module } from "../data/module"
 
 export interface StructuredDna {
   level: number
@@ -10,6 +10,8 @@ export interface StructuredDna {
   positionType: "END" | "MID"
   sectionType: string
   gridType: string
+  gridUnits: number
+  stairsType: string
   internalLayoutType: string
   windowTypeSide1: string
   windowTypeSide2: string
@@ -22,19 +24,24 @@ export const parseDna = (dna: string): StructuredDna => {
   const levelType = chunks[2]
   const levelLetter = chunks[2]?.[0]
   const typeLetter = chunks[1]?.[0]?.toUpperCase()
-  const sectionType = chunks[0] || "S1"
-  const gridType = chunks[5] || "GRD1"
-  const internalLayoutType = chunks[4] || "L0"
-  const windowTypeSide1 = chunks[6] || "SIDE0"
-  const windowTypeSide2 = chunks[7] || "SIDE0"
-  const windowTypeEnd = chunks[8] || "END0"
-  const windowTypeTop = chunks[9] || "TOP0"
+  const sectionType = chunks[0] ?? "S1"
+  const gridType = chunks[3] ?? "GRID1"
+  const gridUnits = Number(chunks[4]) ?? 1
+  const stairsType = chunks[5] ?? "ST0"
+  const internalLayoutType = chunks[6] ?? "L0"
+  const windowTypeSide1 = chunks[7] ?? "SIDE0"
+  const windowTypeSide2 = chunks[8] ?? "SIDE0"
+  const windowTypeEnd = chunks[9] ?? "END0"
+  const windowTypeTop = chunks[10] ?? "TOP0"
+
   return {
     positionType: typeLetter === "E" ? "END" : "MID",
     level: ["F", "G", "M", "T", "R"].indexOf(levelLetter),
     levelType,
     sectionType,
     gridType,
+    gridUnits,
+    stairsType,
     internalLayoutType,
     windowTypeSide1,
     windowTypeSide2,

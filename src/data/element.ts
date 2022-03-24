@@ -1,7 +1,7 @@
 import type { Material } from "./material"
 import { getField, getAirtableEntries } from "./utils"
 import { includes } from "ramda"
-import { BuildSystem } from "@/store/systems"
+import { BuildSystem } from "@/data/buildSystem"
 
 export interface Element {
   id: string

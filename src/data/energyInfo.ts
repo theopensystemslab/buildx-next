@@ -1,4 +1,4 @@
-import type { BuildSystem } from "@/store/systems"
+import type { BuildSystem } from "@/data/buildSystem"
 import { find } from "ramda"
 import type { House } from "./house"
 import type { HouseType } from "./houseType"

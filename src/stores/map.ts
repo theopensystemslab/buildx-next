@@ -4,10 +4,8 @@ import { flatten, map, reduce } from "fp-ts/lib/ReadonlyArray"
 import { Polygon, Position } from "geojson"
 import { useMemo } from "react"
 import { BufferAttribute, BufferGeometry, LineBasicMaterial } from "three"
-import { useSnapshot } from "valtio"
-import { store } from "."
+import { proxy, useSnapshot } from "valtio"
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "../CONSTANTS"
-import { degreeToMeters } from "../data/mapPolygon"
 import { SSR } from "../utils"
 
 const emptyMapPolygon: Polygon = {
@@ -15,32 +13,21 @@ const emptyMapPolygon: Polygon = {
   type: "Polygon",
 }
 
+const mapPolygon = proxy(emptyMapPolygon)
+
 export const initialMapPolygon = ((): Polygon => {
   if (SSR) return emptyMapPolygon
   const rawStoragePayload = localStorage.getItem(
     BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY
   )
-  if (!rawStoragePayload) return emptyMapPolygon
+  if (!rawStoragePayload) {
+    return emptyMapPolygon
+  }
   return JSON.parse(rawStoragePayload)
 })()
 
-// export const useLocallyStoredMapPolygons = () => {
-//   useEffect(
-//     () =>
-//       subscribeKey(store, "mapPolygon", () => {
-//         // console.log("change", store.mapPolygon)
-//         localStorage.setItem(
-//           BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
-//           JSON.stringify(store.mapPolygon)
-//         )
-//       }),
-//     []
-//   )
-// }
-
 export const setMapPolygon = (mapPolygon: Polygon) => {
-  store.mapPolygon = mapPolygon
-  console.log({ mapPolygon, storeMapPolygon: store.mapPolygon })
+  mapPolygon = mapPolygon
 }
 
 export const getMapPolygonCentre = (polygon: Polygon) =>
@@ -55,24 +42,12 @@ export const getMapPolygonCentre = (polygon: Polygon) =>
   )
 
 export const polygonToCoordinates = (polygon: Polygon) => {
-  // const { points, center } = mapPolygonInfo(polygons[0]);
   const [cx, cy] = getMapPolygonCentre(polygon)
 
-  console.log({ cx, cy })
-
-  const foo = pipe(
+  return pipe(
     polygon.coordinates[0],
     map(([x, y]) => [x - cx, 0.1, y - cy])
   )
-
-  console.log({ foo })
-
-  return foo
-
-  // return points.map(([x, y]) => [
-  //   (x - center[0]) * degreeToMeters,
-  //   (y - center[1]) * degreeToMeters * 2,
-  // ]);
 }
 
 // Multiply latitude by 2 so it corresponds to the same distance
@@ -86,9 +61,7 @@ export const polygonToCoordinates = (polygon: Polygon) => {
 // return { center, bound, points };
 
 export const useMapBoundary = () => {
-  const { mapPolygon } = useSnapshot(store) as unknown as {
-    mapPolygon: Polygon
-  }
+  const { coordinates, type } = useSnapshot(mapPolygon)
 
   const material = useMemo(
     () =>
@@ -101,25 +74,17 @@ export const useMapBoundary = () => {
 
   const geometry = useMemo(() => {
     const geometry = new BufferGeometry()
-    const coords = pipe(mapPolygon, polygonToCoordinates, flatten)
-
-    geometry.setAttribute(
-      "position",
-      new BufferAttribute(
-        new Float32Array(coords),
-        // flatten(
-        //   snap.mapPolygon.coordinates.map(([x,y]) => [x,0.1,y])
-        //   // mapPolygonsToCoordinates([snap.mapPolygon]).map(([x, y]) => [
-        //   //   x,
-        //   //   0.1,
-        //   //   y,
-        //   // ])
-        // )
-        3
+    if (coordinates.length > 0) {
+      geometry.setAttribute(
+        "position",
+        new BufferAttribute(
+          new Float32Array(pipe(mapPolygon, polygonToCoordinates, flatten)),
+          3
+        )
       )
-    )
+    }
     return geometry
-  }, [mapPolygon])
+  }, [coordinates, type])
 
   return [geometry, material] as const
 }

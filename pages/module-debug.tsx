@@ -1,8 +1,8 @@
+import ModuleDebug from "@/components/debug/ModuleDebug"
 import Layout from "@/components/layouts"
 import { SiteContextMenu } from "@/components/menu"
 import Container from "@/components/site/Container"
 import HtmlUi from "@/components/site/HtmlUi"
-import SiteThreeApp from "@/components/site/SiteThreeApp"
 import { Loader } from "@/components/ui"
 import { BuildSystemsDataProvider } from "@/contexts/BuildSystemsData"
 import { useLocallyStoredHouses } from "@/stores/houses"
@@ -13,7 +13,7 @@ const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
   ssr: false,
 })
 
-const SiteIndexPage = () => {
+const ModuleDebugPage = () => {
   useLocallyStoredHouses()
 
   return (
@@ -33,17 +33,19 @@ const SiteIndexPage = () => {
         >
           <HtmlUi />
           <SiteThreeInit>
-            <SiteThreeApp />
+            <ModuleDebug />
           </SiteThreeInit>
-          <SiteContextMenu />
         </BuildSystemsDataProvider>
       </Layout>
+      <Suspense fallback={<Loader />}>
+        <SiteContextMenu />
+      </Suspense>
     </Fragment>
   )
 }
 
-SiteIndexPage.getLayout = (page: ReactElement) => {
+ModuleDebugPage.getLayout = (page: ReactElement) => {
   return <Layout>{page}</Layout>
 }
 
-export default SiteIndexPage
+export default ModuleDebugPage
