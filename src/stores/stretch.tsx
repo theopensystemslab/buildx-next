@@ -13,7 +13,7 @@ import { toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 import { Ord as StrOrd } from "fp-ts/lib/string"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import {
   PositionedColumn,
   PositionedModule,
@@ -21,42 +21,46 @@ import {
   useColumnLayout,
 } from "./layouts"
 
-const getMeVanilla = (module: LoadedModule): LoadedModule | null => {
-  const systemModules = pipe(
-    useBuildSystemsData().modules,
-    filterRA((module) => module.systemId === module.systemId)
-  )
+const useGetVanillaModule = () => {
+  const { modules: allModules } = useBuildSystemsData()
+  return (module: LoadedModule): LoadedModule | null => {
+    const systemModules = pipe(
+      allModules,
+      filterRA((module) => module.systemId === module.systemId)
+    )
 
-  return pipe(
-    systemModules,
-    filterRA(
-      (sysModule) =>
-        sysModule.structuredDna.sectionType ===
-          module.structuredDna.sectionType &&
-        sysModule.structuredDna.levelType === module.structuredDna.levelType &&
-        sysModule.structuredDna.positionType === "MID"
-    ),
-    sort(
-      pipe(
-        StrOrd,
-        contramap((m: Module) => m.dna)
-      )
-    ),
-    head,
-    mapO(loadModule),
-    toNullable
-  )
+    return pipe(
+      systemModules,
+      filterRA(
+        (sysModule) =>
+          sysModule.structuredDna.sectionType ===
+            module.structuredDna.sectionType &&
+          sysModule.structuredDna.levelType ===
+            module.structuredDna.levelType &&
+          sysModule.structuredDna.positionType === "MID"
+      ),
+      sort(
+        pipe(
+          StrOrd,
+          contramap((m: Module) => m.dna)
+        )
+      ),
+      head,
+      mapO(loadModule),
+      toNullable
+    )
+  }
 }
 
+// I think you can definitely use instancing for this
 export const useStretchedColumns = (
   buildingId: string,
   back: boolean = false
 ) => {
   const [n, setN] = useState(0)
-  useEffect(() => void console.log(n), [n])
-  const columnLayout = useColumnLayout(buildingId)
+  const getVanillaModule = useGetVanillaModule()
 
-  // you should already have house pos/rot from group
+  const columnLayout = useColumnLayout(buildingId)
 
   const endColumn = columnLayout[back ? columnLayout.length - 1 : 0]
 
@@ -77,7 +81,7 @@ export const useStretchedColumns = (
           ) => {
             const isFirst: boolean = i === 0
 
-            const vanillaModuleOut = getMeVanilla(moduleIn)
+            const vanillaModuleOut = getVanillaModule(moduleIn)
 
             if (!vanillaModuleOut) throw new Error("No vanilla module")
 
@@ -100,11 +104,13 @@ export const useStretchedColumns = (
     }))
   )
 
-  const z0 = endColumn.z
   const vanillaWidth = vanillaGridGroups[0].modules.reduce(
     (acc, v) => acc + v.module.length,
     0
   )
+
+  // see next comment
+  const z0 = endColumn.z
 
   const extraCols = useMemo(
     () =>
@@ -114,6 +120,8 @@ export const useStretchedColumns = (
           (columnIndex): PositionedColumn => ({
             gridGroups: vanillaGridGroups,
             columnIndex,
+            // should work with z0
+            // logic on front vs. back
             z: vanillaWidth * columnIndex,
           })
         )
