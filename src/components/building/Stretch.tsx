@@ -1,61 +1,54 @@
 import { House } from "@/data/house"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
-import context, { useContext } from "@/stores/context"
-import { modulesToRows, useBuildingModules } from "@/stores/houses"
+import context from "@/stores/context"
 import { useStretchedColumns } from "@/stores/stretch"
 import { mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import React, { Fragment, useRef } from "react"
-import { DoubleSide, Mesh } from "three"
-import BuildingHouseColumn from "./BuildingHouseColumn"
+import React, { Fragment, useMemo, useRef } from "react"
+import { Color, DoubleSide, Mesh } from "three"
 
 type Props = {
   house: House
+  back?: boolean
 }
 
-const StretchHandle = (props: Props) => {
-  const { house } = props
-
+const StretchHandle2 = (props: Props) => {
+  const { house, back = false } = props
   const ref = useRef<Mesh>()
-  const invalidate = useThree((three) => three.invalidate)
 
-  const [newDeltaZ, vanillaPositionedRows, n] = useStretchedColumns(
+  const { sendZ, vanillaPositionedRows, n, z0 } = useStretchedColumns(
     house.id,
-    true
+    back
   )
 
-  // const { deleteRow } = useBuildingTransforms()
+  const stretchMaterial = useMemo(() => {
+    const material = defaultMaterial.clone()
+    material.color = new Color("white")
+    return material
+  }, [])
 
-  let dragging = false,
-    z0 = 0
-
-  // useEffect(() => {
-  //   let kill: any
-  //   ;(async function () {
-  //     const rows = await housesRows
-  //     kill = subscribe(rows, (input) => {})
-  //   })()
-  //   return kill
-  // }, [])
-
-  // const houseRows = useHouseRows(buildingId!)
-
-  // const vanillaModules = useVanillaModules(buildingId)
+  const invalidate = useThree((three) => three.invalidate)
 
   const bind = useDrag(({ first, last }) => {
     if (!ref.current) return
     const [, pz] = context.pointer
     if (first) {
       setCameraEnabled(false)
-      z0 = pz
     }
-    ref.current.position.z = pz
 
-    newDeltaZ(pz - z0)
+    // clamp the length here
+    ref.current.position.z = !back ? Math.min(pz, z0) : Math.max(pz, z0)
+
+    sendZ(ref.current.position.z)
+
+    // check if abs(pz - z0) / rowLength !== n
+    // set n
+
+    // sendZ(pz - z0)
 
     if (last) {
       setCameraEnabled(true)
@@ -69,10 +62,10 @@ const StretchHandle = (props: Props) => {
       <mesh
         ref={ref}
         rotation-x={-Math.PI / 2}
+        position-z={z0}
         {...(bind() as any)}
-        // onClick={() => deleteRow(0)}
       >
-        <circleBufferGeometry />
+        <circleBufferGeometry args={[0.5, 10]} />
         <meshBasicMaterial color="steelblue" side={DoubleSide} />
       </mesh>
       <group>
@@ -81,11 +74,14 @@ const StretchHandle = (props: Props) => {
           mapRA(({ geometry, rowLength, y }) => (
             <Instances
               geometry={geometry}
-              material={defaultMaterial}
+              material={stretchMaterial}
               position-y={y}
             >
               {[...Array(n)].map((_, i) => (
-                <Instance key={i} position-z={rowLength * i} />
+                <Instance
+                  key={i}
+                  position-z={z0 + (back ? 1 : -1) * rowLength * i}
+                />
               ))}
             </Instances>
           ))
@@ -113,37 +109,13 @@ const StretchHandle = (props: Props) => {
   )
 }
 
-// const EndModules = () => {
-//   const { buildingId } = useContext()
-//   if (!buildingId) throw new Error("No buildingId in stretch")
-//   const rows = useHouseRows(buildingId)
-//   const ends = pipe(
-//     rows,
-//     mapRA(({ row, vanillaModules, y }) =>
-//       pipe(
-//         row,
-//         filterWithIndex((i) => i === 0 || i === row.length - 1),
-//         (row) => ({ row, vanillaModules, y })
-//       )
-//     )
-//   )
-//   const children = pipe(ends)
-//   return null
-// }
-
-// const ExtraModules = () => {
-//   return null
-// }
-
 const Stretch = (props: Props) => {
   const { house } = props
 
   return (
     <Fragment>
-      <StretchHandle house={house} />
-      {/* <group>{extraCols}</group> */}
-      {/* <EndModules />
-      <ExtraModules /> */}
+      <StretchHandle2 house={house} />
+      <StretchHandle2 house={house} back />
     </Fragment>
   )
 }

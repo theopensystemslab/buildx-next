@@ -40,7 +40,7 @@ export const useCameraFocus = () => {
       camera.controls.getPosition(v3Pos)
       camera.controls.getTarget(v3Tgt)
       camera.lastLookAt = [...v3Pos.toArray(), ...v3Tgt.toArray()]
-      camera.controls.setLookAt(x + 12, 24, z + 12, x, 0, z, true)
+      camera.controls.setLookAt(x - 12, 24, z - 12, x, 0, z, true)
     }
   }, [building])
 }
