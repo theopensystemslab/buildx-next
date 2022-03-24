@@ -1,9 +1,11 @@
 import { House } from "@/data/house"
+import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import context, { useContext } from "@/stores/context"
 import { modulesToRows, useBuildingModules } from "@/stores/houses"
 import { useStretchedColumns } from "@/stores/stretch"
 import { mapRA } from "@/utils"
+import { Instance, Instances } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
@@ -21,7 +23,10 @@ const StretchHandle = (props: Props) => {
   const ref = useRef<Mesh>()
   const invalidate = useThree((three) => three.invalidate)
 
-  const [newDeltaZ, extraCols] = useStretchedColumns(house.id, true)
+  const [newDeltaZ, vanillaPositionedRows, n] = useStretchedColumns(
+    house.id,
+    true
+  )
 
   // const { deleteRow } = useBuildingTransforms()
 
@@ -72,17 +77,37 @@ const StretchHandle = (props: Props) => {
       </mesh>
       <group>
         {pipe(
-          extraCols,
-          mapRA(({ columnIndex, gridGroups, z }) => (
-            <BuildingHouseColumn
-              key={columnIndex}
-              columnIndex={columnIndex}
-              gridGroups={gridGroups}
-              columnZ={z}
-              house={house}
-            />
+          vanillaPositionedRows,
+          mapRA(({ geometry, rowLength, y }) => (
+            <Instances
+              geometry={geometry}
+              material={defaultMaterial}
+              position-y={y}
+            >
+              {[...Array(n)].map((_, i) => (
+                <Instance key={i} position-z={rowLength * i} />
+              ))}
+            </Instances>
           ))
         )}
+        {/* for each level... */}
+        {/* {pipe(
+          extraCols,
+          mapRA(({ columnIndex, vanillaPositionedRows, z }) => (
+            <group key={columnIndex}>
+              {pipe(
+                vanillaPositionedRows,
+                mapRA(({ geometry, y, modules, levelIndex }) => (
+                  <group key={levelIndex} position-y={y}>
+                    <Instances geometry={geometry} material={defaultMaterial}>
+                      <Instance position-z={modules[0].z} />
+                    </Instances>
+                  </group>
+                ))
+              )}
+            </group>
+          ))
+        )} */}
       </group>
     </Fragment>
   )

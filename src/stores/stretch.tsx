@@ -2,24 +2,44 @@ import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { LoadedModule, Module } from "@/data/module"
 import {
   filterRA,
+  isMesh,
   mapO,
   mapRA,
   mapWithIndexRA,
+  reduceRA,
   reduceWithIndexRA,
 } from "@/utils"
 import { loadModule } from "@/utils/modules"
 import { pipe } from "fp-ts/lib/function"
 import { toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
-import { head, sort } from "fp-ts/lib/ReadonlyArray"
+import { flatten, head, sort } from "fp-ts/lib/ReadonlyArray"
+import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import { Ord as StrOrd } from "fp-ts/lib/string"
+import produce from "immer"
 import { useMemo, useState } from "react"
+import { BufferGeometry, Mesh } from "three"
+import { mergeBufferGeometries } from "three-stdlib"
 import {
   PositionedColumn,
   PositionedModule,
   PositionedRow,
   useColumnLayout,
 } from "./layouts"
+
+type VanillaPositionedRow = PositionedRow & {
+  geometry: BufferGeometry
+  rowLength: number
+}
+
+// type VanillaPositionedColumn = {
+//   vanillaPositionedRows: Readonly<Array<VanillaPositionedRow>>
+//   z: number
+//   columnIndex: number
+// }
+
+// or map of levelIndex to geometry
+// then n * dz
 
 const useGetVanillaModule = () => {
   const { modules: allModules } = useBuildSystemsData()
@@ -64,7 +84,9 @@ export const useStretchedColumns = (
 
   const endColumn = columnLayout[back ? columnLayout.length - 1 : 0]
 
-  const vanillaGridGroups: readonly PositionedRow[] = pipe(
+  // may need rowLength
+
+  const positionedRows: readonly PositionedRow[] = pipe(
     endColumn.gridGroups,
     mapRA(({ levelIndex, levelType, y, modules }: PositionedRow) => ({
       levelIndex,
@@ -104,38 +126,100 @@ export const useStretchedColumns = (
     }))
   )
 
-  const vanillaWidth = vanillaGridGroups[0].modules.reduce(
-    (acc, v) => acc + v.module.length,
-    0
+  const vanillaPositionedRows: readonly VanillaPositionedRow[] = pipe(
+    positionedRows,
+    mapRA(
+      ({ modules, levelIndex, levelType, y }): VanillaPositionedRow => ({
+        levelIndex,
+        levelType,
+        y,
+        modules,
+        geometry: pipe(
+          modules,
+          mapRA((module) => toReadonlyArray(module.module.gltf.nodes)),
+          flatten,
+          reduceRA([], (rowMeshes: Mesh[], [, node]) => {
+            return produce(rowMeshes, (draft) => {
+              node.traverse((child) => {
+                if (isMesh(child)) {
+                  draft.push(child)
+                }
+              })
+            })
+          }),
+          (meshes) => {
+            const geom = mergeBufferGeometries(
+              meshes.map((mesh) => mesh.geometry)
+            )
+            if (!geom) throw new Error()
+            return geom
+          }
+        ),
+        rowLength: pipe(
+          modules,
+          reduceRA(0, (acc, v) => acc + v.module.length)
+        ),
+      })
+    )
   )
+
+  // want geometry + y
+
+  // const geometry = pipe(
+  //   vanillaGridGroups,
+  //   reduceRA([], (gridGroupMeshes: Mesh[], positionedRow) => [
+  //     ...gridGroupMeshes,
+  //     ...pipe(
+  //       positionedRow.modules,
+  //       mapRA((module) => toReadonlyArray(module.module.gltf.nodes)),
+  //       flatten,
+  //       reduceRA([], (rowMeshes: Mesh[], [, node]) => {
+  //         return produce(rowMeshes, (draft) => {
+  //           node.traverse((child) => {
+  //             if (isMesh(child)) {
+  //               draft.push(child)
+  //             }
+  //           })
+  //         })
+  //       })
+  //     ),
+  //   ]),
+  //   (meshes) => mergeBufferGeometries(meshes.map((mesh) => mesh.geometry))
+  // )
+
+  // if (!geometry) throw new Error("no vanillaColumnGeometry")
+
+  // console.log(geometry)
 
   // see next comment
   const z0 = endColumn.z
 
-  const extraCols = useMemo(
-    () =>
-      pipe(
-        [...Array(n)],
-        mapWithIndexRA(
-          (columnIndex): PositionedColumn => ({
-            gridGroups: vanillaGridGroups,
-            columnIndex,
-            // should work with z0
-            // logic on front vs. back
-            z: vanillaWidth * columnIndex,
-          })
-        )
-      ),
-    [n]
-  )
+  // const extraCols = useMemo(
+  //   () =>
+  //     pipe(
+  //       [...Array(n)],
+  //       mapWithIndexRA(
+  //         (columnIndex): VanillaPositionedColumn => ({
+  //           columnIndex,
+  //           // should work with z0
+  //           // logic on front vs. back
+  //           z: z0 + vanillaWidth * columnIndex,
+  //           vanillaPositionedRows,
+  //         })
+  //       )
+  //     ),
+  //   [n]
+  // )
+
+  const columnLength = vanillaPositionedRows[0].rowLength
 
   const newDeltaZ = (dz: number, last: boolean = false) => {
-    const next = Math.max(Math.floor(dz / vanillaWidth), 0)
+    const next = Math.max(Math.floor(dz / columnLength), 0)
     if (next !== n) setN(next)
     if (last && n !== 0) {
       setN(0)
     }
   }
 
-  return [newDeltaZ, extraCols] as const
+  return [newDeltaZ, vanillaPositionedRows, n] as const
 }
