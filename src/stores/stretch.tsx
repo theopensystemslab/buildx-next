@@ -12,14 +12,26 @@ import { loadModule } from "@/utils/modules"
 import { pipe } from "fp-ts/lib/function"
 import { toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
-import { flatten, head, sort } from "fp-ts/lib/ReadonlyArray"
+import {
+  flatten,
+  head,
+  replicate,
+  sort,
+  spanLeft,
+} from "fp-ts/lib/ReadonlyArray"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import { Ord as StrOrd } from "fp-ts/lib/string"
 import produce from "immer"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
-import { PositionedModule, PositionedRow, useColumnLayout } from "./layouts"
+import {
+  columnLayoutToDNA,
+  PositionedModule,
+  PositionedRow,
+  useColumnLayout,
+} from "../hooks/layouts"
+import houses from "./houses"
 
 type VanillaPositionedRow = PositionedRow & {
   geometry: BufferGeometry
@@ -61,20 +73,27 @@ export const useStretchedColumns = (
   buildingId: string,
   back: boolean = false
 ) => {
-  const [n, setN] = useState(0)
   const getVanillaModule = useGetVanillaModule()
 
   const columnLayout = useColumnLayout(buildingId)
 
+  const house = houses[buildingId]
+
   // copy vanilla from me
   const endColumn = columnLayout[back ? columnLayout.length - 1 : 0]
 
-  const z0 = back
-    ? endColumn.z
-    : endColumn.gridGroups[0].modules.reduce(
-        (acc, v) => acc + v.module.length,
-        0
-      )
+  const z0 = useMemo(
+    () =>
+      back
+        ? endColumn.z
+        : endColumn.gridGroups[0].modules.reduce(
+            (acc, v) => acc + v.module.length,
+            0
+          ),
+    [columnLayout, house.position]
+  )
+
+  const [n, setN] = useState(0)
 
   const positionedRows: readonly PositionedRow[] = pipe(
     endColumn.gridGroups,
@@ -155,13 +174,47 @@ export const useStretchedColumns = (
 
   const columnLength = vanillaPositionedRows[0].rowLength
 
-  const sendZ = (dz: number, last: boolean = false) => {
-    const next = Math.floor(Math.abs(Math.abs(z0 - dz) / columnLength))
+  const sendZ = (dz: number) => {
+    // working for back but not front (changing floor to ceil doesn't work)
+    const x = Math.floor(Math.abs(z0 - dz) / columnLength)
+    const next = back ? x : x - 1
     if (next !== n) setN(next)
-    if (last && n !== 0) {
-      setN(0)
-    }
   }
 
-  return { sendZ, vanillaPositionedRows, n, z0 } as const
+  // need to calc totalLength
+  // also one-off issue
+  // before after
+
+  const sendLast = () => {
+    const realN = back ? n - 1 : n
+    const dna = pipe(
+      columnLayout,
+      spanLeft(
+        ({ columnIndex }) =>
+          columnIndex !== (back ? columnLayout.length - 1 : 1)
+      ),
+      ({ init, rest }) => [
+        ...init,
+        ...replicate(realN, {
+          columnIndex: 0,
+          gridGroups: positionedRows,
+          z: 0,
+        }),
+        ...rest,
+      ],
+      columnLayoutToDNA
+    ) as string[]
+    let position = house.position
+    if (!back) {
+      position[1] -= columnLength * realN
+    }
+    houses[buildingId] = {
+      ...house,
+      dna,
+      position,
+    }
+    setN(0)
+  }
+
+  return { sendZ, sendLast, vanillaPositionedRows, n, z0 } as const
 }

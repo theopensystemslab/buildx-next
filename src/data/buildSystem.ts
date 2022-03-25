@@ -53,7 +53,7 @@ export interface BuildSystemsData {
   energyInfo: Array<EnergyInfo>
 }
 
-const CACHE_SYSTEMS_DATA = true
+const CACHE_SYSTEMS_DATA = false
 
 const addCached = (buildSystemsData: BuildSystemsData): BuildSystemsData => {
   return {

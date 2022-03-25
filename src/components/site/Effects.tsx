@@ -15,7 +15,7 @@ const Effects = () => {
       <EffectComposer autoClear={false} multisampling={8} disableNormalPass>
         <Outline
           blur
-          selection={outlined.filter((x) => !!x.current) as any}
+          selection={outlined.filter((x) => !!x && !!x?.current) as any}
           visibleEdgeColor={0xffffff}
           hiddenEdgeColor={0xffffff}
           xRay={scopeType !== ScopeTypeEnum.Enum.HOUSE}

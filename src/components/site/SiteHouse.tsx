@@ -1,6 +1,6 @@
 import { House } from "@/data/house"
 import { useUpdatePosition } from "@/stores/houses"
-import { useRowLayout } from "@/stores/layouts"
+import { useRowLayout } from "@/hooks/layouts"
 import { mapWithIndexRA } from "@/utils"
 import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"

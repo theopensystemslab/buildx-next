@@ -2,9 +2,9 @@ import { LoadedModule } from "@/data/module"
 import { mapRA, reduceRA } from "@/utils"
 import { transpose } from "fp-ts-std/ReadonlyArray"
 import { pipe } from "fp-ts/lib/function"
-import { reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
+import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
-import { useBuildingRows } from "./houses"
+import { useBuildingRows } from "../stores/houses"
 
 export type PositionedModule = {
   module: LoadedModule
@@ -234,3 +234,22 @@ export const useColumnLayout = (buildingId: string) => {
     )
   )
 }
+
+export const columnLayoutToDNA = (columnLayout: ColumnLayout) =>
+  pipe(
+    columnLayout,
+    mapRA(({ gridGroups }) =>
+      pipe(
+        gridGroups,
+        mapRA(({ modules }) =>
+          pipe(
+            modules,
+            mapRA(({ module }) => module.dna)
+          )
+        )
+      )
+    ),
+    transpose,
+    flatten,
+    flatten
+  )

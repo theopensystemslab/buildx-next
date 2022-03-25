@@ -1,9 +1,15 @@
 import { boolean } from "fp-ts"
 import { flow } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
+import { Ord as OrdNum } from "fp-ts/lib/number"
 import { map as mapO } from "fp-ts/lib/Option"
+import { clamp } from "fp-ts/lib/Ord"
 import { modifyAt } from "fp-ts/lib/ReadonlyArray"
 import { Monoid, split, toUpperCase } from "fp-ts/lib/string"
+
+const clamp_ = clamp(OrdNum)
+
+export { clamp_ as clamp }
 
 export {
   filter as filterA,

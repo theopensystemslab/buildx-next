@@ -1,7 +1,7 @@
 import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
-import { mapRA, pipeLog, reduceRA } from "@/utils"
+import { mapRA, reduceRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
 import {

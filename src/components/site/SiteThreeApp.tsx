@@ -13,11 +13,7 @@ import SiteHouse from "./SiteHouse"
 const BuildingMode = ({ buildingId }: { buildingId: string }) => {
   const house = useHouse(buildingId)
 
-  return (
-    <Suspense key={house.id} fallback={<Loader3D />}>
-      <BuildingHouse house={house as HouseT} />
-    </Suspense>
-  )
+  return <BuildingHouse house={house as HouseT} />
 }
 
 const SiteMode = () => {
@@ -27,11 +23,7 @@ const SiteMode = () => {
     <group>
       {pipe(
         houses,
-        mapRR((house) => (
-          <Suspense key={house.id} fallback={<Loader3D />}>
-            <SiteHouse house={house as HouseT} />
-          </Suspense>
-        )),
+        mapRR((house) => <SiteHouse key={house.id} house={house as HouseT} />),
         toReadonlyArray
       )}
     </group>
@@ -50,7 +42,11 @@ const SiteThreeApp = () => {
     context.outlined = []
   }, [buildingId])
 
-  return !buildingId ? <SiteMode /> : <BuildingMode buildingId={buildingId} />
+  return (
+    <Suspense fallback={<Loader3D />}>
+      {!buildingId ? <SiteMode /> : <BuildingMode buildingId={buildingId} />}
+    </Suspense>
+  )
 }
 
 export default SiteThreeApp

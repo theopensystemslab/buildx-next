@@ -1,5 +1,5 @@
 import { House } from "@/data/house"
-import { useColumnLayout } from "@/stores/layouts"
+import { useColumnLayout } from "@/hooks/layouts"
 import { mapRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { filterWithIndex } from "fp-ts/lib/ReadonlyArray"

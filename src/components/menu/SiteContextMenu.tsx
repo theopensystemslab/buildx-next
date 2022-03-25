@@ -1,5 +1,5 @@
 import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
-import context, { useContext } from "@/stores/context"
+import context, { EditModeEnum, useContext } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import scope, { HouseScope, ScopeTypeEnum } from "@/stores/scope"
 import React, { Fragment, useState } from "react"
@@ -45,6 +45,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
 
   const editBuilding = () => {
     context.buildingId = firstHouse.id
+    context.editMode = EditModeEnum.Enum.STRETCH
     props?.onClose?.()
   }
 

@@ -2,7 +2,7 @@ import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { House } from "@/data/house"
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
-import context from "@/stores/context"
+import context, { outlineMesh, removeMeshOutline } from "@/stores/context"
 import scope, {
   ElementScopeItem,
   LevelScopeItem,
@@ -84,7 +84,6 @@ const HouseModuleElement = (props: Props) => {
       let isOutlined = context.outlined.includes(meshRef),
         isHovered = false,
         isSelected = false
-
       switch (scope.type) {
         case ScopeTypeEnum.Enum.HOUSE:
           isHovered = scope.hovered === house.id
@@ -129,14 +128,12 @@ const HouseModuleElement = (props: Props) => {
           break
       }
 
-      if (context.menu === null && (isHovered || isSelected) && !isOutlined) {
-        context.outlined.push(ref(meshRef)) // ref([...context.outlined, meshRef])
+      if ((isHovered || isSelected) && !isOutlined) {
+        outlineMesh(meshRef)
         invalidate()
       }
       if (all(context.menu === null, isOutlined, !isHovered, !isSelected)) {
-        context.outlined = context.outlined.filter(
-          (x) => x.current?.id !== meshRef.current?.id
-        )
+        removeMeshOutline(meshRef)
         invalidate()
       }
     })
@@ -263,6 +260,15 @@ const HouseModuleElement = (props: Props) => {
       }
     },
   })
+
+  useEffect(
+    () => () => {
+      context.outlined = context.outlined.filter(
+        (o) => o.current?.id !== meshRef.current?.id
+      )
+    },
+    []
+  )
 
   return (
     <mesh

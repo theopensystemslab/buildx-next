@@ -9,7 +9,7 @@ type CameraProxy = {
   lastLookAt: V6
 }
 
-export const defaultCamPos: [number, number, number] = [12, 24, 12]
+export const defaultCamPos: [number, number, number] = [-12, 24, -12]
 export const defaultCamTgt: [number, number, number] = [0, 0, 0]
 
 const camera = proxy<CameraProxy>({

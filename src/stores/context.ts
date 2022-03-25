@@ -1,6 +1,7 @@
+import { any } from "@/utils"
 import { MutableRefObject } from "react"
 import { Object3D } from "three"
-import { proxy, useSnapshot } from "valtio"
+import { proxy, ref, useSnapshot } from "valtio"
 import * as z from "zod"
 import scope, { Scope } from "./scope"
 
@@ -29,6 +30,20 @@ export const useContext = () => useSnapshot(context)
 
 export const setPointer = ([x, y]: [number, number]) => {
   context.pointer = [x, y]
+}
+
+export const outlineMesh = (
+  meshRef: MutableRefObject<Object3D | undefined>
+) => {
+  context.outlined.push(ref(meshRef))
+}
+
+export const removeMeshOutline = (
+  meshRef: MutableRefObject<Object3D | undefined>
+) => {
+  context.outlined = context.outlined.filter(
+    (x) => x?.current && meshRef?.current && x.current.id !== meshRef.current.id
+  )
 }
 
 export default context

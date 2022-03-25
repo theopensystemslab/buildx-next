@@ -3,7 +3,7 @@ import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import context from "@/stores/context"
 import { useStretchedColumns } from "@/stores/stretch"
-import { mapRA } from "@/utils"
+import { clamp, mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
@@ -20,10 +20,11 @@ const StretchHandle2 = (props: Props) => {
   const { house, back = false } = props
   const ref = useRef<Mesh>()
 
-  const { sendZ, vanillaPositionedRows, n, z0 } = useStretchedColumns(
+  const { sendZ, sendLast, vanillaPositionedRows, n, z0 } = useStretchedColumns(
     house.id,
     back
   )
+  const offset = 1
 
   const stretchMaterial = useMemo(() => {
     const material = defaultMaterial.clone()
@@ -33,25 +34,23 @@ const StretchHandle2 = (props: Props) => {
 
   const invalidate = useThree((three) => three.invalidate)
 
+  const handleZero = useMemo(() => (back ? z0 + offset : z0 - offset), [z0])
+
   const bind = useDrag(({ first, last }) => {
     if (!ref.current) return
-    const [, pz] = context.pointer
+    const pz = context.pointer[1] - house.position[1]
     if (first) {
       setCameraEnabled(false)
+      context.outlined = []
     }
 
-    // clamp the length here
-    ref.current.position.z = !back ? Math.min(pz, z0) : Math.max(pz, z0)
-
-    sendZ(ref.current.position.z)
-
-    // check if abs(pz - z0) / rowLength !== n
-    // set n
-
-    // sendZ(pz - z0)
+    const z = back ? clamp(handleZero, 9)(pz) : clamp(-9, handleZero)(pz)
+    sendZ(z)
+    ref.current.position.z = z
 
     if (last) {
       setCameraEnabled(true)
+      sendLast()
     }
 
     invalidate()
@@ -62,7 +61,7 @@ const StretchHandle2 = (props: Props) => {
       <mesh
         ref={ref}
         rotation-x={-Math.PI / 2}
-        position-z={z0}
+        position-z={handleZero}
         {...(bind() as any)}
       >
         <circleBufferGeometry args={[0.5, 10]} />
@@ -71,8 +70,9 @@ const StretchHandle2 = (props: Props) => {
       <group>
         {pipe(
           vanillaPositionedRows,
-          mapRA(({ geometry, rowLength, y }) => (
+          mapRA(({ geometry, rowLength, y, levelIndex }) => (
             <Instances
+              key={levelIndex}
               geometry={geometry}
               material={stretchMaterial}
               position-y={y}
@@ -86,24 +86,6 @@ const StretchHandle2 = (props: Props) => {
             </Instances>
           ))
         )}
-        {/* for each level... */}
-        {/* {pipe(
-          extraCols,
-          mapRA(({ columnIndex, vanillaPositionedRows, z }) => (
-            <group key={columnIndex}>
-              {pipe(
-                vanillaPositionedRows,
-                mapRA(({ geometry, y, modules, levelIndex }) => (
-                  <group key={levelIndex} position-y={y}>
-                    <Instances geometry={geometry} material={defaultMaterial}>
-                      <Instance position-z={modules[0].z} />
-                    </Instances>
-                  </group>
-                ))
-              )}
-            </group>
-          ))
-        )} */}
       </group>
     </Fragment>
   )
@@ -121,62 +103,3 @@ const Stretch = (props: Props) => {
 }
 
 export default Stretch
-
-// const StretchHandles = () => {
-//   // const {
-//   //   house: {
-//   //     position: [x0, z0],
-//   //   },
-//   //   row0: { row, vanillaModules },
-//   // } = props
-//   // const z1 = row[0].z + 3
-//   // const z2 = row[row.length - 1].z - 3
-
-//   return (
-//     <Fragment>
-//       <StretchHandle />
-//       {/* <StretchHandle back /> */}
-//     </Fragment>
-//   )
-// }
-
-// export default StretchHandles
-
-// have vanilla module
-// every time hits new vanilla module length from origin
-// either just move the first column
-// or... fill?
-
-// would also have to de-fill on other direction
-
-// min max (constrain)
-
-// prob leave the state house alone
-// create modules in transient space?
-
-// maybe you can just update state on house...
-// but you're depending on row 0 ...
-
-// in any case you need to calculate the additional modules
-
-// each row has vanilla modules for END and MID
-// so attach to houseRows?
-
-// could you update stretch handles based on
-// subscribe
-// to dna and drag?
-
-// would need to not take props
-
-// experiment:
-// stretch handles takes no props
-// when drag, update house dna
-// see if stretch handles re-renders
-
-// if it does, try SoC components
-
-// what about do everything in the drag handler but simply
-// read the relevant proxies?
-
-// maybe try without moving the handles first
-// (stick the handle at the side, maybe it goes both ways)
