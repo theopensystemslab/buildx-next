@@ -1,4 +1,3 @@
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { House } from "@/data/house"
 import { useBuildSystemSettings } from "@/data/settings"
 import defaultMaterial from "@/materials/defaultMaterial"
@@ -75,27 +74,28 @@ const StretchHandle = (props: Props) => {
         <circleBufferGeometry args={[0.5, 10]} />
         <meshBasicMaterial color="steelblue" side={DoubleSide} />
       </mesh>
-      <group>
-        {pipe(
-          vanillaPositionedRows,
-          mapRA(({ geometry, rowLength, y, levelIndex }) => (
-            <Instances
-              key={levelIndex}
-              geometry={geometry}
-              material={stretchMaterial}
-              position-y={y}
-            >
-              {n > 0 &&
-                [...Array(n)].map((_, i) => (
+      {n > 0 && (
+        <group>
+          {pipe(
+            vanillaPositionedRows,
+            mapRA(({ geometry, rowLength, y, levelIndex }) => (
+              <Instances
+                key={levelIndex}
+                geometry={geometry}
+                material={stretchMaterial}
+                position-y={y}
+              >
+                {[...Array(n)].map((_, i) => (
                   <Instance
                     key={i}
                     position-z={z0 + (back ? 1 : -1) * rowLength * i}
                   />
                 ))}
-            </Instances>
-          ))
-        )}
-      </group>
+              </Instances>
+            ))
+          )}
+        </group>
+      )}
     </Fragment>
   )
 }

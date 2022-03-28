@@ -22,7 +22,7 @@ import {
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import { Ord as StrOrd } from "fp-ts/lib/string"
 import produce from "immer"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import {
@@ -81,13 +81,6 @@ export const useStretchedColumns = (
 
   // copy vanilla from me
   const endColumn = columnLayout[back ? columnLayout.length - 1 : 0]
-
-  const spannedColumns = pipe(
-    columnLayout,
-    spanLeft(
-      ({ columnIndex }) => columnIndex !== (back ? columnLayout.length - 1 : 1)
-    )
-  )
 
   const [n, setN] = useState(0)
 
@@ -189,7 +182,11 @@ export const useStretchedColumns = (
   const sendLast = () => {
     const realN = back ? n - 1 : n
     const dna = pipe(
-      spannedColumns,
+      columnLayout,
+      spanLeft(
+        ({ columnIndex }) =>
+          columnIndex !== (back ? columnLayout.length - 1 : 1)
+      ),
       ({ init, rest }) => [
         ...init,
         ...replicate(realN, {
