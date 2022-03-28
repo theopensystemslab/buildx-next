@@ -22,7 +22,7 @@ import {
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import { Ord as StrOrd } from "fp-ts/lib/string"
 import produce from "immer"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import {
@@ -82,18 +82,19 @@ export const useStretchedColumns = (
   // copy vanilla from me
   const endColumn = columnLayout[back ? columnLayout.length - 1 : 0]
 
-  const z0 = useMemo(
-    () =>
-      back
-        ? endColumn.z
-        : endColumn.gridGroups[0].modules.reduce(
-            (acc, v) => acc + v.module.length,
-            0
-          ),
-    [columnLayout, house.position]
+  const spannedColumns = pipe(
+    columnLayout,
+    spanLeft(
+      ({ columnIndex }) => columnIndex !== (back ? columnLayout.length - 1 : 1)
+    )
   )
 
   const [n, setN] = useState(0)
+
+  const z0 = useMemo(
+    () => (back ? endColumn.z : endColumn.gridGroups[0].modules[0].z),
+    [columnLayout]
+  )
 
   const positionedRows: readonly PositionedRow[] = pipe(
     endColumn.gridGroups,
@@ -188,11 +189,7 @@ export const useStretchedColumns = (
   const sendLast = () => {
     const realN = back ? n - 1 : n
     const dna = pipe(
-      columnLayout,
-      spanLeft(
-        ({ columnIndex }) =>
-          columnIndex !== (back ? columnLayout.length - 1 : 1)
-      ),
+      spannedColumns,
       ({ init, rest }) => [
         ...init,
         ...replicate(realN, {
@@ -204,14 +201,16 @@ export const useStretchedColumns = (
       ],
       columnLayoutToDNA
     ) as string[]
-    let position = house.position
-    if (!back) {
-      position[1] -= columnLength * realN
-    }
+    // let position = house.position
+    // if (!back) {
+    //   position[1] -= columnLength * realN
+    // }
     houses[buildingId] = {
       ...house,
       dna,
-      position,
+      position: back
+        ? house.position
+        : [house.position[0], house.position[1] - columnLength * realN],
     }
     setN(0)
   }

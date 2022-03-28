@@ -16,6 +16,7 @@ import type { Element } from "./element"
 import { getElements } from "./element"
 import type { WindowType } from "./windowType"
 import { getWindowTypes } from "./windowType"
+import { getSystemSettings, SystemSettings } from "./settings"
 
 export const buildSystems: Array<BuildSystem> = [
   {
@@ -51,6 +52,7 @@ export interface BuildSystemsData {
   windowTypes: Array<WindowType>
   internalLayoutTypes: Array<InternalLayoutType>
   energyInfo: Array<EnergyInfo>
+  settings: Array<SystemSettings>
 }
 
 const CACHE_SYSTEMS_DATA = false
@@ -132,6 +134,10 @@ export const useSystemsData = (): BuildSystemsData | "error" | null => {
         buildSystems.map((system) => getElements(system, materials))
       ).then(flatten)
 
+      const settings = await Promise.all(
+        buildSystems.map((system) => getSystemSettings(system))
+      ).then(flatten)
+
       setSystemsData({
         houseTypes,
         modules,
@@ -140,6 +146,7 @@ export const useSystemsData = (): BuildSystemsData | "error" | null => {
         windowTypes,
         internalLayoutTypes,
         energyInfo,
+        settings,
       })
     } catch (err) {
       setSystemsData("error")

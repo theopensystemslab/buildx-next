@@ -1,3 +1,4 @@
+import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { House as HouseT } from "@/data/house"
 import context, { useContext } from "@/stores/context"
 import { useHouse, useHouses } from "@/stores/houses"
@@ -32,6 +33,8 @@ const SiteMode = () => {
 
 const SiteThreeApp = () => {
   const { buildingId } = useContext()
+
+  const { settings } = useBuildSystemsData()
 
   useEffect(() => {
     if (buildingId === null) {

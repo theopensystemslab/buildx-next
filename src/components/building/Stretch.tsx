@@ -1,4 +1,6 @@
+import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
 import { House } from "@/data/house"
+import { useBuildSystemSettings } from "@/data/settings"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import context from "@/stores/context"
@@ -16,7 +18,7 @@ type Props = {
   back?: boolean
 }
 
-const StretchHandle2 = (props: Props) => {
+const StretchHandle = (props: Props) => {
   const { house, back = false } = props
   const ref = useRef<Mesh>()
 
@@ -24,7 +26,12 @@ const StretchHandle2 = (props: Props) => {
     house.id,
     back
   )
+
   const offset = 1
+
+  const {
+    length: { max },
+  } = useBuildSystemSettings(house.systemId)
 
   const stretchMaterial = useMemo(() => {
     const material = defaultMaterial.clone()
@@ -34,7 +41,7 @@ const StretchHandle2 = (props: Props) => {
 
   const invalidate = useThree((three) => three.invalidate)
 
-  const handleZero = useMemo(() => (back ? z0 + offset : z0 - offset), [z0])
+  const h0 = useMemo(() => (back ? z0 + offset : z0 - offset), [z0])
 
   const bind = useDrag(({ first, last }) => {
     if (!ref.current) return
@@ -44,13 +51,14 @@ const StretchHandle2 = (props: Props) => {
       context.outlined = []
     }
 
-    const z = back ? clamp(handleZero, 9)(pz) : clamp(-9, handleZero)(pz)
+    const z = back ? clamp(h0, max)(pz) : clamp(-max, h0)(pz)
     sendZ(z)
     ref.current.position.z = z
 
     if (last) {
       setCameraEnabled(true)
       sendLast()
+      ref.current.position.z = h0
     }
 
     invalidate()
@@ -61,7 +69,7 @@ const StretchHandle2 = (props: Props) => {
       <mesh
         ref={ref}
         rotation-x={-Math.PI / 2}
-        position-z={handleZero}
+        position-z={h0}
         {...(bind() as any)}
       >
         <circleBufferGeometry args={[0.5, 10]} />
@@ -77,12 +85,13 @@ const StretchHandle2 = (props: Props) => {
               material={stretchMaterial}
               position-y={y}
             >
-              {[...Array(n)].map((_, i) => (
-                <Instance
-                  key={i}
-                  position-z={z0 + (back ? 1 : -1) * rowLength * i}
-                />
-              ))}
+              {n > 0 &&
+                [...Array(n)].map((_, i) => (
+                  <Instance
+                    key={i}
+                    position-z={z0 + (back ? 1 : -1) * rowLength * i}
+                  />
+                ))}
             </Instances>
           ))
         )}
@@ -96,8 +105,8 @@ const Stretch = (props: Props) => {
 
   return (
     <Fragment>
-      <StretchHandle2 house={house} />
-      <StretchHandle2 house={house} back />
+      <StretchHandle house={house} />
+      <StretchHandle house={house} back />
     </Fragment>
   )
 }
