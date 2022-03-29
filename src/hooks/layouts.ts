@@ -1,5 +1,5 @@
 import { LoadedModule } from "@/data/module"
-import { mapRA, reduceRA } from "@/utils"
+import { mapRA, reduceRA, reduceWithIndexRA } from "@/utils"
 import { transpose } from "fp-ts-std/ReadonlyArray"
 import { pipe } from "fp-ts/lib/function"
 import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
@@ -152,6 +152,9 @@ export const useColumnLayout = (buildingId: string) => {
   )
 
   if (!legit) throw new Error("not legit")
+
+  // work on one column first
+  // const foo = pipe(columns[1])
 
   return pipe(
     columns,

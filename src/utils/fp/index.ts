@@ -14,7 +14,9 @@ export { clamp_ as clamp }
 export {
   filter as filterA,
   map as mapA,
+  mapWithIndex as mapWithIndexA,
   reduce as reduceA,
+  reduceWithIndex as reduceWithIndexA,
 } from "fp-ts/lib/Array"
 export {
   chunksOf as chunksOfRA,
@@ -25,6 +27,7 @@ export {
   filterMap as filterMapRA,
   reduce as reduceRA,
   reduceWithIndex as reduceWithIndexRA,
+  zip as zipRA,
 } from "fp-ts/lib/ReadonlyArray"
 export {
   chunksOf as chunksOfRNA,
