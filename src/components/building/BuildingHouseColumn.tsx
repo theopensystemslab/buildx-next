@@ -10,10 +10,18 @@ type Props = {
   columnIndex: number
   mirror?: boolean
   gridGroups: readonly PositionedRow[]
+  visible?: boolean
 }
 
 const BuildingHouseColumn = (props: Props) => {
-  const { house, columnIndex, columnZ, gridGroups, mirror = false } = props
+  const {
+    house,
+    columnIndex,
+    columnZ,
+    gridGroups,
+    mirror = false,
+    visible = true,
+  } = props
   const levels = pipe(
     gridGroups,
     mapRA(({ levelIndex, modules, y }) =>
@@ -34,6 +42,7 @@ const BuildingHouseColumn = (props: Props) => {
                 : z - module.length + module.length / 2,
             ]}
             scale={[1, 1, mirror ? 1 : -1]}
+            visible={visible}
           />
         ))
       )

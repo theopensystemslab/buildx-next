@@ -18,7 +18,7 @@ import type { WindowType } from "./windowType"
 import { getWindowTypes } from "./windowType"
 import { getSystemSettings, SystemSettings } from "./settings"
 
-export const buildSystems: Array<BuildSystem> = [
+export const systems: Array<System> = [
   {
     id: "sampleTom",
     name: "Sample Tom",
@@ -38,13 +38,13 @@ export const buildSystems: Array<BuildSystem> = [
 // oldest
 // airtableId: "appXYQYWjUiAT1Btm",
 
-export interface BuildSystem {
+export interface System {
   id: string
   name: string
   airtableId: string
 }
 
-export interface BuildSystemsData {
+export interface SystemsData {
   houseTypes: Array<HouseType>
   modules: Array<Module>
   materials: Array<Material>
@@ -57,10 +57,10 @@ export interface BuildSystemsData {
 
 const CACHE_SYSTEMS_DATA = false
 
-const addCached = (buildSystemsData: BuildSystemsData): BuildSystemsData => {
+const addCached = (SystemsData: SystemsData): SystemsData => {
   return {
-    ...buildSystemsData,
-    materials: buildSystemsData.materials.map((material) => {
+    ...SystemsData,
+    materials: SystemsData.materials.map((material) => {
       const threeMaterial = createMaterial(material)
       return { ...material, threeMaterial }
     }),
@@ -69,7 +69,7 @@ const addCached = (buildSystemsData: BuildSystemsData): BuildSystemsData => {
 
 const localStorageKey = "buildx-systems-v2"
 
-const saveSystemsData = (systemsData: BuildSystemsData) => {
+const saveSystemsData = (systemsData: SystemsData) => {
   localStorage.setItem(
     localStorageKey,
     JSON.stringify({
@@ -79,7 +79,7 @@ const saveSystemsData = (systemsData: BuildSystemsData) => {
   )
 }
 
-const retrieveSystemsData = (): BuildSystemsData | null => {
+const retrieveSystemsData = (): SystemsData | null => {
   const data = safeLocalStorageGet(localStorageKey)
   if (!data || !data.savedAt) {
     return null
@@ -88,10 +88,10 @@ const retrieveSystemsData = (): BuildSystemsData | null => {
   return savedMinutesAgo < 15 ? data.systemsData : null
 }
 
-export const useSystemsData = (): BuildSystemsData | "error" | null => {
-  const [systemsData, setSystemsData] = useState<
-    BuildSystemsData | "error" | null
-  >(null)
+export const useSystemsData = (): SystemsData | "error" | null => {
+  const [systemsData, setSystemsData] = useState<SystemsData | "error" | null>(
+    null
+  )
 
   useEffect(() => {
     if (!systemsData || systemsData === "error") {
@@ -102,20 +102,18 @@ export const useSystemsData = (): BuildSystemsData | "error" | null => {
 
   const fetch = async () => {
     try {
-      const modules = await Promise.all(buildSystems.map(getModules)).then(
+      const modules = await Promise.all(systems.map(getModules)).then(flatten)
+
+      const windowTypes = await Promise.all(systems.map(getWindowTypes)).then(
         flatten
       )
 
-      const windowTypes = await Promise.all(
-        buildSystems.map(getWindowTypes)
-      ).then(flatten)
-
       const internalLayoutTypes = await Promise.all(
-        buildSystems.map(getInternalLayoutTypes)
+        systems.map(getInternalLayoutTypes)
       ).then(flatten)
 
       const houseTypes = await Promise.all(
-        buildSystems.map((system) => getHouseTypes(system))
+        systems.map((system) => getHouseTypes(system))
       )
         .then(flatten)
         .then((houseTypes) =>
@@ -123,19 +121,19 @@ export const useSystemsData = (): BuildSystemsData | "error" | null => {
         )
 
       const energyInfo = await Promise.all(
-        buildSystems.map((system) => getEnergyInfo(system))
+        systems.map((system) => getEnergyInfo(system))
       ).then(flatten)
 
-      const materials = await Promise.all(buildSystems.map(getMaterials)).then(
+      const materials = await Promise.all(systems.map(getMaterials)).then(
         flatten
       )
 
       const elements = await Promise.all(
-        buildSystems.map((system) => getElements(system, materials))
+        systems.map((system) => getElements(system, materials))
       ).then(flatten)
 
       const settings = await Promise.all(
-        buildSystems.map((system) => getSystemSettings(system))
+        systems.map((system) => getSystemSettings(system))
       ).then(flatten)
 
       setSystemsData({
@@ -169,7 +167,7 @@ export const useSystemsData = (): BuildSystemsData | "error" | null => {
    * value. This is important to keep reference equality and prevent hook re-runs
    * elsewhere in the app.
    */
-  const cacheAddedSystemsDataRef = useRef<BuildSystemsData | null>(null)
+  const cacheAddedSystemsDataRef = useRef<SystemsData | null>(null)
 
   if (!systemsData || systemsData === "error") {
     return systemsData

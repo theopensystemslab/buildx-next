@@ -140,10 +140,7 @@ export const useColumnLayout = (buildingId: string) => {
         ),
         reduceRA(
           { acc: true, prev: null },
-          (
-            { acc, prev }: { acc: boolean; prev: number | null },
-            a: number
-          ) => ({
+          ({ prev }: { prev: number | null }, a: number) => ({
             acc: prev === null || prev === a,
             prev: a as number | null,
           })

@@ -1,8 +1,7 @@
 import { House } from "@/data/house"
 import { useColumnLayout } from "@/hooks/layouts"
-import { mapRA } from "@/utils"
+import { mapWithIndexRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
-import { filterWithIndex } from "fp-ts/lib/ReadonlyArray"
 import { useState } from "react"
 import BuildingHouseColumn from "./BuildingHouseColumn"
 import Stretch from "./Stretch"
@@ -23,9 +22,16 @@ const BuildingHouse = (props: Props) => {
 
   const [stretch, setStretch] = useState(true)
 
+  // split into 5
+  // i) main columns
+  // ii) end column 1
+  // iii) end column 2
+  // iv) extra 1
+  // v) extra 2
+
   const columns = pipe(
     columnLayout,
-    mapRA(({ columnIndex, z, gridGroups }) => (
+    mapWithIndexRA((i, { columnIndex, z, gridGroups }) => (
       <BuildingHouseColumn
         key={columnIndex}
         house={house}
@@ -33,11 +39,9 @@ const BuildingHouse = (props: Props) => {
         columnZ={z}
         gridGroups={gridGroups}
         mirror={columnIndex === columnLayout.length - 1}
+        visible={![0, columnLayout.length - 1].includes(i)}
       />
-    )),
-    filterWithIndex(
-      (i) => !stretch || ![0, columnLayout.length - 1].includes(i)
-    )
+    ))
   )
 
   // house position/rotation group

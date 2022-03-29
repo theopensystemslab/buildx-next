@@ -1,24 +1,24 @@
 import React, { Fragment, ReactNode } from "react"
-import { BuildSystemsData, useSystemsData } from "../data/buildSystem"
+import { SystemsData, useSystemsData } from "../data/system"
 import { createCtx } from "./utils"
 
-const [useCtx, CtxProvider, ctx] = createCtx<BuildSystemsData>()
+const [useCtx, CtxProvider, ctx] = createCtx<SystemsData>()
 
-export { useCtx as useBuildSystemsData }
+export { useCtx as useSystemsData }
 
-export const BuildSystemsDataContext = ctx
+export const SystemsDataContext = ctx
 
-type BuildSystemsDataProviderProps = {
+type SystemsDataProviderProps = {
   children?: ReactNode
   onLoading?: ReactNode
   onError?: ReactNode
 }
 
-export const BuildSystemsDataProvider = ({
+export const SystemsDataProvider = ({
   children,
   onLoading = null,
   onError = null,
-}: BuildSystemsDataProviderProps) => {
+}: SystemsDataProviderProps) => {
   const systemsData = useSystemsData()
   if (!systemsData) return <Fragment>{onLoading}</Fragment>
   if (systemsData === "error") return <Fragment>{onError}</Fragment>

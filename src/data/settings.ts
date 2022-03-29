@@ -1,8 +1,8 @@
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
-import type { BuildSystem } from "@/data/buildSystem"
+import { useSystemsData } from "@/contexts/SystemsData"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse, none, some } from "fp-ts/lib/Option"
 import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
+import { System } from "./system"
 import { getAirtableEntries } from "./utils"
 
 type ClampedDimension = {
@@ -17,9 +17,7 @@ export interface SystemSettings {
   height: ClampedDimension
 }
 
-export const getSystemSettings = (
-  system: BuildSystem
-): Promise<SystemSettings> =>
+export const getSystemSettings = (system: System): Promise<SystemSettings> =>
   getAirtableEntries({ tableId: system.airtableId, tab: "system_settings" })
     .then((res) => {
       const fields = res.records.reduce((acc: any, record: any): any => {
@@ -43,8 +41,8 @@ export const getSystemSettings = (
       return Promise.resolve([])
     })
 
-export const useBuildSystemSettings = (id: string) => {
-  const { settings } = useBuildSystemsData()
+export const useSystemSettings = (id: string) => {
+  const { settings } = useSystemsData()
 
   return pipe(
     settings,

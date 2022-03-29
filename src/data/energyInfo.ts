@@ -1,4 +1,4 @@
-import type { BuildSystem } from "@/data/buildSystem"
+import type { System } from "@/data/system"
 import { find } from "ramda"
 import type { House } from "./house"
 import type { HouseType } from "./houseType"
@@ -26,9 +26,7 @@ const getEnergyEntry = (fieldName: string, records: Array<any>): number => {
   )
 }
 
-export const getEnergyInfo = async (
-  system: BuildSystem
-): Promise<EnergyInfo> => {
+export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
   try {
     const records: Array<any> = (
       await getAirtableEntries({

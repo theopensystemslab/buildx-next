@@ -1,4 +1,4 @@
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
+import { useSystemsData } from "@/contexts/SystemsData"
 import context, { EditModeEnum, useContext } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import scope, { HouseScope, ScopeTypeEnum } from "@/stores/scope"
@@ -19,7 +19,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   const manySelected = scope.selected.length > 1
   const oneSelected = scope.selected.length === 1
 
-  const { houseTypes } = useBuildSystemsData()
+  const { houseTypes } = useSystemsData()
 
   const resetBuildings = () => {
     for (let buildingId of (scope as HouseScope).selected) {

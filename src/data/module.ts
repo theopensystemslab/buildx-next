@@ -1,4 +1,4 @@
-import type { BuildSystem } from "@/data/buildSystem"
+import type { System } from "@/data/system"
 import { GltfT } from "@/utils"
 import { filter } from "fp-ts/lib/Array"
 import type { StructuredDna } from "./moduleLayout"
@@ -23,7 +23,7 @@ export type LoadedModule = Omit<Module, "modelUrl"> & {
   gltf: GltfT
 }
 
-export const getModules = (system: BuildSystem): Promise<Array<Module>> =>
+export const getModules = (system: System): Promise<Array<Module>> =>
   getAirtableEntries({ tableId: system.airtableId, tab: "modules" })
     .then((res) =>
       res.records.map((record: any) => {

@@ -1,4 +1,4 @@
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
+import { useSystemsData } from "@/contexts/SystemsData"
 import { House as HouseT } from "@/data/house"
 import context, { useContext } from "@/stores/context"
 import { useHouse, useHouses } from "@/stores/houses"
@@ -8,13 +8,15 @@ import { pipe } from "fp-ts/lib/function"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import React, { Suspense, useEffect } from "react"
 import BuildingHouse from "../building/BuildingHouse"
+import StretchBuildingHouse from "../building/StretchBuildingHouse"
 import Loader3D from "../ui-3d/Loader3D"
 import SiteHouse from "./SiteHouse"
 
 const BuildingMode = ({ buildingId }: { buildingId: string }) => {
   const house = useHouse(buildingId)
 
-  return <BuildingHouse house={house as HouseT} />
+  return <StretchBuildingHouse house={house as HouseT} />
+  // return <BuildingHouse house={house as HouseT} />
 }
 
 const SiteMode = () => {
@@ -34,7 +36,7 @@ const SiteMode = () => {
 const SiteThreeApp = () => {
   const { buildingId } = useContext()
 
-  const { settings } = useBuildSystemsData()
+  const { settings } = useSystemsData()
 
   useEffect(() => {
     if (buildingId === null) {

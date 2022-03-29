@@ -1,7 +1,8 @@
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
+import { useSystemsData } from "@/contexts/SystemsData"
 import { House } from "@/data/house"
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
+import invisibleMaterial from "@/materials/invisibleMaterial"
 import context, { outlineMesh, removeMeshOutline } from "@/stores/context"
 import scope, {
   ElementScopeItem,
@@ -17,7 +18,7 @@ import { flatten, getOrElse, none, some } from "fp-ts/lib/Option"
 import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
 import React, { useEffect, useMemo, useRef } from "react"
 import { BufferGeometry, Material, Mesh } from "three"
-import { ref, subscribe } from "valtio"
+import { subscribe } from "valtio"
 
 const builtInMaterials: Record<string, Material> = {
   Glazing: glassMaterial,
@@ -29,15 +30,17 @@ type Props = MeshProps & {
   gridIndex: number
   house: House
   geometry: BufferGeometry
+  visible: boolean
 }
 
 const HouseModuleElement = (props: Props) => {
-  const { geometry, elementName, rowIndex, gridIndex, house } = props
+  const { geometry, elementName, rowIndex, gridIndex, house, visible } = props
   const meshRef = useRef<Mesh>()
 
-  const { materials, elements } = useBuildSystemsData()
+  const { materials, elements } = useSystemsData()
 
   const material = useMemo(() => {
+    if (!visible) return invisibleMaterial
     if (house.modifiedMaterials?.[elementName]) {
       return pipe(
         materials,
@@ -77,7 +80,7 @@ const HouseModuleElement = (props: Props) => {
         )
       )
     }
-  }, [elementName, materials])
+  }, [elementName, materials, visible])
 
   useEffect(() =>
     subscribe(scope, () => {

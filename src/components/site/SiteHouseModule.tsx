@@ -1,4 +1,4 @@
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
+import { useSystemsData } from "@/contexts/SystemsData"
 import { House } from "@/data/house"
 import { LoadedModule } from "@/data/module"
 import { fuzzyMatch, isMesh } from "@/utils"
@@ -23,12 +23,20 @@ type Props = GroupProps & {
   rowIndex: number
   gridIndex: number
   house: House
+  visible?: boolean
 }
 
 const SiteHouseModule = (props: Props) => {
-  const { module, rowIndex, house, gridIndex, ...groupProps } = props
+  const {
+    module,
+    rowIndex,
+    house,
+    gridIndex,
+    visible = true,
+    ...groupProps
+  } = props
 
-  const { elements } = useBuildSystemsData()
+  const { elements } = useSystemsData()
 
   const getElement = (nodeType: string) =>
     fuzzyMatch(elements, {
@@ -64,6 +72,7 @@ const SiteHouseModule = (props: Props) => {
           house,
           rowIndex,
           gridIndex,
+          visible,
         }}
       />
     )),

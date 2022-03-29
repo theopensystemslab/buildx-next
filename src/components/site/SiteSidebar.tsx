@@ -1,6 +1,6 @@
 import Sidebar from "@/components/ui/Sidebar"
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
-import { BuildSystem, buildSystems } from "@/data/buildSystem"
+import { useSystemsData } from "@/contexts/SystemsData"
+import { System, systems } from "@/data/system"
 import houses from "@/stores/houses"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
@@ -17,18 +17,18 @@ type Props = {
 const SiteSidebar = ({ open, close }: Props) => {
   const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null)
 
-  const selectedSystem: BuildSystem | undefined = useMemo(() => {
-    return buildSystems.find((system) => system.id === selectedSystemId)
+  const selectedSystem: System | undefined = useMemo(() => {
+    return systems.find((system) => system.id === selectedSystemId)
   }, [selectedSystemId])
 
-  const { houseTypes } = useBuildSystemsData()
+  const { houseTypes } = useSystemsData()
 
   return (
     <Sidebar expanded={open} onClose={close}>
       {!selectedSystem ? (
         <div className="space-y-2">
           <p className="px-4 font-bold">Systems</p>
-          {buildSystems.map((system) => (
+          {systems.map((system) => (
             <button
               key={system.id}
               className="block w-full cursor-pointer px-4 py-2 text-left hover:bg-gray-100"

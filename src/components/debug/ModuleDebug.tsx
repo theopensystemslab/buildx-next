@@ -1,4 +1,4 @@
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
+import { useSystemsData } from "@/contexts/SystemsData"
 import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
 import { mapRA, reduceRA } from "@/utils"
@@ -14,7 +14,7 @@ import { Fragment, Suspense, useEffect, useState } from "react"
 import ModuleDebugModule from "./ModuleDebugModule"
 
 const ModuleDebug = () => {
-  const { houseTypes, modules: systemModules } = useBuildSystemsData()
+  const { houseTypes, modules: systemModules } = useSystemsData()
 
   const houseTypeModules = pipe(
     houseTypes,

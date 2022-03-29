@@ -1,4 +1,4 @@
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
+import { useSystemsData } from "@/contexts/SystemsData"
 import { LoadedModule, Module } from "@/data/module"
 import {
   filterRA,
@@ -25,6 +25,7 @@ import produce from "immer"
 import { useMemo, useState } from "react"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
+import { proxy } from "valtio"
 import {
   columnLayoutToDNA,
   PositionedModule,
@@ -38,8 +39,12 @@ type VanillaPositionedRow = PositionedRow & {
   rowLength: number
 }
 
+export const stretch = proxy({
+  z: 0,
+})
+
 const useGetVanillaModule = () => {
-  const { modules: allModules } = useBuildSystemsData()
+  const { modules: allModules } = useSystemsData()
   return (module: LoadedModule): LoadedModule | null => {
     const systemModules = pipe(
       allModules,
@@ -79,7 +84,6 @@ export const useStretchedColumns = (
 
   const house = houses[buildingId]
 
-  // copy vanilla from me
   const endColumn = columnLayout[back ? columnLayout.length - 1 : 0]
 
   const [n, setN] = useState(0)
@@ -169,15 +173,10 @@ export const useStretchedColumns = (
   const columnLength = vanillaPositionedRows[0].rowLength
 
   const sendZ = (dz: number) => {
-    // working for back but not front (changing floor to ceil doesn't work)
     const x = Math.floor(Math.abs(z0 - dz) / columnLength)
     const next = back ? x : x - 1
     if (next !== n) setN(next)
   }
-
-  // need to calc totalLength
-  // also one-off issue
-  // before after
 
   const sendLast = () => {
     const realN = back ? n - 1 : n
@@ -198,10 +197,7 @@ export const useStretchedColumns = (
       ],
       columnLayoutToDNA
     ) as string[]
-    // let position = house.position
-    // if (!back) {
-    //   position[1] -= columnLength * realN
-    // }
+
     houses[buildingId] = {
       ...house,
       dna,
@@ -209,6 +205,7 @@ export const useStretchedColumns = (
         ? house.position
         : [house.position[0], house.position[1] - columnLength * realN],
     }
+
     setN(0)
   }
 

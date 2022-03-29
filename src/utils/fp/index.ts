@@ -21,6 +21,8 @@ export {
   filter as filterRA,
   map as mapRA,
   mapWithIndex as mapWithIndexRA,
+  filterMapWithIndex as filterMapWithIndexRA,
+  filterMap as filterMapRA,
   reduce as reduceRA,
   reduceWithIndex as reduceWithIndexRA,
 } from "fp-ts/lib/ReadonlyArray"

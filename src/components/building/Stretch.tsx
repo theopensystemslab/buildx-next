@@ -1,5 +1,5 @@
 import { House } from "@/data/house"
-import { useBuildSystemSettings } from "@/data/settings"
+import { useSystemSettings } from "@/data/settings"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import context from "@/stores/context"
@@ -21,6 +21,7 @@ const StretchHandle = (props: Props) => {
   const { house, back = false } = props
   const ref = useRef<Mesh>()
 
+  // should you get rid of n?
   const { sendZ, sendLast, vanillaPositionedRows, n, z0 } = useStretchedColumns(
     house.id,
     back
@@ -30,7 +31,7 @@ const StretchHandle = (props: Props) => {
 
   const {
     length: { max },
-  } = useBuildSystemSettings(house.systemId)
+  } = useSystemSettings(house.systemId)
 
   const stretchMaterial = useMemo(() => {
     const material = defaultMaterial.clone()
@@ -49,6 +50,12 @@ const StretchHandle = (props: Props) => {
       setCameraEnabled(false)
       context.outlined = []
     }
+
+    // if z is + or - makes the difference
+    // min is in metres
+    // need to reduce every grid-group so far
+    // if you just hide the columns (material)
+    // then you don't need to store them (they're already there)
 
     const z = back ? clamp(h0, max)(pz) : clamp(-max, h0)(pz)
     sendZ(z)

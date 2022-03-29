@@ -1,5 +1,5 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
+import { useSystemsData } from "@/contexts/SystemsData"
 import { Houses } from "@/data/house"
 import { LoadedModule, Module } from "@/data/module"
 import { snapToGrid, SSR, useGLTF } from "@/utils"
@@ -55,7 +55,7 @@ export const useBuildingDna = (buildingId: string) => {
 
 export const useHouseType = (houseId: string) => {
   const house = useHouse(houseId)
-  const { houseTypes } = useBuildSystemsData()
+  const { houseTypes } = useSystemsData()
   const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
   if (!houseType) throw new Error("houseType not found")
   return houseType
@@ -195,7 +195,7 @@ export const useBuildingTransforms = () => {
 }
 
 export const useBuildingModules = (buildingId: string) => {
-  const { modules: sysModules } = useBuildSystemsData()
+  const { modules: sysModules } = useSystemsData()
   const house = useSnapshot(houses)[buildingId]
 
   const modules = pipe(
