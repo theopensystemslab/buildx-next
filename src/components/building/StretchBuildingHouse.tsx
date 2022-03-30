@@ -136,22 +136,21 @@ const StretchBuildingHouse = (props: Props) => {
         />
       </group>
       <group position-z={endColumn.z + endColumn.length / 2}>
-        {endVanillaColumns > 0 &&
-          pipe(
-            vanillaPositionedRows,
-            mapRA(({ geometry, length, y, levelIndex }) => (
-              <Instances
-                key={levelIndex}
-                geometry={geometry}
-                material={stretchMaterial}
-                position-y={y}
-              >
-                {[...Array(endVanillaColumns)].map((_, i) => (
-                  <Instance key={i} position-z={length * i} />
-                ))}
-              </Instances>
-            ))
-          )}
+        {pipe(
+          vanillaPositionedRows,
+          mapRA(({ geometry, length, y, levelIndex }) => (
+            <Instances
+              key={levelIndex}
+              geometry={geometry}
+              material={stretchMaterial}
+              position-y={y}
+            >
+              {[...Array(endVanillaColumns)].map((_, i) => (
+                <Instance key={i} position-z={length * i} />
+              ))}
+            </Instances>
+          ))
+        )}
       </group>
     </group>
   )
