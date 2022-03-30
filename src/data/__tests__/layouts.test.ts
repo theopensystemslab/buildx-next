@@ -60,7 +60,7 @@ const columnify = (input: number[][]): number[][][] => {
         pipe(column, analyzeColumn, ({ rows, legit, target }) => {
           if (legit) {
             acc = [...acc, column]
-            slices = slices.map(([end]) => [end, end + 1])
+            slices = slices.map(([, end]) => [end, end + 1])
           } else {
             slices = slices.map(([start, end], i) =>
               rows[i].units === target ? [start, end] : [start, end + 1]
