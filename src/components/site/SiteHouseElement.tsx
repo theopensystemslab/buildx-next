@@ -82,6 +82,11 @@ const HouseModuleElement = (props: Props) => {
     }
   }, [elementName, materials, visible])
 
+  // useEffect(() => {
+  //   material.opacity = 0.3
+  //   material.transparent = true
+  // }, [material])
+
   useEffect(() =>
     subscribe(scope, () => {
       let isOutlined = context.outlined.includes(meshRef),

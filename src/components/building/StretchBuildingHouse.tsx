@@ -2,14 +2,16 @@ import { House } from "@/data/house"
 import { useSystemSettings } from "@/data/settings"
 import { PositionedColumn } from "@/hooks/layouts"
 import { useStretch } from "@/hooks/stretch"
+import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import context from "@/stores/context"
 import { mapRA } from "@/utils"
+import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { useRef } from "react"
-import { DoubleSide, Group } from "three"
+import { useMemo, useRef, useState } from "react"
+import { Color, DoubleSide, Group } from "three"
 import BuildingHouseColumn from "./BuildingHouseColumn"
 
 type StretchHandleProps = MeshProps & {
@@ -41,22 +43,24 @@ const StretchBuildingHouse = (props: Props) => {
   const { house } = props
 
   const {
-    position: [x, z],
-    id: buildingId,
-  } = house
+    startColumn,
+    midColumns,
+    endColumn,
+    columnLayout,
+    startClamp,
+    endClamp,
+    vanillaPositionedRows,
+    sendDrag,
+    sendDrop,
+    startVanillaColumns,
+    endVanillaColumns,
+  } = useStretch(house.id)
 
-  const { startColumn, midColumns, endColumn, columnLayout } =
-    useStretch(buildingId)
-
-  // const [startColumn, ...restColumns] = columnLayout
-  // const midColumns = restColumns.slice()
-
-  // split into 5
-  // i) main columns
-  // ii) end column 1
-  // iii) end column 2
-  // iv) extra 1
-  // v) extra 2
+  const stretchMaterial = useMemo(() => {
+    const material = defaultMaterial.clone()
+    material.color = new Color("white")
+    return material
+  }, [])
 
   const renderColumn = (
     { columnIndex, z, gridGroups }: PositionedColumn,
@@ -78,34 +82,76 @@ const StretchBuildingHouse = (props: Props) => {
 
   const handleOffset = 1
 
-  const {
-    length: { max },
-  } = useSystemSettings(house.systemId)
-
   return (
-    <group position={[x, 0, z]}>
+    <group position={[house.position[0], 0, house.position[1]]}>
       <group ref={startRef}>
         {renderColumn(startColumn)}
         <StretchHandle
-          onDrag={() => {
+          onDrag={({ last }) => {
             if (!startRef.current) return
-            const z = context.pointer[1] - house.position[1]
+            const z = pipe(
+              -(startColumn.z - handleOffset) + context.pointer[1],
+              startClamp
+            )
             startRef.current.position.z = z
+            sendDrag(z, { isStart: true })
+            if (last) sendDrop()
           }}
           position-z={startColumn.z - handleOffset}
         />
+      </group>
+      <group position-z={startColumn.length / 2}>
+        {startVanillaColumns > 0 &&
+          pipe(
+            vanillaPositionedRows,
+            mapRA(({ geometry, length, y, levelIndex }) => (
+              <Instances
+                key={levelIndex}
+                geometry={geometry}
+                material={stretchMaterial}
+                position-y={y}
+              >
+                {[...Array(startVanillaColumns)].map((_, i) => (
+                  <Instance key={i} position-z={-length * i} />
+                ))}
+              </Instances>
+            ))
+          )}
       </group>
       <group>{pipe(midColumns, mapRA(renderColumn))}</group>
       <group ref={endRef}>
         {renderColumn(endColumn)}
         <StretchHandle
-          onDrag={() => {
+          onDrag={({ last }) => {
             if (!endRef.current) return
-            const z = context.pointer[1] - house.position[1]
+            const z = pipe(
+              -(endColumn.z + handleOffset) + context.pointer[1],
+              endClamp
+            )
             endRef.current.position.z = z
+            sendDrag(z, { isStart: false })
+            if (last) sendDrop()
           }}
           position-z={endColumn.z + handleOffset}
         />
+      </group>
+      <group position-z={endColumn.z + endColumn.length / 2}>
+        {endVanillaColumns > 0 &&
+          pipe(
+            vanillaPositionedRows,
+            mapRA(({ geometry, length, y, levelIndex }) => (
+              <Instances
+                key={levelIndex}
+                geometry={geometry}
+                material={stretchMaterial}
+                position-y={y}
+              >
+                {[...Array(endVanillaColumns)].map((_, i) => (
+                  <Instance key={i} position-z={length * i} />
+                ))}
+              </Instances>
+            ))
+          )}
       </group>
     </group>
   )

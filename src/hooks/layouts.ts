@@ -2,13 +2,12 @@ import { LoadedModule } from "@/data/module"
 import {
   mapRA,
   mapWithIndexRA,
-  pipeLog,
   reduceRA,
   reduceWithIndexRA,
   zipRA,
 } from "@/utils"
 import { transpose } from "fp-ts-std/ReadonlyArray"
-import { flow, pipe } from "fp-ts/lib/function"
+import { pipe } from "fp-ts/lib/function"
 import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useBuildingRows } from "../stores/houses"
@@ -23,6 +22,7 @@ export type PositionedRow = {
   levelType: string
   y: number
   modules: Readonly<Array<PositionedModule>>
+  length: number
 }
 
 export type RowLayout = Array<PositionedRow>
@@ -31,6 +31,7 @@ export type PositionedColumn = {
   gridGroups: Readonly<Array<PositionedRow>>
   z: number
   columnIndex: number
+  length: number
 }
 
 export type ColumnLayout = Array<PositionedColumn>
@@ -72,6 +73,7 @@ export const useRowLayout = (buildingId: string): RowLayout =>
           y: number
           levelType: string
           levelIndex: number
+          length: number
         }[],
         row
       ) => {
@@ -91,6 +93,7 @@ export const useRowLayout = (buildingId: string): RowLayout =>
             y,
             levelIndex: i,
             levelType: row[0].module.structuredDna.levelType,
+            length: row.reduce((acc, m) => acc + m.module.length, 0),
           },
         ]
       }
@@ -258,64 +261,68 @@ export const useColumnLayout = (buildingId: string) => {
               (modulesLength, module) => modulesLength + module.module.length,
               0
             )
+
+        const gridGroups = pipe(
+          loadedModules,
+          reduceWithIndex(
+            [],
+            (levelIndex, positionedRows: PositionedRow[], modules) => {
+              const levelType = modules[0].structuredDna.levelType
+              const levelLetter = levelType[0]
+              const height = modules[0].height
+              const y =
+                levelLetter === "F"
+                  ? -height
+                  : levelLetter === "G"
+                  ? 0
+                  : positionedRows[levelIndex - 1].y + height
+
+              return [
+                ...positionedRows,
+                {
+                  modules: pipe(
+                    modules,
+                    reduceWithIndex(
+                      [],
+                      (
+                        i,
+                        positionedModules: PositionedModule[],
+                        module: LoadedModule
+                      ) => {
+                        const isFirst: boolean = i === 0
+
+                        const z = isFirst
+                          ? module.length / 2
+                          : positionedModules[i - 1].z +
+                            positionedModules[i - 1].module.length / 2 +
+                            module.length / 2
+
+                        return [
+                          ...positionedModules,
+                          {
+                            module,
+                            z,
+                          },
+                        ]
+                      }
+                    )
+                  ),
+                  levelIndex,
+                  levelType,
+                  y,
+                  length: modules.reduce((acc, m) => acc + m.length, 0),
+                },
+              ]
+            }
+          )
+        )
         return [
           ...positionedCols,
           {
             columnIndex,
-            gridGroups: pipe(
-              loadedModules,
-              reduceWithIndex(
-                [],
-                (levelIndex, positionedRows: PositionedRow[], modules) => {
-                  const levelType = modules[0].structuredDna.levelType
-                  const levelLetter = levelType[0]
-                  const height = modules[0].height
-                  const y =
-                    levelLetter === "F"
-                      ? -height
-                      : levelLetter === "G"
-                      ? 0
-                      : positionedRows[levelIndex - 1].y + height
-
-                  return [
-                    ...positionedRows,
-                    {
-                      modules: pipe(
-                        modules,
-                        reduceWithIndex(
-                          [],
-                          (
-                            i,
-                            positionedModules: PositionedModule[],
-                            module: LoadedModule
-                          ) => {
-                            const isFirst: boolean = i === 0
-
-                            const z = isFirst
-                              ? module.length / 2
-                              : positionedModules[i - 1].z +
-                                positionedModules[i - 1].module.length / 2 +
-                                module.length / 2
-
-                            return [
-                              ...positionedModules,
-                              {
-                                module,
-                                z,
-                              },
-                            ]
-                          }
-                        )
-                      ),
-                      levelIndex,
-                      levelType,
-                      y,
-                    },
-                  ]
-                }
-              )
-            ),
+            gridGroups,
             z,
+            length: gridGroups.reduce((acc, v) => acc + v.length, 0),
           },
         ]
       }
