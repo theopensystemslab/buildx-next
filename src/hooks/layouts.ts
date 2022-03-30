@@ -1,7 +1,14 @@
 import { LoadedModule } from "@/data/module"
-import { mapRA, reduceRA, reduceWithIndexRA } from "@/utils"
+import {
+  mapRA,
+  mapWithIndexRA,
+  pipeLog,
+  reduceRA,
+  reduceWithIndexRA,
+  zipRA,
+} from "@/utils"
 import { transpose } from "fp-ts-std/ReadonlyArray"
-import { pipe } from "fp-ts/lib/function"
+import { flow, pipe } from "fp-ts/lib/function"
 import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useBuildingRows } from "../stores/houses"
@@ -90,6 +97,74 @@ export const useRowLayout = (buildingId: string): RowLayout =>
     )
   )
 
+const analyzeColumn =
+  <A extends unknown>(toLength: (a: A) => number) =>
+  (as: readonly A[][]) => {
+    return pipe(
+      as,
+      reduceWithIndexRA(
+        { legit: true, target: -1, rows: [] },
+        (
+          index,
+          {
+            rows,
+            legit,
+            target,
+          }: {
+            rows: { units: number; index: number }[]
+            legit: boolean
+            target: number
+          },
+          row: A[]
+        ) => {
+          const units = row.reduce((acc, a) => acc + toLength(a), 0)
+          return {
+            rows: [...rows, { units, index }],
+            legit: legit && (target === -1 || target === units),
+            target: target === -1 ? units : Math.max(target, units),
+          }
+        }
+      )
+    )
+  }
+
+const columnify =
+  <A extends unknown>(toLength: (a: A) => number) =>
+  (input: readonly A[][]) => {
+    let slices = new Array<[number, number]>(input.length).fill([0, 1])
+    const lengths = input.map((v) => v.length)
+
+    let acc: (readonly A[][])[] = []
+
+    const slicesRemaining = () =>
+      !pipe(
+        zipRA(slices)(lengths),
+        reduceRA(true, (acc, [length, [start]]) => acc && start > length - 1)
+      )
+
+    while (slicesRemaining()) {
+      pipe(
+        slices,
+        mapWithIndexRA((rowIndex, [start, end]) =>
+          input[rowIndex].slice(start, end)
+        ),
+        (column) =>
+          pipe(column, analyzeColumn(toLength), ({ rows, legit, target }) => {
+            if (legit) {
+              acc = [...acc, column]
+              slices = slices.map(([, end]) => [end, end + 1])
+            } else {
+              slices = slices.map(([start, end], i) =>
+                rows[i].units === target ? [start, end] : [start, end + 1]
+              )
+            }
+          })
+      )
+    }
+
+    return pipe(acc, transpose)
+  }
+
 export const useColumnLayout = (buildingId: string) => {
   // think you actually want to find
   // lowest denominator in terms of grid units,
@@ -127,7 +202,7 @@ export const useColumnLayout = (buildingId: string) => {
     transpose
   )
 
-  const legit = pipe(
+  const sameLengthColumns = pipe(
     columns,
     mapRA((column) =>
       pipe(
@@ -151,13 +226,26 @@ export const useColumnLayout = (buildingId: string) => {
     reduceRA(true, (b, a) => b && a)
   )
 
-  if (!legit) throw new Error("not legit")
+  if (!sameLengthColumns) throw new Error("not sameLengthColumns")
 
-  // work on one column first
-  // const foo = pipe(columns[1])
+  // columnified
+
+  const columnifiedFurther = pipe(
+    columns,
+    mapRA((column) =>
+      pipe(
+        column,
+        columnify((a) => a.structuredDna.gridUnits),
+        transpose
+      )
+    ),
+    flatten
+  )
+
+  // metadata
 
   return pipe(
-    columns,
+    columnifiedFurther,
     reduceWithIndex(
       [],
       (columnIndex, positionedCols: PositionedColumn[], loadedModules) => {
