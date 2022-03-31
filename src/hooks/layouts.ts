@@ -322,7 +322,7 @@ export const useColumnLayout = (buildingId: string) => {
             columnIndex,
             gridGroups,
             z,
-            length: gridGroups.reduce((acc, v) => acc + v.length, 0),
+            length: gridGroups[0].length,
           },
         ]
       }

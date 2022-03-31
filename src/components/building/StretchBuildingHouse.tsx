@@ -55,22 +55,21 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
   return (
     <Fragment>
       <group position-z={startColumn.length / 2}>
-        {startVanillaColumns > 0 &&
-          pipe(
-            vanillaPositionedRows,
-            mapRA(({ geometry, length, y, levelIndex }) => (
-              <Instances
-                key={levelIndex}
-                geometry={geometry}
-                material={stretchMaterial}
-                position-y={y}
-              >
-                {[...Array(startVanillaColumns)].map((_, i) => (
-                  <Instance key={i} position-z={-length * i} />
-                ))}
-              </Instances>
-            ))
-          )}
+        {pipe(
+          vanillaPositionedRows,
+          mapRA(({ geometry, length, y, levelIndex }) => (
+            <Instances
+              key={levelIndex}
+              geometry={geometry}
+              material={stretchMaterial}
+              position-y={y}
+            >
+              {[...Array(Math.max(0, startVanillaColumns))].map((_, i) => (
+                <Instance key={i} position-z={-length * i} />
+              ))}
+            </Instances>
+          ))
+        )}
       </group>
       <group position-z={endColumn.z + endColumn.length / 2}>
         {pipe(
@@ -82,7 +81,7 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
               material={stretchMaterial}
               position-y={y}
             >
-              {[...Array(endVanillaColumns)].map((_, i) => (
+              {[...Array(Math.max(0, endVanillaColumns))].map((_, i) => (
                 <Instance key={i} position-z={length * i} />
               ))}
             </Instances>
@@ -91,6 +90,34 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
       </group>
     </Fragment>
   )
+}
+
+type MidColumnsProps = {
+  house: House
+  columnLayout: PositionedColumn[]
+  midColumns: readonly PositionedColumn[]
+}
+
+const MidColumns = (props: MidColumnsProps) => {
+  const { house, columnLayout, midColumns } = props
+
+  const { visibleStartIndex, visibleEndIndex } = useSnapshot(stretchProxy)
+
+  const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
+    <BuildingHouseColumn
+      key={columnIndex}
+      house={house}
+      columnIndex={columnIndex}
+      columnZ={z}
+      gridGroups={gridGroups}
+      mirror={columnIndex === columnLayout.length - 1}
+      visible={
+        columnIndex >= visibleStartIndex && columnIndex <= visibleEndIndex
+      }
+    />
+  )
+
+  return <group>{pipe(midColumns, mapRA(renderColumn))}</group>
 }
 
 type Props = {
@@ -145,12 +172,14 @@ const StretchBuildingHouse = (props: Props) => {
             )
             startRef.current.position.z = z
             sendDrag(z, { isStart: true })
-            if (last) sendDrop()
+            if (last) {
+              startRef.current.position.z = 0
+              sendDrop()
+            }
           }}
           position-z={startColumn.z - handleOffset}
         />
       </group>
-      <group>{pipe(midColumns, mapRA(renderColumn))}</group>
       <group ref={endRef}>
         {renderColumn(endColumn)}
         <StretchHandle
@@ -162,11 +191,19 @@ const StretchBuildingHouse = (props: Props) => {
             )
             endRef.current.position.z = z
             sendDrag(z, { isStart: false })
-            if (last) sendDrop()
+            if (last) {
+              endRef.current.position.z = 0
+              sendDrop()
+            }
           }}
           position-z={endColumn.z + handleOffset}
         />
       </group>
+      <MidColumns
+        columnLayout={columnLayout}
+        house={house}
+        midColumns={midColumns}
+      />
       <StretchedColumns
         {...{ endColumn, startColumn, vanillaPositionedRows }}
       />

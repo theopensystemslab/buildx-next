@@ -5,6 +5,7 @@ import { flow, pipe } from "fp-ts/lib/function"
 import { flatten, partition } from "fp-ts/lib/ReadonlyArray"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
+import { useEffect } from "react"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import { proxy } from "valtio"
@@ -19,6 +20,8 @@ import { useGetVanillaModule } from "./modules"
 export const stretchProxy = proxy({
   endVanillaColumns: 0,
   startVanillaColumns: 0,
+  visibleStartIndex: -1,
+  visibleEndIndex: -1,
 })
 
 export type VanillaPositionedRow = PositionedRow & {
@@ -135,6 +138,14 @@ export const useStretch = (buildingId: string) => {
     })
   )
 
+  if (
+    stretchProxy.visibleStartIndex === -1 &&
+    stretchProxy.visibleEndIndex === -1
+  ) {
+    stretchProxy.visibleStartIndex = startColumn.columnIndex
+    stretchProxy.visibleEndIndex = endColumn.columnIndex
+  }
+
   const vanillaPositionedRows = useVanillaPositionedRows(startColumn.gridGroups)
 
   const vanillaColumnLength = vanillaPositionedRows[0].length
@@ -162,21 +173,43 @@ export const useStretch = (buildingId: string) => {
     { isStart }: { isStart: boolean } = { isStart: true }
   ) => {
     if (isStart) {
-      // diff +/-
       const next = Math.ceil(-z / vanillaColumnLength)
+      if (columnLayout[stretchProxy.visibleStartIndex]?.z < z) {
+        stretchProxy.visibleStartIndex = clamp(
+          startColumn.columnIndex,
+          endColumn.columnIndex
+        )(stretchProxy.visibleStartIndex + 1)
+      } else if (columnLayout[stretchProxy.visibleStartIndex - 1]?.z > z) {
+        stretchProxy.visibleStartIndex = clamp(
+          startColumn.columnIndex,
+          endColumn.columnIndex
+          // midColumns[midColumns.length - 1].columnIndex + 1
+        )(stretchProxy.visibleStartIndex - 1)
+      }
+      // const gate = midColumns[stretchProxy.visibleStartIndex]
+      // if (gate && gate.z < z) {
+      //   stretchProxy.visibleStartIndex++
+      // }
       if (next !== stretchProxy.startVanillaColumns) {
         stretchProxy.startVanillaColumns = next
       }
     } else {
-      // diff +/-
       const next = Math.ceil(z / vanillaColumnLength)
+      // if (midColumns[stretchProxy.visibleEndIndex].z > z) {
+      //   stretchProxy.visibleEndIndex--
+      // }
       if (next !== stretchProxy.endVanillaColumns) {
         stretchProxy.endVanillaColumns = next
       }
     }
   }
 
-  const sendDrop = () => {}
+  const sendDrop = () => {
+    stretchProxy.visibleStartIndex = startColumn.columnIndex
+    stretchProxy.visibleEndIndex = endColumn.columnIndex
+    stretchProxy.endVanillaColumns = 0
+    stretchProxy.startVanillaColumns = 0
+  }
 
   return {
     startColumn,
