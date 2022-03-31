@@ -1,9 +1,13 @@
+import { useSystemSettings } from "@/data/settings"
+import { useHouse } from "@/stores/houses"
 import { clamp, isMesh, mapRA, reduceRA, reduceWithIndexRA } from "@/utils"
 import { flow, pipe } from "fp-ts/lib/function"
 import { flatten, partition } from "fp-ts/lib/ReadonlyArray"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
 import { BufferGeometry, Mesh } from "three"
+import { mergeBufferGeometries } from "three-stdlib"
+import { proxy } from "valtio"
 import {
   PositionedColumn,
   PositionedModule,
@@ -11,12 +15,13 @@ import {
   useColumnLayout,
 } from "./layouts"
 import { useGetVanillaModule } from "./modules"
-import { mergeBufferGeometries } from "three-stdlib"
-import { useSystemSettings } from "@/data/settings"
-import { useHouse } from "@/stores/houses"
-import { useMemo, useState } from "react"
 
-type VanillaPositionedRow = PositionedRow & {
+export const stretchProxy = proxy({
+  endVanillaColumns: 0,
+  startVanillaColumns: 0,
+})
+
+export type VanillaPositionedRow = PositionedRow & {
   geometry: BufferGeometry
 }
 
@@ -152,9 +157,6 @@ export const useStretch = (buildingId: string) => {
     maxLength - totalLength
   )
 
-  const [startVanillaColumns, setStartVanillaColumns] = useState(0)
-  const [endVanillaColumns, setEndVanillaColumns] = useState(0)
-
   const sendDrag = (
     z: number,
     { isStart }: { isStart: boolean } = { isStart: true }
@@ -162,14 +164,14 @@ export const useStretch = (buildingId: string) => {
     if (isStart) {
       // diff +/-
       const next = Math.ceil(-z / vanillaColumnLength)
-      if (next !== startVanillaColumns) {
-        setStartVanillaColumns(next)
+      if (next !== stretchProxy.startVanillaColumns) {
+        stretchProxy.startVanillaColumns = next
       }
     } else {
       // diff +/-
       const next = Math.ceil(z / vanillaColumnLength)
-      if (next !== endVanillaColumns) {
-        setEndVanillaColumns(next)
+      if (next !== stretchProxy.endVanillaColumns) {
+        stretchProxy.endVanillaColumns = next
       }
     }
   }
@@ -186,7 +188,5 @@ export const useStretch = (buildingId: string) => {
     sendDrag,
     sendDrop,
     vanillaPositionedRows,
-    endVanillaColumns,
-    startVanillaColumns,
   }
 }

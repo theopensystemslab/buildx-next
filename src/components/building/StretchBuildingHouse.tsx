@@ -1,7 +1,7 @@
 import { House } from "@/data/house"
 import { useSystemSettings } from "@/data/settings"
 import { PositionedColumn } from "@/hooks/layouts"
-import { useStretch } from "@/hooks/stretch"
+import { stretchProxy, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import context from "@/stores/context"
@@ -10,8 +10,9 @@ import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { useMemo, useRef, useState } from "react"
+import { Fragment, useMemo, useRef, useState } from "react"
 import { Color, DoubleSide, Group } from "three"
+import { useSnapshot } from "valtio"
 import BuildingHouseColumn from "./BuildingHouseColumn"
 
 type StretchHandleProps = MeshProps & {
@@ -35,6 +36,63 @@ const StretchHandle = (props: StretchHandleProps) => {
   )
 }
 
+type StretchedColumnsProps = {
+  startColumn: PositionedColumn
+  endColumn: PositionedColumn
+  vanillaPositionedRows: readonly VanillaPositionedRow[]
+}
+
+const StretchedColumns = (props: StretchedColumnsProps) => {
+  const { startColumn, endColumn, vanillaPositionedRows } = props
+  const { startVanillaColumns, endVanillaColumns } = useSnapshot(stretchProxy)
+
+  const stretchMaterial = useMemo(() => {
+    const material = defaultMaterial.clone()
+    material.color = new Color("white")
+    return material
+  }, [])
+
+  return (
+    <Fragment>
+      <group position-z={startColumn.length / 2}>
+        {startVanillaColumns > 0 &&
+          pipe(
+            vanillaPositionedRows,
+            mapRA(({ geometry, length, y, levelIndex }) => (
+              <Instances
+                key={levelIndex}
+                geometry={geometry}
+                material={stretchMaterial}
+                position-y={y}
+              >
+                {[...Array(startVanillaColumns)].map((_, i) => (
+                  <Instance key={i} position-z={-length * i} />
+                ))}
+              </Instances>
+            ))
+          )}
+      </group>
+      <group position-z={endColumn.z + endColumn.length / 2}>
+        {pipe(
+          vanillaPositionedRows,
+          mapRA(({ geometry, length, y, levelIndex }) => (
+            <Instances
+              key={levelIndex}
+              geometry={geometry}
+              material={stretchMaterial}
+              position-y={y}
+            >
+              {[...Array(endVanillaColumns)].map((_, i) => (
+                <Instance key={i} position-z={length * i} />
+              ))}
+            </Instances>
+          ))
+        )}
+      </group>
+    </Fragment>
+  )
+}
+
 type Props = {
   house: House
 }
@@ -52,15 +110,7 @@ const StretchBuildingHouse = (props: Props) => {
     vanillaPositionedRows,
     sendDrag,
     sendDrop,
-    startVanillaColumns,
-    endVanillaColumns,
   } = useStretch(house.id)
-
-  const stretchMaterial = useMemo(() => {
-    const material = defaultMaterial.clone()
-    material.color = new Color("white")
-    return material
-  }, [])
 
   const renderColumn = (
     { columnIndex, z, gridGroups }: PositionedColumn,
@@ -100,24 +150,6 @@ const StretchBuildingHouse = (props: Props) => {
           position-z={startColumn.z - handleOffset}
         />
       </group>
-      <group position-z={startColumn.length / 2}>
-        {startVanillaColumns > 0 &&
-          pipe(
-            vanillaPositionedRows,
-            mapRA(({ geometry, length, y, levelIndex }) => (
-              <Instances
-                key={levelIndex}
-                geometry={geometry}
-                material={stretchMaterial}
-                position-y={y}
-              >
-                {[...Array(startVanillaColumns)].map((_, i) => (
-                  <Instance key={i} position-z={-length * i} />
-                ))}
-              </Instances>
-            ))
-          )}
-      </group>
       <group>{pipe(midColumns, mapRA(renderColumn))}</group>
       <group ref={endRef}>
         {renderColumn(endColumn)}
@@ -135,23 +167,9 @@ const StretchBuildingHouse = (props: Props) => {
           position-z={endColumn.z + handleOffset}
         />
       </group>
-      <group position-z={endColumn.z + endColumn.length / 2}>
-        {pipe(
-          vanillaPositionedRows,
-          mapRA(({ geometry, length, y, levelIndex }) => (
-            <Instances
-              key={levelIndex}
-              geometry={geometry}
-              material={stretchMaterial}
-              position-y={y}
-            >
-              {[...Array(endVanillaColumns)].map((_, i) => (
-                <Instance key={i} position-z={length * i} />
-              ))}
-            </Instances>
-          ))
-        )}
-      </group>
+      <StretchedColumns
+        {...{ endColumn, startColumn, vanillaPositionedRows }}
+      />
     </group>
   )
 }
