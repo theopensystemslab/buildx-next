@@ -54,7 +54,7 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
 
   return (
     <Fragment>
-      <group position-z={startColumn.length / 2}>
+      <group position-z={startColumn.length}>
         {pipe(
           vanillaPositionedRows,
           mapRA(({ geometry, length, y, levelIndex }) => (
@@ -71,7 +71,7 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
           ))
         )}
       </group>
-      <group position-z={endColumn.z + endColumn.length / 2}>
+      <group position-z={endColumn.z + endColumn.length}>
         {pipe(
           vanillaPositionedRows,
           mapRA(({ geometry, length, y, levelIndex }) => (
@@ -167,7 +167,7 @@ const StretchBuildingHouse = (props: Props) => {
           onDrag={({ last }) => {
             if (!startRef.current) return
             const z = pipe(
-              -(startColumn.z - handleOffset) + context.pointer[1],
+              handleOffset + context.pointer[1] - house.position[1],
               startClamp
             )
             startRef.current.position.z = z
@@ -186,7 +186,9 @@ const StretchBuildingHouse = (props: Props) => {
           onDrag={({ last }) => {
             if (!endRef.current) return
             const z = pipe(
-              -(endColumn.z + handleOffset) + context.pointer[1],
+              -(endColumn.z + handleOffset) +
+                context.pointer[1] -
+                house.position[1],
               endClamp
             )
             endRef.current.position.z = z

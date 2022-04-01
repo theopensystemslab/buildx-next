@@ -183,28 +183,52 @@ export const useStretch = (buildingId: string) => {
         stretchProxy.visibleStartIndex = clamp(
           startColumn.columnIndex,
           endColumn.columnIndex
-          // midColumns[midColumns.length - 1].columnIndex + 1
         )(stretchProxy.visibleStartIndex - 1)
       }
-      // const gate = midColumns[stretchProxy.visibleStartIndex]
-      // if (gate && gate.z < z) {
-      //   stretchProxy.visibleStartIndex++
-      // }
       if (next !== stretchProxy.startVanillaColumns) {
         stretchProxy.startVanillaColumns = next
       }
-    } else {
+    } else if (!isStart) {
       const next = Math.ceil(z / vanillaColumnLength)
-      // if (midColumns[stretchProxy.visibleEndIndex].z > z) {
-      //   stretchProxy.visibleEndIndex--
-      // }
+      if (columnLayout[stretchProxy.visibleEndIndex - 1]?.z < endColumn.z - z) {
+        stretchProxy.visibleEndIndex = clamp(
+          startColumn.columnIndex,
+          endColumn.columnIndex
+        )(stretchProxy.visibleEndIndex + 1)
+      } else if (
+        columnLayout[stretchProxy.visibleEndIndex]?.z <
+        endColumn.z - z
+      ) {
+        stretchProxy.visibleEndIndex = clamp(
+          startColumn.columnIndex,
+          endColumn.columnIndex
+        )(stretchProxy.visibleEndIndex - 1)
+      }
       if (next !== stretchProxy.endVanillaColumns) {
         stretchProxy.endVanillaColumns = next
       }
     }
   }
 
-  const sendDrop = () => {
+  const sendDrop = ({ isStart }: { isStart: boolean } = { isStart: true }) => {
+    // update the DNA depending on...
+    // endVanillaColumns
+    // which end (isStart)
+
+    // add some vanilla
+    if (stretchProxy.endVanillaColumns > 0) {
+      // start
+      if (isStart) {
+        // end
+      } else {
+      }
+      // subtract from start
+    } else if (stretchProxy.visibleStartIndex > startColumn.columnIndex) {
+      // subtract from end
+    } else if (stretchProxy.visibleEndIndex < endColumn.columnIndex) {
+    }
+
+    // reset
     stretchProxy.visibleStartIndex = startColumn.columnIndex
     stretchProxy.visibleEndIndex = endColumn.columnIndex
     stretchProxy.endVanillaColumns = 0
