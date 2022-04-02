@@ -330,7 +330,9 @@ export const useColumnLayout = (buildingId: string) => {
   )
 }
 
-export const columnLayoutToDNA = (columnLayout: ColumnLayout) =>
+export const columnLayoutToDNA = (
+  columnLayout: Omit<PositionedColumn, "length" | "z" | "columnIndex">[]
+) =>
   pipe(
     columnLayout,
     mapRA(({ gridGroups }) =>

@@ -1,6 +1,6 @@
 import { House } from "@/data/house"
 import { PositionedColumn } from "@/hooks/layouts"
-import { stretchProxy, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
+import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import context from "@/stores/context"
@@ -43,7 +43,7 @@ type StretchedColumnsProps = {
 
 const StretchedColumns = (props: StretchedColumnsProps) => {
   const { startColumn, endColumn, vanillaPositionedRows } = props
-  const { startVanillaColumns, endVanillaColumns } = useSnapshot(stretchProxy)
+  const { startVanillaColumns, endVanillaColumns } = useSnapshot(stretch)
 
   const stretchMaterial = useMemo(() => {
     const material = defaultMaterial.clone()
@@ -100,7 +100,7 @@ type MidColumnsProps = {
 const MidColumns = (props: MidColumnsProps) => {
   const { house, columnLayout, midColumns } = props
 
-  const { visibleStartIndex, visibleEndIndex } = useSnapshot(stretchProxy)
+  const { visibleStartIndex, visibleEndIndex } = useSnapshot(stretch)
 
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
     <BuildingHouseColumn

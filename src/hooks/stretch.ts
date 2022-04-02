@@ -1,14 +1,15 @@
 import { useSystemSettings } from "@/data/settings"
-import { useHouse } from "@/stores/houses"
+import houses, { useHouse } from "@/stores/houses"
 import { clamp, isMesh, mapRA, reduceRA, reduceWithIndexRA } from "@/utils"
 import { flow, pipe } from "fp-ts/lib/function"
-import { flatten, partition } from "fp-ts/lib/ReadonlyArray"
+import { flatten, partition, replicate } from "fp-ts/lib/ReadonlyArray"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import { proxy } from "valtio"
 import {
+  columnLayoutToDNA,
   PositionedColumn,
   PositionedModule,
   PositionedRow,
@@ -16,7 +17,7 @@ import {
 } from "./layouts"
 import { useGetVanillaModule } from "./modules"
 
-export const stretchProxy = proxy({
+export const stretch = proxy({
   endVanillaColumns: 0,
   startVanillaColumns: 0,
   visibleStartIndex: -1,
@@ -137,12 +138,9 @@ export const useStretch = (buildingId: string) => {
     })
   )
 
-  if (
-    stretchProxy.visibleStartIndex === -1 &&
-    stretchProxy.visibleEndIndex === -1
-  ) {
-    stretchProxy.visibleStartIndex = startColumn.columnIndex
-    stretchProxy.visibleEndIndex = endColumn.columnIndex
+  if (stretch.visibleStartIndex === -1 && stretch.visibleEndIndex === -1) {
+    stretch.visibleStartIndex = startColumn.columnIndex
+    stretch.visibleEndIndex = endColumn.columnIndex
   }
 
   const vanillaPositionedRows = useVanillaPositionedRows(startColumn.gridGroups)
@@ -179,60 +177,100 @@ export const useStretch = (buildingId: string) => {
     if (isStart) {
       if (z < 0) {
         const nextVanillaLength = Math.ceil(-z / vanillaColumnLength)
-        if (nextVanillaLength !== stretchProxy.startVanillaColumns) {
-          stretchProxy.startVanillaColumns = nextVanillaLength
+        if (nextVanillaLength !== stretch.startVanillaColumns) {
+          stretch.startVanillaColumns = nextVanillaLength
         }
       } else if (z > 0) {
-        stretchProxy.startVanillaColumns = 0
+        stretch.startVanillaColumns = 0
         const visibleStartIndex = columnZsUp.findIndex((columnZ) => columnZ > z)
-        if (stretchProxy.visibleStartIndex !== visibleStartIndex) {
-          stretchProxy.visibleStartIndex = visibleStartIndex
+        if (stretch.visibleStartIndex !== visibleStartIndex) {
+          stretch.visibleStartIndex = visibleStartIndex
         }
       }
     } else if (!isStart) {
       if (z > 0) {
         const nextVanillaLength = Math.ceil(z / vanillaColumnLength)
-        if (nextVanillaLength !== stretchProxy.startVanillaColumns) {
-          stretchProxy.endVanillaColumns = nextVanillaLength
+        if (nextVanillaLength !== stretch.startVanillaColumns) {
+          stretch.endVanillaColumns = nextVanillaLength
         }
       } else if (z < 0) {
-        stretchProxy.endVanillaColumns = 0
-        console.log([
-          stretchProxy.visibleStartIndex,
-          stretchProxy.visibleEndIndex,
-        ])
+        stretch.endVanillaColumns = 0
         const result = columnZsDown.find((x) => -z < x.target)
-        console.log(result)
         if (result) {
-          stretchProxy.visibleEndIndex = result.columnIndex - 1
+          stretch.visibleEndIndex = result.columnIndex - 1
         }
       }
     }
   }
 
-  const sendDrop = ({ isStart }: { isStart: boolean } = { isStart: true }) => {
+  const sendDrop = () => {
     // update the DNA depending on...
     // endVanillaColumns
     // which end (isStart)
 
-    // add some vanilla
-    if (stretchProxy.endVanillaColumns > 0) {
-      // start
-      if (isStart) {
-        // end
-      } else {
-      }
-      // subtract from start
-    } else if (stretchProxy.visibleStartIndex > startColumn.columnIndex) {
-      // subtract from end
-    } else if (stretchProxy.visibleEndIndex < endColumn.columnIndex) {
+    const {
+      startVanillaColumns,
+      endVanillaColumns,
+      visibleStartIndex,
+      visibleEndIndex,
+    } = stretch
+
+    if (startVanillaColumns > 0 || endVanillaColumns > 0) {
+      houses[house.id].dna = columnLayoutToDNA([
+        startColumn,
+        ...replicate(startVanillaColumns, {
+          gridGroups: vanillaPositionedRows,
+        }),
+        ...midColumns,
+        ...replicate(endVanillaColumns, {
+          gridGroups: vanillaPositionedRows,
+        }),
+        endColumn,
+      ]) as string[]
+    } else if (
+      visibleStartIndex > 0 ||
+      visibleEndIndex < columnLayout.length - 1
+    ) {
+      houses[house.id].dna = columnLayoutToDNA([
+        startColumn,
+        ...midColumns.slice(visibleStartIndex, visibleEndIndex),
+        endColumn,
+      ]) as string[]
     }
 
+    // const realN = pipe(
+    //   columnLayout,
+    //   spanLeft(
+    //     ({ columnIndex }) =>
+    //       columnIndex !== (isStart ? columnLayout.length - 1 : 1)
+    //   ),
+    //   ({ init, rest }) => [
+    //     ...init,
+    //     ...replicate(realN, {
+    //       columnIndex: 0,
+    //       gridGroups: positionedRows,
+    //       z: 0,
+    //     }),
+    //     ...rest,
+    //   ]
+    // )
+    // // add some vanilla
+    // if (stretch.endVanillaColumns > 0) {
+    //   // start
+    //     // end
+    //   } else {
+    //   }
+    //   // subtract from start
+    // } else if (stretch.visibleStartIndex > startColumn.columnIndex) {
+    //   // subtract from end
+    // } else if (stretch.visibleEndIndex < endColumn.columnIndex) {
+    // }
+
     // reset
-    stretchProxy.visibleStartIndex = startColumn.columnIndex
-    stretchProxy.visibleEndIndex = endColumn.columnIndex
-    stretchProxy.endVanillaColumns = 0
-    stretchProxy.startVanillaColumns = 0
+    stretch.visibleStartIndex = -1
+    stretch.visibleEndIndex = -1
+    stretch.endVanillaColumns = 0
+    stretch.startVanillaColumns = 0
   }
 
   return {
@@ -247,3 +285,36 @@ export const useStretch = (buildingId: string) => {
     vanillaPositionedRows,
   }
 }
+
+// const realN = back ? n - 1 : n
+// const dna = pipe(
+//   columnLayout,
+//   spanLeft(
+//     ({ columnIndex }) =>
+//       columnIndex !== (back ? columnLayout.length - 1 : 1)
+//   ),
+//   ({ init, rest }) => [
+//     ...init,
+//     ...replicate(realN, {
+//       columnIndex: 0,
+//       gridGroups: positionedRows,
+//       z: 0,
+//     }),
+//     ...rest,
+//   ],
+//   columnLayoutToDNA
+// ) as string[]
+
+// let position = house.position
+// if (!back) {
+//   position[1] -= columnLength * realN
+// }
+
+// houses[buildingId] = {
+//   ...house,
+//   dna,
+//   position: back
+//     ? house.position
+//     : [house.position[0], house.position[1] - columnLength * realN],
+// }
+// setN(0)
