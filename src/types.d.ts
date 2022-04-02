@@ -9,4 +9,6 @@ type Pt3 = [number, number, number]
 
 type Pt2 = [number, number]
 
+type V3 = [number, number, number]
+
 type V6 = [number, number, number, number, number, number]

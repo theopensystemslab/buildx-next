@@ -6,7 +6,7 @@ import { ScopeTypeEnum, setScopeType } from "@/stores/scope"
 import { mapRR } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
-import React, { Suspense, useEffect } from "react"
+import React, { Fragment, Suspense, useEffect } from "react"
 import StretchBuildingHouse from "../building/StretchBuildingHouse"
 import Loader3D from "../ui-3d/Loader3D"
 import SiteHouse from "./SiteHouse"
@@ -15,20 +15,23 @@ const BuildingMode = ({ buildingId }: { buildingId: string }) => {
   const house = useHouse(buildingId)
 
   return <StretchBuildingHouse house={house as HouseT} />
-  // return <BuildingHouse house={house as HouseT} />
 }
 
 const SiteMode = () => {
   const houses = useHouses()
 
   return (
-    <group>
-      {pipe(
-        houses,
-        mapRR((house) => <SiteHouse key={house.id} house={house as HouseT} />),
-        toReadonlyArray
-      )}
-    </group>
+    <Fragment>
+      <group>
+        {pipe(
+          houses,
+          mapRR((house) => (
+            <SiteHouse key={house.id} house={house as HouseT} />
+          )),
+          toReadonlyArray
+        )}
+      </group>
+    </Fragment>
   )
 }
 

@@ -5,7 +5,6 @@ import { flow, pipe } from "fp-ts/lib/function"
 import { flatten, partition } from "fp-ts/lib/ReadonlyArray"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
-import { useEffect } from "react"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import { proxy } from "valtio"
@@ -168,44 +167,45 @@ export const useStretch = (buildingId: string) => {
     maxLength - totalLength
   )
 
+  const columnZsUp = columnLayout.map((x) => x.z)
+  const columnZsDown = columnLayout
+    .map(({ z, columnIndex }) => ({ target: totalLength - z, columnIndex }))
+    .reverse()
+
   const sendDrag = (
     z: number,
     { isStart }: { isStart: boolean } = { isStart: true }
   ) => {
     if (isStart) {
-      const next = Math.ceil(-z / vanillaColumnLength)
-      if (columnLayout[stretchProxy.visibleStartIndex]?.z < z) {
-        stretchProxy.visibleStartIndex = clamp(
-          startColumn.columnIndex,
-          endColumn.columnIndex
-        )(stretchProxy.visibleStartIndex + 1)
-      } else if (columnLayout[stretchProxy.visibleStartIndex - 1]?.z > z) {
-        stretchProxy.visibleStartIndex = clamp(
-          startColumn.columnIndex,
-          endColumn.columnIndex
-        )(stretchProxy.visibleStartIndex - 1)
-      }
-      if (next !== stretchProxy.startVanillaColumns) {
-        stretchProxy.startVanillaColumns = next
+      if (z < 0) {
+        const nextVanillaLength = Math.ceil(-z / vanillaColumnLength)
+        if (nextVanillaLength !== stretchProxy.startVanillaColumns) {
+          stretchProxy.startVanillaColumns = nextVanillaLength
+        }
+      } else if (z > 0) {
+        stretchProxy.startVanillaColumns = 0
+        const visibleStartIndex = columnZsUp.findIndex((columnZ) => columnZ > z)
+        if (stretchProxy.visibleStartIndex !== visibleStartIndex) {
+          stretchProxy.visibleStartIndex = visibleStartIndex
+        }
       }
     } else if (!isStart) {
-      const next = Math.ceil(z / vanillaColumnLength)
-      if (columnLayout[stretchProxy.visibleEndIndex - 1]?.z < endColumn.z - z) {
-        stretchProxy.visibleEndIndex = clamp(
-          startColumn.columnIndex,
-          endColumn.columnIndex
-        )(stretchProxy.visibleEndIndex + 1)
-      } else if (
-        columnLayout[stretchProxy.visibleEndIndex]?.z <
-        endColumn.z - z
-      ) {
-        stretchProxy.visibleEndIndex = clamp(
-          startColumn.columnIndex,
-          endColumn.columnIndex
-        )(stretchProxy.visibleEndIndex - 1)
-      }
-      if (next !== stretchProxy.endVanillaColumns) {
-        stretchProxy.endVanillaColumns = next
+      if (z > 0) {
+        const nextVanillaLength = Math.ceil(z / vanillaColumnLength)
+        if (nextVanillaLength !== stretchProxy.startVanillaColumns) {
+          stretchProxy.endVanillaColumns = nextVanillaLength
+        }
+      } else if (z < 0) {
+        stretchProxy.endVanillaColumns = 0
+        console.log([
+          stretchProxy.visibleStartIndex,
+          stretchProxy.visibleEndIndex,
+        ])
+        const result = columnZsDown.find((x) => -z < x.target)
+        console.log(result)
+        if (result) {
+          stretchProxy.visibleEndIndex = result.columnIndex - 1
+        }
       }
     }
   }
