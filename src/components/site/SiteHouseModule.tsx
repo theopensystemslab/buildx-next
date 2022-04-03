@@ -7,7 +7,6 @@ import { pipe } from "fp-ts/lib/function"
 import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
 import {
   filter,
-  filterWithIndex,
   map,
   mapWithIndex,
   toReadonlyArray,
@@ -51,7 +50,7 @@ const SiteHouseModule = (props: Props) => {
     toReadonlyArray,
     reduce({}, (acc: { [e: string]: Mesh[] }, [nodeType, node]) => {
       const element = getElement(nodeType)
-      if (!element) return acc
+      if (!element || element.name === "Appliance") return acc
       return produce(acc, (draft) => {
         node.traverse((child) => {
           if (isMesh(child)) {

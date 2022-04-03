@@ -38,8 +38,6 @@ const SiteMode = () => {
 const SiteThreeApp = () => {
   const { buildingId } = useContext()
 
-  const { settings } = useSystemsData()
-
   useEffect(() => {
     if (buildingId === null) {
       setScopeType(ScopeTypeEnum.Enum.HOUSE)
