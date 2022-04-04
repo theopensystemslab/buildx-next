@@ -11,7 +11,7 @@ import { mapWithIndex } from "fp-ts/lib/Record"
 import * as React from "react"
 import * as THREE from "three"
 import { Event, OrthographicCamera, PerspectiveCamera } from "three"
-import { CameraLayer } from "@/CONSTANTS"
+import { CameraLayer, EffectsLayer } from "@/CONSTANTS"
 
 CameraControls.install({ THREE })
 extend({ CameraControls })
@@ -72,9 +72,11 @@ export const CamControls = React.forwardRef<CameraControls, CamControlsProps>(
 
     React.useEffect(() => {
       explCamera.updateProjectionMatrix()
-      // explCamera.layers.enableAll()
-      explCamera.layers.enable(CameraLayer.visible)
+      explCamera.layers.enableAll()
       explCamera.layers.disable(CameraLayer.invisible)
+      // explCamera.layers.enable(CameraLayer.visible)
+      // explCamera.layers.enable(EffectsLayer.bloom)
+      // explCamera.layers.enable(EffectsLayer.outline)
     }, [explCamera])
 
     useFrame((_, delta) => {

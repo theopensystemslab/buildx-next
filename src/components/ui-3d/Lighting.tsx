@@ -1,5 +1,8 @@
-import React from "react";
-import Line from "./Line";
+import { CameraLayer, EffectsLayer } from "@/CONSTANTS"
+import highlights from "@/stores/highlights"
+import React from "react"
+import { ref } from "valtio"
+import Line from "./Line"
 
 const shadowProps = {
   "shadow-camera-far": 100,
@@ -9,16 +12,16 @@ const shadowProps = {
   "shadow-camera-top": 100,
   "shadow-camera-bottom": -100,
   "shadow-mapSize": [4096, 4096],
-};
-
-interface LightSetting {
-  position: [number, number, number];
-  color: string;
-  intensity: number;
-  castShadow?: boolean;
 }
 
-const intensityScale = 1;
+interface LightSetting {
+  position: [number, number, number]
+  color: string
+  intensity: number
+  castShadow?: boolean
+}
+
+const intensityScale = 1
 
 const eveningLights: Array<LightSetting> = [
   {
@@ -45,9 +48,9 @@ const eveningLights: Array<LightSetting> = [
     color: "#9bb9c6",
     intensity: 0.3 * intensityScale,
   },
-];
+]
 
-const VISUALIZE_LIGHTS = false;
+const VISUALIZE_LIGHTS = false
 
 const Lighting = () => {
   return (
@@ -64,8 +67,17 @@ const Lighting = () => {
           <Line to={[30, -10, 0]} from={[0, 0, 0]} />
         </>
       )}
+      {/* <ambientLight
+        ref={(lightRef) => {
+          highlights.bloomLightRef = lightRef === null ? null : ref(lightRef)
+        }}
+        // position={[-10, -10, -10]}
+        color="red"
+        intensity={1}
+        layers={CameraLayer.invisible}
+      /> */}
     </>
-  );
-};
+  )
+}
 
-export default Lighting;
+export default Lighting

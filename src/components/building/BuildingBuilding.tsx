@@ -12,7 +12,7 @@ import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useEffect, useMemo, useRef } from "react"
 import { Color, DoubleSide, Group } from "three"
-import { useSnapshot } from "valtio"
+import { subscribe, useSnapshot } from "valtio"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
 type StretchHandleProps = MeshProps & {

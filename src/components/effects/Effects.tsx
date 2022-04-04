@@ -8,8 +8,8 @@ const Effects = () => {
   return (
     <Suspense fallback={null}>
       <EffectComposer autoClear={false} multisampling={8} disableNormalPass>
-        {/* <Outline /> */}
         <SelectiveBloom />
+        <Outline />
         {/* <SMAA edgeDetectionMode={EdgeDetectionMode.DEPTH} /> */}
       </EffectComposer>
     </Suspense>

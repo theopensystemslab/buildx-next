@@ -1,16 +1,23 @@
 import { isMesh, ObjectRef } from "@/utils"
 import { MutableRefObject } from "react"
-import { Group } from "three"
+import { AmbientLight, Group } from "three"
 import { proxy, ref, useSnapshot } from "valtio"
 
 type Highights = {
   outlined: Array<ObjectRef>
   illuminated: Array<ObjectRef>
+  bloomLightRef: AmbientLight | null
 }
 const highlights = proxy<Highights>({
   outlined: [],
   illuminated: [],
+  bloomLightRef: null,
 })
+
+export const useBloomLightRef = () => {
+  const { bloomLightRef } = useSnapshot(highlights)
+  return bloomLightRef
+}
 
 export const useOutlined = () =>
   useSnapshot(highlights).outlined as Array<ObjectRef>

@@ -1,31 +1,29 @@
-import { CameraLayer } from "@/CONSTANTS"
-import { useIlluminated } from "@/stores/highlights"
+import { CameraLayer, EffectsLayer } from "@/CONSTANTS"
+import { useBloomLightRef, useIlluminated } from "@/stores/highlights"
 import { SelectiveBloom as SelectiveBloom_ } from "@react-three/postprocessing"
-import React, { Fragment, useEffect, useMemo, useRef } from "react"
-import { AmbientLight } from "three"
+import React, { Fragment, useEffect, useRef } from "react"
+import { useSnapshot } from "valtio"
 
 const SelectiveBloom = () => {
-  const lightRef = useRef()
+  // const lightRef = useRef()
   const illuminated = useIlluminated()
-  useEffect(() => void console.log(illuminated), [illuminated])
-  const intensity = illuminated.length > 0 ? 1 : 0
+  // const lightRef = useBloomLightRef()
+
+  // useEffect(() => void console.log(lightRef), [lightRef])
+
+  // useEffect(() => void console.log(illuminated), [illuminated])
+
+  const intensity = 1 // illuminated.length > 0 ? 1 : 0
   return (
     <Fragment>
-      <pointLight
-        ref={lightRef}
-        position={[-10, -10, -10]}
-        color="red"
-        intensity={intensity}
-        layers={CameraLayer.invisible}
-      />
       <SelectiveBloom_
         kernelSize={4}
         luminanceThreshold={0}
         intensity={intensity}
         luminanceSmoothing={0}
         selection={illuminated}
-        selectionLayer={CameraLayer.visible}
-        lights={[lightRef]}
+        selectionLayer={EffectsLayer.bloom}
+        // lights={[lightRef].filter((x) => !!x)}
       />
     </Fragment>
   )

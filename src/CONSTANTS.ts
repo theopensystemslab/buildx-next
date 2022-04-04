@@ -6,8 +6,13 @@ export enum CameraLayer {
 }
 
 export enum RaycasterLayer {
-  clickable = 3,
-  non_clickable = 4,
+  clickable = 2,
+  non_clickable = 3,
+}
+
+export enum EffectsLayer {
+  outline = 4,
+  bloom = 5,
 }
 
 export const BUILDX_LOCAL_STORAGE_HOUSES_KEY = "BUILDX_LOCAL_STORAGE_HOUSES_KEY"

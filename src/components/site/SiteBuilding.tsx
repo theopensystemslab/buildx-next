@@ -35,6 +35,7 @@ const SiteBuilding = (props: Props) => {
   const bind = useGesture<{
     drag: ThreeEvent<PointerEvent>
     hover: ThreeEvent<PointerEvent>
+    onPointerDown: ThreeEvent<PointerEvent>
   }>({
     onDrag,
     onPointerOver: () => {
@@ -45,11 +46,26 @@ const SiteBuilding = (props: Props) => {
       if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
       hoverHouse(false)
     },
-    onContextMenu: ({ event: { pageX, pageY } }) => {
+    onContextMenu: ({ event: { pageX, pageY, shiftKey } }) => {
       if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
-      if (!scopes.primary.selected.includes(id))
-        scopes.primary.selected.push(id)
+      if (!scopes.primary.selected.includes(id)) {
+        if (!shiftKey) {
+          scopes.primary.selected = [id]
+        } else {
+          scopes.primary.selected.push(id)
+        }
+      }
       context.menu = [pageX, pageY]
+    },
+    onPointerDown: ({ shiftKey }) => {
+      if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
+      if (!scopes.primary.selected.includes(id)) {
+        if (!shiftKey) {
+          scopes.primary.selected = [id]
+        } else {
+          scopes.primary.selected.push(id)
+        }
+      }
     },
   })
 

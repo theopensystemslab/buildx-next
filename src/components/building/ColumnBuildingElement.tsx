@@ -3,9 +3,10 @@ import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
 import invisibleMaterial from "@/materials/invisibleMaterial"
 import context from "@/stores/context"
+import highlights from "@/stores/highlights"
 import { useHouse } from "@/stores/houses"
 import scopes, { ElementScopeItem, ScopeTypeEnum } from "@/stores/scope"
-import { all, any, undef } from "@/utils"
+import { all, any, ObjectRef, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
@@ -13,7 +14,7 @@ import { flatten, getOrElse, none, some } from "fp-ts/lib/Option"
 import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
 import React, { useEffect, useMemo, useRef } from "react"
 import { BufferGeometry, Material, Mesh } from "three"
-import { subscribe } from "valtio"
+import { ref, subscribe } from "valtio"
 
 const builtInMaterials: Record<string, Material> = {
   Glazing: glassMaterial,
@@ -88,63 +89,78 @@ const ColumnBuildingElement = (props: Props) => {
     }
   }, [elementName, materials, visible])
 
-  // useEffect(() =>
-  //   subscribe(scopes.primary, () => {
-  //     let isOutlined = context.outlined.includes(meshRef),
-  //       isHovered = false,
-  //       isSelected = false
-  //     switch (scopes.primary.type) {
-  //       case ScopeTypeEnum.Enum.HOUSE:
-  //         isHovered = scopes.primary.hovered === house.id
-  //         isSelected = scopes.primary.selected.includes(house.id)
-  //         break
+  useEffect(() =>
+    subscribe(scopes.primary, () => {
+      let isOutlined =
+          highlights.outlined.filter(
+            (x) => x.current.id === meshRef.current!.id
+          ).length > 0,
+        isHovered = false,
+        isSelected = false
+      switch (scopes.primary.type) {
+        // case ScopeTypeEnum.Enum.HOUSE:
+        //   isHovered = scopes.primary.hovered === house.id
+        //   isSelected = scopes.primary.selected.includes(house.id)
+        //   break
 
-  //       case ScopeTypeEnum.Enum.ELEMENT:
-  //         isHovered =
-  //           context.buildingId === buildingId &&
-  //           scopes.primary.hovered?.elementName === elementName
-  //         isSelected = !undef(
-  //           scopes.primary.selected.find((x) => x.elementName === elementName)
-  //         )
-  //         break
+        case ScopeTypeEnum.Enum.ELEMENT:
+          isHovered =
+            context.buildingId === buildingId &&
+            scopes.primary.hovered?.elementName === elementName
+          isSelected = !undef(
+            scopes.primary.selected.find((x) => x.elementName === elementName)
+          )
+          break
 
-  //       case ScopeTypeEnum.Enum.MODULE:
-  //         isHovered =
-  //           scopes.primary.hovered?.columnIndex === columnIndex &&
-  //           scopes.primary.hovered?.levelIndex === levelIndex &&
-  //           scopes.primary.hovered?.groupIndex === groupIndex
-  //         isSelected = !undef(
-  //           scopes.primary.selected.find(
-  //             (x) =>
-  //               x.columnIndex === columnIndex &&
-  //               x.levelIndex === levelIndex &&
-  //               x.groupIndex === groupIndex
-  //           )
-  //         )
-  //         break
+        // case ScopeTypeEnum.Enum.MODULE:
+        //   isHovered =
+        //     scopes.primary.hovered?.columnIndex === columnIndex &&
+        //     scopes.primary.hovered?.levelIndex === levelIndex &&
+        //     scopes.primary.hovered?.groupIndex === groupIndex
+        //   isSelected = !undef(
+        //     scopes.primary.selected.find(
+        //       (x) =>
+        //         x.columnIndex === columnIndex &&
+        //         x.levelIndex === levelIndex &&
+        //         x.groupIndex === groupIndex
+        //     )
+        //   )
+        //   break
 
-  //       // case ScopeTypeEnum.Enum.LEVEL:
-  //       //   isHovered =
-  //       //     scopes.primary.hovered?.houseId === house.id &&
-  //       //     scopes.primary.hovered.rowIndex === levelIndex
-  //       //   isSelected = !undef(
-  //       //     scopes.primary.selected.find(
-  //       //       (x) => x.houseId === house.id && x.rowIndex === levelIndex
-  //       //     )
-  //       //   )
-  //       //   break
-  //     }
+        // case ScopeTypeEnum.Enum.LEVEL:
+        //   isHovered =
+        //     scopes.primary.hovered?.houseId === house.id &&
+        //     scopes.primary.hovered.rowIndex === levelIndex
+        //   isSelected = !undef(
+        //     scopes.primary.selected.find(
+        //       (x) => x.houseId === house.id && x.rowIndex === levelIndex
+        //     )
+        //   )
+        //   break
+      }
 
-  //     if ((isHovered || isSelected) && !isOutlined) {
-  //       outlineMesh(meshRef)
-  //       invalidate()
-  //     }
-  //     if (all(context.menu === null, isOutlined, !isHovered, !isSelected)) {
-  //       removeMeshOutline(meshRef)
-  //       invalidate()
-  //     }
-  //   })
-  // )
+      if ((isHovered || isSelected) && !isOutlined) {
+        console.log("outlining")
+        highlights.outlined.push(ref(meshRef as ObjectRef))
+        invalidate()
+        // outlineMesh(meshRef)
+      }
+      if (
+        all(
+          context.menu === null,
+          isOutlined,
+          !isHovered,
+          !isSelected,
+          !!meshRef.current
+        )
+      ) {
+        highlights.outlined = highlights.outlined.filter(
+          (x) => x.current.id !== meshRef.current!.id
+        )
+        invalidate()
+      }
+    })
+  )
 
   const bind = useGesture<{
     hover: ThreeEvent<PointerEvent>
@@ -160,19 +176,19 @@ const ColumnBuildingElement = (props: Props) => {
       if (obj.id !== meshRef.current.id) return
 
       switch (scopes.primary.type) {
-        case ScopeTypeEnum.Enum.HOUSE:
-          scopes.primary.hovered = house.id
-          break
+        // case ScopeTypeEnum.Enum.HOUSE:
+        //   scopes.primary.hovered = house.id
+        //   break
         case ScopeTypeEnum.Enum.ELEMENT:
           scopes.primary.hovered = { elementName }
           break
-        case ScopeTypeEnum.Enum.MODULE:
-          scopes.primary.hovered = {
-            columnIndex,
-            levelIndex,
-            groupIndex,
-          }
-          break
+        // case ScopeTypeEnum.Enum.MODULE:
+        //   scopes.primary.hovered = {
+        //     columnIndex,
+        //     levelIndex,
+        //     groupIndex,
+        //   }
+        //   break
         // case ScopeTypeEnum.Enum.LEVEL:
         //   scopes.primary.hovered = { houseId: house.id, rowIndex: levelIndex }
         //   break
@@ -226,48 +242,50 @@ const ColumnBuildingElement = (props: Props) => {
       let payload: any
 
       switch (scopes.primary.type) {
-        case ScopeTypeEnum.Enum.HOUSE:
-          isSelected = scopes.primary.selected.includes(house.id)
-          payload = house.id
-          break
-        // case ScopeTypeEnum.Enum.MODULE:
-        //   isSelected = !undef(
-        //     scopes.primary.selected.find(
-        //       (x) =>
-        //         x.houseId === house.id &&
-        //         x.rowIndex === levelIndex &&
-        //         x.gridIndex === groupIndex
-        //     )
-        //   )
-        //   payload = {
-        //     houseId: house.id,
-        //     rowIndex: levelIndex,
-        //     gridIndex: groupIndex,
-        //   } as ModuleScopeItem
-        //   break
-        case ScopeTypeEnum.Enum.ELEMENT:
-          isSelected = !undef(
-            scopes.primary.selected.find((x) => x.elementName === elementName)
-          )
-          payload = { houseId: house.id, elementName } as ElementScopeItem
-          break
-        // case ScopeTypeEnum.Enum.LEVEL:
-        //   isSelected = !undef(
-        //     scopes.primary.selected.find(
-        //       (x) => x.houseId === house.id && x.rowIndex === levelIndex
-        //     )
-        //   )
-        //   payload = {
-        //     houseId: house.id,
-        //     rowIndex: levelIndex,
-        //   } as LevelScopeItem
-        //   break
       }
+      // case ScopeTypeEnum.Enum.HOUSE:
+      //   isSelected = scopes.primary.selected.includes(house.id)
+      //   payload = house.id
+      //   break
+      // case ScopeTypeEnum.Enum.MODULE:
+      //   isSelected = !undef(
+      //     scopes.primary.selected.find(
+      //       (x) =>
+      //         x.houseId === house.id &&
+      //         x.rowIndex === levelIndex &&
+      //         x.gridIndex === groupIndex
+      //     )
+      //   )
+      //   payload = {
+      //     houseId: house.id,
+      //     rowIndex: levelIndex,
+      //     gridIndex: groupIndex,
+      //   } as ModuleScopeItem
+      //   break
 
-      if (!isSelected) {
-        if (shiftKey) scopes.primary.selected.push(payload)
-        else scopes.primary.selected = [payload]
-      }
+      // case ScopeTypeEnum.Enum.ELEMENT:
+      //   isSelected = !undef(
+      //     scopes.primary.selected.find((x) => x.elementName === elementName)
+      //   )
+      //   payload = { houseId: house.id, elementName } as ElementScopeItem
+      //   break
+
+      // case ScopeTypeEnum.Enum.LEVEL:
+      //   isSelected = !undef(
+      //     scopes.primary.selected.find(
+      //       (x) => x.houseId === house.id && x.rowIndex === levelIndex
+      //     )
+      //   )
+      //   payload = {
+      //     houseId: house.id,
+      //     rowIndex: levelIndex,
+      //   } as LevelScopeItem
+      //   break
+
+      // if (!isSelected) {
+      //   if (shiftKey) scopes.primary.selected.push(payload)
+      //   else scopes.primary.selected = [payload]
+      // }
     },
   })
 
