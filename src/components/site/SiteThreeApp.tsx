@@ -1,20 +1,16 @@
-import { useSystemsData } from "@/contexts/SystemsData"
-import { House as HouseT } from "@/data/house"
 import context, { useContext } from "@/stores/context"
-import { useHouse, useHouses } from "@/stores/houses"
-import { ScopeTypeEnum, setScopeType } from "@/stores/scope"
-import { mapRR } from "@/utils"
+import { useHouses } from "@/stores/houses"
+import scopes, { ScopeTypeEnum } from "@/stores/scope"
+import { mapRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
-import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
+import { keys } from "fp-ts/lib/ReadonlyRecord"
 import React, { Fragment, Suspense, useEffect } from "react"
-import StretchBuildingHouse from "../building/StretchBuildingHouse"
+import BuildingBuilding from "../building/BuildingBuilding"
 import Loader3D from "../ui-3d/Loader3D"
-import SiteHouse from "./SiteHouse"
+import SiteBuilding from "./SiteBuilding"
 
 const BuildingMode = ({ buildingId }: { buildingId: string }) => {
-  const house = useHouse(buildingId)
-
-  return <StretchBuildingHouse house={house as HouseT} />
+  return <BuildingBuilding id={buildingId} />
 }
 
 const SiteMode = () => {
@@ -24,11 +20,8 @@ const SiteMode = () => {
     <Fragment>
       <group>
         {pipe(
-          houses,
-          mapRR((house) => (
-            <SiteHouse key={house.id} house={house as HouseT} />
-          )),
-          toReadonlyArray
+          keys(houses),
+          mapRA((id) => <SiteBuilding key={id} id={id} />)
         )}
       </group>
     </Fragment>
@@ -40,9 +33,17 @@ const SiteThreeApp = () => {
 
   useEffect(() => {
     if (buildingId === null) {
-      setScopeType(ScopeTypeEnum.Enum.HOUSE)
+      scopes.primary = {
+        type: ScopeTypeEnum.Enum.HOUSE,
+        hovered: null,
+        selected: [],
+      }
     } else {
-      setScopeType(ScopeTypeEnum.Enum.ELEMENT)
+      scopes.primary = {
+        type: ScopeTypeEnum.Enum.ELEMENT,
+        hovered: null,
+        selected: [],
+      }
     }
     context.outlined = []
   }, [buildingId])

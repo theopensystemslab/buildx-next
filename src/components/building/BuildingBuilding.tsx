@@ -1,18 +1,19 @@
-import { House } from "@/data/house"
 import { PositionedColumn } from "@/hooks/layouts"
 import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import context from "@/stores/context"
+import { useHouse } from "@/stores/houses"
+import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { Fragment, useMemo, useRef } from "react"
+import { Fragment, useEffect, useMemo, useRef } from "react"
 import { Color, DoubleSide, Group } from "three"
 import { useSnapshot } from "valtio"
-import BuildingHouseColumn from "./BuildingHouseColumn"
+import BuildingHouseColumn from "./ColumnBuildingColumn"
 
 type StretchHandleProps = MeshProps & {
   onDrag: Handler<"drag", ThreeEvent<PointerEvent>>
@@ -92,20 +93,20 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
 }
 
 type MidColumnsProps = {
-  house: House
+  buildingId: string
   columnLayout: PositionedColumn[]
   midColumns: readonly PositionedColumn[]
 }
 
 const MidColumns = (props: MidColumnsProps) => {
-  const { house, columnLayout, midColumns } = props
+  const { buildingId, columnLayout, midColumns } = props
 
   const { visibleStartIndex, visibleEndIndex } = useSnapshot(stretch)
 
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
     <BuildingHouseColumn
       key={columnIndex}
-      house={house}
+      buildingId={buildingId}
       columnIndex={columnIndex}
       columnZ={z}
       gridGroups={gridGroups}
@@ -120,11 +121,23 @@ const MidColumns = (props: MidColumnsProps) => {
 }
 
 type Props = {
-  house: House
+  id: string
 }
 
-const StretchBuildingHouse = (props: Props) => {
-  const { house } = props
+const BuildingBuilding = (props: Props) => {
+  const { id } = props
+
+  useEffect(() => {
+    scopes.secondary = {
+      type: ScopeTypeEnum.Enum.LEVEL,
+      hovered: null,
+      selected: [],
+    }
+  }, [])
+
+  const {
+    position: [buildingX, buildingZ],
+  } = useHouse(id)
 
   const {
     startColumn,
@@ -136,7 +149,7 @@ const StretchBuildingHouse = (props: Props) => {
     vanillaPositionedRows,
     sendDrag,
     sendDrop,
-  } = useStretch(house.id)
+  } = useStretch(id)
 
   const renderColumn = (
     { columnIndex, z, gridGroups }: PositionedColumn,
@@ -144,7 +157,7 @@ const StretchBuildingHouse = (props: Props) => {
   ) => (
     <BuildingHouseColumn
       key={columnIndex}
-      house={house}
+      buildingId={id}
       columnIndex={columnIndex}
       columnZ={z}
       gridGroups={gridGroups}
@@ -153,20 +166,19 @@ const StretchBuildingHouse = (props: Props) => {
     />
   )
 
-  const startRef = useRef<Group>()
-  const endRef = useRef<Group>()
+  const startRef = useRef<Group>(null!)
+  const endRef = useRef<Group>(null!)
 
   const handleOffset = 1
 
   return (
-    <group position={[house.position[0], 0, house.position[1]]}>
+    <group position={[buildingX, 0, buildingZ]}>
       <group ref={startRef}>
         {renderColumn(startColumn)}
         <StretchHandle
           onDrag={({ last }) => {
-            if (!startRef.current) return
             const z = pipe(
-              handleOffset + context.pointer[1] - house.position[1],
+              handleOffset + context.pointer[1] - buildingZ,
               startClamp
             )
             startRef.current.position.z = z
@@ -183,11 +195,8 @@ const StretchBuildingHouse = (props: Props) => {
         {renderColumn(endColumn)}
         <StretchHandle
           onDrag={({ last }) => {
-            if (!endRef.current) return
             const z = pipe(
-              -(endColumn.z + handleOffset) +
-                context.pointer[1] -
-                house.position[1],
+              -(endColumn.z + handleOffset) + context.pointer[1] - buildingZ,
               endClamp
             )
             endRef.current.position.z = z
@@ -202,7 +211,7 @@ const StretchBuildingHouse = (props: Props) => {
       </group>
       <MidColumns
         columnLayout={columnLayout}
-        house={house}
+        buildingId={id}
         midColumns={midColumns}
       />
       <StretchedColumns
@@ -212,4 +221,4 @@ const StretchBuildingHouse = (props: Props) => {
   )
 }
 
-export default StretchBuildingHouse
+export default BuildingBuilding

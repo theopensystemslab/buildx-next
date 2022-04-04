@@ -72,7 +72,8 @@ export const CamControls = React.forwardRef<CameraControls, CamControlsProps>(
 
     React.useEffect(() => {
       explCamera.updateProjectionMatrix()
-      explCamera.layers.enableAll()
+      // explCamera.layers.enableAll()
+      explCamera.layers.enable(CameraLayer.visible)
       explCamera.layers.disable(CameraLayer.invisible)
     }, [explCamera])
 

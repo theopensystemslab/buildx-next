@@ -20,7 +20,7 @@ import { Group } from "three"
 import { proxy, subscribe, useSnapshot } from "valtio"
 import { setCameraEnabled } from "./camera"
 import context, { useContext } from "./context"
-import scope, { ScopeTypeEnum } from "./scope"
+import scopes, { ScopeTypeEnum } from "./scope"
 
 export const getInitialHouses = () =>
   SSR
@@ -80,7 +80,7 @@ export const useUpdatePosition = (
   useEffect(onPositionUpdate, [onPositionUpdate])
 
   return ({ first, last }) => {
-    if (scope.type !== ScopeTypeEnum.Enum.HOUSE) return
+    if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
     if (first) {
       setCameraEnabled(false)
     }
@@ -89,7 +89,7 @@ export const useUpdatePosition = (
     const [x, z] = houses[houseId].position
     const [dx, dz] = [px - x, pz - z].map(snapToGrid)
 
-    for (let k of scope.selected) {
+    for (let k of scopes.primary.selected) {
       houses[k].position[0] += dx
       houses[k].position[1] += dz
     }
@@ -246,6 +246,18 @@ export const modulesToRows = (
 export const useBuildingRows = (buildingId: string) => {
   const houseModules = useBuildingModules(buildingId)
   return modulesToRows(houseModules)
+}
+
+export const useHoverHouse = (id: string) => {
+  return (hover: boolean = true) => {
+    if (scopes.primary.type === ScopeTypeEnum.Enum.HOUSE) {
+      if (scopes.primary.hovered !== id && hover) {
+        scopes.primary.hovered = id
+      } else if (scopes.primary.hovered === id && !hover) {
+        scopes.primary.hovered = null
+      }
+    }
+  }
 }
 
 export default houses

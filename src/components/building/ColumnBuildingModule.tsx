@@ -1,8 +1,10 @@
 import { useSystemsData } from "@/contexts/SystemsData"
-import { House } from "@/data/house"
 import { LoadedModule } from "@/data/module"
+import highlights, { illuminateGroup } from "@/stores/highlights"
+import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { fuzzyMatch, isMesh } from "@/utils"
-import { GroupProps } from "@react-three/fiber"
+import { GroupProps, ThreeEvent } from "@react-three/fiber"
+import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
 import {
@@ -12,28 +14,33 @@ import {
   toReadonlyArray,
 } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
-import React from "react"
-import { BufferGeometry, Mesh } from "three"
+import React, { useRef } from "react"
+import { BufferGeometry, Group, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
-import SiteHouseElement from "./SiteHouseElement"
+import { subscribe } from "valtio"
+import ColumnBuildingElement from "./ColumnBuildingElement"
 
 type Props = GroupProps & {
   module: LoadedModule
-  rowIndex: number
-  gridIndex: number
-  house: House
+  columnIndex: number
+  levelIndex: number
+  groupIndex: number
+  buildingId: string
   visible?: boolean
 }
 
-const SiteHouseModule = (props: Props) => {
+const ColumnBuildingModule = (props: Props) => {
   const {
+    buildingId,
+    columnIndex,
+    levelIndex,
+    groupIndex,
     module,
-    rowIndex,
-    house,
-    gridIndex,
     visible = true,
     ...groupProps
   } = props
+
+  const groupRef = useRef<Group>()
 
   const { elements } = useSystemsData()
 
@@ -45,7 +52,7 @@ const SiteHouseModule = (props: Props) => {
 
   const gltf = module.gltf
 
-  const meshes = pipe(
+  const children = pipe(
     gltf.nodes,
     toReadonlyArray,
     reduce({}, (acc: { [e: string]: Mesh[] }, [nodeType, node]) => {
@@ -63,14 +70,15 @@ const SiteHouseModule = (props: Props) => {
     map((meshes) => mergeBufferGeometries(meshes.map((mesh) => mesh.geometry))),
     filter((bg: BufferGeometry | null): bg is BufferGeometry => Boolean(bg)),
     mapWithIndex((elementName, geometry) => (
-      <SiteHouseElement
+      <ColumnBuildingElement
         key={elementName}
         {...{
           elementName,
           geometry,
-          house,
-          rowIndex,
-          gridIndex,
+          buildingId,
+          columnIndex,
+          levelIndex,
+          groupIndex,
           visible,
         }}
       />
@@ -79,7 +87,35 @@ const SiteHouseModule = (props: Props) => {
     mapA(([_k, v]) => v)
   )
 
-  return <group {...groupProps}>{meshes}</group>
+  const bind = useGesture<{ onPointerOver: ThreeEvent<PointerEvent> }>({
+    onPointerOver: () => {
+      if (
+        scopes.secondary.type === ScopeTypeEnum.Enum.LEVEL &&
+        scopes.secondary.hovered?.levelIndex !== levelIndex
+      ) {
+        scopes.secondary.hovered = {
+          levelIndex,
+        }
+      }
+    },
+  })
+
+  subscribe(scopes.secondary, () => {
+    if (
+      scopes.secondary.type === ScopeTypeEnum.Enum.LEVEL &&
+      scopes.secondary.hovered?.levelIndex === levelIndex
+    ) {
+      illuminateGroup(groupRef)
+    } else {
+      illuminateGroup(groupRef, { remove: true })
+    }
+  })
+
+  return (
+    <group ref={groupRef} {...(bind() as any)} {...groupProps}>
+      {children}
+    </group>
+  )
 }
 
-export default SiteHouseModule
+export default ColumnBuildingModule

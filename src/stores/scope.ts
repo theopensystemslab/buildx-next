@@ -1,7 +1,13 @@
-import { proxy, useSnapshot } from "valtio"
+import { proxy } from "valtio"
 import * as z from "zod"
 
-export const ScopeTypeEnum = z.enum(["HOUSE", "LEVEL", "MODULE", "ELEMENT"])
+export const ScopeTypeEnum = z.enum([
+  "HOUSE",
+  "LEVEL",
+  "MODULE",
+  "ELEMENT",
+  "ZERO",
+])
 
 export type ScopeType = z.infer<typeof ScopeTypeEnum>
 
@@ -12,9 +18,9 @@ export type HouseScope = {
 }
 
 export type ModuleScopeItem = {
-  rowIndex: number
-  gridIndex: number
-  houseId: string
+  columnIndex: number
+  levelIndex: number
+  groupIndex: number
 }
 
 export type ModuleScope = {
@@ -25,7 +31,6 @@ export type ModuleScope = {
 
 export type ElementScopeItem = {
   elementName: string
-  houseId: string
 }
 
 export type ElementScope = {
@@ -35,8 +40,7 @@ export type ElementScope = {
 }
 
 export type LevelScopeItem = {
-  houseId: string
-  rowIndex: number
+  levelIndex: number
 }
 
 export type LevelScope = {
@@ -45,32 +49,36 @@ export type LevelScope = {
   hovered: LevelScopeItem | null
 }
 
-export type Scope = HouseScope | LevelScope | ModuleScope | ElementScope
+export type ZeroScope = {
+  type: "ZERO"
+  selected: []
+  hovered: null
+}
 
-export type FocusedHouseScope = LevelScope | ModuleScope | ElementScope
+export type PrimaryScope = ElementScope | HouseScope | ModuleScope
 
-const getInitScope = (): HouseScope => ({
+export type SecondaryScope = LevelScope | ZeroScope
+
+const initPrimaryScope = (): HouseScope => ({
   type: ScopeTypeEnum.enum.HOUSE,
   selected: [],
   hovered: null,
 })
 
-const scope = proxy<Scope>(getInitScope())
+const initSecondaryScope = (): ZeroScope => ({
+  type: "ZERO",
+  hovered: null,
+  selected: [],
+})
 
-export const setScopeType = (type: ScopeType) => {
-  scope.type = type
-  scope.selected = []
-  scope.hovered = null
+export type Scopes = {
+  primary: PrimaryScope
+  secondary: SecondaryScope
 }
 
-export const useScopeType = () => {
-  const { type: scopeType } = useSnapshot(scope)
-  return scopeType
-}
+const scopes = proxy<Scopes>({
+  primary: initPrimaryScope(),
+  secondary: initSecondaryScope(),
+})
 
-export const useSelected = () => {
-  const { selected } = useSnapshot(scope)
-  return selected
-}
-
-export default scope
+export default scopes

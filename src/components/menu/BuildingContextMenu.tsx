@@ -10,9 +10,9 @@ type Props = ContextMenuProps & {
 
 const BuildingContextMenu = (props: Props) => {
   const { buildingId, ...restProps } = props
-  const { scope } = useContext()
-  if (scope.selected.length !== 1) return null
-  const elementName = (scope as ElementScope).selected[0].elementName
+  const { scopes } = useContext()
+  if (scopes.primary.selected.length !== 1) return null
+  const elementName = (scopes.primary as ElementScope).selected[0].elementName
   return (
     <ContextMenu {...restProps}>
       <ContextMenuHeading>{elementName}</ContextMenuHeading>

@@ -2,10 +2,10 @@ import { House } from "@/data/house"
 import { PositionedRow } from "@/hooks/layouts"
 import { mapRA, mapWithIndexRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
-import SiteHouseModule from "../site/SiteHouseModule"
+import ColumnBuildingModule from "./ColumnBuildingModule"
 
 type Props = {
-  house: House
+  buildingId: string
   columnZ: number
   columnIndex: number
   mirror?: boolean
@@ -15,7 +15,7 @@ type Props = {
 
 const BuildingHouseColumn = (props: Props) => {
   const {
-    house,
+    buildingId,
     columnIndex,
     columnZ,
     gridGroups,
@@ -27,13 +27,14 @@ const BuildingHouseColumn = (props: Props) => {
     mapRA(({ levelIndex, modules, y }) =>
       pipe(
         modules,
-        mapWithIndexRA((gridIndex, { module, z }) => (
-          <SiteHouseModule
-            key={`${columnIndex}-${levelIndex}-${gridIndex}`}
+        mapWithIndexRA((groupIndex, { module, z }) => (
+          <ColumnBuildingModule
+            key={`${columnIndex}-${levelIndex}-${groupIndex}`}
             module={module}
-            rowIndex={levelIndex}
-            gridIndex={gridIndex}
-            house={house}
+            columnIndex={columnIndex}
+            levelIndex={levelIndex}
+            groupIndex={groupIndex}
+            buildingId={buildingId}
             position={[
               0,
               y,

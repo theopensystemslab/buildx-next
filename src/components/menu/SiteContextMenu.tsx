@@ -1,7 +1,7 @@
 import { useSystemsData } from "@/contexts/SystemsData"
 import context, { EditModeEnum, useContext } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
-import scope, { HouseScope, ScopeTypeEnum } from "@/stores/scope"
+import scopes, { HouseScope, ScopeTypeEnum } from "@/stores/scope"
 import React, { Fragment, useState } from "react"
 import ContextMenu, { ContextMenuProps } from "../ui/ContextMenu"
 import ContextMenuButton from "../ui/ContextMenuButton"
@@ -10,19 +10,19 @@ import BuildingContextMenu from "./BuildingContextMenu"
 import RenameHouseForm from "./RenameHouseForm"
 
 const SiteContextMenu_ = (props: ContextMenuProps) => {
-  if (scope.type !== ScopeTypeEnum.Enum.HOUSE) {
+  if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) {
     console.error("SiteContextMenu called with scope type other than HOUSE")
     return null
   }
 
-  const firstHouse = useHouse(scope.selected[0])
-  const manySelected = scope.selected.length > 1
-  const oneSelected = scope.selected.length === 1
+  const firstHouse = useHouse(scopes.primary.selected[0])
+  const manySelected = scopes.primary.selected.length > 1
+  const oneSelected = scopes.primary.selected.length === 1
 
   const { houseTypes } = useSystemsData()
 
   const resetBuildings = () => {
-    for (let buildingId of (scope as HouseScope).selected) {
+    for (let buildingId of (scopes.primary as HouseScope).selected) {
       const house = houses[buildingId]
       const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
       if (houseType) houses[buildingId].dna = houseType.dna as string[]
@@ -31,7 +31,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   }
 
   const deleteBuildings = () => {
-    for (let buildingId of (scope as HouseScope).selected) {
+    for (let buildingId of (scopes.primary as HouseScope).selected) {
       delete houses[buildingId]
     }
     props.onClose?.()
@@ -101,7 +101,7 @@ const SiteContextMenu = () => {
   const [pageX, pageY] = menu
 
   const onClose = () => {
-    // scope.selected = []
+    // scopes.primary.selected = []
     context.menu = null
   }
 

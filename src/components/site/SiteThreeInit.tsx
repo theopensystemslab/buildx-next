@@ -1,17 +1,17 @@
 import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
 import { setPointer } from "@/stores/context"
-import scope from "@/stores/scope"
+import scopes from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
 import { useContextBridge } from "@react-three/drei"
 // import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
-import React, { PropsWithChildren, Suspense } from "react"
+import React, { PropsWithChildren } from "react"
 import { BasicShadowMap } from "three"
+import Effects from "../effects"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
 import RectangularGrid from "../ui-3d/RectangularGrid"
-import Effects from "./Effects"
 import GroundCircle from "./GroundCircle"
 import ShadowPlane from "./ShadowPlane"
 import SiteCamControls from "./SiteCamControls"
@@ -49,7 +49,7 @@ const SiteThreeInit = (props: Props) => {
       shadows={{ enabled: true, type: BasicShadowMap }}
       onCreated={({ gl, raycaster }) => {
         gl.localClippingEnabled = true
-        raycaster.layers.enableAll()
+        raycaster.layers.enable(RaycasterLayer.clickable)
         raycaster.layers.disable(RaycasterLayer.non_clickable)
       }}
     >
@@ -65,11 +65,13 @@ const SiteThreeInit = (props: Props) => {
       <HorizontalPlane
         onChange={setPointer}
         onNearClick={() => {
-          scope.selected = []
+          scopes.primary.selected = []
+          scopes.secondary.selected = []
           // store.contextMenu = null
         }}
         onNearHover={() => {
-          scope.hovered = null
+          scopes.primary.hovered = null
+          scopes.secondary.hovered = null
         }}
       />
       {shadows && (
@@ -79,7 +81,7 @@ const SiteThreeInit = (props: Props) => {
         </>
       )}
       {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
-      {/* <Effects /> */}
+      <Effects />
       <SiteCamControls />
       <ContextBridge>{children}</ContextBridge>
     </Canvas>

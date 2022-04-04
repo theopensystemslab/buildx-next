@@ -18,6 +18,8 @@ export type GltfT = {
   }
 }
 
+export type ObjectRef = { current: Object3D }
+
 export const useGLTF = <T extends string | string[]>(path: T) =>
   useGLTFDrei(path, true, true) as unknown as T extends any[] ? GltfT[] : GltfT
 
