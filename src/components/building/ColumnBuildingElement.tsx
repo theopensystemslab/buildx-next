@@ -13,7 +13,7 @@ import { pipe } from "fp-ts/lib/function"
 import { flatten, getOrElse, none, some } from "fp-ts/lib/Option"
 import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
 import React, { useEffect, useMemo, useRef } from "react"
-import { BufferGeometry, Material, Mesh } from "three"
+import { BufferGeometry, Material, Mesh, Object3D } from "three"
 import { ref, subscribe } from "valtio"
 
 const builtInMaterials: Record<string, Material> = {
@@ -92,9 +92,8 @@ const ColumnBuildingElement = (props: Props) => {
   useEffect(() =>
     subscribe(scopes.primary, () => {
       let isOutlined =
-          highlights.outlined.filter(
-            (x) => x.current.id === meshRef.current!.id
-          ).length > 0,
+          highlights.outlined.filter((x) => x.id === meshRef.current!.id)
+            .length > 0,
         isHovered = false,
         isSelected = false
       switch (scopes.primary.type) {
@@ -140,8 +139,7 @@ const ColumnBuildingElement = (props: Props) => {
       }
 
       if ((isHovered || isSelected) && !isOutlined) {
-        console.log("outlining")
-        highlights.outlined.push(ref(meshRef as ObjectRef))
+        highlights.outlined.push(ref(meshRef.current as Object3D))
         invalidate()
         // outlineMesh(meshRef)
       }
@@ -155,7 +153,7 @@ const ColumnBuildingElement = (props: Props) => {
         )
       ) {
         highlights.outlined = highlights.outlined.filter(
-          (x) => x.current.id !== meshRef.current!.id
+          (x) => x.id !== meshRef.current!.id
         )
         invalidate()
       }

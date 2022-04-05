@@ -2,18 +2,20 @@ import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { useHouse } from "@/stores/houses"
+import scopes from "@/stores/scope"
 import scope, { ScopeTypeEnum } from "@/stores/scope"
 import React from "react"
 
 const ModuleContextMenu = (props: ContextMenuProps) => {
+  const scope = scopes.primary
   if (scope.type !== ScopeTypeEnum.Enum.MODULE) {
     console.error("LevelContextMenu called with different scope type")
     return null
   }
 
-  const { houseId, rowIndex, gridIndex: gridIndex } = scope.selected[0]
+  // const { houseId, rowIndex, gridIndex: gridIndex } = scope.selected[0]
 
-  const house = useHouse(houseId)
+  // const house = useHouse(houseId)
 
   // const { houseTypes, modules: allModules } = useSystemsData()
 

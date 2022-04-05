@@ -1,4 +1,5 @@
-import context, { useContext } from "@/stores/context"
+import { useContext } from "@/stores/context"
+import highlights from "@/stores/highlights"
 import { useHouses } from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapRA } from "@/utils"
@@ -45,7 +46,7 @@ const SiteThreeApp = () => {
         selected: [],
       }
     }
-    context.outlined = []
+    highlights.outlined = []
   }, [buildingId])
 
   return (

@@ -3,7 +3,6 @@
 
 // which doesn't have typings.
 declare module "nanoid"
-declare module "postprocessing"
 
 type Pt3 = [number, number, number]
 

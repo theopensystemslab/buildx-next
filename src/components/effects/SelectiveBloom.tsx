@@ -1,12 +1,9 @@
-import { CameraLayer, EffectsLayer } from "@/CONSTANTS"
-import { useBloomLightRef, useIlluminated } from "@/stores/highlights"
+import { EffectsLayer } from "@/CONSTANTS"
 import { SelectiveBloom as SelectiveBloom_ } from "@react-three/postprocessing"
-import React, { Fragment, useEffect, useRef } from "react"
-import { useSnapshot } from "valtio"
+import React, { Fragment } from "react"
 
 const SelectiveBloom = () => {
   // const lightRef = useRef()
-  const illuminated = useIlluminated()
   // const lightRef = useBloomLightRef()
 
   // useEffect(() => void console.log(lightRef), [lightRef])
@@ -21,7 +18,7 @@ const SelectiveBloom = () => {
         luminanceThreshold={0}
         intensity={intensity}
         luminanceSmoothing={0}
-        selection={illuminated}
+        selection={[]}
         selectionLayer={EffectsLayer.bloom}
         // lights={[lightRef].filter((x) => !!x)}
       />

@@ -1,28 +1,16 @@
 import { isMesh, ObjectRef } from "@/utils"
 import { MutableRefObject } from "react"
-import { AmbientLight, Group } from "three"
+import { AmbientLight, Group, Object3D } from "three"
 import { proxy, ref, useSnapshot } from "valtio"
 
 type Highights = {
-  outlined: Array<ObjectRef>
-  illuminated: Array<ObjectRef>
-  bloomLightRef: AmbientLight | null
+  outlined: Array<Object3D>
+  illuminated: Array<Object3D>
 }
 const highlights = proxy<Highights>({
   outlined: [],
   illuminated: [],
-  bloomLightRef: null,
 })
-
-export const useBloomLightRef = () => {
-  const { bloomLightRef } = useSnapshot(highlights)
-  return bloomLightRef
-}
-
-export const useOutlined = () =>
-  useSnapshot(highlights).outlined as Array<ObjectRef>
-export const useIlluminated = () =>
-  useSnapshot(highlights).illuminated as Array<ObjectRef>
 
 export const outlineGroup = (
   groupRef: MutableRefObject<Group | undefined>,
@@ -31,24 +19,24 @@ export const outlineGroup = (
   if (!groupRef.current) return
 
   const { remove = false } = opts
-  const objectRefs: Array<ObjectRef> = []
+  const objs: Array<Object3D> = []
 
   let changed = false
   groupRef.current.traverse((o3) => {
     if (isMesh(o3)) {
-      const next = { current: o3 }
-      objectRefs.push(ref(next))
+      const next = ref(o3)
+      objs.push(next)
       if (highlights.outlined.indexOf(next) === -1) changed = true
     }
   })
 
   if (changed && !remove) {
-    highlights.outlined = objectRefs
+    highlights.outlined = objs
   }
 
   if (remove) {
     highlights.outlined = highlights.outlined.filter(
-      (x) => objectRefs.findIndex((y) => y.current.id === x.current.id) === -1
+      (x) => objs.findIndex((y) => y.id === x.id) === -1
     )
   }
 }
@@ -60,26 +48,25 @@ export const illuminateGroup = (
   if (!groupRef.current) return
 
   const { remove = false } = opts
-  const objectRefs: Array<ObjectRef> = []
+  const objs: Array<Object3D> = []
 
   let changed = false
   groupRef.current.traverse((o3) => {
     if (isMesh(o3)) {
-      const next = { current: o3 }
-      objectRefs.push(ref(next))
+      const next = ref(o3)
+      objs.push(next)
       if (highlights.illuminated.indexOf(next) === -1) changed = true
     }
   })
 
   if (changed && !remove) {
-    highlights.illuminated = [...highlights.illuminated, ...objectRefs]
+    highlights.illuminated = objs
   }
 
   if (remove) {
     highlights.illuminated = highlights.illuminated.filter(
-      (x) => objectRefs.findIndex((y) => y.current.id === x.current.id) === -1
+      (x) => objs.findIndex((y) => y.id === x.id) === -1
     )
   }
 }
-
 export default highlights

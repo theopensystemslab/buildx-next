@@ -6,6 +6,7 @@ import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { filterCompatibleModules, Module } from "@/data/module"
 import { ModuleLayoutItem } from "@/data/moduleLayout"
 import houses from "@/stores/houses"
+import scopes from "@/stores/scope"
 import scope, { ScopeTypeEnum } from "@/stores/scope"
 import { filterMap, head, map, sort, uniq } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
@@ -16,6 +17,7 @@ import { Eq, Ord as StrOrd } from "fp-ts/lib/string"
 import React from "react"
 
 const SingleLevelContextMenu = (props: ContextMenuProps) => {
+  const scope = scopes.secondary
   if (scope.type !== ScopeTypeEnum.Enum.LEVEL) {
     console.error("LevelContextMenu called with different scope type")
     return null
@@ -27,7 +29,7 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
     return null
   }
 
-  const { houseId, rowIndex } = scope.selected[0]
+  // const { houseId, rowIndex } = scope.selected[0]
   // const { modules: allModules } = useSystemsData()
   // const houseRows = useHouseRows(houseId)
 
@@ -37,7 +39,7 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
 
   // const levelModule = houseRows[rowIndex].row[0].module
 
-  const heading = `Level ${scope.selected[0].rowIndex}`
+  // const heading = `Level ${scope.selected[0].rowIndex}`
 
   // const height = rowIndex + 1
 
@@ -178,7 +180,7 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
 
   return (
     <ContextMenu {...props}>
-      <ContextMenuHeading>{heading}</ContextMenuHeading>
+      {/* <ContextMenuHeading>{heading}</ContextMenuHeading> */}
       <ContextMenuButton onClick={addFloor}>Add floor above</ContextMenuButton>
       <ContextMenuButton onClick={removeFloor}>Remove floor</ContextMenuButton>
       <ContextMenuNested label="Change Level Type">
@@ -193,6 +195,7 @@ const SingleLevelContextMenu = (props: ContextMenuProps) => {
 }
 
 const ManyLevelsContextMenu = (props: ContextMenuProps) => {
+  const scope = scopes.secondary
   if (scope.type !== ScopeTypeEnum.Enum.LEVEL) {
     console.error("LevelContextMenu called with different scope type")
     return null
@@ -215,7 +218,7 @@ const ManyLevelsContextMenu = (props: ContextMenuProps) => {
 }
 
 const LevelContextMenu = (props: ContextMenuProps) => {
-  const levels = scope.selected.length
+  const levels = scopes.secondary.selected.length
 
   return levels > 1 ? (
     <ManyLevelsContextMenu {...props} />

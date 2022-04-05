@@ -9,6 +9,7 @@ import { Canvas } from "@react-three/fiber"
 import React, { PropsWithChildren } from "react"
 import { BasicShadowMap } from "three"
 import Effects from "../effects"
+import Effects2 from "../effects/Effects2"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
 import RectangularGrid from "../ui-3d/RectangularGrid"
@@ -81,7 +82,7 @@ const SiteThreeInit = (props: Props) => {
         </>
       )}
       {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
-      <Effects />
+      <Effects2 />
       <SiteCamControls />
       <ContextBridge>{children}</ContextBridge>
     </Canvas>
