@@ -2,7 +2,7 @@ import { useSystemsData } from "@/contexts/SystemsData"
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
 import invisibleMaterial from "@/materials/invisibleMaterial"
-import context from "@/stores/context"
+import context, { useContext } from "@/stores/context"
 import highlights from "@/stores/highlights"
 import { useHouse } from "@/stores/houses"
 import scopes, { ElementScopeItem, ScopeTypeEnum } from "@/stores/scope"
@@ -13,12 +13,21 @@ import { pipe } from "fp-ts/lib/function"
 import { flatten, getOrElse, none, some } from "fp-ts/lib/Option"
 import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
 import React, { useEffect, useMemo, useRef } from "react"
-import { BufferGeometry, Material, Mesh, Object3D } from "three"
+import {
+  BufferGeometry,
+  Color,
+  Material,
+  Mesh,
+  MeshBasicMaterial,
+  MeshPhongMaterial,
+  MeshPhysicalMaterial,
+  MeshStandardMaterial,
+  Object3D,
+} from "three"
 import { ref, subscribe } from "valtio"
-
-const builtInMaterials: Record<string, Material> = {
-  Glazing: glassMaterial,
-}
+import materials from "@/stores/materials"
+import { DEFAULT_MATERIAL_NAME } from "@/CONSTANTS"
+import useMaterial from "@/hooks/useMaterial"
 
 type Props = MeshProps & {
   elementName: string
@@ -34,9 +43,9 @@ const ColumnBuildingElement = (props: Props) => {
   const {
     geometry,
     elementName,
+    columnIndex,
     levelIndex,
     groupIndex,
-    columnIndex,
     buildingId,
     visible,
   } = props
@@ -44,50 +53,12 @@ const ColumnBuildingElement = (props: Props) => {
 
   const meshRef = useRef<Mesh>()
 
-  const { materials, elements } = useSystemsData()
-
-  const material = useMemo(() => {
-    if (!visible) return invisibleMaterial
-    if (house.modifiedMaterials?.[elementName]) {
-      return pipe(
-        materials,
-        findFirstMap((m) =>
-          m.name === house.modifiedMaterials[elementName] && m.threeMaterial
-            ? some(m.threeMaterial)
-            : none
-        ),
-        getOrElse(() =>
-          elementName in builtInMaterials
-            ? builtInMaterials[elementName]
-            : defaultMaterial
-        )
-      )
-    } else {
-      return pipe(
-        elements,
-        findFirstMap((e) =>
-          e.name === elementName
-            ? some(
-                pipe(
-                  materials,
-                  findFirstMap((m) =>
-                    m.name === e.defaultMaterial && m.threeMaterial
-                      ? some(m.threeMaterial)
-                      : none
-                  )
-                )
-              )
-            : none
-        ),
-        flatten,
-        getOrElse(() =>
-          elementName in builtInMaterials
-            ? builtInMaterials[elementName]
-            : defaultMaterial
-        )
-      )
-    }
-  }, [elementName, materials, visible])
+  const material = useMaterial(
+    elementName,
+    house.modifiedMaterials,
+    levelIndex,
+    visible
+  )
 
   useEffect(() =>
     subscribe(scopes.primary, () => {

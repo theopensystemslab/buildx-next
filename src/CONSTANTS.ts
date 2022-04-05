@@ -18,6 +18,7 @@ export enum EffectsLayer {
 export const BUILDX_LOCAL_STORAGE_HOUSES_KEY = "BUILDX_LOCAL_STORAGE_HOUSES_KEY"
 export const BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY =
   "BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY"
+export const DEFAULT_MATERIAL_NAME = "Plywood"
 
 // type SetTypes = {
 //   [key: string]: string[][][]

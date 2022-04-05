@@ -3,7 +3,7 @@ import { LoadedModule } from "@/data/module"
 import highlights, { illuminateGroup } from "@/stores/highlights"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { fuzzyMatch, isMesh } from "@/utils"
-import { GroupProps, ThreeEvent } from "@react-three/fiber"
+import { GroupProps, invalidate, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
@@ -96,6 +96,7 @@ const ColumnBuildingModule = (props: Props) => {
         scopes.secondary.hovered = {
           levelIndex,
         }
+        invalidate()
       }
     },
   })
