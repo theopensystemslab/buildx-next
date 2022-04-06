@@ -2,19 +2,17 @@ import { DEFAULT_MATERIAL_NAME } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
 import defaultMaterial from "@/materials/defaultMaterial"
 import glassMaterial from "@/materials/glassMaterial"
-import invisibleMaterial from "@/materials/invisibleMaterial"
+import highlights from "@/stores/highlights"
 import houses from "@/stores/houses"
-import materials from "@/stores/materials"
-import scopes from "@/stores/scope"
+import materials, { MaterialValue } from "@/stores/materials"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse, none, some } from "fp-ts/lib/Option"
 import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
-import { useMemo, useState } from "react"
-import { Color, Material } from "three"
-import { subscribe } from "valtio"
+import { useMemo, useRef } from "react"
+import { Color, MeshPhysicalMaterial } from "three"
 import { subscribeKey } from "valtio/utils"
 
-const builtInMaterials: Record<string, Material> = {
+const builtInMaterials: Record<string, MeshPhysicalMaterial> = {
   Glazing: glassMaterial,
 }
 
@@ -22,52 +20,74 @@ const useMaterial = (
   buildingId: string,
   elementName: string,
   levelIndex: number
-  // modifiedMaterials: Record<string, string>,
-  // visible: boolean = true
 ) => {
   const { elements, materials: sysMaterials } = useSystemsData()
 
-  const material = useMemo(() => {
-    const k = { buildingId, elementName, levelIndex }
-    const maybeMaterial = materials.get(k)
+  const { threeMaterial, colors } = useMemo(() => {
+    const maybeMaterial = materials?.[buildingId]?.[elementName]?.[levelIndex]
 
-    if (maybeMaterial) return maybeMaterial.material
+    if (maybeMaterial) return maybeMaterial
     else {
       const materialName =
         houses[buildingId].modifiedMaterials?.[elementName] ??
         elements.find((e) => e.name === elementName)?.defaultMaterial ??
         DEFAULT_MATERIAL_NAME
 
-      const material = {
-        material: pipe(
-          sysMaterials,
-          findFirstMap((sysM) =>
-            sysM.name === materialName && sysM.threeMaterial
-              ? some(sysM.threeMaterial)
-              : none
-          ),
-          getOrElse(() =>
-            elementName in builtInMaterials
-              ? builtInMaterials[elementName]
-              : defaultMaterial
-          )
+      const threeMaterial = pipe(
+        sysMaterials,
+        findFirstMap((sysM) =>
+          sysM.name === materialName && sysM.threeMaterial
+            ? some(sysM.threeMaterial)
+            : none
         ),
-
-        clipped: false,
-        illuminated: false,
-        visible: true,
+        getOrElse(() =>
+          elementName in builtInMaterials
+            ? builtInMaterials[elementName]
+            : defaultMaterial
+        ),
+        (m) => m.clone()
+      )
+      const material: MaterialValue = {
+        threeMaterial,
+        colors: {
+          default: threeMaterial.color.clone(),
+          illuminated: threeMaterial.color.clone().add(new Color("#ff0000")),
+        },
       }
 
-      materials.set(k, material)
-      return material.material
+      if (!(buildingId in materials)) {
+        materials[buildingId] = {
+          [elementName]: {
+            [levelIndex]: material,
+          },
+        }
+      } else if (!(elementName in materials[buildingId])) {
+        materials[buildingId][elementName] = {
+          [levelIndex]: material,
+        }
+      } else {
+        materials[buildingId][elementName][levelIndex] = material
+      }
+
+      return material
     }
   }, [buildingId, elementName, levelIndex])
 
-  subscribe(materials, (...args) => {
-    console.log(args)
+  subscribeKey(highlights, "hoveredLevelIndex", () => {
+    if (highlights.hoveredLevelIndex === levelIndex) {
+      threeMaterial.color = colors.illuminated
+    } else if (highlights.hoveredLevelIndex !== levelIndex) {
+      threeMaterial.color = colors.default
+    }
   })
 
-  return material
+  // subscribe(materials[buildingId][elementName][levelIndex], () => {
+  //   console.log(materials[buildingId][elementName][levelIndex].illuminated)
+  //   // console.log(`${buildingId}-${elementName}-${levelIndex}`)
+  //   // console.log(materials[buildingId][elementName][levelIndex])
+  // })
+
+  return threeMaterial
 
   // const [illuminated, setIlluminated] = useState(false)
 

@@ -1,33 +1,13 @@
-import { useSystemsData } from "@/contexts/SystemsData"
-import defaultMaterial from "@/materials/defaultMaterial"
-import glassMaterial from "@/materials/glassMaterial"
-import invisibleMaterial from "@/materials/invisibleMaterial"
-import context, { useContext } from "@/stores/context"
+import useMaterial from "@/hooks/useMaterial"
+import context from "@/stores/context"
 import highlights from "@/stores/highlights"
-import { useHouse } from "@/stores/houses"
-import scopes, { ElementScopeItem, ScopeTypeEnum } from "@/stores/scope"
-import { all, any, ObjectRef, undef } from "@/utils"
+import scopes, { ScopeTypeEnum } from "@/stores/scope"
+import { all, any, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
-import { pipe } from "fp-ts/lib/function"
-import { flatten, getOrElse, none, some } from "fp-ts/lib/Option"
-import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
-import React, { useEffect, useMemo, useRef } from "react"
-import {
-  BufferGeometry,
-  Color,
-  Material,
-  Mesh,
-  MeshBasicMaterial,
-  MeshPhongMaterial,
-  MeshPhysicalMaterial,
-  MeshStandardMaterial,
-  Object3D,
-} from "three"
+import React, { useEffect, useRef } from "react"
+import { BufferGeometry, Mesh, Object3D } from "three"
 import { ref, subscribe } from "valtio"
-import materials from "@/stores/materials"
-import { DEFAULT_MATERIAL_NAME } from "@/CONSTANTS"
-import useMaterial from "@/hooks/useMaterial"
 
 type Props = MeshProps & {
   elementName: string
@@ -137,6 +117,47 @@ const ColumnBuildingElement = (props: Props) => {
       if (undef(meshRef.current)) return
       const obj = intersections[0].object ?? intersections[0].eventObject
       if (obj.id !== meshRef.current.id) return
+
+      switch (scopes.secondary.type) {
+        case ScopeTypeEnum.Enum.LEVEL:
+          if (highlights.hoveredLevelIndex !== levelIndex) {
+            highlights.hoveredLevelIndex = levelIndex
+          }
+          break
+          // const m = materials[buildingId][elementName][levelIndex]
+          // m.material.opacity = 1.0
+
+          // for (let [elName, obj] of Object.entries(materials[buildingId])) {
+          //   for (let level of Object.keys(obj)) {
+          //     if (Number(level) === levelIndex) break
+          //     materials[buildingId][elName][
+          //       Number(level)
+          //     ].material.opacity = 0.1
+          //   }
+          // }
+          // invalidate()
+          // if (!m.illuminated) m.illuminated = true
+          break
+
+        // else {
+        //   if ("color" in m.material) {
+        //     // @ts-ignore
+        //     m.material.color = m.material.color.add(new Color("#660000"))
+        //     m.illuminated = true
+        //     invalidate()
+        //   }
+        //   for (let k of Object.keys(materials[buildingId][elementName])) {
+        //     if (Number(k) === levelIndex) break
+        //     const n = materials[buildingId][elementName][Number(k)]
+        //     if (n.illuminated && "color" in m.material) {
+        //       // @ts-ignore
+        //       n.material.color = m.material.color.sub(new Color("#660000"))
+        //       n.illuminated = false
+        //       invalidate()
+        //     }
+        //   }
+        // }
+      }
 
       switch (scopes.primary.type) {
         // case ScopeTypeEnum.Enum.HOUSE:

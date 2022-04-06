@@ -1,26 +1,22 @@
-import { Material } from "three"
-import { proxyMap } from "valtio/utils"
+import { Color, MeshPhysicalMaterial, MeshStandardMaterial } from "three"
+import { proxy } from "valtio"
 
-// type MaterialKey = {
-//   name?: string
-//   visible?: boolean
-//   illuminated?: boolean
-//   clippingPlanes?: Plane[]
-// }
-
-type MaterialKey = {
-  buildingId: string
-  elementName: string
-  levelIndex: number
+export type MaterialValue = {
+  threeMaterial: MeshStandardMaterial | MeshPhysicalMaterial
+  colors: {
+    default: Color
+    illuminated: Color
+  }
 }
 
-type MaterialValue = {
-  material: Material
-  illuminated: boolean
-  visible: boolean
-  clipped: boolean // [boolean,boolean,boolean]?
+type MaterialsCache = {
+  [buildingId: string]: {
+    [elementName: string]: {
+      [levelIndex: number]: MaterialValue
+    }
+  }
 }
-const materials = proxyMap<MaterialKey, MaterialValue>([])
+const materials = proxy<MaterialsCache>({})
 
 // const materials = new Map<MaterialKey, Material>([])
 

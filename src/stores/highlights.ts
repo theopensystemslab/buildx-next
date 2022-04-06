@@ -6,10 +6,12 @@ import { proxy, ref, useSnapshot } from "valtio"
 type Highights = {
   outlined: Array<Object3D>
   illuminated: Array<Object3D>
+  hoveredLevelIndex: number | null
 }
 const highlights = proxy<Highights>({
   outlined: [],
   illuminated: [],
+  hoveredLevelIndex: null,
 })
 
 export const outlineGroup = (
