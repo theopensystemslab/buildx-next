@@ -1,6 +1,6 @@
 import useMaterial from "@/hooks/useMaterial"
 import context from "@/stores/context"
-import highlights from "@/stores/highlights"
+import highlights, { setIlluminatedLevel } from "@/stores/highlights"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { all, any, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
@@ -32,7 +32,7 @@ const ColumnBuildingElement = (props: Props) => {
 
   const meshRef = useRef<Mesh>()
 
-  const material = useMaterial(buildingId, elementName, levelIndex)
+  const material = useMaterial({ buildingId, elementName, levelIndex })
 
   useEffect(() =>
     subscribe(scopes.primary, () => {
@@ -120,9 +120,13 @@ const ColumnBuildingElement = (props: Props) => {
 
       switch (scopes.secondary.type) {
         case ScopeTypeEnum.Enum.LEVEL:
-          if (highlights.hoveredLevelIndex !== levelIndex) {
-            highlights.hoveredLevelIndex = levelIndex
+          if (scopes.secondary.hovered?.levelIndex === levelIndex) {
+            setIlluminatedLevel(buildingId, levelIndex)
+            // invalidate()
           }
+          // if (highlights.hoveredLevelIndex !== levelIndex) {
+          //   highlights.hoveredLevelIndex = levelIndex
+          // }
           break
           // const m = materials[buildingId][elementName][levelIndex]
           // m.material.opacity = 1.0

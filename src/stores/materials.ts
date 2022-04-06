@@ -1,43 +1,44 @@
+import { proxyMap } from "valtio/utils"
 import { Color, MeshPhysicalMaterial, MeshStandardMaterial } from "three"
-import { proxy } from "valtio"
+
+export type ColorOpts = {
+  default: Color
+  illuminated: Color
+}
+
+export type MaterialKey = {
+  buildingId: string
+  elementName: string
+  levelIndex: number
+}
 
 export type MaterialValue = {
+  key: MaterialKey
   threeMaterial: MeshStandardMaterial | MeshPhysicalMaterial
-  colors: {
-    default: Color
-    illuminated: Color
-  }
+  colorOpts: ColorOpts
+  colorValue: keyof ColorOpts
 }
 
-type MaterialsCache = {
-  [buildingId: string]: {
-    [elementName: string]: {
-      [levelIndex: number]: MaterialValue
-    }
-  }
+// key is hash of JSON.stringify([buildingId, elementName, levelIndex])
+const materials = proxyMap<string, MaterialValue>()
+
+export const hashMaterialKey = ({
+  buildingId,
+  elementName,
+  levelIndex,
+}: MaterialKey) => JSON.stringify([buildingId, elementName, levelIndex])
+
+export const pushMaterial = (material: MaterialValue) => {
+  const hashKey = hashMaterialKey(material.key)
+  if (!(hashKey in hashMaterialKey)) materials.set(hashKey, material)
 }
-const materials = proxy<MaterialsCache>({})
 
-// const materials = new Map<MaterialKey, Material>([])
-
-// export const useMaterialsMap = () => {
-//   const { materials: sysMaterials } = useSystemsData()
-
-//   pipe(
-//     sysMaterials,
-//     filterMapRA(
-//       ({ threeMaterial, name }): Option<[MaterialKey, Material]> =>
-//         threeMaterial
-//           ? some([
-//               { clippingPlanes: [], illuminated: false, name },
-//               threeMaterial,
-//             ])
-//           : none
-//     )
-//   ).forEach(([k, v], i) => {
-//     materials.set(ref(k), ref(v))
-//     console.log(i, materials.get(k))
-//   })
-// }
+export const setMaterialColor = (
+  material: MaterialValue,
+  color: keyof ColorOpts
+) => {
+  material.threeMaterial.color.set(material.colorOpts[color])
+  material.colorValue = color
+}
 
 export default materials

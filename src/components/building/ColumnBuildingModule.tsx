@@ -1,6 +1,5 @@
 import { useSystemsData } from "@/contexts/SystemsData"
 import { LoadedModule } from "@/data/module"
-import highlights, { illuminateGroup } from "@/stores/highlights"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { fuzzyMatch, isMesh } from "@/utils"
 import { GroupProps, invalidate, ThreeEvent } from "@react-three/fiber"
@@ -17,7 +16,6 @@ import produce from "immer"
 import React, { useRef } from "react"
 import { BufferGeometry, Group, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
-import { subscribe } from "valtio"
 import ColumnBuildingElement from "./ColumnBuildingElement"
 
 type Props = GroupProps & {
@@ -101,16 +99,16 @@ const ColumnBuildingModule = (props: Props) => {
     },
   })
 
-  subscribe(scopes.secondary, () => {
-    if (
-      scopes.secondary.type === ScopeTypeEnum.Enum.LEVEL &&
-      scopes.secondary.hovered?.levelIndex === levelIndex
-    ) {
-      illuminateGroup(groupRef)
-    } else {
-      illuminateGroup(groupRef, { remove: true })
-    }
-  })
+  // subscribe(scopes.secondary, () => {
+  //   if (
+  //     scopes.secondary.type === ScopeTypeEnum.Enum.LEVEL &&
+  //     scopes.secondary.hovered?.levelIndex === levelIndex
+  //   ) {
+  //     illuminateGroup(groupRef)
+  //   } else {
+  //     illuminateGroup(groupRef, { remove: true })
+  //   }
+  // })
 
   return (
     <group ref={groupRef} {...(bind() as any)} {...groupProps}>
