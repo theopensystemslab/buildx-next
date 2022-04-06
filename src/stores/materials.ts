@@ -1,14 +1,26 @@
-import { Material, Plane } from "three"
+import { Material } from "three"
 import { proxyMap } from "valtio/utils"
 
+// type MaterialKey = {
+//   name?: string
+//   visible?: boolean
+//   illuminated?: boolean
+//   clippingPlanes?: Plane[]
+// }
+
 type MaterialKey = {
-  name?: string
-  visible?: boolean
-  illuminated?: boolean
-  clippingPlanes?: Plane[]
+  buildingId: string
+  elementName: string
+  levelIndex: number
 }
 
-const materials = proxyMap<MaterialKey, Material>([])
+type MaterialValue = {
+  material: Material
+  illuminated: boolean
+  visible: boolean
+  clipped: boolean // [boolean,boolean,boolean]?
+}
+const materials = proxyMap<MaterialKey, MaterialValue>([])
 
 // const materials = new Map<MaterialKey, Material>([])
 

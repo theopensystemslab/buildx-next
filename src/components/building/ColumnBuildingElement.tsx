@@ -49,16 +49,10 @@ const ColumnBuildingElement = (props: Props) => {
     buildingId,
     visible,
   } = props
-  const house = useHouse(buildingId)
 
   const meshRef = useRef<Mesh>()
 
-  const material = useMaterial(
-    elementName,
-    house.modifiedMaterials,
-    levelIndex,
-    visible
-  )
+  const material = useMaterial(buildingId, elementName, levelIndex)
 
   useEffect(() =>
     subscribe(scopes.primary, () => {
