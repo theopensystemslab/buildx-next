@@ -1,8 +1,8 @@
 import { useContext } from "@/stores/context"
 import { ElementScope } from "@/stores/scope"
 import React from "react"
-import ContextMenu, { ContextMenuProps } from "../ui/ContextMenu"
-import ContextMenuHeading from "../ui/ContextMenuHeading"
+import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
+import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 
 type Props = ContextMenuProps & {
   buildingId: string

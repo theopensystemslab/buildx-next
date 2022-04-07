@@ -6,7 +6,6 @@ import {
   EffectPass,
   OutlineEffect as OutlineEffectRaw,
   RenderPass,
-  SelectiveBloomEffect,
 } from "postprocessing"
 import { useEffect, useMemo } from "react"
 import { subscribeKey } from "valtio/utils"
@@ -34,7 +33,7 @@ export const defaultOutlineEffectParams: UseOutlineEffectParams = {
 
 const defaultRenderPriority: number = 1
 
-const Effects2 = () => {
+const Effects = () => {
   const { gl, camera, size, scene } = useThree()
 
   const renderTarget = useFBO(size.width, size.height, { depthBuffer: true })
@@ -103,4 +102,4 @@ const Effects2 = () => {
   return null
 }
 
-export default Effects2
+export default Effects

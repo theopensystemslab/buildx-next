@@ -6,7 +6,7 @@ import { mapRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/ReadonlyRecord"
 import React, { Fragment, Suspense, useEffect } from "react"
-import BuildingBuilding from "../building/BuildingBuilding"
+import BuildingBuilding from "./building/BuildingBuilding"
 import Loader3D from "../ui-3d/Loader3D"
 import SiteBuilding from "./SiteBuilding"
 

@@ -1,6 +1,6 @@
 import ModuleDebug from "@/components/debug/ModuleDebug"
 import Layout from "@/components/layouts"
-import { SiteContextMenu } from "@/components/menu"
+import { SiteContextMenu } from "@/components/site/menu"
 import Container from "@/components/site/Container"
 import HtmlUi from "@/components/site/HtmlUi"
 import { Loader } from "@/components/ui"

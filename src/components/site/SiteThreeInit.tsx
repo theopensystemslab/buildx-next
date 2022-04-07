@@ -8,10 +8,10 @@ import { useContextBridge } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import React, { PropsWithChildren } from "react"
 import { BasicShadowMap } from "three"
-import Effects2 from "../effects/Effects2"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
 import RectangularGrid from "../ui-3d/RectangularGrid"
+import Effects from "./Effects"
 import GroundCircle from "./GroundCircle"
 import ShadowPlane from "./ShadowPlane"
 import SiteCamControls from "./SiteCamControls"
@@ -45,7 +45,6 @@ const SiteThreeInit = (props: Props) => {
   return (
     <Canvas
       frameloop="demand"
-      mode="concurrent"
       shadows={{ enabled: true, type: BasicShadowMap }}
       onCreated={({ gl, raycaster }) => {
         gl.localClippingEnabled = true
@@ -81,7 +80,7 @@ const SiteThreeInit = (props: Props) => {
         </>
       )}
       {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
-      <Effects2 />
+      <Effects />
       <SiteCamControls />
       <ContextBridge>{children}</ContextBridge>
     </Canvas>

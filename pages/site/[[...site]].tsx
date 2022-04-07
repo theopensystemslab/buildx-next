@@ -1,5 +1,5 @@
 import Layout from "@/components/layouts"
-import { SiteContextMenu } from "@/components/menu"
+import { SiteContextMenu } from "@/components/site/menu"
 import Container from "@/components/site/Container"
 import HtmlUi from "@/components/site/HtmlUi"
 import SiteThreeApp from "@/components/site/SiteThreeApp"
@@ -8,7 +8,7 @@ import { SystemsDataProvider } from "@/contexts/SystemsData"
 import { useRouting } from "@/hooks/routing"
 import { useLocallyStoredHouses } from "@/stores/houses"
 import dynamic from "next/dynamic"
-import React, { Fragment, ReactElement, Suspense } from "react"
+import React, { Fragment, ReactElement } from "react"
 
 const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
   ssr: false,
@@ -34,11 +34,10 @@ const SiteIndexPage = () => {
             </Container>
           }
         >
-          <HtmlUi />
           <SiteThreeInit>
             <SiteThreeApp />
           </SiteThreeInit>
-          <SiteContextMenu />
+          <HtmlUi />
         </SystemsDataProvider>
       </Layout>
     </Fragment>
