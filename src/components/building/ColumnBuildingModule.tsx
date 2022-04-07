@@ -78,6 +78,7 @@ const ColumnBuildingModule = (props: Props) => {
           levelIndex,
           groupIndex,
           visible,
+          moduleHeight: module.height,
         }}
       />
     )),

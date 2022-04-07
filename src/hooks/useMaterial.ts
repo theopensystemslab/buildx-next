@@ -13,17 +13,33 @@ import { pipe } from "fp-ts/lib/function"
 import { getOrElse, none, some } from "fp-ts/lib/Option"
 import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
 import { useMemo } from "react"
-import { Color, MeshPhysicalMaterial } from "three"
+import { Color, MeshPhysicalMaterial, Plane, Vector3 } from "three"
+import invisibleMaterial from "@/materials/invisibleMaterial"
+import { useColumnLayout } from "./layouts"
 
 const builtInMaterials: Record<string, MeshPhysicalMaterial> = {
   Glazing: glassMaterial,
 }
 
-const useMaterial = (materialKey: MaterialKey) => {
+const useMaterial = (
+  materialKey: MaterialKey,
+  moduleHeight: number,
+  visible: boolean = true
+) => {
   const { buildingId, elementName, levelIndex } = materialKey
   const { elements, materials: sysMaterials } = useSystemsData()
 
+  const columnLayout = useColumnLayout(buildingId)
+  const clippingPlaneHeight =
+    columnLayout[0].gridGroups[levelIndex].y + moduleHeight / 2
+
+  const clippingPlane = useMemo(
+    () => new Plane(new Vector3(0, -1, 0), clippingPlaneHeight),
+    [clippingPlaneHeight]
+  )
+
   return useMemo(() => {
+    if (!visible) return invisibleMaterial
     const hashKey = hashMaterialKey(materialKey)
     const maybeMaterial = materials.get(hashKey) // materials?.[buildingId]?.[elementName]?.[levelIndex]
 
@@ -61,11 +77,13 @@ const useMaterial = (materialKey: MaterialKey) => {
         key: materialKey,
       }
 
+      material.threeMaterial.clippingPlanes = [clippingPlane]
+
       materials.set(hashKey, material)
 
       return material.threeMaterial
     }
-  }, [buildingId, elementName, levelIndex])
+  }, [buildingId, elementName, levelIndex, visible, clippingPlane])
 }
 
 export default useMaterial

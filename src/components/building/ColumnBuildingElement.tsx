@@ -17,6 +17,7 @@ type Props = MeshProps & {
   buildingId: string
   geometry: BufferGeometry
   visible: boolean
+  moduleHeight: number
 }
 
 const ColumnBuildingElement = (props: Props) => {
@@ -28,11 +29,16 @@ const ColumnBuildingElement = (props: Props) => {
     groupIndex,
     buildingId,
     visible,
+    moduleHeight,
   } = props
 
   const meshRef = useRef<Mesh>()
 
-  const material = useMaterial({ buildingId, elementName, levelIndex })
+  const material = useMaterial(
+    { buildingId, elementName, levelIndex },
+    moduleHeight,
+    visible
+  )
 
   useEffect(() =>
     subscribe(scopes.primary, () => {

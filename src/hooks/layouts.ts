@@ -169,11 +169,6 @@ const columnify =
   }
 
 export const useColumnLayout = (buildingId: string) => {
-  // think you actually want to find
-  // lowest denominator in terms of grid units,
-  // per grid type column
-  // then delineate again, so that columns are minimal
-
   const rows = useBuildingRows(buildingId)
 
   const columns = pipe(
@@ -231,8 +226,6 @@ export const useColumnLayout = (buildingId: string) => {
 
   if (!sameLengthColumns) throw new Error("not sameLengthColumns")
 
-  // columnified
-
   const columnifiedFurther = pipe(
     columns,
     mapRA((column) =>
@@ -244,8 +237,6 @@ export const useColumnLayout = (buildingId: string) => {
     ),
     flatten
   )
-
-  // metadata
 
   return pipe(
     columnifiedFurther,
