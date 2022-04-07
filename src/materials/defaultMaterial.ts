@@ -23,7 +23,6 @@ const defaultMaterial = new MeshStandardMaterial({
   clipIntersection: true,
   shadowSide: DoubleSide,
   clipShadows: true,
-  refractionRatio: 1,
   wireframe: false,
   wireframeLinewidth: 1,
   flatShading: false,
