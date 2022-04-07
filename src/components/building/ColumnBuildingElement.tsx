@@ -91,7 +91,6 @@ const ColumnBuildingElement = (props: Props) => {
 
       if ((isHovered || isSelected) && !isOutlined) {
         highlights.outlined.push(ref(meshRef.current as Object3D))
-        invalidate()
         // outlineMesh(meshRef)
       }
       if (
@@ -106,8 +105,8 @@ const ColumnBuildingElement = (props: Props) => {
         highlights.outlined = highlights.outlined.filter(
           (x) => x.id !== meshRef.current!.id
         )
-        invalidate()
       }
+      invalidate()
     })
   )
 
@@ -128,7 +127,6 @@ const ColumnBuildingElement = (props: Props) => {
         case ScopeTypeEnum.Enum.LEVEL:
           if (scopes.secondary.hovered?.levelIndex === levelIndex) {
             setIlluminatedLevel(buildingId, levelIndex)
-            // invalidate()
           }
           // if (highlights.hoveredLevelIndex !== levelIndex) {
           //   highlights.hoveredLevelIndex = levelIndex
@@ -187,6 +185,7 @@ const ColumnBuildingElement = (props: Props) => {
         //   scopes.primary.hovered = { houseId: house.id, rowIndex: levelIndex }
         //   break
       }
+      invalidate()
     },
     onContextMenu: ({ event: { intersections, pageX, pageY } }) => {
       const returnIf = any(

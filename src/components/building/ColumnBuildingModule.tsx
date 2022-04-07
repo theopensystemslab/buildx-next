@@ -95,7 +95,6 @@ const ColumnBuildingModule = (props: Props) => {
         scopes.secondary.hovered = {
           levelIndex,
         }
-        invalidate()
       }
     },
   })

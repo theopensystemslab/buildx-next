@@ -62,9 +62,8 @@ export const CamControls = React.forwardRef<CameraControls, CamControlsProps>(
     const explCamera = (camera ?? defaultCamera) as
       | PerspectiveCamera
       | OrthographicCamera
-    const explDomElement =
-      domElement ??
-      (typeof events.connected !== "boolean" ? events.connected : gl.domElement)
+    const explDomElement = domElement ?? events.connected ?? gl.domElement
+    if (!explDomElement) throw new Error("explDomElement undefined")
     const controls = React.useMemo(
       () => new CameraControls(explCamera, explDomElement),
       [explCamera, explDomElement]

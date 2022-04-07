@@ -20,13 +20,8 @@ import { getSystemSettings, SystemSettings } from "./settings"
 
 export const systems: Array<System> = [
   {
-    id: "sampleTom",
-    name: "Sample Tom",
-    airtableId: "appgVlfhT0anmqi5a",
-  },
-  {
-    id: "sampleClayton",
-    name: "Sample Clayton",
+    id: "sample",
+    name: "Sample",
     airtableId: "app7ApkBWMj8Z8gdV",
   },
   // {
@@ -35,8 +30,6 @@ export const systems: Array<System> = [
   //   airtableId: "appYkSYalupnJmUA2",
   // },
 ]
-// oldest
-// airtableId: "appXYQYWjUiAT1Btm",
 
 export interface System {
   id: string
