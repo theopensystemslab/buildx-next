@@ -1,4 +1,5 @@
-import { useContext } from "@/stores/context"
+import { useRouting } from "@/hooks/routing"
+import context, { useContext } from "@/stores/context"
 import highlights from "@/stores/highlights"
 import { useHouses } from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
@@ -6,9 +7,11 @@ import { mapRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/ReadonlyRecord"
 import React, { Fragment, Suspense, useEffect } from "react"
-import BuildingBuilding from "./building/BuildingBuilding"
+import { subscribe } from "valtio"
+import { useLocation } from "wouter"
 import Loader3D from "../ui-3d/Loader3D"
-import SiteBuilding from "./SiteBuilding"
+import BuildingBuilding from "./building/BuildingBuilding"
+import SiteBuilding from "./building/SiteBuilding"
 
 const BuildingMode = ({ buildingId }: { buildingId: string }) => {
   return <BuildingBuilding id={buildingId} />
@@ -30,7 +33,9 @@ const SiteMode = () => {
 }
 
 const SiteThreeApp = () => {
-  const { buildingId } = useContext()
+  const { buildingId, levelIndex } = useContext()
+
+  useRouting()
 
   useEffect(() => {
     if (buildingId === null) {

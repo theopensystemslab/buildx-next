@@ -19,7 +19,8 @@ import { MutableRefObject, useCallback, useEffect } from "react"
 import { Group } from "three"
 import { proxy, subscribe, useSnapshot } from "valtio"
 import { setCameraEnabled } from "./camera"
-import context, { useContext } from "./context"
+import { useContext } from "./context"
+import pointer from "./pointer"
 import scopes, { ScopeTypeEnum } from "./scope"
 
 export const getInitialHouses = () =>
@@ -85,7 +86,7 @@ export const useUpdatePosition = (
       setCameraEnabled(false)
     }
 
-    const [px, pz] = context.pointer
+    const [px, pz] = pointer.xz
     const [x, z] = houses[houseId].position
     const [dx, dz] = [px - x, pz - z].map(snapToGrid)
 

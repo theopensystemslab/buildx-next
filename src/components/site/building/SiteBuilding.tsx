@@ -10,7 +10,7 @@ import { pipe } from "fp-ts/lib/function"
 import { useEffect, useRef } from "react"
 import { Group } from "three"
 import { subscribe } from "valtio"
-import BuildingHouseColumn from "./building/ColumnBuildingColumn"
+import BuildingHouseColumn from "./ColumnBuildingColumn"
 
 type Props = {
   id: string

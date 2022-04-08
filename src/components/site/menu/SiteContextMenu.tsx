@@ -1,11 +1,11 @@
+import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
+import ContextMenuButton from "@/components/ui/ContextMenuButton"
+import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import { useSystemsData } from "@/contexts/SystemsData"
 import context, { EditModeEnum, useContext } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import scopes, { HouseScope, ScopeTypeEnum } from "@/stores/scope"
 import React, { Fragment, useState } from "react"
-import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
-import ContextMenuButton from "@/components/ui/ContextMenuButton"
-import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import BuildingContextMenu from "./BuildingContextMenu"
 import RenameHouseForm from "./RenameHouseForm"
 
@@ -36,8 +36,6 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
     }
     props.onClose?.()
   }
-
-  // const deleteHouse = useDeleteHouse(buildingId)
 
   const [renaming, setRenaming] = useState(false)
 

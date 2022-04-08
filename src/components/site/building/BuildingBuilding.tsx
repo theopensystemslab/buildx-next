@@ -2,8 +2,8 @@ import { PositionedColumn } from "@/hooks/layouts"
 import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
-import context from "@/stores/context"
 import { useHouse } from "@/stores/houses"
+import pointer from "@/stores/pointer"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
@@ -12,7 +12,7 @@ import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useEffect, useMemo, useRef } from "react"
 import { Color, DoubleSide, Group } from "three"
-import { subscribe, useSnapshot } from "valtio"
+import { useSnapshot } from "valtio"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
 type StretchHandleProps = MeshProps & {
@@ -177,10 +177,7 @@ const BuildingBuilding = (props: Props) => {
         {renderColumn(startColumn)}
         <StretchHandle
           onDrag={({ last }) => {
-            const z = pipe(
-              handleOffset + context.pointer[1] - buildingZ,
-              startClamp
-            )
+            const z = pipe(handleOffset + pointer.xz[1] - buildingZ, startClamp)
             startRef.current.position.z = z
             sendDrag(z, { isStart: true })
             if (last) {
@@ -196,7 +193,7 @@ const BuildingBuilding = (props: Props) => {
         <StretchHandle
           onDrag={({ last }) => {
             const z = pipe(
-              -(endColumn.z + handleOffset) + context.pointer[1] - buildingZ,
+              -(endColumn.z + handleOffset) + pointer.xz[1] - buildingZ,
               endClamp
             )
             endRef.current.position.z = z

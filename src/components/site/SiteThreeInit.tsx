@@ -1,6 +1,6 @@
 import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
-import { setPointer } from "@/stores/context"
+import { setXZ } from "@/stores/pointer"
 import scopes from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
 import { useContextBridge } from "@react-three/drei"
@@ -62,7 +62,7 @@ const SiteThreeInit = (props: Props) => {
       />
       {/* </group> */}
       <HorizontalPlane
-        onChange={setPointer}
+        onChange={setXZ}
         onNearClick={() => {
           scopes.primary.selected = []
           scopes.secondary.selected = []
