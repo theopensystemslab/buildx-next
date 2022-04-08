@@ -1,6 +1,6 @@
 import context from "@/stores/context"
 import { subscribe } from "valtio"
-import { useLocation } from "wouter"
+import { useLocation, useRoute } from "wouter"
 
 export const useRouting = () => {
   const [, setLocation] = useLocation()

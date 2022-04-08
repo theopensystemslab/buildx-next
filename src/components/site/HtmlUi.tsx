@@ -4,6 +4,7 @@ import { Check, Environment, Menu } from "@/components/ui/icons"
 import context, { useContext } from "@/stores/context"
 import { setOrthographic, useSettings } from "@/stores/settings"
 import React, { Fragment, Suspense, useState } from "react"
+import Breadcrumbs from "../ui/Breadcrumbs"
 import { SiteContextMenu } from "./menu"
 
 const HtmlUi = () => {
@@ -52,6 +53,7 @@ const HtmlUi = () => {
           </button>
         </div>
       ) : null}
+      <Breadcrumbs />
       <SiteContextMenu />
     </Fragment>
   )
