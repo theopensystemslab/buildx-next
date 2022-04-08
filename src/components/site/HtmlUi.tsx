@@ -10,8 +10,16 @@ import { SiteContextMenu } from "./menu"
 const HtmlUi = () => {
   const [sidebar, setSidebar] = useState(false)
   const { orthographic } = useSettings()
-  const { buildingId } = useContext()
-  const buildingMode = buildingId !== null
+  const { buildingId, levelIndex } = useContext()
+
+  const check = buildingId !== null || levelIndex !== null
+  const onCheck = () => {
+    if (levelIndex !== null) {
+      context.levelIndex = null
+    } else if (buildingId !== null) {
+      context.buildingId = null
+    }
+  }
 
   return (
     <Fragment>
@@ -43,10 +51,10 @@ const HtmlUi = () => {
       <Suspense fallback={<Loader />}>
         <SiteSidebar open={sidebar} close={() => setSidebar(false)} />
       </Suspense>
-      {buildingMode ? (
+      {check ? (
         <div className="absolute left-1/2 top-16 z-10 flex -translate-x-1/2 transform justify-center">
           <button
-            onClick={() => void (context.buildingId = null)}
+            onClick={onCheck}
             className="block h-12 w-12 rounded-full bg-white p-2 text-green-500 shadow-lg hover:bg-gray-100"
           >
             <Check />

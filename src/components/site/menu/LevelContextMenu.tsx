@@ -217,13 +217,24 @@ const ManyLevelsContextMenu = (props: ContextMenuProps) => {
   )
 }
 
-const LevelContextMenu = (props: ContextMenuProps) => {
-  const levels = scopes.secondary.selected.length
+type Props = ContextMenuProps & {
+  buildingId: string
+  levelIndex: number
+}
 
-  return levels > 1 ? (
-    <ManyLevelsContextMenu {...props} />
-  ) : (
-    <SingleLevelContextMenu {...props} />
+const LevelContextMenu = (props: Props) => {
+  // const levels = scopes.secondary.selected.length
+
+  // return levels > 1 ? (
+  //   <ManyLevelsContextMenu {...props} />
+  // ) : (
+  //   <SingleLevelContextMenu {...props} />
+  // )
+
+  return (
+    <ContextMenu {...props}>
+      <ContextMenuHeading>Level menu</ContextMenuHeading>
+    </ContextMenu>
   )
 }
 

@@ -1,5 +1,6 @@
 import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
+import context from "@/stores/context"
 import { setXZ } from "@/stores/pointer"
 import scopes from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
@@ -64,6 +65,7 @@ const SiteThreeInit = (props: Props) => {
       <HorizontalPlane
         onChange={setXZ}
         onNearClick={() => {
+          context.menu = null
           scopes.primary.selected = []
           scopes.secondary.selected = []
           // store.contextMenu = null

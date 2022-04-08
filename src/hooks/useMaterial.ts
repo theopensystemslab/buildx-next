@@ -16,6 +16,9 @@ import { useMemo } from "react"
 import { Color, MeshPhysicalMaterial, Plane, Vector3 } from "three"
 import invisibleMaterial from "@/materials/invisibleMaterial"
 import { useColumnLayout } from "./layouts"
+import context from "@/stores/context"
+import { subscribe } from "valtio"
+import { subscribeKey } from "valtio/utils"
 
 const builtInMaterials: Record<string, MeshPhysicalMaterial> = {
   Glazing: glassMaterial,
@@ -38,7 +41,7 @@ const useMaterial = (
     [clippingPlaneHeight]
   )
 
-  return useMemo(() => {
+  const material = useMemo(() => {
     if (!visible) return invisibleMaterial
     const hashKey = hashMaterialKey(materialKey)
     const maybeMaterial = materials.get(hashKey) // materials?.[buildingId]?.[elementName]?.[levelIndex]
@@ -77,13 +80,31 @@ const useMaterial = (
         key: materialKey,
       }
 
-      material.threeMaterial.clippingPlanes = [clippingPlane]
-
       materials.set(hashKey, material)
 
       return material.threeMaterial
     }
   }, [buildingId, elementName, levelIndex, visible, clippingPlane])
+
+  subscribeKey(context, "levelIndex", () => {
+    switch (true) {
+      case context.levelIndex === null:
+        if (material.visible === false) material.visible = true
+        if (material.clippingPlanes !== null) material.clippingPlanes = null
+        break
+      case context.levelIndex === levelIndex:
+        if (material.visible === false) material.visible = true
+        if (material.clippingPlanes === null)
+          material.clippingPlanes = [clippingPlane]
+        break
+      case context.levelIndex !== null && context.levelIndex !== levelIndex:
+        if (material.visible === true) material.visible = false
+        if (material.clippingPlanes !== null) material.clippingPlanes = null
+        break
+    }
+  })
+
+  return material
 }
 
 export default useMaterial

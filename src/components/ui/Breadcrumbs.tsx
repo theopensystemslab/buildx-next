@@ -1,3 +1,4 @@
+import context from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import { useRoute } from "@/utils/wouter"
 import React from "react"
@@ -6,6 +7,7 @@ import { Link } from "wouter"
 type BreadcrumbProps = {
   path: string
   label: string
+  onClick?: () => void
 }
 
 type Params = {
@@ -13,8 +15,14 @@ type Params = {
   levelIndex?: string
 }
 
-const Breadcrumb = ({ path, label }: BreadcrumbProps) => (
-  <Link href={path}>{label}</Link>
+const Breadcrumb = ({ path, label, onClick }: BreadcrumbProps) => (
+  <Link
+    href={path}
+    onClick={onClick}
+    className="mr-4 rounded-md border border-black bg-white p-1"
+  >
+    {label}
+  </Link>
 )
 
 const BreadcrumbsWithParams = (params: Params) => {
@@ -23,10 +31,21 @@ const BreadcrumbsWithParams = (params: Params) => {
   const { friendlyName } = houses[buildingId]
 
   return (
-    <div className="absolute top-0 left-0 bg-pink-500">
+    <div className="absolute top-0 left-0">
+      <Breadcrumb
+        path={`/site`}
+        label="Site"
+        onClick={() => {
+          context.buildingId = null
+          context.levelIndex = null
+        }}
+      />
       <Breadcrumb
         path={`/site?buildingId=${buildingId}`}
         label={friendlyName}
+        onClick={() => {
+          context.levelIndex = null
+        }}
       />
       {levelIndex && (
         <Breadcrumb

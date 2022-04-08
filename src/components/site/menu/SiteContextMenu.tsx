@@ -7,6 +7,7 @@ import houses, { useHouse } from "@/stores/houses"
 import scopes, { HouseScope, ScopeTypeEnum } from "@/stores/scope"
 import React, { Fragment, useState } from "react"
 import BuildingContextMenu from "./BuildingContextMenu"
+import LevelContextMenu from "./LevelContextMenu"
 import RenameHouseForm from "./RenameHouseForm"
 
 const SiteContextMenu_ = (props: ContextMenuProps) => {
@@ -91,6 +92,7 @@ const SiteContextMenu = () => {
   const {
     menu,
     buildingId,
+    levelIndex,
     // scope: { type: scopeType },
   } = useContext()
 
@@ -107,8 +109,14 @@ const SiteContextMenu = () => {
 
   return !buildingId ? (
     <SiteContextMenu_ {...props} />
-  ) : (
+  ) : !levelIndex ? (
     <BuildingContextMenu {...props} buildingId={buildingId} />
+  ) : (
+    <LevelContextMenu
+      {...props}
+      buildingId={buildingId}
+      levelIndex={levelIndex}
+    />
   )
 }
 

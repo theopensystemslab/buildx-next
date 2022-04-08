@@ -1,7 +1,7 @@
 import useMaterial from "@/hooks/useMaterial"
 import context from "@/stores/context"
 import highlights, { setIlluminatedLevel } from "@/stores/highlights"
-import scopes, { ScopeTypeEnum } from "@/stores/scope"
+import scopes, { ScopeTypeEnum, select } from "@/stores/scope"
 import { all, any, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
@@ -121,8 +121,8 @@ const ColumnBuildingElement = (props: Props) => {
       if (context.menu) return
       if (!intersections?.[0]) return
       if (!meshRef.current) return
-      // const obj = intersections[0].object ?? intersections[0].eventObject
-      // if (obj.uuid !== meshRef.current.uuid) return
+      const obj = intersections[0].object ?? intersections[0].eventObject
+      if (obj.uuid !== meshRef.current.uuid) return
 
       switch (scopes.secondary.type) {
         case ScopeTypeEnum.Enum.LEVEL:
@@ -194,35 +194,37 @@ const ColumnBuildingElement = (props: Props) => {
         intersections[0].object.id !== meshRef.current?.id
       )
       if (returnIf) return
-      switch (scopes.primary.type) {
-        case ScopeTypeEnum.Enum.ELEMENT:
-          if (
-            scopes.primary.selected.filter((x) => x.elementName === elementName)
-              .length < 1
-          )
-            scopes.primary.selected.push({
-              elementName,
-            })
-          break
-        // case ScopeTypeEnum.Enum.HOUSE:
-        //   if (!scopes.primary.selected.includes(house.id)) scopes.primary.selected.push(house.id)
-        //   break
-        // case ScopeTypeEnum.Enum.LEVEL:
-        //   if (scopes.primary.selected.filter((x) => x.houseId === house.id).length < 1)
-        //     scopes.primary.selected.push({
-        //       houseId: house.id,
-        //       rowIndex: levelIndex,
-        //     })
-        //   break
-        // case ScopeTypeEnum.Enum.MODULE:
-        //   if (scopes.primary.selected.filter((x) => x.houseId === house.id).length < 1)
-        //     scopes.primary.selected.push({
-        //       houseId: house.id,
-        //       gridIndex: groupIndex,
-        //       rowIndex: levelIndex,
-        //     })
-        //   break
-      }
+
+      select({ buildingId, elementName, levelIndex })
+      // switch (scopes.primary.type) {
+      //   case ScopeTypeEnum.Enum.ELEMENT:
+      //     if (
+      //       scopes.primary.selected.filter((x) => x.elementName === elementName)
+      //         .length < 1
+      //     )
+      //       scopes.primary.selected.push({
+      //         elementName,
+      //       })
+      //     break
+      // case ScopeTypeEnum.Enum.HOUSE:
+      //   if (!scopes.primary.selected.includes(house.id)) scopes.primary.selected.push(house.id)
+      //   break
+      // case ScopeTypeEnum.Enum.LEVEL:
+      //   if (scopes.primary.selected.filter((x) => x.houseId === house.id).length < 1)
+      //     scopes.primary.selected.push({
+      //       houseId: house.id,
+      //       rowIndex: levelIndex,
+      //     })
+      //   break
+      // case ScopeTypeEnum.Enum.MODULE:
+      //   if (scopes.primary.selected.filter((x) => x.houseId === house.id).length < 1)
+      //     scopes.primary.selected.push({
+      //       houseId: house.id,
+      //       gridIndex: groupIndex,
+      //       rowIndex: levelIndex,
+      //     })
+      //   break
+      // }
       context.menu = [pageX, pageY]
     },
     onPointerDown: ({ event: { intersections }, shiftKey }) => {

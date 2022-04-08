@@ -4,13 +4,12 @@ import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
-import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { Fragment, useEffect, useMemo, useRef } from "react"
+import { Fragment, useMemo, useRef } from "react"
 import { Color, DoubleSide, Group } from "three"
 import { useSnapshot } from "valtio"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
@@ -127,13 +126,13 @@ type Props = {
 const BuildingBuilding = (props: Props) => {
   const { id } = props
 
-  useEffect(() => {
-    scopes.secondary = {
-      type: ScopeTypeEnum.Enum.LEVEL,
-      hovered: null,
-      selected: [],
-    }
-  }, [])
+  // useEffect(() => {
+  //   scopes.secondary = {
+  //     type: ScopeTypeEnum.Enum.LEVEL,
+  //     hovered: null,
+  //     selected: [],
+  //   }
+  // }, [])
 
   const {
     position: [buildingX, buildingZ],
