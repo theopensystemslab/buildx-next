@@ -157,11 +157,18 @@ const ColumnBuildingElement = (props: Props) => {
       event.preventDefault?.()
       const returnIf = any(
         undef(intersections?.[0]),
-        intersections[0].object.id !== meshRef.current?.id
+        intersections[0].object.id !== meshRef.current?.id,
+        context.buildingId !== null && context.buildingId !== buildingId
       )
       if (returnIf) return
 
-      select({ buildingId, columnIndex, levelIndex, groupIndex, elementName })
+      select({
+        buildingId: context.buildingId!,
+        columnIndex,
+        levelIndex: context.levelIndex ?? levelIndex,
+        groupIndex,
+        elementName,
+      })
       // switch (scopes.primary.type) {
       //   case ScopeTypeEnum.Enum.ELEMENT:
       //     if (

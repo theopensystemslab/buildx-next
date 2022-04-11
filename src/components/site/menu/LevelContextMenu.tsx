@@ -1,12 +1,11 @@
 import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
-import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { columnLayoutToDNA, useColumnLayout } from "@/hooks/layouts"
-import { useLayoutOptions, useSystemModules } from "@/hooks/modules"
+import { useLayoutOptions } from "@/hooks/modules"
 import houses from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
-import { mapA, mapRA } from "@/utils"
+import { mapA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import produce from "immer"
 import React from "react"
@@ -52,15 +51,37 @@ const LevelContextMenu = (props: Props) => {
     props.onClose?.()
   }
 
+  // const stairsOpts = useStairsOptions(module)
+
+  const changeStairs = () => {
+    // prep stair changes to record of keys to dna values
+    // so integrate the thing into the opts, more natural
+    // also could then preview on hover!
+  }
+
+  const canChangeStairs = true
+  const canChangeLayout = true
+
   return (
     <ContextMenu {...props}>
-      <ContextMenuNested label="Change layout">
-        <Radio
-          options={layoutOpts}
-          selected={module.dna}
-          onChange={changeLayout}
-        />
-      </ContextMenuNested>
+      {canChangeLayout && (
+        <ContextMenuNested label="Change layout">
+          <Radio
+            options={layoutOpts}
+            selected={module.dna}
+            onChange={changeLayout}
+          />
+        </ContextMenuNested>
+      )}
+      {canChangeStairs && (
+        <ContextMenuNested label="Change stairs">
+          <Radio
+            options={layoutOpts}
+            selected={module.dna}
+            onChange={changeStairs}
+          />
+        </ContextMenuNested>
+      )}
     </ContextMenu>
   )
 }

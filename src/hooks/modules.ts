@@ -7,6 +7,7 @@ import { Ord as StrOrd } from "fp-ts/lib/string"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 import { loadModule } from "@/utils/modules"
 import { toNullable } from "fp-ts/lib/Option"
+import { StructuredDna } from "@/data/moduleLayout"
 
 export const useGetVanillaModule = () => {
   const { modules: allModules } = useSystemsData()
@@ -44,17 +45,39 @@ export const useSystemModules = (systemId: string) => {
   return modules.filter((m) => m.systemId === systemId)
 }
 
-export const useLayoutOptions = (module: LoadedModule | Module) => {
+export const useLayoutOptions = <
+  T extends { structuredDna: StructuredDna; systemId: string }
+>(
+  module: T
+) => {
   const systemModules = useSystemModules(module.systemId)
   return pipe(
     systemModules,
-    pipeLog,
     filterCompatibleModules([
       "sectionType",
       "positionType",
       "levelType",
       "gridType",
       "gridUnits",
+      "stairsType",
     ])(module)
   )
+}
+
+export const useStairsOptions = <
+  T extends { structuredDna: StructuredDna; systemId: string }
+>(
+  module: T
+) => {
+  const systemModules = useSystemModules(module.systemId)
+
+  // need columnIndex,
+  //    gridUnits from/to
+
+  // for each level
+  //    at that columnIndex, grid units from/to
+  //        compat stairs types?
+
+  // if a matching option across each relevant level
+  //    present as stairs type option
 }
