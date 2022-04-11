@@ -42,56 +42,22 @@ const ColumnBuildingElement = (props: Props) => {
 
   useEffect(() =>
     subscribe(scopes.primary, () => {
-      let isOutlined =
-          highlights.outlined.filter((x) => x.id === meshRef.current!.id)
-            .length > 0,
-        isHovered = false,
-        isSelected = false
-      switch (scopes.primary.type) {
-        // case ScopeTypeEnum.Enum.HOUSE:
-        //   isHovered = scopes.primary.hovered === house.id
-        //   isSelected = scopes.primary.selected.includes(house.id)
-        //   break
+      if (scopes.primary.type !== ScopeTypeEnum.Enum.ELEMENT) return
 
-        case ScopeTypeEnum.Enum.ELEMENT:
-          isHovered =
-            context.buildingId === buildingId &&
-            scopes.primary.hovered?.elementName === elementName
-          isSelected = !undef(
-            scopes.primary.selected.find((x) => x.elementName === elementName)
-          )
-          break
+      const isOutlined =
+        highlights.outlined.filter((x) => x.id === meshRef.current!.id).length >
+        0
 
-        // case ScopeTypeEnum.Enum.MODULE:
-        //   isHovered =
-        //     scopes.primary.hovered?.columnIndex === columnIndex &&
-        //     scopes.primary.hovered?.levelIndex === levelIndex &&
-        //     scopes.primary.hovered?.groupIndex === groupIndex
-        //   isSelected = !undef(
-        //     scopes.primary.selected.find(
-        //       (x) =>
-        //         x.columnIndex === columnIndex &&
-        //         x.levelIndex === levelIndex &&
-        //         x.groupIndex === groupIndex
-        //     )
-        //   )
-        //   break
+      const isHovered =
+        context.buildingId === buildingId &&
+        scopes.primary.hovered?.elementName === elementName
 
-        // case ScopeTypeEnum.Enum.LEVEL:
-        //   isHovered =
-        //     scopes.primary.hovered?.houseId === house.id &&
-        //     scopes.primary.hovered.rowIndex === levelIndex
-        //   isSelected = !undef(
-        //     scopes.primary.selected.find(
-        //       (x) => x.houseId === house.id && x.rowIndex === levelIndex
-        //     )
-        //   )
-        //   break
-      }
+      const isSelected = !undef(
+        scopes.primary.selected.find((x) => x.elementName === elementName)
+      )
 
       if ((isHovered || isSelected) && !isOutlined) {
         highlights.outlined.push(ref(meshRef.current as Object3D))
-        // outlineMesh(meshRef)
       }
       if (
         all(
@@ -106,7 +72,6 @@ const ColumnBuildingElement = (props: Props) => {
           (x) => x.id !== meshRef.current!.id
         )
       }
-      invalidate()
     })
   )
 
@@ -188,14 +153,15 @@ const ColumnBuildingElement = (props: Props) => {
       }
       invalidate()
     },
-    onContextMenu: ({ event: { intersections, pageX, pageY } }) => {
+    onContextMenu: ({ event, event: { intersections, pageX, pageY } }) => {
+      event.preventDefault?.()
       const returnIf = any(
         undef(intersections?.[0]),
         intersections[0].object.id !== meshRef.current?.id
       )
       if (returnIf) return
 
-      select({ buildingId, elementName, levelIndex })
+      select({ buildingId, columnIndex, levelIndex, groupIndex, elementName })
       // switch (scopes.primary.type) {
       //   case ScopeTypeEnum.Enum.ELEMENT:
       //     if (

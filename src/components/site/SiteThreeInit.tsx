@@ -1,6 +1,7 @@
 import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
 import context from "@/stores/context"
+import highlights from "@/stores/highlights"
 import { setXZ } from "@/stores/pointer"
 import scopes from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
@@ -68,7 +69,6 @@ const SiteThreeInit = (props: Props) => {
           context.menu = null
           scopes.primary.selected = []
           scopes.secondary.selected = []
-          // store.contextMenu = null
         }}
         onNearHover={() => {
           scopes.primary.hovered = null

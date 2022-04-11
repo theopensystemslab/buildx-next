@@ -1,4 +1,5 @@
 import { isMesh } from "@/utils"
+import { invalidate } from "@react-three/fiber"
 import { MutableRefObject } from "react"
 import { Group, Object3D } from "three"
 import { proxy, ref } from "valtio"
@@ -93,6 +94,7 @@ export const outlineGroup = (
       (x) => objs.findIndex((y) => y.id === x.id) === -1
     )
   }
+  invalidate()
 }
 
 // export const illuminateGroup = (

@@ -1,3 +1,4 @@
+import { objComp } from "@/utils"
 import { proxy } from "valtio"
 import * as z from "zod"
 import context from "./context"
@@ -118,9 +119,17 @@ export const initScopes = () => {
 
 export const select = ({
   buildingId,
-  elementName,
+  columnIndex,
   levelIndex,
-}: MaterialKey) => {
+  groupIndex,
+  elementName,
+}: {
+  buildingId: string
+  columnIndex: number
+  levelIndex: number
+  groupIndex: number
+  elementName: string
+}) => {
   const { primary, secondary } = scopes
   switch (true) {
     case !!context.buildingId && !context.levelIndex: {
@@ -137,6 +146,20 @@ export const select = ({
         secondary.selected.findIndex((x) => x.levelIndex === levelIndex) === -1
       )
         secondary.selected.push({ levelIndex })
+      break
+    }
+    case !!context.buildingId && context.levelIndex !== null: {
+      if (
+        primary.type !== ScopeTypeEnum.Enum.MODULE ||
+        secondary.type !== ScopeTypeEnum.Enum.ZERO
+      )
+        throw new Error("Unexpected scope types in select function")
+      if (
+        primary.selected.findIndex((x) =>
+          objComp(x, { columnIndex, levelIndex, groupIndex })
+        ) === -1
+      )
+        primary.selected.push({ columnIndex, levelIndex, groupIndex })
       break
     }
   }

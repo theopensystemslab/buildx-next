@@ -1,6 +1,6 @@
 import { useSystemsData } from "@/contexts/SystemsData"
-import { LoadedModule, Module } from "@/data/module"
-import { filterRA, mapO } from "@/utils"
+import { filterCompatibleModules, LoadedModule, Module } from "@/data/module"
+import { filterRA, mapO, pipeLog } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { contramap } from "fp-ts/lib/Ord"
 import { Ord as StrOrd } from "fp-ts/lib/string"
@@ -37,4 +37,24 @@ export const useGetVanillaModule = () => {
       toNullable
     )
   }
+}
+
+export const useSystemModules = (systemId: string) => {
+  const { modules } = useSystemsData()
+  return modules.filter((m) => m.systemId === systemId)
+}
+
+export const useLayoutOptions = (module: LoadedModule | Module) => {
+  const systemModules = useSystemModules(module.systemId)
+  return pipe(
+    systemModules,
+    pipeLog,
+    filterCompatibleModules([
+      "sectionType",
+      "positionType",
+      "levelType",
+      "gridType",
+      "gridUnits",
+    ])(module)
+  )
 }

@@ -1,10 +1,12 @@
 import { boolean } from "fp-ts"
-import { flow } from "fp-ts/lib/function"
+import { map, reduce, zip } from "fp-ts/lib/Array"
+import { flow, pipe } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
 import { Ord as OrdNum } from "fp-ts/lib/number"
 import { map as mapO } from "fp-ts/lib/Option"
 import { clamp } from "fp-ts/lib/Ord"
 import { modifyAt } from "fp-ts/lib/ReadonlyArray"
+import { keys } from "fp-ts/lib/Record"
 import { Monoid, split, toUpperCase } from "fp-ts/lib/string"
 
 const clamp_ = clamp(OrdNum)
@@ -90,3 +92,9 @@ export const findA2 =
     }
     return indices
   }
+
+export const objComp = (a: Record<string, any>, b: Record<string, any>) =>
+  pipe(
+    keys(a),
+    reduce(true, (acc, k) => acc && a[k] === b[k])
+  )

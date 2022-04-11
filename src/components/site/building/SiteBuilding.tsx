@@ -4,7 +4,7 @@ import { outlineGroup } from "@/stores/highlights"
 import { useHoverHouse, useUpdatePosition } from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapRA } from "@/utils"
-import { invalidate, ThreeEvent } from "@react-three/fiber"
+import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { useEffect, useRef } from "react"
@@ -46,7 +46,8 @@ const SiteBuilding = (props: Props) => {
       if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
       hoverHouse(false)
     },
-    onContextMenu: ({ event: { pageX, pageY, shiftKey } }) => {
+    onContextMenu: ({ event, event: { pageX, pageY, shiftKey } }) => {
+      event.preventDefault?.()
       if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
       if (!scopes.primary.selected.includes(id)) {
         if (!shiftKey) {
@@ -76,7 +77,6 @@ const SiteBuilding = (props: Props) => {
           scopes.primary.hovered !== id &&
           !scopes.primary.selected.includes(id),
       })
-      invalidate()
     }
   })
 

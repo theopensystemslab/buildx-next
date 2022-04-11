@@ -35,6 +35,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
     for (let buildingId of (scopes.primary as HouseScope).selected) {
       delete houses[buildingId]
     }
+    scopes.primary.selected = []
     props.onClose?.()
   }
 
