@@ -97,8 +97,9 @@ const useMaterial = (
         if (material.clippingPlanes === null)
           material.clippingPlanes = [clippingPlane]
         break
-      case context.levelIndex !== null && context.levelIndex !== levelIndex:
-        if (material.visible === true) material.visible = false
+      default:
+        const above = levelIndex < context.levelIndex!
+        if (material.visible === !above) material.visible = above
         if (material.clippingPlanes !== null) material.clippingPlanes = null
         break
     }

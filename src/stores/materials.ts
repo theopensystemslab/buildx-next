@@ -19,8 +19,9 @@ export type MaterialValue = {
   colorValue: keyof ColorOpts
 }
 
-// key is hash of JSON.stringify([buildingId, elementName, levelIndex])
-const materials = proxyMap<string, MaterialValue>()
+type MaterialKeyHash = string
+
+const materials = proxyMap<MaterialKeyHash, MaterialValue>()
 
 export const hashMaterialKey = ({
   buildingId,
