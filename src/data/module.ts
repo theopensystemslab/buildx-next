@@ -1,6 +1,14 @@
 import type { System } from "@/data/system"
-import { GltfT } from "@/utils"
-import { filter } from "fp-ts/lib/Array"
+import { abs, GltfT, hamming, mapA, pipeLog } from "@/utils"
+import { sum } from "fp-ts-std/Array"
+import { values } from "fp-ts-std/Record"
+import { filter, Foldable, sortBy } from "fp-ts/lib/Array"
+import { flow, pipe } from "fp-ts/lib/function"
+import { fromCompare } from "fp-ts/lib/Ord"
+import { sign } from "fp-ts/lib/Ordering"
+import { fromFoldable } from "fp-ts/lib/Record"
+import { first } from "fp-ts/lib/Semigroup"
+import { Eq } from "fp-ts/lib/string"
 import type { StructuredDna } from "./moduleLayout"
 import { parseDna } from "./moduleLayout"
 import { getAirtableEntries } from "./utils"
@@ -19,7 +27,11 @@ export interface Module {
   visualReference?: string
 }
 
-export type LoadedModule = Omit<Module, "modelUrl"> & {
+export type StructuredDnaModule = Pick<Module, "structuredDna">
+
+export type BareModule = Omit<Module, "modelUrl">
+
+export type LoadedModule = BareModule & {
   gltf: GltfT
 }
 
@@ -49,12 +61,92 @@ export const getModules = (system: System): Promise<Array<Module>> =>
     })
 
 export const filterCompatibleModules =
-  (ks: Array<keyof StructuredDna>) =>
-  (module: { structuredDna: StructuredDna }) =>
-    filter((m: Module) =>
+  (ks: Array<keyof StructuredDna>) => (module: BareModule) =>
+    filter((m: BareModule) =>
       ks.reduce(
         (acc: boolean, k) =>
           acc && m.structuredDna[k] === module.structuredDna[k],
         true
       )
     )
+
+export const keysFilter =
+  <M extends BareModule>(ks: Array<keyof StructuredDna>, targetModule: M) =>
+  (m: M) =>
+    ks.reduce(
+      (acc: boolean, k) =>
+        acc && m.structuredDna[k] === targetModule.structuredDna[k],
+      true
+    )
+
+export const keysHamming =
+  (ks: Array<keyof StructuredDna>) =>
+  <M extends StructuredDnaModule>(a: M, b: M) =>
+    pipe(
+      ks,
+      mapA((k): [string, number] => {
+        switch (typeof a.structuredDna[k]) {
+          case "string":
+            return [
+              k,
+              hamming(
+                a.structuredDna[k] as string,
+                b.structuredDna[k] as string
+              ),
+            ]
+          case "number":
+            return [
+              k,
+              abs(
+                (a.structuredDna[k] as number) - (b.structuredDna[k] as number)
+              ),
+            ]
+          default:
+            return [k, 0]
+        }
+      }),
+      fromFoldable(first<number>(), Foldable)
+    )
+
+export const keysHammingTotal =
+  (ks: Array<keyof StructuredDna>) =>
+  <M extends StructuredDnaModule>(a: M, b: M) =>
+    pipe(keysHamming(ks)(a, b), values, sum)
+
+export const keysHammingSort = <M extends BareModule>(
+  ks: Array<keyof StructuredDna>,
+  targetModule: M
+) =>
+  sortBy(
+    pipe(
+      ks,
+      mapA((k) => {
+        console.log(k)
+        const ham = (x: string | number) => {
+          const foo =
+            typeof x === "string"
+              ? hamming(x, targetModule.structuredDna[k] as string)
+              : x - (targetModule.structuredDna[k] as number)
+
+          console.log(foo)
+
+          return foo
+        }
+
+        return fromCompare((first: M, second: M) => {
+          return sign(
+            ham(first.structuredDna[k]) - ham(second.structuredDna[k])
+          )
+        })
+      })
+    )
+  )
+
+// (inputModule: BareModule) =>
+//   ks.reduce(
+//     (acc: boolean, k) =>
+//       acc && inputModule.structuredDna[k] === targetModule.structuredDna[k],
+//     true
+//   )
+
+// export const keyHammingSort

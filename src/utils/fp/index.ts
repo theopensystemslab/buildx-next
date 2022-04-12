@@ -1,5 +1,4 @@
-import { boolean } from "fp-ts"
-import { map, reduce, zip } from "fp-ts/lib/Array"
+import { reduce, zipWith } from "fp-ts/lib/Array"
 import { flow, pipe } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
 import { Ord as OrdNum } from "fp-ts/lib/number"
@@ -9,24 +8,29 @@ import { modifyAt } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/Record"
 import { Monoid, split, toUpperCase } from "fp-ts/lib/string"
 
-const clamp_ = clamp(OrdNum)
-
-export { clamp_ as clamp }
+const { min, max, abs, sign } = Math
 
 export {
   filter as filterA,
+  filterMap as filterMapA,
   map as mapA,
   mapWithIndex as mapWithIndexA,
   reduce as reduceA,
   reduceWithIndex as reduceWithIndexA,
 } from "fp-ts/lib/Array"
 export {
+  filter as filterNEA,
+  head as headNEA,
+  map as mapNEA,
+  reduce as reduceNEA,
+} from "fp-ts/lib/NonEmptyArray"
+export {
   chunksOf as chunksOfRA,
   filter as filterRA,
+  filterMap as filterMapRA,
+  filterMapWithIndex as filterMapWithIndexRA,
   map as mapRA,
   mapWithIndex as mapWithIndexRA,
-  filterMapWithIndex as filterMapWithIndexRA,
-  filterMap as filterMapRA,
   reduce as reduceRA,
   reduceWithIndex as reduceWithIndexRA,
   zip as zipRA,
@@ -49,7 +53,11 @@ export {
   reduce as reduceR,
 } from "fp-ts/lib/Record"
 export { map as mapT } from "fp-ts/lib/Task"
+export { min, max, abs, sign }
+export { clamp_ as clamp }
 export { mapO }
+
+const clamp_ = clamp(OrdNum)
 
 export const pipeLog = <T extends unknown>(x: T): T => (console.log(x), x)
 
@@ -98,3 +106,11 @@ export const objComp = (a: Record<string, any>, b: Record<string, any>) =>
     keys(a),
     reduce(true, (acc, k) => acc && a[k] === b[k])
   )
+
+export const hamming = (a: string, b: string) => {
+  if (a.length !== b.length) throw new Error("Hamming of different lengths")
+
+  return zipWith(a.split(""), b.split(""), (a, b) =>
+    abs(a.codePointAt(0)! - b.codePointAt(0)!)
+  ).reduce((acc, v) => acc + v, 0)
+}

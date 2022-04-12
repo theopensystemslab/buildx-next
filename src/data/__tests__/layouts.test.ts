@@ -1,18 +1,6 @@
-import { mapA, mapWithIndexA, reduceRA, reduceWithIndexA, zipRA } from "@/utils"
-import { dropLeft, filterMap, head, isEmpty } from "fp-ts/lib/Array"
+import { mapWithIndexA, reduceRA, reduceWithIndexA, zipRA } from "@/utils"
+import { transpose } from "fp-ts-std/Array"
 import { pipe } from "fp-ts/lib/function"
-
-export const transpose = <A>(xs: Array<Array<A>>): Array<Array<A>> => {
-  /* eslint-disable functional/no-conditional-statement */
-  if (isEmpty(xs)) return []
-  if (isEmpty(xs[0])) return transpose(dropLeft(1)(xs))
-  /* eslint-enable functional/no-conditional-statement */
-
-  const [[y, ...ys], ...yss] = xs
-  const zs = [y, ...filterMap(head)(yss)]
-  const zss = [ys, ...mapA(dropLeft(1))(yss)]
-  return [zs, ...transpose(zss)]
-}
 
 const analyzeColumn = reduceWithIndexA(
   { legit: true, target: -1, rows: [] },
