@@ -26,7 +26,10 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
     for (let buildingId of (scopes.primary as HouseScope).selected) {
       const house = houses[buildingId]
       const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
-      if (houseType) houses[buildingId].dna = houseType.dna as string[]
+      if (houseType) {
+        houses[buildingId].dna = houseType.dna as string[]
+        houses[buildingId].modifiedMaterials = {}
+      }
     }
     props.onClose?.()
   }

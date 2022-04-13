@@ -17,12 +17,9 @@ import { Color, MeshPhysicalMaterial, Plane, Vector3 } from "three"
 import invisibleMaterial from "@/materials/invisibleMaterial"
 import { useColumnLayout } from "./layouts"
 import context from "@/stores/context"
-import { subscribe } from "valtio"
+import { subscribe, useSnapshot } from "valtio"
 import { subscribeKey } from "valtio/utils"
-
-const builtInMaterials: Record<string, MeshPhysicalMaterial> = {
-  Glazing: glassMaterial,
-}
+import builtInMaterials from "@/materials/builtInMaterials"
 
 const useMaterial = (
   materialKey: MaterialKey,

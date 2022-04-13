@@ -1,14 +1,14 @@
 import type { System } from "@/data/system"
-import { abs, GltfT, hamming, mapA, pipeLog } from "@/utils"
+import { abs, GltfT, hamming, mapA } from "@/utils"
 import { sum } from "fp-ts-std/Array"
 import { values } from "fp-ts-std/Record"
-import { filter, Foldable, sortBy } from "fp-ts/lib/Array"
-import { flow, pipe } from "fp-ts/lib/function"
-import { fromCompare } from "fp-ts/lib/Ord"
+import { filter, Foldable, sort, sortBy, takeLeft } from "fp-ts/lib/Array"
+import { pipe } from "fp-ts/lib/function"
+import { Ord } from "fp-ts/lib/number"
+import { contramap, fromCompare } from "fp-ts/lib/Ord"
 import { sign } from "fp-ts/lib/Ordering"
 import { fromFoldable } from "fp-ts/lib/Record"
 import { first } from "fp-ts/lib/Semigroup"
-import { Eq } from "fp-ts/lib/string"
 import type { StructuredDna } from "./moduleLayout"
 import { parseDna } from "./moduleLayout"
 import { getAirtableEntries } from "./utils"
@@ -102,7 +102,9 @@ export const keysHamming =
               ),
             ]
           default:
-            return [k, 0]
+            throw new Error(
+              `structuredDna key ${k} type ${typeof a.structuredDna[k]} `
+            )
         }
       }),
       fromFoldable(first<number>(), Foldable)
@@ -113,6 +115,23 @@ export const keysHammingTotal =
   <M extends StructuredDnaModule>(a: M, b: M) =>
     pipe(keysHamming(ks)(a, b), values, sum)
 
+export const candidatesByHamming = <M extends StructuredDnaModule>(
+  ks: Array<keyof StructuredDna>,
+  targetModule: M,
+  candidateModules: M[]
+) =>
+  pipe(
+    candidateModules,
+    mapA((m): [M, number] => [m, keysHammingTotal(ks)(targetModule, m)]),
+    sort(
+      pipe(
+        Ord,
+        contramap(([m, n]: [M, number]) => n)
+      )
+    ),
+    ([[m]]) => m
+  )
+
 export const keysHammingSort = <M extends BareModule>(
   ks: Array<keyof StructuredDna>,
   targetModule: M
@@ -121,14 +140,11 @@ export const keysHammingSort = <M extends BareModule>(
     pipe(
       ks,
       mapA((k) => {
-        console.log(k)
         const ham = (x: string | number) => {
           const foo =
             typeof x === "string"
               ? hamming(x, targetModule.structuredDna[k] as string)
               : x - (targetModule.structuredDna[k] as number)
-
-          console.log(foo)
 
           return foo
         }
@@ -141,12 +157,3 @@ export const keysHammingSort = <M extends BareModule>(
       })
     )
   )
-
-// (inputModule: BareModule) =>
-//   ks.reduce(
-//     (acc: boolean, k) =>
-//       acc && inputModule.structuredDna[k] === targetModule.structuredDna[k],
-//     true
-//   )
-
-// export const keyHammingSort

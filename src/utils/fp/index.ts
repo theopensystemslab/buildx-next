@@ -1,12 +1,20 @@
 import { reduce, zipWith } from "fp-ts/lib/Array"
 import { flow, pipe } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
-import { Ord as OrdNum } from "fp-ts/lib/number"
+import { Ord as NumOrd, Eq as NumEq } from "fp-ts/lib/number"
 import { map as mapO } from "fp-ts/lib/Option"
 import { clamp } from "fp-ts/lib/Ord"
 import { modifyAt } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/Record"
-import { Monoid, split, toUpperCase } from "fp-ts/lib/string"
+import {
+  Monoid,
+  split,
+  toUpperCase,
+  Eq as StrEq,
+  Ord as StrOrd,
+} from "fp-ts/lib/string"
+
+export { NumOrd, NumEq, StrOrd, StrEq }
 
 const { min, max, abs, sign } = Math
 
@@ -56,8 +64,9 @@ export { map as mapT } from "fp-ts/lib/Task"
 export { min, max, abs, sign }
 export { clamp_ as clamp }
 export { mapO }
+export { map as mapM, reduce as reduceM } from "fp-ts/lib/Map"
 
-const clamp_ = clamp(OrdNum)
+const clamp_ = clamp(NumOrd)
 
 export const pipeLog = <T extends unknown>(x: T): T => (console.log(x), x)
 

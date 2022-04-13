@@ -1,7 +1,8 @@
 import { PositionedColumn, useColumnLayout } from "@/hooks/layouts"
-import context from "@/stores/context"
+import context, { useContext } from "@/stores/context"
 import { outlineGroup } from "@/stores/highlights"
-import { useHoverHouse, useUpdatePosition } from "@/stores/houses"
+import houses, { useHoverHouse, useUpdatePosition } from "@/stores/houses"
+import { useSyncModifiedMaterials } from "@/stores/materials"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapRA } from "@/utils"
 import { ThreeEvent } from "@react-three/fiber"
@@ -10,13 +11,15 @@ import { pipe } from "fp-ts/lib/function"
 import { useEffect, useRef } from "react"
 import { Group } from "three"
 import { subscribe } from "valtio"
+import { subscribeKey } from "valtio/utils"
+import BuildingBuilding from "./BuildingBuilding"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
 type Props = {
   id: string
 }
 
-const SiteBuilding = (props: Props) => {
+const SiteBuildingMain = (props: Props) => {
   const { id } = props
   const groupRef = useRef<Group>()
 
@@ -97,6 +100,18 @@ const SiteBuilding = (props: Props) => {
     <group ref={groupRef} {...(bind() as any)}>
       {pipe(columns, mapRA(renderColumn))}
     </group>
+  )
+}
+
+const SiteBuilding = ({ id }: Props) => {
+  const { buildingId } = useContext()
+
+  useSyncModifiedMaterials(id)
+
+  return buildingId !== id ? (
+    <SiteBuildingMain id={id} />
+  ) : (
+    <BuildingBuilding id={id} />
   )
 }
 

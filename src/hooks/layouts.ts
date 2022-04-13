@@ -340,4 +340,4 @@ export const columnLayoutToDNA = (
     transpose,
     flatten,
     flatten
-  )
+  ) as string[]

@@ -2,6 +2,7 @@ import { PositionedColumn } from "@/hooks/layouts"
 import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
+import { EditModeEnum, useContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
 import { mapRA } from "@/utils"
@@ -170,40 +171,50 @@ const BuildingBuilding = (props: Props) => {
 
   const handleOffset = 1
 
+  const { editMode } = useContext()
+
   return (
     <group position={[buildingX, 0, buildingZ]}>
       <group ref={startRef}>
         {renderColumn(startColumn)}
-        <StretchHandle
-          onDrag={({ last }) => {
-            const z = pipe(handleOffset + pointer.xz[1] - buildingZ, startClamp)
-            startRef.current.position.z = z
-            sendDrag(z, { isStart: true })
-            if (last) {
-              startRef.current.position.z = 0
-              sendDrop()
-            }
-          }}
-          position-z={startColumn.z - handleOffset}
-        />
+
+        {editMode === EditModeEnum.Enum.STRETCH && (
+          <StretchHandle
+            onDrag={({ last }) => {
+              const z = pipe(
+                handleOffset + pointer.xz[1] - buildingZ,
+                startClamp
+              )
+              startRef.current.position.z = z
+              sendDrag(z, { isStart: true })
+              if (last) {
+                startRef.current.position.z = 0
+                sendDrop()
+              }
+            }}
+            position-z={startColumn.z - handleOffset}
+          />
+        )}
       </group>
       <group ref={endRef}>
         {renderColumn(endColumn)}
-        <StretchHandle
-          onDrag={({ last }) => {
-            const z = pipe(
-              -(endColumn.z + handleOffset) + pointer.xz[1] - buildingZ,
-              endClamp
-            )
-            endRef.current.position.z = z
-            sendDrag(z, { isStart: false })
-            if (last) {
-              endRef.current.position.z = 0
-              sendDrop()
-            }
-          }}
-          position-z={endColumn.z + handleOffset}
-        />
+        {editMode === EditModeEnum.Enum.STRETCH && (
+          <StretchHandle
+            onDrag={({ last }) => {
+              const z = pipe(
+                -(endColumn.z + handleOffset) + pointer.xz[1] - buildingZ,
+                endClamp
+              )
+              endRef.current.position.z = z
+              sendDrag(z, { isStart: false })
+              if (last) {
+                endRef.current.position.z = 0
+                sendDrop()
+              }
+            }}
+            position-z={endColumn.z + handleOffset}
+          />
+        )}
       </group>
       <MidColumns
         columnLayout={columnLayout}

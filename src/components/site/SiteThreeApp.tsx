@@ -7,7 +7,6 @@ import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/ReadonlyRecord"
 import React, { Suspense, useEffect } from "react"
 import Loader3D from "../ui-3d/Loader3D"
-import BuildingBuilding from "./building/BuildingBuilding"
 import SiteBuilding from "./building/SiteBuilding"
 
 const SiteThreeApp = () => {
@@ -29,7 +28,7 @@ const SiteThreeApp = () => {
     </group>
   ) : (
     <Suspense fallback={<Loader3D />}>
-      <BuildingBuilding id={buildingId} />
+      <SiteBuilding id={buildingId} />
     </Suspense>
   )
 }
