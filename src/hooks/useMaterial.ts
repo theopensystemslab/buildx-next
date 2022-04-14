@@ -1,33 +1,50 @@
 import { DEFAULT_MATERIAL_NAME } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
+import builtInMaterials from "@/materials/builtInMaterials"
 import defaultMaterial from "@/materials/defaultMaterial"
-import glassMaterial from "@/materials/glassMaterial"
+import invisibleMaterial from "@/materials/invisibleMaterial"
+import context from "@/stores/context"
+import houses from "@/stores/houses"
 import materials, {
   ColorOpts,
   hashMaterialKey,
   MaterialKey,
   MaterialValue,
 } from "@/stores/materials"
-import houses from "@/stores/houses"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse, none, some } from "fp-ts/lib/Option"
 import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
-import { useMemo } from "react"
-import { Color, MeshPhysicalMaterial, Plane, Vector3 } from "three"
-import invisibleMaterial from "@/materials/invisibleMaterial"
-import { useColumnLayout } from "./layouts"
-import context from "@/stores/context"
-import { subscribe, useSnapshot } from "valtio"
+import { useMemo, useState } from "react"
+import { Color, Plane, Vector3 } from "three"
 import { subscribeKey } from "valtio/utils"
-import builtInMaterials from "@/materials/builtInMaterials"
+import { useColumnLayout } from "./layouts"
+
+export const useMaterialName = (buildingId: string, elementName: string) => {
+  const { elements } = useSystemsData()
+
+  const defaultMaterialName =
+    elements.find((e) => e.name === elementName)?.defaultMaterial ??
+    DEFAULT_MATERIAL_NAME
+
+  const [materialName, setMaterialName] = useState(defaultMaterialName)
+
+  subscribeKey(houses[buildingId], "modifiedMaterials", () => {
+    const maybeMaterialName: string | undefined =
+      houses[buildingId].modifiedMaterials?.[elementName]
+
+    setMaterialName(maybeMaterialName ?? defaultMaterialName)
+  })
+
+  return useMemo(() => materialName, [materialName])
+}
 
 const useMaterial = (
   materialKey: MaterialKey,
   moduleHeight: number,
   visible: boolean = true
 ) => {
-  const { buildingId, elementName, levelIndex } = materialKey
-  const { elements, materials: sysMaterials } = useSystemsData()
+  const { buildingId, elementName, materialName, levelIndex } = materialKey
+  const { materials: sysMaterials } = useSystemsData()
 
   const columnLayout = useColumnLayout(buildingId)
   const clippingPlaneHeight =
@@ -45,11 +62,6 @@ const useMaterial = (
 
     if (maybeMaterial) return maybeMaterial.threeMaterial
     else {
-      const materialName =
-        houses[buildingId].modifiedMaterials?.[elementName] ??
-        elements.find((e) => e.name === elementName)?.defaultMaterial ??
-        DEFAULT_MATERIAL_NAME
-
       const threeMaterial = pipe(
         sysMaterials,
         findFirstMap((sysM) =>
@@ -81,7 +93,14 @@ const useMaterial = (
 
       return material.threeMaterial
     }
-  }, [buildingId, elementName, levelIndex, visible, clippingPlane])
+  }, [
+    buildingId,
+    elementName,
+    levelIndex,
+    visible,
+    clippingPlane,
+    materialName,
+  ])
 
   subscribeKey(context, "levelIndex", () => {
     switch (true) {

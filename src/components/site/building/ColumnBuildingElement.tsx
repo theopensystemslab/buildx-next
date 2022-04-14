@@ -1,8 +1,8 @@
-import useMaterial from "@/hooks/useMaterial"
+import useMaterial, { useMaterialName } from "@/hooks/useMaterial"
 import context from "@/stores/context"
 import highlights, { setIlluminatedLevel } from "@/stores/highlights"
 import scopes, { ScopeTypeEnum, select } from "@/stores/scope"
-import { all, any, undef } from "@/utils"
+import { all, any, object3dChildOf, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import React, { useEffect, useRef } from "react"
@@ -34,8 +34,10 @@ const ColumnBuildingElement = (props: Props) => {
 
   const meshRef = useRef<Mesh>()
 
+  const materialName = useMaterialName(buildingId, elementName)
+
   const material = useMaterial(
-    { buildingId, elementName, levelIndex },
+    { buildingId, elementName, materialName, levelIndex },
     moduleHeight,
     visible
   )
