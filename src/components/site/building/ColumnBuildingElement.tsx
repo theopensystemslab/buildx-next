@@ -87,7 +87,7 @@ const ColumnBuildingElement = (props: Props) => {
       if (!intersections?.[0]) return
       if (!meshRef.current) return
       const obj = intersections[0].object ?? intersections[0].eventObject
-      if (obj.uuid !== meshRef.current.uuid) return
+      if (!object3dChildOf(obj, meshRef.current)) return
 
       switch (scopes.secondary.type) {
         case ScopeTypeEnum.Enum.LEVEL:
@@ -155,10 +155,14 @@ const ColumnBuildingElement = (props: Props) => {
     },
     onContextMenu: ({ event, event: { intersections, pageX, pageY } }) => {
       event.preventDefault?.()
+      const obj = intersections[0].object ?? intersections[0].eventObject
+      if (!meshRef.current) return
+
       const returnIf = any(
         undef(intersections?.[0]),
         intersections[0].object.id !== meshRef.current?.id,
-        context.buildingId !== null && context.buildingId !== buildingId
+        context.buildingId !== null && context.buildingId !== buildingId,
+        !object3dChildOf(obj, meshRef.current)
       )
       if (returnIf) return
 

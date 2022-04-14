@@ -141,11 +141,11 @@ export const select = ({
       if (
         primary.selected.findIndex((x) => x.elementName === elementName) === -1
       )
-        primary.selected.push({ elementName })
+        primary.selected = [{ elementName }]
       if (
         secondary.selected.findIndex((x) => x.levelIndex === levelIndex) === -1
       )
-        secondary.selected.push({ levelIndex })
+        secondary.selected = [{ levelIndex }]
       break
     }
     case !!context.buildingId && context.levelIndex !== null: {
@@ -159,7 +159,7 @@ export const select = ({
           objComp(x, { columnIndex, levelIndex, groupIndex })
         ) === -1
       )
-        primary.selected.push({ columnIndex, levelIndex, groupIndex })
+        primary.selected = [{ columnIndex, levelIndex, groupIndex }]
       break
     }
   }

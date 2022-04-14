@@ -25,8 +25,8 @@ const materials = proxyMap<MaterialKeyHash, MaterialValue>()
 
 export const hashMaterialKey = ({
   buildingId,
-  elementName,
   levelIndex,
+  elementName,
 }: MaterialKey) => JSON.stringify([buildingId, elementName, levelIndex])
 
 export const pushMaterial = (material: MaterialValue) => {

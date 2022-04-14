@@ -67,7 +67,7 @@ const useMaterial = (
 
       const colorOpts: ColorOpts = {
         default: threeMaterial.color.clone(),
-        illuminated: threeMaterial.color.clone().add(new Color("#ff0000")),
+        illuminated: threeMaterial.color.clone().add(new Color("#fff")),
       }
 
       const material: MaterialValue = {
