@@ -58,13 +58,18 @@ export {
 export {
   filter as filterR,
   map as mapR,
+  mapWithIndex as mapWithIndexR,
   reduce as reduceR,
 } from "fp-ts/lib/Record"
 export { map as mapT } from "fp-ts/lib/Task"
 export { min, max, abs, sign }
 export { clamp_ as clamp }
 export { mapO }
-export { map as mapM, reduce as reduceM } from "fp-ts/lib/Map"
+export {
+  map as mapM,
+  reduce as reduceM,
+  mapWithIndex as mapWithIndexM,
+} from "fp-ts/lib/Map"
 
 const clamp_ = clamp(NumOrd)
 

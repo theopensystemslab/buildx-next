@@ -1,12 +1,14 @@
 import { useSystemsData } from "@/contexts/SystemsData"
 import { LoadedModule } from "@/data/module"
 import context from "@/stores/context"
+import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
-import { fuzzyMatch, isMesh } from "@/utils"
+import { fuzzyMatch, isMesh, mapM, mapWithIndexM, StrOrd } from "@/utils"
 import { GroupProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
+import { toArray } from "fp-ts/lib/Map"
 import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
 import {
   filter,
@@ -44,33 +46,11 @@ const ColumnBuildingModule = (props: Props) => {
   const groupRef = useRef<Group>()
 
   const { elements } = useSystemsData()
-
-  const getElement = (nodeType: string) =>
-    fuzzyMatch(elements, {
-      keys: ["ifc4Variable"],
-      threshold: 0.5,
-    })(nodeType)
-
-  const gltf = module.gltf
+  const moduleGeometries = useModuleGeometries(module.dna, module.gltf)
 
   const children = pipe(
-    gltf.nodes,
-    toReadonlyArray,
-    reduce({}, (acc: { [e: string]: Mesh[] }, [nodeType, node]) => {
-      const element = getElement(nodeType)
-      if (!element || element.name === "Appliance") return acc
-      return produce(acc, (draft) => {
-        node.traverse((child) => {
-          if (isMesh(child)) {
-            if (element.name in draft) draft[element.name].push(child)
-            else draft[element.name] = [child]
-          }
-        })
-      })
-    }),
-    map((meshes) => mergeBufferGeometries(meshes.map((mesh) => mesh.geometry))),
-    filter((bg: BufferGeometry | null): bg is BufferGeometry => Boolean(bg)),
-    mapWithIndex((elementName, geometry) => (
+    moduleGeometries,
+    mapWithIndexM((elementName, geometry) => (
       <ColumnBuildingElement
         key={elementName}
         {...{
@@ -85,8 +65,7 @@ const ColumnBuildingModule = (props: Props) => {
         }}
       />
     )),
-    toReadonlyArray,
-    mapA(([_k, v]) => v)
+    toArray(StrOrd)
   )
 
   const bind = useGesture<{ onPointerOver: ThreeEvent<PointerEvent> }>({

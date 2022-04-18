@@ -127,14 +127,6 @@ type Props = {
 const BuildingBuilding = (props: Props) => {
   const { id } = props
 
-  // useEffect(() => {
-  //   scopes.secondary = {
-  //     type: ScopeTypeEnum.Enum.LEVEL,
-  //     hovered: null,
-  //     selected: [],
-  //   }
-  // }, [])
-
   const {
     position: [buildingX, buildingZ],
   } = useHouse(id)

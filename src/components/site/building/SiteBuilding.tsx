@@ -1,8 +1,7 @@
 import { PositionedColumn, useColumnLayout } from "@/hooks/layouts"
 import context, { useContext } from "@/stores/context"
 import { outlineGroup } from "@/stores/highlights"
-import houses, { useHoverHouse, useUpdatePosition } from "@/stores/houses"
-import { useSyncModifiedMaterials } from "@/stores/materials"
+import { useHoverHouse, useUpdatePosition } from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapRA } from "@/utils"
 import { ThreeEvent } from "@react-three/fiber"
@@ -11,7 +10,6 @@ import { pipe } from "fp-ts/lib/function"
 import { useEffect, useRef } from "react"
 import { Group } from "three"
 import { subscribe } from "valtio"
-import { subscribeKey } from "valtio/utils"
 import BuildingBuilding from "./BuildingBuilding"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
@@ -105,8 +103,6 @@ const SiteBuildingMain = (props: Props) => {
 
 const SiteBuilding = ({ id }: Props) => {
   const { buildingId } = useContext()
-
-  useSyncModifiedMaterials(id)
 
   return buildingId !== id ? (
     <SiteBuildingMain id={id} />
