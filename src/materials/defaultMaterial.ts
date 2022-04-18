@@ -26,6 +26,7 @@ const defaultMaterial = new MeshStandardMaterial({
   wireframe: false,
   wireframeLinewidth: 1,
   flatShading: false,
+  transparent: true,
 })
 
 export default defaultMaterial

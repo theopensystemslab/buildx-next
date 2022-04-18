@@ -33,6 +33,7 @@ const BuildingHouseColumn = (props: Props) => {
             module={module}
             columnIndex={columnIndex}
             levelIndex={levelIndex}
+            levelY={y}
             groupIndex={groupIndex}
             buildingId={buildingId}
             position={[

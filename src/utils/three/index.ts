@@ -29,10 +29,11 @@ export const createMaterial = (config: Material) => {
   if (config.defaultColor) {
     return new MeshStandardMaterial({
       color: config.defaultColor,
+      transparent: true,
     })
   }
 
-  const textureLoader = new TextureLoader()
+  // const textureLoader = new TextureLoader()
 
   // const setRepeat = (texture: Texture): void => {
   //   texture.wrapS = texture.wrapT = RepeatWrapping
@@ -74,6 +75,7 @@ export const createMaterial = (config: Material) => {
     wireframe: false,
     wireframeLinewidth: 1,
     flatShading: false,
+    transparent: true,
   })
 }
 

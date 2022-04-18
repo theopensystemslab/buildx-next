@@ -1,6 +1,6 @@
-import useMaterial, { useMaterialName } from "@/hooks/useMaterial"
 import context from "@/stores/context"
 import highlights, { setIlluminatedLevel } from "@/stores/highlights"
+import { useMaterial, useMaterialName } from "@/stores/materials"
 import scopes, { ScopeTypeEnum, select } from "@/stores/scope"
 import { all, any, object3dChildOf, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
@@ -16,8 +16,7 @@ type Props = MeshProps & {
   groupIndex: number
   buildingId: string
   geometry: BufferGeometry
-  visible: boolean
-  moduleHeight: number
+  clippingPlaneHeight: number
 }
 
 const ColumnBuildingElement = (props: Props) => {
@@ -28,8 +27,7 @@ const ColumnBuildingElement = (props: Props) => {
     levelIndex,
     groupIndex,
     buildingId,
-    visible,
-    moduleHeight,
+    clippingPlaneHeight,
   } = props
 
   const meshRef = useRef<Mesh>()
@@ -37,9 +35,8 @@ const ColumnBuildingElement = (props: Props) => {
   const materialName = useMaterialName(buildingId, elementName)
 
   const material = useMaterial(
-    { buildingId, elementName, materialName, levelIndex },
-    moduleHeight,
-    visible
+    { buildingId, columnIndex, elementName, materialName, levelIndex },
+    clippingPlaneHeight
   )
 
   useEffect(() =>
@@ -84,7 +81,7 @@ const ColumnBuildingElement = (props: Props) => {
     onContextMenu: ThreeEvent<PointerEvent> &
       React.MouseEvent<EventTarget, MouseEvent>
   }>({
-    onPointerOver: ({ event: { intersections } }) => {
+    onHover: ({ event: { intersections } }) => {
       if (context.menu) return
       if (!intersections?.[0]) return
       if (!meshRef.current) return

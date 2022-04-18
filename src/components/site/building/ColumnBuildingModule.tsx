@@ -29,7 +29,7 @@ type Props = GroupProps & {
   levelIndex: number
   groupIndex: number
   buildingId: string
-  visible?: boolean
+  levelY: number
 }
 
 const ColumnBuildingModule = (props: Props) => {
@@ -39,6 +39,7 @@ const ColumnBuildingModule = (props: Props) => {
     levelIndex,
     groupIndex,
     module,
+    levelY,
     visible = true,
     ...groupProps
   } = props
@@ -60,8 +61,7 @@ const ColumnBuildingModule = (props: Props) => {
           columnIndex,
           levelIndex,
           groupIndex,
-          visible,
-          moduleHeight: module.height,
+          clippingPlaneHeight: levelY + module.height / 2,
         }}
       />
     )),

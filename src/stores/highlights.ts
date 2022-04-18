@@ -97,33 +97,4 @@ export const outlineGroup = (
   invalidate()
 }
 
-// export const illuminateGroup = (
-//   groupRef: MutableRefObject<Group | undefined>,
-//   opts: { remove: boolean } = { remove: false }
-// ) => {
-//   if (!groupRef.current) return
-
-//   const { remove = false } = opts
-//   const objs: Array<Object3D> = []
-
-//   let changed = false
-//   groupRef.current.traverse((o3) => {
-//     if (isMesh(o3)) {
-//       const next = ref(o3)
-//       objs.push(next)
-//       if (highlights.illuminated.indexOf(next) === -1) changed = true
-//     }
-//   })
-
-//   if (changed && !remove) {
-//     highlights.illuminated = objs
-//   }
-
-//   if (remove) {
-//     highlights.illuminated = highlights.illuminated.filter(
-//       (x) => objs.findIndex((y) => y.id === x.id) === -1
-//     )
-//   }
-// }
-
 export default highlights

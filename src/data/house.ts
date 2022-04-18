@@ -1,6 +1,5 @@
 import { DeepReadonly, safeLocalStorageGet } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
-import { filterMap, findFirst } from "fp-ts/lib/ReadonlyArray"
 import { map } from "fp-ts/lib/ReadonlyRecord"
 import type { Rectangle } from "./collisions"
 import { checkRectangleIntersection } from "./collisions"
@@ -16,6 +15,7 @@ export interface House {
   rotation: number
   dna: string[]
   modifiedMaterials: Record<string, string>
+  modifiedMaterialsPreview: Record<string, string>
   friendlyName: string
 }
 

@@ -1,23 +1,76 @@
 import { DEFAULT_MATERIAL_NAME } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
+import { stretch } from "@/hooks/stretch"
 import builtInMaterials from "@/materials/builtInMaterials"
 import defaultMaterial from "@/materials/defaultMaterial"
-import invisibleMaterial from "@/materials/invisibleMaterial"
-import context from "@/stores/context"
-import houses from "@/stores/houses"
-import materials, {
-  ColorOpts,
-  hashMaterialKey,
-  MaterialKey,
-  MaterialValue,
-} from "@/stores/materials"
+import { findFirstMap } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse, none, some } from "fp-ts/lib/Option"
-import { findFirstMap } from "fp-ts/lib/ReadonlyArray"
-import { useMemo, useState } from "react"
-import { Color, Plane, Vector3 } from "three"
-import { subscribeKey } from "valtio/utils"
-import { useColumnLayout } from "./layouts"
+import { useMemo } from "react"
+import {
+  Color,
+  MeshPhysicalMaterial,
+  MeshStandardMaterial,
+  Plane,
+  Vector3,
+} from "three"
+import { subscribe, useSnapshot } from "valtio"
+import { proxyMap, subscribeKey } from "valtio/utils"
+import context from "./context"
+import houses from "./houses"
+import scopes from "./scope"
+
+export type ColorOpts = {
+  default: Color
+  illuminated: Color
+}
+
+export type MaterialKey = {
+  buildingId: string
+  columnIndex: number
+  levelIndex: number
+  elementName: string
+  materialName: string
+}
+
+export type MaterialValue = {
+  key: MaterialKey
+  threeMaterial: MeshStandardMaterial | MeshPhysicalMaterial
+  colorOpts: ColorOpts
+  colorValue: keyof ColorOpts
+}
+
+type MaterialKeyHash = string
+
+const materials = proxyMap<MaterialKeyHash, MaterialValue>()
+
+export const hashMaterialKey = ({
+  buildingId,
+  columnIndex,
+  levelIndex,
+  elementName,
+  materialName,
+}: MaterialKey) =>
+  JSON.stringify([
+    buildingId,
+    columnIndex,
+    levelIndex,
+    elementName,
+    materialName,
+  ])
+
+export const pushMaterial = (material: MaterialValue) => {
+  const hashKey = hashMaterialKey(material.key)
+  if (!(hashKey in hashMaterialKey)) materials.set(hashKey, material)
+}
+
+export const setMaterialColor = (
+  material: MaterialValue,
+  color: keyof ColorOpts
+) => {
+  material.threeMaterial.color.set(material.colorOpts[color])
+  material.colorValue = color
+}
 
 export const useMaterialName = (buildingId: string, elementName: string) => {
   const { elements } = useSystemsData()
@@ -26,39 +79,37 @@ export const useMaterialName = (buildingId: string, elementName: string) => {
     elements.find((e) => e.name === elementName)?.defaultMaterial ??
     DEFAULT_MATERIAL_NAME
 
-  const [materialName, setMaterialName] = useState(defaultMaterialName)
+  const { modifiedMaterials, modifiedMaterialsPreview } = useSnapshot(
+    houses[buildingId]
+  )
 
-  subscribeKey(houses[buildingId], "modifiedMaterials", () => {
-    const maybeMaterialName: string | undefined =
-      houses[buildingId].modifiedMaterials?.[elementName]
-
-    setMaterialName(maybeMaterialName ?? defaultMaterialName)
-  })
-
-  return useMemo(() => materialName, [materialName])
+  return useMemo(() => {
+    if (elementName in modifiedMaterialsPreview)
+      return modifiedMaterialsPreview[elementName]
+    else if (elementName in modifiedMaterials)
+      return modifiedMaterials[elementName]
+    else return defaultMaterialName
+  }, [modifiedMaterials, modifiedMaterialsPreview])
 }
 
-const useMaterial = (
+export const useMaterial = (
   materialKey: MaterialKey,
-  moduleHeight: number,
-  visible: boolean = true
+  clippingPlaneHeight: number
 ) => {
-  const { buildingId, elementName, materialName, levelIndex } = materialKey
-  const { materials: sysMaterials } = useSystemsData()
+  const { buildingId, columnIndex, levelIndex, elementName } = materialKey
 
-  const columnLayout = useColumnLayout(buildingId)
-  const clippingPlaneHeight =
-    columnLayout[0].gridGroups[levelIndex].y + moduleHeight / 2
+  const { materials: sysMaterials } = useSystemsData()
 
   const clippingPlane = useMemo(
     () => new Plane(new Vector3(0, -1, 0), clippingPlaneHeight),
     [clippingPlaneHeight]
   )
 
+  const materialName = useMaterialName(buildingId, elementName)
+
   const material = useMemo(() => {
-    if (!visible) return invisibleMaterial
     const hashKey = hashMaterialKey(materialKey)
-    const maybeMaterial = materials.get(hashKey) // materials?.[buildingId]?.[elementName]?.[levelIndex]
+    const maybeMaterial = materials.get(hashKey)
 
     if (maybeMaterial) return maybeMaterial.threeMaterial
     else {
@@ -95,12 +146,15 @@ const useMaterial = (
     }
   }, [
     buildingId,
-    elementName,
+    columnIndex,
     levelIndex,
-    visible,
+    elementName,
     clippingPlane,
     materialName,
   ])
+
+  // effects for level illumination
+  // visibility
 
   subscribeKey(context, "levelIndex", () => {
     switch (true) {
@@ -121,7 +175,13 @@ const useMaterial = (
     }
   })
 
+  subscribe(stretch, () => {
+    const { visibleStartIndex, visibleEndIndex } = stretch
+
+    material.visible =
+      columnIndex >= visibleStartIndex && columnIndex <= visibleEndIndex
+  })
+
   return material
 }
-
-export default useMaterial
+export default materials
