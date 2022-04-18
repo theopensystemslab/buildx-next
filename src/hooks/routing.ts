@@ -1,4 +1,5 @@
 import context, { EditModeEnum } from "@/stores/context"
+import scopes, { initScopes } from "@/stores/scope"
 import { useRoute } from "@/utils/wouter"
 import { useEffect } from "react"
 import { subscribe } from "valtio"
@@ -48,6 +49,7 @@ export const useRouting = () => {
           context.editMode = EditModeEnum.Enum.MOVE
     }
 
+    initScopes()
     urlChange = false
   }, [params])
 }

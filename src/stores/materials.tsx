@@ -18,7 +18,6 @@ import { subscribe, useSnapshot } from "valtio"
 import { proxyMap, subscribeKey } from "valtio/utils"
 import context from "./context"
 import houses from "./houses"
-import scopes from "./scope"
 
 export type ColorOpts = {
   default: Color
@@ -130,7 +129,7 @@ export const useMaterial = (
 
       const colorOpts: ColorOpts = {
         default: threeMaterial.color.clone(),
-        illuminated: threeMaterial.color.clone().add(new Color("#fff")),
+        illuminated: threeMaterial.color.clone().add(new Color("#bbb")),
       }
 
       const material: MaterialValue = {
@@ -152,9 +151,6 @@ export const useMaterial = (
     clippingPlane,
     materialName,
   ])
-
-  // effects for level illumination
-  // visibility
 
   subscribeKey(context, "levelIndex", () => {
     switch (true) {

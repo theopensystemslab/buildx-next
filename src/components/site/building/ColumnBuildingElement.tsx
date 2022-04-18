@@ -87,10 +87,10 @@ const ColumnBuildingElement = (props: Props) => {
       if (!meshRef.current) return
       const obj = intersections[0].object ?? intersections[0].eventObject
       if (!object3dChildOf(obj, meshRef.current)) return
-
       switch (scopes.secondary.type) {
         case ScopeTypeEnum.Enum.LEVEL:
           if (scopes.secondary.hovered?.levelIndex === levelIndex) {
+            scopes.secondary.hovered = { levelIndex }
             setIlluminatedLevel(buildingId, levelIndex)
           }
           // if (highlights.hoveredLevelIndex !== levelIndex) {
