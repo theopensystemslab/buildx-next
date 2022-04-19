@@ -1,16 +1,36 @@
+import { useSystemsData } from "@/contexts/SystemsData"
 import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
-import { useDebug } from "@/stores/debug"
-import { reduceRA } from "@/utils"
+import { mapRA, reduceRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
-import { filterMapWithIndex } from "fp-ts/lib/ReadonlyArray"
+import {
+  filterMap,
+  filterMapWithIndex,
+  findFirst,
+} from "fp-ts/lib/ReadonlyArray"
 import { useControls } from "leva"
-import React, { Fragment, Suspense, useEffect, useState } from "react"
+import { Fragment, Suspense, useEffect, useState } from "react"
 import ModuleDebugModule from "./ModuleDebugModule"
 
 const ModuleDebug = () => {
-  const houseTypeModules = useDebug()
+  const { houseTypes, modules: systemModules } = useSystemsData()
+
+  const houseTypeModules = pipe(
+    houseTypes,
+    mapRA((houseType) =>
+      pipe(
+        houseType.dna,
+        filterMap((strand) =>
+          pipe(
+            systemModules,
+            findFirst((module) => module.dna === strand)
+          )
+        ),
+        (modules) => ({ houseType, modules })
+      )
+    )
+  )
 
   const [maxModuleIndex, setMaxModuleIndex] = useState(0)
 
@@ -37,12 +57,16 @@ const ModuleDebug = () => {
     selection: { houseType: HouseType; modules: Module[] }
     moduleIndex: number
   }
+
   useEffect(
     () => setMaxModuleIndex(selection.modules.length - 1),
     [selection.modules.length]
   )
 
-  useEffect(() => void console.log(maxModuleIndex), [maxModuleIndex])
+  useEffect(() => {
+    console.log(selection.modules[moduleIndex].dna)
+  }, [moduleIndex])
+
   const { modules } = selection
 
   return (

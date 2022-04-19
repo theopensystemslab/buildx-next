@@ -1,6 +1,6 @@
 import { getField, getAirtableEntries } from "./utils"
 import type { MeshStandardMaterial } from "three"
-import type { BuildSystem } from "@/data/buildSystem"
+import type { System } from "@/data/system"
 
 export interface Material {
   id: string
@@ -23,7 +23,7 @@ export interface Material {
 }
 
 export const getMaterials = async (
-  system: BuildSystem
+  system: System
 ): Promise<Array<Material>> => {
   try {
     const materialMenu = (

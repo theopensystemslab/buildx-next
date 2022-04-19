@@ -18,6 +18,8 @@ export type GltfT = {
   }
 }
 
+export type ObjectRef = { current: Object3D }
+
 export const useGLTF = <T extends string | string[]>(path: T) =>
   useGLTFDrei(path, true, true) as unknown as T extends any[] ? GltfT[] : GltfT
 
@@ -27,26 +29,27 @@ export const createMaterial = (config: Material) => {
   if (config.defaultColor) {
     return new MeshStandardMaterial({
       color: config.defaultColor,
+      transparent: true,
     })
   }
 
-  const textureLoader = new TextureLoader()
+  // const textureLoader = new TextureLoader()
 
-  const setRepeat = (texture: Texture): void => {
-    texture.wrapS = texture.wrapT = RepeatWrapping
-    texture.repeat.set(10, 10)
-  }
+  // const setRepeat = (texture: Texture): void => {
+  //   texture.wrapS = texture.wrapT = RepeatWrapping
+  //   texture.repeat.set(10, 10)
+  // }
 
-  const extractOrNullTextureMap = (url: string | undefined | null) =>
-    url ? textureLoader.load(url, setRepeat) : null
+  // const extractOrNullTextureMap = (url: string | undefined | null) =>
+  //   url ? textureLoader.load(url, setRepeat) : null
 
   return new MeshStandardMaterial({
     color: 0xeeeeee,
-    map: extractOrNullTextureMap(config.textureUrl),
-    displacementMap: extractOrNullTextureMap(config.displacementUrl),
-    bumpMap: extractOrNullTextureMap(config.bumpUrl),
-    normalMap: extractOrNullTextureMap(config.normUrl),
-    aoMap: extractOrNullTextureMap(config.aoUrl),
+    // map: extractOrNullTextureMap(config.textureUrl),
+    // displacementMap: extractOrNullTextureMap(config.displacementUrl),
+    // bumpMap: extractOrNullTextureMap(config.bumpUrl),
+    // normalMap: extractOrNullTextureMap(config.normUrl),
+    // aoMap: extractOrNullTextureMap(config.aoUrl),
     // roughnessMap: extractOrNullTextureMap(config.roughnessUrl),
     displacementScale: 0, // this can be used to 'explode' the components
     aoMapIntensity: 3.0,
@@ -69,9 +72,22 @@ export const createMaterial = (config: Material) => {
     shadowSide: DoubleSide,
     clipShadows: true,
     clippingPlanes: [],
-    refractionRatio: 0,
     wireframe: false,
     wireframeLinewidth: 1,
     flatShading: false,
+    transparent: true,
   })
+}
+
+export const object3dChildOf = (
+  childObject: Object3D | null,
+  parentObject: Object3D
+): boolean => {
+  if (childObject === parentObject) {
+    return true
+  }
+  if (!childObject) {
+    return false
+  }
+  return object3dChildOf(childObject.parent, parentObject)
 }

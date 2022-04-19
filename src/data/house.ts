@@ -1,5 +1,4 @@
 import { DeepReadonly, safeLocalStorageGet } from "@/utils"
-import { filterMap, findFirst } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { map } from "fp-ts/lib/ReadonlyRecord"
 import type { Rectangle } from "./collisions"
@@ -16,6 +15,7 @@ export interface House {
   rotation: number
   dna: string[]
   modifiedMaterials: Record<string, string>
+  modifiedMaterialsPreview: Record<string, string>
   friendlyName: string
 }
 
@@ -85,35 +85,3 @@ export const getHouses = (): Record<string, House> =>
       houseTypeId: house.houseTypeId ?? house.id,
     }))
   )
-
-export const getHouseModules = (house: House, sysModules: Module[]) =>
-  pipe(
-    house.dna,
-    filterMap((dna) =>
-      pipe(
-        sysModules,
-        findFirst(
-          (sysM: Module) => sysM.systemId === house.systemId && sysM.dna === dna
-        )
-      )
-    )
-  )
-// pipe(
-//   houseTypes,
-//   findFirst((ht: HouseType) => ht.id === house.houseTypeId),
-//   optMap((houseType) => house.dna),
-//   optMap(
-//     flow(
-//       filterMap((dna) =>
-//         pipe(
-//           sysModules,
-//           findFirst(
-//             (sysM: Module) =>
-//               sysM.systemId === house.systemId && sysM.dna === dna
-//           )
-//         )
-//       )
-//     )
-//   ),
-//   getOrElse(() => [] as Module[])
-// )

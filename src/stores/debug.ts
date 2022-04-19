@@ -1,36 +1,38 @@
-import { mapRA } from "@/utils"
-import { pipe } from "fp-ts/lib/function"
-import { filterMap, findFirst } from "fp-ts/lib/ReadonlyArray"
-import { useSnapshot } from "valtio"
-import { derive } from "valtio/utils"
-import systemsData from "./systems"
+import { ColorRepresentation } from "three"
+import { proxy } from "valtio"
 
-const debug = derive({
-  houseTypeModules: async (get) => {
-    const houseTypes = await get(systemsData).houseTypes
-    const systemModules = await get(systemsData).modules
+type DebugPlane = {
+  position: [number, number, number]
+  rotation: [number, number, number]
+  width?: number
+  height?: number
+  color?: ColorRepresentation
+}
 
-    return pipe(
-      houseTypes,
-      mapRA((houseType) =>
-        pipe(
-          houseType.dna,
-          filterMap((strand) =>
-            pipe(
-              systemModules,
-              findFirst((module) => module.dna === strand)
-            )
-          ),
-          (modules) => ({ houseType, modules })
-        )
-      )
-    )
-  },
+type Debug = {
+  planes: { [key: string]: DebugPlane }
+}
+
+const debug = proxy<Debug>({
+  planes: {},
 })
 
-export const useDebug = () => {
-  const { houseTypeModules } = useSnapshot(debug)
-  return houseTypeModules
+export const addDebugPlaneZ = (key: string, z: number) => {
+  const colors = [
+    "red",
+    "green",
+    "blue",
+    "pink",
+    "orange",
+    "brown",
+    "purple",
+    "yellow",
+  ]
+  debug.planes[key] = {
+    position: [0, 0, z],
+    rotation: [0, 0, 0],
+    color: colors[Math.floor(Math.random() * colors.length)],
+  }
 }
 
 export default debug

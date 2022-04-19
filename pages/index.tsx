@@ -1,1 +1,1 @@
-export { default } from "@/components/map"
+export { default } from "./site/[[...site]]"

@@ -1,10 +1,10 @@
-import React from "react";
-import { Html, useProgress } from "@react-three/drei";
+import { Html, useProgress } from "@react-three/drei"
+import React from "react"
 
 const Loader3D = () => {
-  const { progress } = useProgress();
+  const { progress } = useProgress()
   return (
-    <Html center className="text-center space-y-2">
+    <Html center className="space-y-2 text-center">
       <p className="text-xs text-gray-600">
         {Math.floor(Number(progress))} % loaded
       </p>
@@ -15,7 +15,7 @@ const Loader3D = () => {
         />
       </div>
     </Html>
-  );
-};
+  )
+}
 
-export default Loader3D;
+export default Loader3D

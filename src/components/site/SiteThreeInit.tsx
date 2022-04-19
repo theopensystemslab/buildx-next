@@ -1,10 +1,17 @@
 import { RaycasterLayer } from "@/CONSTANTS"
-import { setPointer } from "@/stores/context"
-import scope from "@/stores/scope"
+import { SystemsDataContext } from "@/contexts/SystemsData"
+import context from "@/stores/context"
+import highlights, {
+  clearIlluminatedMaterials,
+  setIlluminatedLevel,
+} from "@/stores/highlights"
+import { setXZ } from "@/stores/pointer"
+import scopes, { initScopes, ScopeTypeEnum } from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
+import { useContextBridge } from "@react-three/drei"
 // import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
-import React, { PropsWithChildren, Suspense } from "react"
+import React, { PropsWithChildren } from "react"
 import { BasicShadowMap } from "three"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
@@ -19,6 +26,7 @@ type Props = PropsWithChildren<{}>
 const SiteThreeInit = (props: Props) => {
   const { children } = props
   const { orthographic, shadows } = useSettings()
+  const ContextBridge = useContextBridge(SystemsDataContext)
 
   // Re-initialize canvas if settings like orthographic camera are changed
   // const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)
@@ -39,14 +47,14 @@ const SiteThreeInit = (props: Props) => {
   //     </div>
   //   )
   // }
+
   return (
     <Canvas
       frameloop="demand"
-      mode="concurrent"
       shadows={{ enabled: true, type: BasicShadowMap }}
       onCreated={({ gl, raycaster }) => {
         gl.localClippingEnabled = true
-        raycaster.layers.enableAll()
+        raycaster.layers.enable(RaycasterLayer.clickable)
         raycaster.layers.disable(RaycasterLayer.non_clickable)
       }}
     >
@@ -60,13 +68,16 @@ const SiteThreeInit = (props: Props) => {
       />
       {/* </group> */}
       <HorizontalPlane
-        onChange={setPointer}
+        onChange={setXZ}
         onNearClick={() => {
-          scope.selected = []
-          // store.contextMenu = null
+          context.menu = null
+          scopes.primary.selected = []
+          scopes.secondary.selected = []
         }}
         onNearHover={() => {
-          scope.hovered = null
+          scopes.primary.hovered = null
+          scopes.secondary.hovered = null
+          clearIlluminatedMaterials()
         }}
       />
       {shadows && (
@@ -78,7 +89,7 @@ const SiteThreeInit = (props: Props) => {
       {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
       <Effects />
       <SiteCamControls />
-      <Suspense fallback={null}>{children}</Suspense>
+      <ContextBridge>{children}</ContextBridge>
     </Canvas>
   )
 }

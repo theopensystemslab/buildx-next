@@ -1,4 +1,4 @@
-import type { BuildSystem } from "@/data/buildSystem"
+import type { System } from "@/data/system"
 import { getAirtableEntries } from "./utils"
 
 export interface WindowType {
@@ -10,9 +10,7 @@ export interface WindowType {
   glazingArea: number
 }
 
-export const getWindowTypes = (
-  system: BuildSystem
-): Promise<Array<WindowType>> =>
+export const getWindowTypes = (system: System): Promise<Array<WindowType>> =>
   getAirtableEntries({ tableId: system.airtableId, tab: "window_type" })
     .then((res) =>
       res.records.map((record: any): WindowType => {
