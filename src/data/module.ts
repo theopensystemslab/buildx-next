@@ -1,14 +1,29 @@
 import type { System } from "@/data/system"
-import { abs, GltfT, hamming, mapA } from "@/utils"
+import {
+  ColumnLayout,
+  columnLayoutToDNA,
+  PositionedModule,
+} from "@/hooks/layouts"
+import { useGetVanillaModule } from "@/hooks/modules"
+import { abs, filterA, GltfT, hamming, mapA } from "@/utils"
 import { sum } from "fp-ts-std/Array"
 import { values } from "fp-ts-std/Record"
-import { filter, Foldable, sort, sortBy, takeLeft } from "fp-ts/lib/Array"
+import {
+  filter,
+  Foldable,
+  replicate,
+  sort,
+  sortBy,
+  takeLeft,
+} from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
+import { range } from "fp-ts/lib/NonEmptyArray"
 import { Ord } from "fp-ts/lib/number"
 import { contramap, fromCompare } from "fp-ts/lib/Ord"
 import { sign } from "fp-ts/lib/Ordering"
 import { fromFoldable } from "fp-ts/lib/Record"
 import { first } from "fp-ts/lib/Semigroup"
+import produce from "immer"
 import type { StructuredDna } from "./moduleLayout"
 import { parseDna } from "./moduleLayout"
 import { getAirtableEntries } from "./utils"
@@ -25,6 +40,7 @@ export interface Module {
   cost: number // Euros
   embodiedCarbon: number // kgCO2
   visualReference?: string
+  description?: string
 }
 
 export type StructuredDnaModule = Pick<Module, "structuredDna">
@@ -52,6 +68,7 @@ export const getModules = (system: System): Promise<Array<Module>> =>
           cost: record.fields?.["baseline_module_cost"] ?? 1500,
           embodiedCarbon: record.fields?.["embodied_carbon"] ?? -400,
           visualReference: record.fields?.["visual_reference"]?.[0]?.url,
+          description: record.fields?.["description"],
         }
       })
     )
@@ -157,3 +174,90 @@ export const keysHammingSort = <M extends BareModule>(
       })
     )
   )
+
+export type ColumnModuleKey = {
+  columnIndex: number
+  levelIndex: number
+  groupIndex: number
+}
+
+export const useChangeModuleLayout = <T extends BareModule>(
+  columnLayout: ColumnLayout,
+  { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
+) => {
+  const getVanillaModule = useGetVanillaModule()
+
+  const oldModule =
+    columnLayout[columnIndex].gridGroups[levelIndex].modules[groupIndex].module
+
+  return (newModule: T): string[] => {
+    const gridUnitDiff =
+      newModule.structuredDna.gridUnits - oldModule.structuredDna.gridUnits
+
+    const { sign } = Math
+
+    const roofIndex = columnLayout[columnIndex].gridGroups.length - 1
+
+    switch (true) {
+      case sign(gridUnitDiff) < 0:
+        // old module was bigger
+        // for this level index vanilla the gridUnitDiff
+        return pipe(
+          columnLayout,
+          produce((draft: ColumnLayout) => {
+            draft[columnIndex].gridGroups[levelIndex].modules[
+              groupIndex
+            ].module.dna = newModule.dna
+            draft[columnIndex].gridGroups[levelIndex].modules = [
+              ...draft[columnIndex].gridGroups[levelIndex].modules,
+              ...pipe(
+                replicate(-gridUnitDiff, getVanillaModule(newModule)),
+                mapA((module) => ({ module, z: 0 } as any))
+              ),
+            ]
+          }),
+          columnLayoutToDNA
+        ) as string[]
+
+      case sign(gridUnitDiff) > 0:
+        // new module is bigger
+        // for this level vanilla all other levels
+        return pipe(
+          columnLayout,
+          produce((draft) => {
+            draft[columnIndex].gridGroups[levelIndex].modules[
+              groupIndex
+            ].module.dna = newModule.dna
+            pipe(
+              range(0, roofIndex),
+              filterA((x) => x !== levelIndex)
+            ).forEach((i) => {
+              const vanillaModule = getVanillaModule(
+                columnLayout[columnIndex].gridGroups[i].modules[0].module
+              )
+              draft[columnIndex].gridGroups[i].modules = [
+                ...draft[columnIndex].gridGroups[i].modules,
+                ...pipe(
+                  replicate(gridUnitDiff, vanillaModule),
+                  mapA((module) => ({ module, z: 0 }))
+                ),
+              ]
+            })
+          }),
+          columnLayoutToDNA
+        )
+      case sign(gridUnitDiff) === 0:
+      default:
+        // just swap the module
+        return pipe(
+          columnLayout,
+          produce((draft) => {
+            draft[columnIndex].gridGroups[levelIndex].modules[
+              groupIndex
+            ].module.dna = newModule.dna
+          }),
+          columnLayoutToDNA
+        ) as string[]
+    }
+  }
+}

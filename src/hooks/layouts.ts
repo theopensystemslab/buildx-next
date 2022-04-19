@@ -205,10 +205,10 @@ export const useColumnLayout = (buildingId: string) => {
     mapRA((column) =>
       pipe(
         column,
-        mapRA((y) =>
+        mapRA((module) =>
           pipe(
-            y,
-            reduceRA(0, (b, a) => b + a.structuredDna.gridUnits)
+            module,
+            reduceRA(0, (b, v) => b + v.structuredDna.gridUnits)
           )
         ),
         reduceRA(

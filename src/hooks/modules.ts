@@ -1,11 +1,13 @@
 import { useSystemsData } from "@/contexts/SystemsData"
 import {
   BareModule,
+  ColumnModuleKey,
   filterCompatibleModules,
   keysFilter,
   keysHammingSort,
   LoadedModule,
   Module,
+  useChangeModuleLayout,
 } from "@/data/module"
 import {
   filterA,
@@ -27,18 +29,17 @@ import { getOrElse, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 import { first } from "fp-ts/lib/Semigroup"
-import produce from "immer"
 import { ColumnLayout, columnLayoutToDNA } from "./layouts"
 
-export const useGetVanillaModule = () => {
+export const useGetVanillaModule = <T extends BareModule>() => {
   const { modules: allModules } = useSystemsData()
-  return (module: LoadedModule): LoadedModule | null => {
+  return (module: T): LoadedModule => {
     const systemModules = pipe(
       allModules,
       filterRA((module) => module.systemId === module.systemId)
     )
 
-    return pipe(
+    const vanillaModule = pipe(
       systemModules,
       filterRA(
         (sysModule) =>
@@ -58,18 +59,17 @@ export const useGetVanillaModule = () => {
       mapO(loadModule),
       toNullable
     )
+
+    if (!vanillaModule)
+      throw new Error(`No vanilla module found for ${module.dna}`)
+
+    return vanillaModule
   }
 }
 
 export const useSystemModules = (systemId: string) => {
   const { modules } = useSystemsData()
   return modules.filter((m) => m.systemId === systemId)
-}
-
-export type ColumnModuleKey = {
-  columnIndex: number
-  levelIndex: number
-  groupIndex: number
 }
 
 type LayoutOpt = {
@@ -84,6 +84,19 @@ export const useLayoutOptions = <T extends BareModule>(
 ): { options: LayoutOpt[]; selected: LayoutOpt["value"] } => {
   const systemModules = useSystemModules(module.systemId)
 
+  const changeModuleLayout = useChangeModuleLayout(columnLayout, {
+    columnIndex,
+    levelIndex,
+    groupIndex,
+  })
+
+  const getVanillaModule = useGetVanillaModule()
+
+  const vanillaModule = getVanillaModule(module)
+
+  // if has stairs type, must match stairs type
+  // otherwise change stairs type first
+
   const options = pipe(
     systemModules,
     filterCompatibleModules([
@@ -91,22 +104,23 @@ export const useLayoutOptions = <T extends BareModule>(
       "positionType",
       "levelType",
       "gridType",
-      "gridUnits",
+      // "gridUnits",
       "stairsType",
     ])(module),
-    mapA((module) => ({
-      label: module.dna,
+    mapA((m) => ({
+      label: m.description ?? m.dna,
       value: {
-        module,
-        buildingDna: pipe(
-          columnLayout,
-          produce((draft) => {
-            draft[columnIndex].gridGroups[levelIndex].modules[
-              groupIndex
-            ].module.dna = module.dna
-          }),
-          columnLayoutToDNA
-        ) as string[],
+        module: m,
+        buildingDna: changeModuleLayout(m),
+        // buildingDna: pipe(
+        //   columnLayout,
+        //   produce((draft) => {
+        //     draft[columnIndex].gridGroups[levelIndex].modules[
+        //       groupIndex
+        //     ].module.dna = m.dna
+        //   }),
+        //   columnLayoutToDNA
+        // ) as string[],
       },
     }))
   )
