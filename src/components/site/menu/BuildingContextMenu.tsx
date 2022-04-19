@@ -32,7 +32,7 @@ const BuildingContextMenu = (props: Props) => {
 
   return (
     <ContextMenu {...restProps}>
-      <ContextMenuButton onClick={editLevel}>{`Edit Level`}</ContextMenuButton>
+      <ContextMenuButton onClick={editLevel}>{`Edit level`}</ContextMenuButton>
       <ChangeMaterials buildingId={buildingId} elementName={elementName} />
     </ContextMenu>
   )

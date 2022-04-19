@@ -19,6 +19,7 @@ import {
   reduceM,
   reduceRA,
   StrOrd,
+  upperFirst,
 } from "@/utils"
 import { loadModule } from "@/utils/modules"
 import { findFirst, Foldable } from "fp-ts/lib/Array"
@@ -108,7 +109,11 @@ export const useLayoutOptions = <T extends BareModule>(
       "stairsType",
     ])(module),
     mapA((m) => ({
-      label: m.description ?? m.dna,
+      label: pipe(
+        m.description ?? "",
+        upperFirst,
+        getOrElse(() => m.dna)
+      ),
       value: {
         module: m,
         buildingDna: changeModuleLayout(m),

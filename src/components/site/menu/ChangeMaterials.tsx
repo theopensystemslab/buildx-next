@@ -1,4 +1,5 @@
 import { Radio } from "@/components/ui"
+import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { useSystemsData } from "@/contexts/SystemsData"
 import houses, { useHouse, useHouseType } from "@/stores/houses"
@@ -46,7 +47,8 @@ const ChangeMaterials = ({
       }))
 
       return options.length < 1 ? null : (
-        <ContextMenuNested label={`Change ${elementName} Material`}>
+        <ContextMenuNested label={`Change material`}>
+          <ContextMenuHeading>{elementName}</ContextMenuHeading>
           <Radio
             options={options}
             selected={

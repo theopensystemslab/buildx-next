@@ -55,7 +55,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   return (
     <ContextMenu {...props}>
       <ContextMenuHeading>
-        {manySelected ? `Several Buildings` : firstHouse.friendlyName}
+        {manySelected ? `Several buildings` : firstHouse.friendlyName}
       </ContextMenuHeading>
       {!renaming && (
         <Fragment>
@@ -65,7 +65,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
           </ContextMenuButton>
           {oneSelected ? (
             <ContextMenuButton onClick={editBuilding}>
-              Edit Building
+              {`Edit building`}
             </ContextMenuButton>
           ) : null}
         </Fragment>
@@ -74,7 +74,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
       {oneSelected ? (
         <Fragment>
           <ContextMenuButton onClick={rename}>
-            Rename Building
+            {`Rename building`}
           </ContextMenuButton>
           {renaming && (
             <RenameHouseForm
