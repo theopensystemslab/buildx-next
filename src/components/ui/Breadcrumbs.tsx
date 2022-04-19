@@ -1,7 +1,7 @@
 import context from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import { useRoute } from "@/utils/wouter"
-import React from "react"
+import React, { Fragment } from "react"
 import { Link } from "wouter"
 
 type BreadcrumbProps = {
@@ -19,7 +19,7 @@ const Breadcrumb = ({ path, label, onClick }: BreadcrumbProps) => (
   <Link
     href={path}
     onClick={onClick}
-    className="mr-4 rounded-md border border-black bg-white p-1"
+    className="m-1 bg-white rounded-sm p-1 hover:bg-gray-300"
   >
     {label}
   </Link>
@@ -40,6 +40,7 @@ const BreadcrumbsWithParams = (params: Params) => {
           context.levelIndex = null
         }}
       />
+      <span>{`/`}</span>
       <Breadcrumb
         path={`/site?buildingId=${buildingId}`}
         label={friendlyName}
@@ -48,10 +49,13 @@ const BreadcrumbsWithParams = (params: Params) => {
         }}
       />
       {levelIndex && (
-        <Breadcrumb
-          path={`/site?buildingId=${buildingId}&levelIndex=${levelIndex}`}
-          label={`Level ${levelIndex}`}
-        />
+        <Fragment>
+          <span>{`/`}</span>
+          <Breadcrumb
+            path={`/site?buildingId=${buildingId}&levelIndex=${levelIndex}`}
+            label={`Level ${levelIndex}`}
+          />
+        </Fragment>
       )}
     </div>
   )

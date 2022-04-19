@@ -6,7 +6,7 @@ import defaultMaterial from "@/materials/defaultMaterial"
 import { findFirstMap } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse, none, some } from "fp-ts/lib/Option"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import {
   Color,
   MeshPhysicalMaterial,
@@ -152,31 +152,39 @@ export const useMaterial = (
     materialName,
   ])
 
-  subscribeKey(context, "levelIndex", () => {
-    switch (true) {
-      case context.levelIndex === null:
-        if (material.visible === false) material.visible = true
-        if (material.clippingPlanes !== null) material.clippingPlanes = null
-        break
-      case context.levelIndex === levelIndex:
-        if (material.visible === false) material.visible = true
-        if (material.clippingPlanes === null)
-          material.clippingPlanes = [clippingPlane]
-        break
-      default:
-        const above = levelIndex < context.levelIndex!
-        if (material.visible === !above) material.visible = above
-        if (material.clippingPlanes !== null) material.clippingPlanes = null
-        break
+  useEffect(() => {
+    const go = () => {
+      switch (true) {
+        case context.levelIndex === null:
+          if (material.visible === false) material.visible = true
+          if (material.clippingPlanes !== null) material.clippingPlanes = null
+          break
+        case context.levelIndex === levelIndex:
+          if (material.visible === false) material.visible = true
+          if (material.clippingPlanes === null)
+            material.clippingPlanes = [clippingPlane]
+          break
+        default:
+          const above = levelIndex < context.levelIndex!
+          if (material.visible === !above) material.visible = above
+          if (material.clippingPlanes !== null) material.clippingPlanes = null
+          break
+      }
     }
-  })
+    go()
+    return subscribeKey(context, "levelIndex", go)
+  }, [])
 
-  subscribe(stretch, () => {
-    const { visibleStartIndex, visibleEndIndex } = stretch
+  useEffect(
+    () =>
+      subscribe(stretch, () => {
+        const { visibleStartIndex, visibleEndIndex } = stretch
 
-    material.visible =
-      columnIndex >= visibleStartIndex && columnIndex <= visibleEndIndex
-  })
+        material.visible =
+          columnIndex >= visibleStartIndex && columnIndex <= visibleEndIndex
+      }),
+    []
+  )
 
   return material
 }
