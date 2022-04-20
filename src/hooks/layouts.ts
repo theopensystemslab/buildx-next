@@ -1,13 +1,16 @@
-import { LoadedModule } from "@/data/module"
+import { BareModule, LoadedModule, StructuredDnaModule } from "@/data/module"
 import {
+  flattenA,
+  mapA,
   mapRA,
   mapWithIndexRA,
   reduceRA,
   reduceWithIndexRA,
+  transposeA,
   zipRA,
 } from "@/utils"
 import { transpose } from "fp-ts-std/ReadonlyArray"
-import { pipe } from "fp-ts/lib/function"
+import { flow, pipe } from "fp-ts/lib/function"
 import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useBuildingRows } from "../stores/houses"
@@ -342,16 +345,34 @@ export const columnLayoutToDNA = (
     flatten
   ) as string[]
 
-export const updatePositionedRowAt = (
-  positionedRow: PositionedRow,
-  groupIndex: number,
-  newModules: LoadedModule[]
-): PositionedRow => {
-  return produce(positionedRow, (draft) => {
-    draft.modules = [
-      ...draft.modules.slice(0, groupIndex),
-      ...newModules.map((x) => ({ module: x, z: 0 })),
-      ...draft.modules.slice(groupIndex + 1),
-    ]
-  })
+export const columnLayoutToMatrix = <
+  T extends StructuredDnaModule = StructuredDnaModule
+>(
+  columnLayout: ColumnLayout
+): T[][][] => {
+  return pipe(
+    columnLayout,
+    mapRA((column) =>
+      pipe(
+        column.gridGroups,
+        mapRA((gridGroup) =>
+          pipe(
+            gridGroup.modules,
+            mapRA(({ module }) => module)
+          )
+        )
+      )
+    )
+  ) as unknown as T[][][]
 }
+
+export const columnMatrixToDna = <T extends BareModule = BareModule>(
+  columnMatrix: T[][][]
+) =>
+  pipe(
+    columnMatrix,
+    mapA(mapA(mapA((x) => x.dna))),
+    transposeA,
+    flattenA,
+    flattenA
+  )

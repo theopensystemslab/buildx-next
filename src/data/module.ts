@@ -5,12 +5,13 @@ import {
   PositionedModule,
 } from "@/hooks/layouts"
 import { useGetVanillaModule } from "@/hooks/modules"
-import { abs, filterA, GltfT, hamming, mapA } from "@/utils"
+import { abs, filterA, GltfT, hamming, mapA, mapO } from "@/utils"
 import { sum } from "fp-ts-std/Array"
 import { values } from "fp-ts-std/Record"
 import {
   filter,
   Foldable,
+  head,
   replicate,
   sort,
   sortBy,
@@ -19,6 +20,7 @@ import {
 import { pipe } from "fp-ts/lib/function"
 import { range } from "fp-ts/lib/NonEmptyArray"
 import { Ord } from "fp-ts/lib/number"
+import { toNullable } from "fp-ts/lib/Option"
 import { contramap, fromCompare } from "fp-ts/lib/Ord"
 import { sign } from "fp-ts/lib/Ordering"
 import { fromFoldable } from "fp-ts/lib/Record"
@@ -88,7 +90,10 @@ export const filterCompatibleModules =
     )
 
 export const keysFilter =
-  <M extends BareModule>(ks: Array<keyof StructuredDna>, targetModule: M) =>
+  <M extends StructuredDnaModule>(
+    ks: Array<keyof StructuredDna>,
+    targetModule: M
+  ) =>
   (m: M) =>
     ks.reduce(
       (acc: boolean, k) =>
@@ -136,17 +141,19 @@ export const topCandidateByHamming = <M extends StructuredDnaModule>(
   ks: Array<keyof StructuredDna>,
   targetModule: M,
   candidateModules: M[]
-) =>
+): M | null =>
   pipe(
     candidateModules,
     mapA((m): [M, number] => [m, keysHammingTotal(ks)(targetModule, m)]),
     sort(
       pipe(
         Ord,
-        contramap(([m, n]: [M, number]) => n)
+        contramap(([, n]: [M, number]) => n)
       )
     ),
-    ([[m]]) => m
+    head,
+    mapO(([m]) => m),
+    toNullable
   )
 
 export const keysHammingSort = <M extends BareModule>(

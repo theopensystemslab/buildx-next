@@ -2,7 +2,7 @@ import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { columnLayoutToDNA, useColumnLayout } from "@/hooks/layouts"
-import { useLayoutOptions, useStairsOptions } from "@/hooks/modules"
+import { StairsOpt, useLayoutOptions, useStairsOptions } from "@/hooks/modules"
 import houses from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapA } from "@/utils"
@@ -48,13 +48,19 @@ const LevelContextMenu = (props: Props) => {
     props.onClose?.()
   }
 
-  const foo = useStairsOptions(module, columnLayout, {
-    columnIndex,
-    levelIndex,
-    groupIndex,
-  })
+  const { options: stairsOpts, selected: selectedStairsOpt } = useStairsOptions(
+    module,
+    columnLayout,
+    {
+      columnIndex,
+      levelIndex,
+      groupIndex,
+    }
+  )
 
-  const changeStairs = () => {
+  const changeStairs = ({ buildingDna }: StairsOpt["value"]) => {
+    console.log({ buildingDna })
+    // houses[buildingId].dna = buildingDna
     // prep stair changes to record of keys to dna values
     // so integrate the thing into the opts, more natural
     // also could then preview on hover!
@@ -74,7 +80,7 @@ const LevelContextMenu = (props: Props) => {
           />
         </ContextMenuNested>
       )}
-      {/* {canChangeStairs && (
+      {canChangeStairs && (
         <ContextMenuNested label="Change stairs">
           <Radio
             options={stairsOpts}
@@ -82,7 +88,7 @@ const LevelContextMenu = (props: Props) => {
             onChange={changeStairs}
           />
         </ContextMenuNested>
-      )} */}
+      )}
     </ContextMenu>
   )
 }

@@ -25,6 +25,7 @@ export {
   mapWithIndex as mapWithIndexA,
   reduce as reduceA,
   reduceWithIndex as reduceWithIndexA,
+  flatten as flattenA,
 } from "fp-ts/lib/Array"
 export {
   filter as filterNEA,
@@ -71,6 +72,9 @@ export {
   mapWithIndex as mapWithIndexM,
   reduceWithIndex as reduceWithIndexM,
 } from "fp-ts/lib/Map"
+
+export { transpose as transposeA } from "fp-ts-std/Array"
+export { transpose as transposeRA } from "fp-ts-std/ReadonlyArray"
 
 const clamp_ = clamp(NumOrd)
 
