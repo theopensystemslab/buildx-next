@@ -7,29 +7,40 @@ import {
   keysHammingSort,
   LoadedModule,
   Module,
+  topCandidateByHamming,
   useChangeModuleLayout,
 } from "@/data/module"
 import {
   filterA,
   filterRA,
   mapA,
+  mapM,
+  mapNEA,
   mapO,
+  mapR,
+  mapWithIndexM,
+  mapWithIndexR,
   NumEq,
   NumOrd,
+  pipeLog,
   reduceM,
   reduceRA,
+  reduceWithIndexM,
+  reduceWithIndexRA,
   StrOrd,
   upperFirst,
 } from "@/utils"
 import { loadModule } from "@/utils/modules"
-import { findFirst, Foldable } from "fp-ts/lib/Array"
+import { findFirst, Foldable, isNonEmpty } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { fromFoldable } from "fp-ts/lib/Map"
-import { range } from "fp-ts/lib/NonEmptyArray"
+import { groupBy, NonEmptyArray, range } from "fp-ts/lib/NonEmptyArray"
 import { getOrElse, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
+import { keys } from "fp-ts/lib/Record"
 import { first } from "fp-ts/lib/Semigroup"
+import produce from "immer"
 import { ColumnLayout, columnLayoutToDNA } from "./layouts"
 
 export const useGetVanillaModule = <T extends BareModule>() => {
@@ -91,13 +102,6 @@ export const useLayoutOptions = <T extends BareModule>(
     groupIndex,
   })
 
-  const getVanillaModule = useGetVanillaModule()
-
-  const vanillaModule = getVanillaModule(module)
-
-  // if has stairs type, must match stairs type
-  // otherwise change stairs type first
-
   const options = pipe(
     systemModules,
     filterCompatibleModules([
@@ -105,7 +109,6 @@ export const useLayoutOptions = <T extends BareModule>(
       "positionType",
       "levelType",
       "gridType",
-      // "gridUnits",
       "stairsType",
     ])(module),
     mapA((m) => ({
@@ -117,15 +120,6 @@ export const useLayoutOptions = <T extends BareModule>(
       value: {
         module: m,
         buildingDna: changeModuleLayout(m),
-        // buildingDna: pipe(
-        //   columnLayout,
-        //   produce((draft) => {
-        //     draft[columnIndex].gridGroups[levelIndex].modules[
-        //       groupIndex
-        //     ].module.dna = m.dna
-        //   }),
-        //   columnLayoutToDNA
-        // ) as string[],
       },
     }))
   )
@@ -174,110 +168,150 @@ export const useStairsOptions = <T extends BareModule>(
   module: T,
   columnLayout: ColumnLayout,
   { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
-): { options: StairsOpt[]; selected: StairsOpt } => {
+): { options: StairsOpt[]; selected: StairsOpt["value"] } => {
   const systemModules = useSystemModules(module.systemId)
 
-  // need this _for each_ module
-
-  // you only need to hamming sort if you have multiple options
-  // (NEA probably has a "lowest of comparison" or some such)
-
-  // make `selected` first
-
-  const selected: StairsOpt = {
-    label: module.structuredDna.stairsType,
-    value: {
-      stairsType: module.structuredDna.stairsType,
-      buildingDna: columnLayoutToDNA(columnLayout),
-    },
+  const selected: StairsOpt["value"] = {
+    stairsType: module.structuredDna.stairsType,
+    buildingDna: columnLayoutToDNA(columnLayout),
   }
 
   const roofIndex = columnLayout[columnIndex].gridGroups.length - 1
   const groundIndex = 1
 
-  const targetGridUnits = columnLayout[columnIndex].gridGroups
+  const targetGridUnits = columnLayout[columnIndex].gridGroups[
+    levelIndex
+  ].modules
     .slice(0, groupIndex)
-    .reduce(
-      (acc, { modules }) =>
-        acc +
-        modules.reduce((bcc, w) => bcc + w.module.structuredDna.gridUnits, 0),
-      0
-    )
+    .reduce((acc, v) => acc + v.module.structuredDna.gridUnits, 0)
 
   const levelModulesMap = pipe(
     range(groundIndex, roofIndex),
-    mapA((i) =>
+    mapA((levelIdx) =>
       pipe(
-        columnLayout[columnIndex].gridGroups[i].modules,
-        reduceRA(
-          { gridUnits: 0, module: null },
+        columnLayout[columnIndex].gridGroups[levelIdx].modules,
+        reduceWithIndexRA(
+          { groupIndex: 0, gridUnits: 0, module: null },
           (
-            acc: { gridUnits: number; module: LoadedModule | null },
+            i,
+            acc: {
+              groupIndex: number
+              gridUnits: number
+              module: LoadedModule | null
+            },
             { module }
           ) => {
             const nextGridUnits = acc.gridUnits + module.structuredDna.gridUnits
+            const nextModule =
+              acc.module === null && acc.gridUnits === targetGridUnits
+                ? module
+                : acc.module
             return {
               gridUnits: nextGridUnits,
-              module: acc.gridUnits === targetGridUnits ? module : acc.module,
+              module: nextModule,
+              groupIndex: nextModule === null ? i : acc.groupIndex,
             }
           }
         ),
-        ({ module }) => {
+        ({ module, groupIndex: groupIdx }) => {
           if (module === null)
             throw new Error(
               "Appropriate stairs module not found where expected"
             )
-          return [i, module] as [number, LoadedModule]
+          return [levelIdx, { module, groupIdx }] as [
+            number,
+            { module: LoadedModule; groupIdx: number }
+          ]
         }
       )
     ),
-    fromFoldable(NumEq, first<LoadedModule>(), Foldable)
+    fromFoldable(
+      NumEq,
+      first<{ module: LoadedModule; groupIdx: number }>(),
+      Foldable
+    )
   )
 
   // ensure stairs type consistency across level
   pipe(
     levelModulesMap,
-    reduceM(NumOrd)(module.structuredDna.stairsType, (acc, v) => {
-      if (v.structuredDna.stairsType !== acc)
+    reduceM(NumOrd)(module.structuredDna.stairsType, (acc, { module }) => {
+      if (module.structuredDna.stairsType !== acc)
         throw new Error("Inconsistent stairs type at different level")
       return acc
     })
   )
 
-  // rewrite from here
+  const getStairTypeOptions = <M extends T>(module: M) => {
+    const constraints = keysFilter<BareModule>(
+      ["sectionType", "positionType", "levelType", "gridType"],
+      module
+    )
 
-  // maybe find the stairs types that the selected has available
-  // (separate function)
+    const compatMods = pipe(systemModules, filterA(constraints))
 
-  // then create a record or map of those stairs types to
-  // levelModulesMaps
-  // filter where those maps have no module candidates
+    return pipe(compatMods, (xs) =>
+      isNonEmpty(xs)
+        ? pipe(
+            xs,
+            groupBy((module) => module.structuredDna.stairsType),
+            mapR((modules) =>
+              topCandidateByHamming(
+                [
+                  "internalLayoutType",
+                  "windowTypeSide1",
+                  "windowTypeSide2",
+                  "windowTypeEnd",
+                  "windowTypeTop",
+                ],
+                module,
+                modules as BareModule[]
+              )
+            ),
+            mapR((m) => ({
+              module: m,
+              gridUnitDiff:
+                m.structuredDna.gridUnits - module.structuredDna.gridUnits,
+            }))
+          )
+        : {}
+    )
+  }
 
-  // levelModulesMap : Map<number,Module>
-  // some kinda filter map to like
-  // stairsType
-  const options = pipe(
-    levelModulesMap,
-    reduceM(NumOrd)({}, (acc, v) => {
-      return acc
-    })
+  const selectedStairTypeOptions = getStairTypeOptions(module)
+
+  const foo = pipe(
+    selectedStairTypeOptions,
+    mapWithIndexR((stairsType, stairsTypeOption) =>
+      pipe(
+        columnLayout,
+        produce((draft: ColumnLayout) => {
+          levelModulesMap.forEach(({ groupIdx, module }, levelIdx) => {
+            if (levelIdx === levelIndex) {
+              draft[columnIndex].gridGroups[levelIndex].modules[
+                groupIndex
+              ].module = stairsTypeOption.module as LoadedModule
+              // if stairsTypeOption.gridUnitDiff is negative
+              // stick some vanilla here
+            } else {
+              const gridUnitDiff =
+                module.structuredDna.gridUnits -
+                stairsTypeOption.module.structuredDna.gridUnits
+              // if stairsTypeOption.gridUnitDiff is positive
+              // subtract local gridUnitDiff from it
+              // if this diff is now negative
+              draft[columnIndex].gridGroups[levelIndex].modules[
+                groupIdx
+              ].module = module
+            }
+          })
+          // next DNA here
+          // [] if nothing
+          // filter [] at end
+        })
+      )
+    )
   )
-
-  // const constraints = keysFilter<BareModule>(
-  //   ["sectionType", "positionType", "levelType", "gridType", "gridUnits"],
-  //   module
-  // )
-
-  // const compatMods = pipe(systemModules, filterA(constraints))
-
-  // const stairsTypeOptions = pipe(compatMods, (xs) =>
-  //   isNonEmpty(xs)
-  //     ? pipe(
-  //         xs,
-  //         groupBy((module) => module.structuredDna.stairsType)
-  //       )
-  //     : {}
-  // )
 
   return undefined as any
 }

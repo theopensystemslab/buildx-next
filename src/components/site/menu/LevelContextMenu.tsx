@@ -48,7 +48,7 @@ const LevelContextMenu = (props: Props) => {
     props.onClose?.()
   }
 
-  const stairsOpts = useStairsOptions(module, columnLayout, {
+  const foo = useStairsOptions(module, columnLayout, {
     columnIndex,
     levelIndex,
     groupIndex,

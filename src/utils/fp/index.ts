@@ -69,6 +69,7 @@ export {
   map as mapM,
   reduce as reduceM,
   mapWithIndex as mapWithIndexM,
+  reduceWithIndex as reduceWithIndexM,
 } from "fp-ts/lib/Map"
 
 const clamp_ = clamp(NumOrd)

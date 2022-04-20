@@ -341,3 +341,17 @@ export const columnLayoutToDNA = (
     flatten,
     flatten
   ) as string[]
+
+export const updatePositionedRowAt = (
+  positionedRow: PositionedRow,
+  groupIndex: number,
+  newModules: LoadedModule[]
+): PositionedRow => {
+  return produce(positionedRow, (draft) => {
+    draft.modules = [
+      ...draft.modules.slice(0, groupIndex),
+      ...newModules.map((x) => ({ module: x, z: 0 })),
+      ...draft.modules.slice(groupIndex + 1),
+    ]
+  })
+}

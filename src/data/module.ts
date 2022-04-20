@@ -132,7 +132,7 @@ export const keysHammingTotal =
   <M extends StructuredDnaModule>(a: M, b: M) =>
     pipe(keysHamming(ks)(a, b), values, sum)
 
-export const candidatesByHamming = <M extends StructuredDnaModule>(
+export const topCandidateByHamming = <M extends StructuredDnaModule>(
   ks: Array<keyof StructuredDna>,
   targetModule: M,
   candidateModules: M[]
