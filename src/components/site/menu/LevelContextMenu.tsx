@@ -59,11 +59,8 @@ const LevelContextMenu = (props: Props) => {
   )
 
   const changeStairs = ({ buildingDna }: StairsOpt["value"]) => {
-    console.log({ buildingDna })
-    // houses[buildingId].dna = buildingDna
-    // prep stair changes to record of keys to dna values
-    // so integrate the thing into the opts, more natural
-    // also could then preview on hover!
+    houses[buildingId].dna = buildingDna
+    props.onClose?.()
   }
 
   const canChangeStairs = true
