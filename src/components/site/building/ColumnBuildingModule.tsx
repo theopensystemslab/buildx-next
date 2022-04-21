@@ -46,7 +46,6 @@ const ColumnBuildingModule = (props: Props) => {
 
   const groupRef = useRef<Group>()
 
-  const { elements } = useSystemsData()
   const moduleGeometries = useModuleGeometries(module.dna, module.gltf)
 
   const children = pipe(

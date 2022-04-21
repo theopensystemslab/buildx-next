@@ -3,13 +3,12 @@ import React from "react"
 
 interface Props<T> {
   selected: T
-  options: Readonly<
-    Array<{
-      label: string | ReactElement
-      value: T
-      thumbnail?: string
-    }>
-  >
+  options: Array<{
+    label: string | ReactElement
+    value: T
+    thumbnail?: string
+  }>
+
   onChange: (newSelected: T) => void
   onHoverChange?: (newHovered: T | null) => void
   id?: string
