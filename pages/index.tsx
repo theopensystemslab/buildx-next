@@ -1,1 +1,1 @@
-export { default } from "./site/[[...site]]"
+export { default } from "./site/[[...slug]]"
