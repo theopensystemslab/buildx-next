@@ -1,24 +1,11 @@
 import { BareModule } from "@/data/module"
 import houses from "@/stores/houses"
-import {
-  flattenA,
-  mapA,
-  mapO,
-  mapRA,
-  pipeLog,
-  reduceA,
-  transposeA,
-} from "@/utils"
-import { lookup, replicate } from "fp-ts/lib/Array"
+import { flattenA, mapA, transposeA } from "@/utils"
+import { lookup } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import produce from "immer"
-import {
-  rowMatrixToDna,
-  useColumnLayout,
-  useColumnMatrix,
-  useRowMatrix,
-} from "./layouts"
-import { useGetVanillaModule } from "./modules"
+import { toNullable } from "fp-ts/lib/Option"
+import { rowMatrixToDna, useColumnMatrix } from "./layouts"
+import { useGetBareVanillaModule } from "./modules"
 
 export const useLevelInteractions = (
   buildingId: string,
@@ -27,67 +14,57 @@ export const useLevelInteractions = (
 ) => {
   const columnMatrix = useColumnMatrix<BareModule>(buildingId)
 
-  const getVanillaModule = useGetVanillaModule()
+  const getVanillaModule = useGetBareVanillaModule()
 
-  const thisLevel = pipe(
-    columnMatrix,
-    transposeA,
-    lookup(levelIndex),
-    mapO((levelGroups) => ({
-      levelGroups,
-      levelType: levelGroups[0][0].structuredDna.levelType,
-    }))
-    // pipeLog,
-    // mapO((groups) =>
-    //   pipe(
-    //     groups,
-    //     mapA((group) =>
-    //       pipe(
-    //         group,
-    //         reduceA([], (acc: BareModule[], m) => {
-    //           return [
-    //             ...acc,
-    //             ...replicate(m.structuredDna.gridUnits, getVanillaModule(m)),
-    //           ]
-    //         })
-    //       )
-    //     )
-    //   )
-    // ),
-  )
+  const getLevel = (i: number) =>
+    pipe(columnMatrix, transposeA, lookup(i), toNullable)
 
-  // level type is like...
+  const thisLevel = getLevel(levelIndex)
+  const nextLevel = getLevel(levelIndex + 1)
 
-  // source level must be G, M or T
+  if (thisLevel === null) throw new Error("thisLevel null")
 
-  // add floor above must always be on G or M
+  const thisLevelLetter = thisLevel[0][0].structuredDna.levelType[0]
+  const nextLevelLetter = nextLevel?.[0][0].structuredDna.levelType[0]
 
-  // if G add M's
+  const targetLevelLetter = nextLevelLetter === "R" ? "T" : "M"
 
-  // if M keep adding M's
+  const canAddFloorAbove =
+    nextLevel !== null && ["R", "M", "T"].includes(targetLevelLetter)
+
+  const canRemoveFloor = ["M", "T"].includes(thisLevelLetter)
 
   const addFloorAbove = () => {
-    // houses[buildingId].dna = pipe(
-    //   rowMatrix,
-    //   pipeLog,
-    //   produce((draft) => {
-    //     console.log(vanillaLevel)
-    //     return [
-    //       ...draft.slice(0, levelIndex + 1),
-    //       vanillaLevel,
-    //       ...draft.slice(levelIndex + 1),
-    //     ]
-    //   }),
-    //   pipeLog,
-    //   rowMatrixToDna,
-    //   pipeLog
-    // )
-    // onComplete?.()
-  }
-  const removeFloor = () => {}
+    if (!canAddFloorAbove) return
 
-  const canAddFloorAbove = true
-  const canRemoveFloor = true
+    houses[buildingId].dna = pipe(
+      columnMatrix,
+      transposeA,
+      (rows) => [
+        ...rows.slice(0, levelIndex + 1),
+        pipe(
+          rows[levelIndex],
+          mapA(mapA((m) => getVanillaModule(m, targetLevelLetter)))
+        ),
+        ...rows.slice(levelIndex + 1),
+      ],
+      mapA(flattenA),
+      rowMatrixToDna
+    )
+    onComplete?.()
+  }
+  const removeFloor = () => {
+    if (!canRemoveFloor) return
+
+    houses[buildingId].dna = pipe(
+      columnMatrix,
+      transposeA,
+      (rows) => [...rows.slice(0, levelIndex), ...rows.slice(levelIndex + 1)],
+      mapA(flattenA),
+      rowMatrixToDna
+    )
+    onComplete?.()
+  }
 
   return {
     addFloorAbove,

@@ -4,7 +4,6 @@ import {
   ColumnModuleKey,
   filterCompatibleModules,
   keysFilter,
-  LoadedModule,
   Module,
   StructuredDnaModule,
   topCandidateByHamming,
@@ -12,6 +11,7 @@ import {
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
 import {
+  all,
   filterA,
   filterMapA,
   filterRA,
@@ -37,11 +37,52 @@ import {
   columnMatrixToDna,
 } from "./layouts"
 
-const { abs, sign } = Math
+export const getLevelNumber = (levelLetter: string) =>
+  ["F", "G", "M", "T", "R"].findIndex((x) => x === levelLetter)
 
-export const useGetVanillaModule = <T extends BareModule>() => {
+export const useGetBareVanillaModule = <T extends BareModule>() => {
   const { modules: allModules } = useSystemsData()
-  return (module: T): LoadedModule => {
+
+  return (module: T, levelLetter?: string) => {
+    const systemModules = pipe(
+      allModules,
+      filterRA((module) => module.systemId === module.systemId)
+    )
+
+    const vanillaModule = pipe(
+      systemModules,
+      filterRA((sysModule) =>
+        all(
+          sysModule.structuredDna.sectionType ===
+            module.structuredDna.sectionType,
+          sysModule.structuredDna.positionType ===
+            module.structuredDna.positionType,
+          levelLetter
+            ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
+            : sysModule.structuredDna.levelType ===
+                module.structuredDna.levelType
+        )
+      ),
+      sort(
+        pipe(
+          StrOrd,
+          contramap((m: Module) => m.dna)
+        )
+      ),
+      head,
+      toNullable
+    )
+
+    if (!vanillaModule)
+      throw new Error(`No vanilla module found for ${module.dna}`)
+
+    return vanillaModule
+  }
+}
+
+export const useGetLoadedVanillaModule = <T extends BareModule>() => {
+  const { modules: allModules } = useSystemsData()
+  return (module: T) => {
     const systemModules = pipe(
       allModules,
       filterRA((module) => module.systemId === module.systemId)
@@ -142,7 +183,7 @@ export const useStairsOptions = <T extends BareModule>(
 ): { options: StairsOpt[]; selected: StairsOpt["value"] } => {
   const { stairTypes, modules: systemModules } = useSystemsData()
 
-  const getVanillaModule = useGetVanillaModule()
+  const getVanillaModule = useGetBareVanillaModule()
 
   const selected: StairsOpt["value"] = {
     stairType: module.structuredDna.stairsType,

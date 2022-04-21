@@ -1,10 +1,6 @@
 import type { System } from "@/data/system"
-import {
-  ColumnLayout,
-  columnLayoutToDNA,
-  PositionedModule,
-} from "@/hooks/layouts"
-import { useGetVanillaModule } from "@/hooks/modules"
+import { ColumnLayout, columnLayoutToDNA } from "@/hooks/layouts"
+import { useGetBareVanillaModule } from "@/hooks/modules"
 import { abs, filterA, GltfT, hamming, mapA, mapO } from "@/utils"
 import { sum } from "fp-ts-std/Array"
 import { values } from "fp-ts-std/Record"
@@ -15,7 +11,6 @@ import {
   replicate,
   sort,
   sortBy,
-  takeLeft,
 } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { range } from "fp-ts/lib/NonEmptyArray"
@@ -192,7 +187,7 @@ export const useChangeModuleLayout = <T extends BareModule>(
   columnLayout: ColumnLayout,
   { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
 ) => {
-  const getVanillaModule = useGetVanillaModule()
+  const getVanillaModule = useGetBareVanillaModule()
 
   const oldModule =
     columnLayout[columnIndex].gridGroups[levelIndex].modules[groupIndex].module
