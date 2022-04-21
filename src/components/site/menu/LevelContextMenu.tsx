@@ -83,6 +83,7 @@ const LevelContextMenu = (props: Props) => {
             options={stairsOpts}
             selected={selectedStairsOpt}
             onChange={changeStairs}
+            compare={(a, b) => a.stairType === b.stairType}
           />
         </ContextMenuNested>
       )}
