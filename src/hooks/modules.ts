@@ -17,8 +17,6 @@ import {
   filterRA,
   mapA,
   mapO,
-  mapWithIndexM,
-  pipeLog,
   reduceA,
   reduceWithIndexRA,
   StrOrd,
@@ -28,13 +26,7 @@ import { loadModule } from "@/utils/modules"
 import { findFirst, replicate } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { range } from "fp-ts/lib/NonEmptyArray"
-import {
-  fromNullable,
-  getOrElse,
-  none,
-  some,
-  toNullable,
-} from "fp-ts/lib/Option"
+import { fromNullable, getOrElse, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
@@ -63,7 +55,8 @@ export const useGetVanillaModule = <T extends BareModule>() => {
             module.structuredDna.sectionType &&
           sysModule.structuredDna.levelType ===
             module.structuredDna.levelType &&
-          sysModule.structuredDna.positionType === "MID"
+          sysModule.structuredDna.positionType ===
+            module.structuredDna.positionType
       ),
       sort(
         pipe(
