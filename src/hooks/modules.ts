@@ -4,7 +4,6 @@ import {
   ColumnModuleKey,
   filterCompatibleModules,
   keysFilter,
-  LoadedModule,
   Module,
   StructuredDnaModule,
   topCandidateByHamming,
@@ -12,13 +11,12 @@ import {
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
 import {
+  all,
   filterA,
   filterMapA,
   filterRA,
   mapA,
   mapO,
-  mapWithIndexM,
-  pipeLog,
   reduceA,
   reduceWithIndexRA,
   StrOrd,
@@ -28,13 +26,7 @@ import { loadModule } from "@/utils/modules"
 import { findFirst, replicate } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { range } from "fp-ts/lib/NonEmptyArray"
-import {
-  fromNullable,
-  getOrElse,
-  none,
-  some,
-  toNullable,
-} from "fp-ts/lib/Option"
+import { fromNullable, getOrElse, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
@@ -45,11 +37,52 @@ import {
   columnMatrixToDna,
 } from "./layouts"
 
-const { abs, sign } = Math
+export const getLevelNumber = (levelLetter: string) =>
+  ["F", "G", "M", "T", "R"].findIndex((x) => x === levelLetter)
 
-export const useGetVanillaModule = <T extends BareModule>() => {
+export const useGetBareVanillaModule = <T extends BareModule>() => {
   const { modules: allModules } = useSystemsData()
-  return (module: T): LoadedModule => {
+
+  return (module: T, levelLetter?: string) => {
+    const systemModules = pipe(
+      allModules,
+      filterRA((module) => module.systemId === module.systemId)
+    )
+
+    const vanillaModule = pipe(
+      systemModules,
+      filterRA((sysModule) =>
+        all(
+          sysModule.structuredDna.sectionType ===
+            module.structuredDna.sectionType,
+          sysModule.structuredDna.positionType ===
+            module.structuredDna.positionType,
+          levelLetter
+            ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
+            : sysModule.structuredDna.levelType ===
+                module.structuredDna.levelType
+        )
+      ),
+      sort(
+        pipe(
+          StrOrd,
+          contramap((m: Module) => m.dna)
+        )
+      ),
+      head,
+      toNullable
+    )
+
+    if (!vanillaModule)
+      throw new Error(`No vanilla module found for ${module.dna}`)
+
+    return vanillaModule
+  }
+}
+
+export const useGetLoadedVanillaModule = <T extends BareModule>() => {
+  const { modules: allModules } = useSystemsData()
+  return (module: T) => {
     const systemModules = pipe(
       allModules,
       filterRA((module) => module.systemId === module.systemId)
@@ -63,7 +96,8 @@ export const useGetVanillaModule = <T extends BareModule>() => {
             module.structuredDna.sectionType &&
           sysModule.structuredDna.levelType ===
             module.structuredDna.levelType &&
-          sysModule.structuredDna.positionType === "MID"
+          sysModule.structuredDna.positionType ===
+            module.structuredDna.positionType
       ),
       sort(
         pipe(
@@ -149,7 +183,7 @@ export const useStairsOptions = <T extends BareModule>(
 ): { options: StairsOpt[]; selected: StairsOpt["value"] } => {
   const { stairTypes, modules: systemModules } = useSystemsData()
 
-  const getVanillaModule = useGetVanillaModule()
+  const getVanillaModule = useGetBareVanillaModule()
 
   const selected: StairsOpt["value"] = {
     stairType: module.structuredDna.stairsType,
@@ -327,73 +361,6 @@ export const useStairsOptions = <T extends BareModule>(
 
       return acc
     }),
-    // mapWithIndexM((stairType, levelChanges) => {
-    //   return pipe(
-    //     produce(columnMatrix, (draft) => {
-    //       let ultimateDiff = 0
-    //       let ultimateLevel = -1
-    //       levelChanges.forEach(
-    //         ({ levelIdx, groupIdx, newModule, gridUnitDiff }) => {
-    //           let goAhead = abs(gridUnitDiff) > abs(ultimateDiff)
-    //           ultimateDiff = goAhead ? gridUnitDiff : ultimateDiff
-    //           ultimateLevel = goAhead ? levelIdx : ultimateLevel
-    //           draft[columnIndex][levelIdx][groupIdx] = newModule
-    //         }
-    //       )
-    //       switch (sign(ultimateDiff)) {
-    //         case 1:
-    //           // todo: for let of all the levels
-    //           for (
-    //             let i = 0;
-    //             i < draft[columnIndex].length && i !== ultimateLevel;
-    //             i++
-    //           ) {
-    //             draft[columnIndex][i] = [
-    //               ...draft[columnIndex][i],
-    //               ...replicate(
-    //                 ultimateDiff,
-    //                 getVanillaModule(draft[columnIndex][i][0])
-    //               ),
-    //             ]
-    //           }
-    //           break
-    //         case -1:
-    //           // todo: for let of all the levels
-    //           for (
-    //             let i = 0;
-    //             i < draft[columnIndex].length && i !== ultimateLevel;
-    //             i++
-    //           ) {
-    //             let done = 0
-    //             const vanillaModule = getVanillaModule(draft[columnIndex][i][0])
-
-    //             for (let j = draft[columnIndex][i].length - 1; j >= 0; j--) {
-    //               done += draft[columnIndex][i][j].structuredDna.gridUnits
-    //               draft[columnIndex][i] = draft[columnIndex][i].filter(
-    //                 (_, j) => j !== i
-    //               )
-    //               if (done >= abs(ultimateDiff)) break
-    //             }
-
-    //             if (done > abs(ultimateDiff)) {
-    //               draft[columnIndex][i] = [
-    //                 ...draft[columnIndex][i],
-    //                 ...replicate(done - abs(ultimateDiff), vanillaModule),
-    //               ]
-    //             }
-    //           }
-    //           break
-    //       }
-    //     }),
-    //     columnMatrixToDna,
-    //     (dna) => ({
-    //       label:
-    //         stairTypes.find((x) => x.code === stairType)?.description ??
-    //         stairType,
-    //       value: { buildingDna: dna, stairType },
-    //     })
-    //   )
-    // }),
     (map) => Array.from(map.values())
   )
 

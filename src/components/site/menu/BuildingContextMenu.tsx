@@ -1,5 +1,6 @@
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
+import { useLevelInteractions } from "@/hooks/levels"
 import context from "@/stores/context"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import React from "react"
@@ -30,9 +31,22 @@ const BuildingContextMenu = (props: Props) => {
     props.onClose?.()
   }
 
+  const { addFloorAbove, removeFloor, canAddFloorAbove, canRemoveFloor } =
+    useLevelInteractions(buildingId, levelIndex, props.onClose)
+
   return (
     <ContextMenu {...restProps}>
       <ContextMenuButton onClick={editLevel}>{`Edit level`}</ContextMenuButton>
+      {canAddFloorAbove && (
+        <ContextMenuButton
+          onClick={addFloorAbove}
+        >{`Add floor above`}</ContextMenuButton>
+      )}
+      {canRemoveFloor && (
+        <ContextMenuButton
+          onClick={removeFloor}
+        >{`Remove floor`}</ContextMenuButton>
+      )}
       <ChangeMaterials buildingId={buildingId} elementName={elementName} />
     </ContextMenu>
   )

@@ -376,3 +376,45 @@ export const columnMatrixToDna = <T extends BareModule = BareModule>(
     flattenA,
     flattenA
   )
+
+export const useColumnMatrix = <
+  T extends StructuredDnaModule = StructuredDnaModule
+>(
+  buildingId: string
+) => {
+  const columnLayout = useColumnLayout(buildingId)
+  return columnLayoutToMatrix<T>(columnLayout)
+}
+
+export const rowLayoutToMatrix = <
+  T extends StructuredDnaModule = StructuredDnaModule
+>(
+  rowLayout: RowLayout
+): T[][] =>
+  pipe(
+    rowLayout,
+    mapA(({ modules }) =>
+      pipe(
+        modules,
+        mapRA(({ module }) => module)
+      )
+    )
+  ) as unknown as T[][]
+
+export const useRowMatrix = <
+  T extends StructuredDnaModule = StructuredDnaModule
+>(
+  buildingId: string
+): T[][] => {
+  const rowLayout = useRowLayout(buildingId)
+  return rowLayoutToMatrix<T>(rowLayout)
+}
+
+export const rowMatrixToDna = <T extends BareModule = BareModule>(
+  rowMatrix: T[][]
+): string[] =>
+  pipe(
+    rowMatrix,
+    flattenA,
+    mapA((x) => x.dna)
+  )

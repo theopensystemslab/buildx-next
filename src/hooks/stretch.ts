@@ -15,7 +15,7 @@ import {
   PositionedRow,
   useColumnLayout,
 } from "./layouts"
-import { useGetVanillaModule } from "./modules"
+import { useGetLoadedVanillaModule } from "./modules"
 
 export const stretch = proxy({
   endVanillaColumns: 0,
@@ -38,7 +38,7 @@ const getColumnsLength = flow(
 export const useVanillaPositionedRows = (
   gridGroups: readonly PositionedRow[]
 ) => {
-  const getVanillaModule = useGetVanillaModule()
+  const getVanillaModule = useGetLoadedVanillaModule()
   return pipe(
     gridGroups,
     mapRA(({ levelIndex, levelType, y, modules: modulesIn }: PositionedRow) => {
