@@ -1,25 +1,15 @@
-import { useSystemsData } from "@/contexts/SystemsData"
 import { LoadedModule } from "@/data/module"
 import context from "@/stores/context"
 import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
-import { fuzzyMatch, isMesh, mapM, mapWithIndexM, StrOrd } from "@/utils"
+import { mapWithIndexM, StrOrd } from "@/utils"
 import { GroupProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { toArray } from "fp-ts/lib/Map"
-import { map as mapA, reduce } from "fp-ts/lib/ReadonlyArray"
-import {
-  filter,
-  map,
-  mapWithIndex,
-  toReadonlyArray,
-} from "fp-ts/lib/ReadonlyRecord"
-import produce from "immer"
 import React, { useRef } from "react"
-import { BufferGeometry, Group, Mesh } from "three"
-import { mergeBufferGeometries } from "three-stdlib"
+import { Group } from "three"
 import { subscribe } from "valtio"
 import ColumnBuildingElement from "./ColumnBuildingElement"
 

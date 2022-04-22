@@ -1,4 +1,3 @@
-import { House } from "@/data/house"
 import { PositionedRow } from "@/hooks/layouts"
 import { mapRA, mapWithIndexRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
