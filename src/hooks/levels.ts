@@ -44,7 +44,9 @@ export const useLevelInteractions = (
         ...rows.slice(0, levelIndex + 1),
         pipe(
           rows[levelIndex],
-          mapA(mapA((m) => getVanillaModule(m, targetLevelLetter)))
+          mapA(
+            mapA((m) => getVanillaModule(m, { levelLetter: targetLevelLetter }))
+          )
         ),
         ...rows.slice(levelIndex + 1),
       ],

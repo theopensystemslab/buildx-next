@@ -43,7 +43,12 @@ export const getLevelNumber = (levelLetter: string) =>
 export const useGetBareVanillaModule = <T extends BareModule>() => {
   const { modules: allModules } = useSystemsData()
 
-  return (module: T, levelLetter?: string) => {
+  return (
+    module: T,
+    opts: { positionType?: string; levelLetter?: string } = {}
+  ) => {
+    const { positionType, levelLetter } = opts
+
     const systemModules = pipe(
       allModules,
       filterRA((module) => module.systemId === module.systemId)
@@ -55,8 +60,10 @@ export const useGetBareVanillaModule = <T extends BareModule>() => {
         all(
           sysModule.structuredDna.sectionType ===
             module.structuredDna.sectionType,
-          sysModule.structuredDna.positionType ===
-            module.structuredDna.positionType,
+          positionType
+            ? sysModule.structuredDna.positionType === positionType
+            : sysModule.structuredDna.positionType ===
+                module.structuredDna.positionType,
           levelLetter
             ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
             : sysModule.structuredDna.levelType ===
@@ -82,7 +89,12 @@ export const useGetBareVanillaModule = <T extends BareModule>() => {
 
 export const useGetLoadedVanillaModule = <T extends BareModule>() => {
   const { modules: allModules } = useSystemsData()
-  return (module: T) => {
+  return (
+    module: T,
+    opts: { positionType?: string; levelLetter?: string } = {}
+  ) => {
+    const { positionType, levelLetter } = opts
+
     const systemModules = pipe(
       allModules,
       filterRA((module) => module.systemId === module.systemId)
@@ -90,14 +102,19 @@ export const useGetLoadedVanillaModule = <T extends BareModule>() => {
 
     const vanillaModule = pipe(
       systemModules,
-      filterRA(
-        (sysModule) =>
+      filterRA((sysModule) =>
+        all(
           sysModule.structuredDna.sectionType ===
-            module.structuredDna.sectionType &&
-          sysModule.structuredDna.levelType ===
-            module.structuredDna.levelType &&
-          sysModule.structuredDna.positionType ===
-            module.structuredDna.positionType
+            module.structuredDna.sectionType,
+          positionType
+            ? sysModule.structuredDna.positionType === positionType
+            : sysModule.structuredDna.positionType ===
+                module.structuredDna.positionType,
+          levelLetter
+            ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
+            : sysModule.structuredDna.levelType ===
+                module.structuredDna.levelType
+        )
       ),
       sort(
         pipe(
