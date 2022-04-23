@@ -1,6 +1,6 @@
 import { useSystemsData } from "@/data/system"
 import { useHouses } from "@/stores/houses"
-import React, { type FC } from "react"
+import React, { useState, type FC } from "react"
 import Link from "next/link"
 import { nativeEnum } from "zod"
 
@@ -53,13 +53,22 @@ const Dashboard: FC<Props> = (props) => {
   const houses = useHouses()
   const systemsData = useSystemsData()
   const activeTab = fromSlug(props.slug)
+
+  const [selectedBuildings, setSelectedBuildings] = useState<string[]>(
+    Object.keys(houses).slice(0, 1)
+  )
+
   return (
     <div className="w-full h-full bg-gray-100">
       <div className="max-w-5xl pt-20 mx-auto space-y-8">
         <div className="flex py-4 border-b border-gray-700 space-x-4">
-          {Object.entries(houses).map(([houseId, house]) => (
-            <p className="px-2 py-1 bg-white">{house.friendlyName}</p>
-          ))}
+          {selectedBuildings.map((houseId) => {
+            const house = houses[houseId]
+            if (!house) {
+              return null
+            }
+            return <p key={houseId} className="px-2 py-1 bg-white">{house.friendlyName}</p>
+          })}
         </div>
         <div className="flex items-center justify-start space-x-8">
           {tabs.map((tab) => {
