@@ -1,5 +1,6 @@
 import { useSystemsData } from "@/data/system"
 import { useHouses } from "@/stores/houses"
+import { Close } from "@/components/ui/icons"
 import React, { useState, type FC } from "react"
 import Link from "next/link"
 import { nativeEnum } from "zod"
@@ -42,12 +43,81 @@ const SingleDataPoint: FC<{
   unitOfMeasurement: string
   explanation: string
 }> = (props) => (
-  <div>
-    <p>{props.label}</p>
-    <p>{`${props.value}${props.unitOfMeasurement}`}</p>
-    <p>{props.explanation}</p>
+  <div className="space-y-4">
+    <p className="text-sm">{props.label}</p>
+    <div>
+      <p className="text-4xl text-gray-400">{`${props.value}${props.unitOfMeasurement}`}</p>
+      <p className="text-sm text-gray-400">{props.explanation}</p>
+    </div>
   </div>
 )
+
+const BasicChart: FC<{
+  label: string
+  data: number[]
+  explanation: string
+}> = (props) => (
+  <div className="space-y-4">
+    <p className="text-sm">{props.label}</p>
+    <div>
+      <svg viewBox="0 0 60 100">
+        <line
+          x1="0"
+          y1="99.5"
+          x2="60"
+          y2="99.5"
+          stroke="#000"
+          strokeWidth="1"
+        />
+      </svg>
+      <p className="text-sm text-gray-400">{props.explanation}</p>
+    </div>
+  </div>
+)
+
+const Overview = () => {
+  return (
+    <div className="space-y-16">
+      <div className="grid grid-cols-4 space-x-4">
+        <SingleDataPoint
+          label="Total site area"
+          value={350}
+          unitOfMeasurement="m²"
+          explanation="gross internal area"
+        />
+        <SingleDataPoint
+          label="Total building area"
+          value={350}
+          unitOfMeasurement="m²"
+          explanation="gross internal area"
+        />
+        <SingleDataPoint
+          label="Number of units"
+          value={350}
+          unitOfMeasurement="m²"
+          explanation="gross internal area"
+        />
+      </div>
+      <div className="grid grid-cols-4 space-x-4">
+        <BasicChart
+          label="Total site area"
+          data={[]}
+          explanation="gross internal area"
+        />
+        <BasicChart
+          label="Total building area"
+          data={[]}
+          explanation="gross internal area"
+        />
+        <BasicChart
+          label="Number of units"
+          data={[]}
+          explanation="gross internal area"
+        />
+      </div>
+    </div>
+  )
+}
 
 const Dashboard: FC<Props> = (props) => {
   const houses = useHouses()
@@ -59,15 +129,61 @@ const Dashboard: FC<Props> = (props) => {
   )
 
   return (
-    <div className="w-full h-full bg-gray-100">
+    <div className="w-full h-full overflow-auto bg-gray-100">
       <div className="max-w-5xl pt-20 mx-auto space-y-8">
-        <div className="flex py-4 border-b border-gray-700 space-x-4">
+        <div className="flex py-4 border-b border-gray-700 space-x-2">
+          <input
+            list="buildings"
+            className="w-40 px-2 py-1 list-none"
+            value=""
+            placeholder="Add house"
+            onChange={(ev) => {
+              const foundHouse = Object.entries(houses).find(
+                ([_houseId, house]) => house.friendlyName === ev.target.value
+              )
+              const houseId = foundHouse?.[0]
+              if (!houseId) {
+                return null
+              }
+              setSelectedBuildings((prev) => [...prev, houseId])
+            }}
+          />
+          <datalist id="buildings">
+            {Object.entries(houses).map(([houseId, house]) =>
+              selectedBuildings.includes(houseId) ? null : (
+                <option
+                  key={houseId}
+                  value={house.friendlyName}
+                  data-houseId={houseId}
+                />
+              )
+            )}
+          </datalist>
           {selectedBuildings.map((houseId) => {
             const house = houses[houseId]
             if (!house) {
               return null
             }
-            return <p key={houseId} className="px-2 py-1 bg-white">{house.friendlyName}</p>
+            return (
+              <p
+                key={houseId}
+                className="inline-flex items-center bg-white space-x-1"
+              >
+                <span className="inline-block py-1 pl-3">
+                  {house.friendlyName}
+                </span>
+                <button
+                  className="h-8 w-8 p-0.5 hover:bg-gray-50"
+                  onClick={() => {
+                    setSelectedBuildings((prev) =>
+                      prev.filter((id) => id !== houseId)
+                    )
+                  }}
+                >
+                  <Close />
+                </button>
+              </p>
+            )
           })}
         </div>
         <div className="flex items-center justify-start space-x-8">
@@ -86,6 +202,9 @@ const Dashboard: FC<Props> = (props) => {
               </Link>
             )
           })}
+        </div>
+        <div className="pt-8">
+          {activeTab === Tab.Overview ? <Overview /> : null}
         </div>
       </div>
     </div>
