@@ -3,9 +3,12 @@ import Layout from "@/components/layouts"
 import { Loader } from "@/components/ui"
 import Container from "@/components/ui/Container"
 import { SystemsDataProvider } from "@/contexts/SystemsData"
+import { useRouter } from "next/router"
 import React from "react"
 
 const DashboardIndexPage = () => {
+  const router = useRouter()
+
   return (
     <Layout>
       <SystemsDataProvider
@@ -20,7 +23,7 @@ const DashboardIndexPage = () => {
           </Container>
         }
       >
-        <Dashboard />
+        <Dashboard slug={router.query.slug?.[0]} />
       </SystemsDataProvider>
     </Layout>
   )
