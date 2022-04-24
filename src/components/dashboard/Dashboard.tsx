@@ -1,7 +1,7 @@
 import { useSystemsData } from "@/data/system"
 import { useHouses } from "@/stores/houses"
 import { Close } from "@/components/ui/icons"
-import React, { useState, type FC } from "react"
+import React, { useMemo, useState, type FC } from "react"
 import Link from "next/link"
 import { nativeEnum } from "zod"
 
@@ -56,24 +56,62 @@ const BasicChart: FC<{
   label: string
   data: number[]
   explanation: string
-}> = (props) => (
-  <div className="space-y-4">
-    <p className="text-sm">{props.label}</p>
-    <div>
-      <svg viewBox="0 0 60 100">
-        <line
-          x1="0"
-          y1="99.5"
-          x2="60"
-          y2="99.5"
-          stroke="#000"
-          strokeWidth="1"
-        />
-      </svg>
-      <p className="text-sm text-gray-400">{props.explanation}</p>
+}> = (props) => {
+  const max = useMemo(() => Math.max(...props.data), [props.data])
+  const min = useMemo(() => Math.min(...props.data), [props.data])
+
+  const w = 60
+  const h = 100
+
+  const baseline = min < 0 ? h / 2 : h
+
+  const scale = (min < 0 ? h / 2 : h) * 0.85
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm">{props.label}</p>
+      <div className="space-y-2">
+        <svg width="200" viewBox={`0 0 ${w} ${h}`}>
+          {props.data.map((point, index) => {
+            const width = (w / (props.data.length + 1)) * 0.6
+            const height = (point * scale) / max
+            const x = (w * (index + 1)) / (props.data.length + 1) - width / 2
+            return (
+              <>
+                <rect
+                  x={x}
+                  y={baseline - Math.max(height, 0)}
+                  width={width}
+                  height={Math.abs(height)}
+                  stroke="none"
+                  fill={index === 0 ? "#3EFF80" : "#9D9D9D"}
+                />
+                <text
+                  x={x + width / 2}
+                  y={baseline - height - (height < 0 ? -6 : 3)}
+                  fill="#9D9D9D"
+                  textAnchor="middle"
+                  style={{ fontSize: 4 }}
+                >
+                  {point}
+                </text>
+              </>
+            )
+          })}
+          <line
+            x1="0"
+            y1={baseline - 0.25}
+            x2={w}
+            y2={baseline - 0.25}
+            stroke="#000"
+            strokeWidth="0.5"
+          />
+        </svg>
+        <p className="text-sm text-gray-400">{props.explanation}</p>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 const Overview = () => {
   return (
@@ -93,25 +131,25 @@ const Overview = () => {
         />
         <SingleDataPoint
           label="Number of units"
-          value={350}
-          unitOfMeasurement="m²"
-          explanation="gross internal area"
+          value={2}
+          unitOfMeasurement=""
+          explanation="new buildings"
         />
       </div>
       <div className="grid grid-cols-4 space-x-4">
         <BasicChart
           label="Total site area"
-          data={[]}
+          data={[10, 20]}
           explanation="gross internal area"
         />
         <BasicChart
           label="Total building area"
-          data={[]}
+          data={[-2, 8]}
           explanation="gross internal area"
         />
         <BasicChart
           label="Number of units"
-          data={[]}
+          data={[4, 1]}
           explanation="gross internal area"
         />
       </div>
@@ -130,7 +168,7 @@ const Dashboard: FC<Props> = (props) => {
 
   return (
     <div className="w-full h-full overflow-auto bg-gray-100">
-      <div className="max-w-5xl pt-20 mx-auto space-y-8">
+      <div className="max-w-5xl pt-20 pb-16 mx-auto space-y-8">
         <div className="flex py-4 border-b border-gray-700 space-x-2">
           <input
             list="buildings"
