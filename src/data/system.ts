@@ -25,6 +25,11 @@ export const systems: Array<System> = [
     name: "Sample",
     airtableId: "app7ApkBWMj8Z8gdV",
   },
+  {
+    id: "3cea-amvic",
+    name: "3CEA-AMVIC",
+    airtableId: "appsOHJyDxhPrHyxc",
+  },
   // {
   //   id: "mobble",
   //   name: "Mobble",
