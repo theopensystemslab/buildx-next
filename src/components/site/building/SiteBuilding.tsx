@@ -1,18 +1,17 @@
+import RotateHandles from "@/components/ui-3d/RotateHandles"
 import { PositionedColumn, useColumnLayout } from "@/hooks/layouts"
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
-import siteContext, {
+import {
+  EditModeEnum,
   SiteContextModeEnum,
   useSiteContext,
   useSiteContextMode,
 } from "@/stores/context"
 import { outlineGroup } from "@/stores/highlights"
-import { useUpdatePosition } from "@/stores/houses"
 import scope from "@/stores/scope"
 import { mapRA } from "@/utils"
-import { ThreeEvent } from "@react-three/fiber"
-import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { useEffect, useRef } from "react"
+import { Fragment, useEffect, useRef } from "react"
 import { Group } from "three"
 import { subscribe } from "valtio"
 import BuildingBuilding from "./BuildingBuilding"
@@ -25,8 +24,8 @@ type Props = {
 const SiteBuildingMain = (props: Props) => {
   const { id } = props
   const groupRef = useRef<Group>()
-
   const contextMode = useSiteContextMode()
+  const { editMode } = useSiteContext()
 
   useEffect(() => {
     if (contextMode !== SiteContextModeEnum.Enum.SITE) return
@@ -55,7 +54,23 @@ const SiteBuildingMain = (props: Props) => {
     />
   )
 
-  return <group ref={groupRef}>{pipe(columns, mapRA(renderColumn))}</group>
+  const buildingLength = columns.reduce((acc, v) => acc + v.length, 0)
+  const buildingWidth = columns[0].gridGroups[0].modules[0].module.width
+
+  return (
+    <Fragment>
+      <group ref={groupRef}>
+        {pipe(columns, mapRA(renderColumn))}
+        {editMode === EditModeEnum.Enum.MOVE_ROTATE && (
+          <RotateHandles
+            buildingId={id}
+            buildingLength={buildingLength}
+            buildingWidth={buildingWidth}
+          />
+        )}
+      </group>
+    </Fragment>
+  )
 }
 
 const SiteBuilding = ({ id }: Props) => {

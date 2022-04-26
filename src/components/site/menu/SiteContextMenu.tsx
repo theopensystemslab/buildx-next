@@ -1,22 +1,15 @@
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import { useSystemsData } from "@/contexts/SystemsData"
-import siteContext, {
-  EditModeEnum,
-  useSiteContext,
-  useSiteContextMode,
-} from "@/stores/context"
+import siteContext, { EditModeEnum, useSiteContext } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import scope from "@/stores/scope"
 import React, { Fragment, useState } from "react"
-import { useSnapshot } from "valtio"
 import BuildingContextMenu from "./BuildingContextMenu"
 import LevelContextMenu from "./LevelContextMenu"
 import RenameHouseForm from "./RenameHouseForm"
 
 const SiteContextMenu_ = (props: ContextMenuProps) => {
-  const contextMode = useSiteContextMode()
-
   if (scope.selected === null) throw new Error("scope.selected null")
 
   const { buildingId } = scope.selected
@@ -51,6 +44,11 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
     props?.onClose?.()
   }
 
+  const moveRotate = () => {
+    siteContext.editMode = EditModeEnum.Enum.MOVE_ROTATE
+    props.onClose?.()
+  }
+
   return (
     <ContextMenu {...props}>
       {!renaming && (
@@ -77,6 +75,36 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
           />
         )}
       </Fragment>
+      <ContextMenuButton onClick={moveRotate}>
+        {`Move/rotate building`}
+      </ContextMenuButton>
+
+      <Fragment>
+        <ContextMenuButton onClick={rename}>
+          {`Rename building`}
+        </ContextMenuButton>
+        {renaming && (
+          <RenameHouseForm
+            {...props}
+            currentName={firstHouse.friendlyName}
+            onNewName={(newName) => {
+              houses[firstHouse.id].friendlyName = newName
+              setRenaming(false)
+            }}
+          />
+        )}
+      </Fragment>
+
+      {!renaming && (
+        <Fragment>
+          <ContextMenuButton onClick={resetBuilding}>
+            {`Reset building`}
+          </ContextMenuButton>
+          <ContextMenuButton onClick={deleteBuilding}>
+            {`Delete building`}
+          </ContextMenuButton>
+        </Fragment>
+      )}
     </ContextMenu>
   )
 }

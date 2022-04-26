@@ -46,8 +46,8 @@ export const useRouting = () => {
       case !("buildingId" in params):
         if (siteContext.buildingId !== null) siteContext.buildingId = null
         if (siteContext.levelIndex !== null) siteContext.levelIndex = null
-        if (siteContext.editMode !== EditModeEnum.Enum.MOVE)
-          siteContext.editMode = EditModeEnum.Enum.MOVE
+        if (siteContext.editMode === EditModeEnum.Enum.MOVE_ROTATE)
+          siteContext.editMode = null
     }
 
     scope.selected = null
