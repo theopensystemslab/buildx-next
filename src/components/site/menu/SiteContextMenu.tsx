@@ -24,6 +24,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
     if (houseType) {
       houses[buildingId].dna = houseType.dna as string[]
       houses[buildingId].modifiedMaterials = {}
+      houses[buildingId].rotation = 0
     }
     props.onClose?.()
   }
