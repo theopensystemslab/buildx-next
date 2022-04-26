@@ -52,12 +52,14 @@ const SiteBuildingMain = (props: Props) => {
 
   useEffect(onPositionUpdate, [onPositionUpdate])
 
-  useEffect(() =>
-    subscribeKey(houses[id], "rotation", () => {
+  useEffect(() => {
+    const go = () => {
       if (!groupRef.current) return
       groupRef.current?.rotation.set(0, houses[id].rotation, 0)
-    })
-  )
+    }
+    go()
+    return subscribeKey(houses[id], "rotation", go)
+  }, [])
 
   const bind = useGesture<{
     drag: ThreeEvent<PointerEvent>

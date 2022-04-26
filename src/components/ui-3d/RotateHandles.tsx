@@ -16,6 +16,7 @@ type Props = {
 const RotateHandles = (props: Props) => {
   const { buildingId, buildingWidth, buildingLength } = props
   const uvAtDragStart = useRef<[number, number]>([0, 0])
+  const initialRotation = useRef<number>(0)
 
   const bind = useGesture({
     onHover: (data) => {
@@ -30,13 +31,15 @@ const RotateHandles = (props: Props) => {
       if (first) {
         setCameraEnabled(false)
         uvAtDragStart.current = pointer.xz
+        initialRotation.current = houses[buildingId].rotation
       }
       const [x0, y0] = uvAtDragStart.current
+      const [hx, hy] = houses[buildingId].position
       const [x, y] = pointer.xz
-      const angle0 = Math.atan2(y0, x0)
-      const angle = Math.atan2(y, x) - angle0
-      console.log(angle)
-      houses[buildingId].rotation += angle
+      const angle0 = Math.atan2(y0 - hy, x0 - hx)
+      const angle = Math.atan2(y - hy, x - hx)
+
+      houses[buildingId].rotation = initialRotation.current - (angle - angle0)
       if (last) {
         setCameraEnabled(true)
       }
