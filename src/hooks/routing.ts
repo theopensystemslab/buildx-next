@@ -45,8 +45,7 @@ export const useRouting = () => {
       case !("buildingId" in params):
         if (context.buildingId !== null) context.buildingId = null
         if (context.levelIndex !== null) context.levelIndex = null
-        if (context.editMode !== EditModeEnum.Enum.MOVE)
-          context.editMode = EditModeEnum.Enum.MOVE
+        if (context.editMode !== null) context.editMode = null
     }
 
     initScopes()

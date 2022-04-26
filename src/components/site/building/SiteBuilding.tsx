@@ -1,15 +1,21 @@
+import RotateHandles from "@/components/ui-3d/RotateHandles"
 import { PositionedColumn, useColumnLayout } from "@/hooks/layouts"
-import context, { useContext } from "@/stores/context"
+import { setCameraEnabled } from "@/stores/camera"
+import context, { EditModeEnum, useContext } from "@/stores/context"
+import debug from "@/stores/debug"
 import { outlineGroup } from "@/stores/highlights"
-import { useHoverHouse, useUpdatePosition } from "@/stores/houses"
+import houses, { useHoverHouse } from "@/stores/houses"
+import pointer from "@/stores/pointer"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
-import { mapRA } from "@/utils"
-import { ThreeEvent } from "@react-three/fiber"
+import { mapRA, snapToGrid } from "@/utils"
+import { invalidate, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { useEffect, useRef } from "react"
+import { Fragment, useCallback, useEffect, useRef } from "react"
 import { Group } from "three"
 import { subscribe } from "valtio"
+import { subscribeKey } from "valtio/utils"
+import PlanesDebug from "../../debug/PlanesDebug"
 import BuildingBuilding from "./BuildingBuilding"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
@@ -21,6 +27,8 @@ const SiteBuildingMain = (props: Props) => {
   const { id } = props
   const groupRef = useRef<Group>()
 
+  const { editMode } = useContext()
+
   useEffect(() => {
     scopes.secondary = {
       type: ScopeTypeEnum.Enum.ZERO,
@@ -31,14 +39,54 @@ const SiteBuildingMain = (props: Props) => {
 
   const hoverHouse = useHoverHouse(id)
 
-  const onDrag = useUpdatePosition(id, groupRef)
+  const onPositionUpdate = useCallback(() => {
+    if (!groupRef.current) return
+    const [x, z] = houses[id].position
+    groupRef.current.position.set(x, 0, z)
+  }, [id])
+
+  useEffect(
+    () => subscribe(houses[id].position, onPositionUpdate),
+    [id, onPositionUpdate]
+  )
+
+  useEffect(onPositionUpdate, [onPositionUpdate])
+
+  useEffect(() =>
+    subscribeKey(houses[id], "rotation", () => {
+      if (!groupRef.current) return
+      groupRef.current?.rotation.set(0, houses[id].rotation, 0)
+    })
+  )
 
   const bind = useGesture<{
     drag: ThreeEvent<PointerEvent>
     hover: ThreeEvent<PointerEvent>
     onPointerDown: ThreeEvent<PointerEvent>
   }>({
-    onDrag,
+    onDrag: ({ first, last }) => {
+      if (
+        scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE ||
+        context.editMode !== EditModeEnum.Enum.MOVE_ROTATE
+      )
+        return
+      if (first) {
+        setCameraEnabled(false)
+      }
+
+      const [px, pz] = pointer.xz
+      const [x, z] = houses[id].position
+      const [dx, dz] = [px - x, pz - z].map(snapToGrid)
+
+      for (let k of scopes.primary.selected) {
+        houses[k].position[0] += dx
+        houses[k].position[1] += dz
+      }
+
+      invalidate()
+
+      if (last) setCameraEnabled(true)
+    },
     onPointerOver: () => {
       if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
       hoverHouse()
@@ -94,10 +142,22 @@ const SiteBuildingMain = (props: Props) => {
     />
   )
 
+  const buildingLength = columns.reduce((acc, v) => acc + v.length, 0)
+  const buildingWidth = columns[0].gridGroups[0].modules[0].module.width
+
   return (
-    <group ref={groupRef} {...(bind() as any)}>
-      {pipe(columns, mapRA(renderColumn))}
-    </group>
+    <Fragment>
+      <group ref={groupRef} {...(bind() as any)}>
+        {pipe(columns, mapRA(renderColumn))}
+        {editMode === EditModeEnum.Enum.MOVE_ROTATE && (
+          <RotateHandles
+            buildingId={id}
+            buildingLength={buildingLength}
+            buildingWidth={buildingWidth}
+          />
+        )}
+      </group>
+    </Fragment>
   )
 }
 

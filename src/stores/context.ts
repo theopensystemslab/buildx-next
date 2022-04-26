@@ -1,7 +1,7 @@
 import { proxy, useSnapshot } from "valtio"
 import * as z from "zod"
 
-export const EditModeEnum = z.enum(["MOVE", "ROTATE", "STRETCH"])
+export const EditModeEnum = z.enum(["MOVE_ROTATE", "STRETCH"])
 export type EditMode = z.infer<typeof EditModeEnum>
 
 type ContextProxy = {

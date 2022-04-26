@@ -15,16 +15,17 @@ const PlaneDebug = ({ id }: { id: string }) => {
     height = 10,
     color = "red",
   } = useSnapshot(debug.planes[id])
-  useEffect(
-    () =>
-      subscribeKey(debug.planes, id, () => {
-        if (!ref.current) return
-        const { position, rotation } = debug.planes[id]
-        ref.current.position.set(...position)
-        ref.current.rotation.set(...rotation)
-      }),
-    []
-  )
+
+  const go = () => {
+    if (!ref.current) return
+    const { position, rotation } = debug.planes[id]
+    ref.current.position.set(...position)
+    ref.current.rotation.set(...rotation)
+  }
+  useEffect(() => {
+    go()
+    return subscribeKey(debug.planes, id, go)
+  }, [])
 
   return (
     <Plane ref={ref} args={[width, height]}>

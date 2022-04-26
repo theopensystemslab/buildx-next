@@ -11,14 +11,17 @@ import SiteMetrics from "./SiteMetrics"
 const HtmlUi = () => {
   const [sidebar, setSidebar] = useState(false)
   const { orthographic } = useSettings()
-  const { buildingId, levelIndex } = useContext()
+  const { buildingId, levelIndex, editMode } = useContext()
 
-  const check = buildingId !== null || levelIndex !== null
+  const check = buildingId !== null || levelIndex !== null || editMode !== null
+
   const onCheck = () => {
     if (levelIndex !== null) {
       context.levelIndex = null
     } else if (buildingId !== null) {
       context.buildingId = null
+    } else if (editMode !== null) {
+      context.editMode = null
     }
   }
 

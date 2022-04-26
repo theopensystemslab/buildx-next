@@ -49,32 +49,39 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   const editBuilding = () => {
     context.buildingId = firstHouse.id
     context.editMode = EditModeEnum.Enum.STRETCH
-    props?.onClose?.()
+    props.onClose?.()
   }
+
+  const moveRotate = () => {
+    context.editMode = EditModeEnum.Enum.MOVE_ROTATE
+    props.onClose?.()
+  }
+
+  const buildingString = manySelected ? `buildings` : `building`
 
   return (
     <ContextMenu {...props}>
       <ContextMenuHeading>
         {manySelected ? `Several buildings` : firstHouse.friendlyName}
       </ContextMenuHeading>
+
       {!renaming && (
         <Fragment>
-          <ContextMenuButton onClick={resetBuildings}>Reset</ContextMenuButton>
-          <ContextMenuButton onClick={deleteBuildings}>
-            Delete
-          </ContextMenuButton>
           {oneSelected ? (
             <ContextMenuButton onClick={editBuilding}>
-              {`Edit building`}
+              Edit building
             </ContextMenuButton>
           ) : null}
+          <ContextMenuButton onClick={moveRotate}>
+            {`Move/rotate ${buildingString}`}
+          </ContextMenuButton>
         </Fragment>
       )}
 
       {oneSelected ? (
         <Fragment>
           <ContextMenuButton onClick={rename}>
-            {`Rename building`}
+            {`Rename ${buildingString}`}
           </ContextMenuButton>
           {renaming && (
             <RenameHouseForm
@@ -88,6 +95,17 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
           )}
         </Fragment>
       ) : null}
+
+      {!renaming && (
+        <Fragment>
+          <ContextMenuButton onClick={resetBuildings}>
+            {`Reset ${buildingString}`}
+          </ContextMenuButton>
+          <ContextMenuButton onClick={deleteBuildings}>
+            {`Delete ${buildingString}`}
+          </ContextMenuButton>
+        </Fragment>
+      )}
     </ContextMenu>
   )
 }

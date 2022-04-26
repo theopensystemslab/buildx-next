@@ -62,45 +62,6 @@ export const useHouseType = (houseId: string) => {
   return houseType
 }
 
-export const useUpdatePosition = (
-  houseId: string,
-  groupRef: MutableRefObject<Group | undefined>
-): Handler<"drag", ThreeEvent<PointerEvent>> => {
-  const invalidate = useThree((three) => three.invalidate)
-
-  const onPositionUpdate = useCallback(() => {
-    if (!groupRef.current) return
-    const [x, z] = houses[houseId].position
-    groupRef.current.position.set(x, 0, z)
-  }, [houseId])
-
-  useEffect(
-    () => subscribe(houses[houseId].position, onPositionUpdate),
-    [houseId, onPositionUpdate]
-  )
-  useEffect(onPositionUpdate, [onPositionUpdate])
-
-  return ({ first, last }) => {
-    if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
-    if (first) {
-      setCameraEnabled(false)
-    }
-
-    const [px, pz] = pointer.xz
-    const [x, z] = houses[houseId].position
-    const [dx, dz] = [px - x, pz - z].map(snapToGrid)
-
-    for (let k of scopes.primary.selected) {
-      houses[k].position[0] += dx
-      houses[k].position[1] += dz
-    }
-
-    invalidate()
-
-    if (last) setCameraEnabled(true)
-  }
-}
-
 export const useFocusedBuilding = () => {
   const houses = useHouses()
   const { buildingId } = useContext()
