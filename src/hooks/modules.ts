@@ -10,6 +10,7 @@ import {
   useChangeModuleLayout,
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
+import context from "@/stores/context"
 import {
   all,
   filterA,
@@ -36,6 +37,7 @@ import {
   columnLayoutToMatrix,
   columnMatrixToDna,
 } from "./layouts"
+import { useSide } from "./side"
 
 export const getLevelNumber = (levelLetter: string) =>
   ["F", "G", "M", "T", "R"].findIndex((x) => x === levelLetter)
@@ -382,4 +384,47 @@ export const useStairsOptions = <T extends BareModule>(
   )
 
   return { options, selected }
+}
+
+export type WindowOpt = {
+  label: string
+  value: { stairType: string; buildingDna: string[] }
+}
+
+export const useWindowOptions = <T extends BareModule>(
+  module: T,
+  columnLayout: ColumnLayout,
+  { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
+): { options: WindowOpt[]; selected: WindowOpt["value"] } => {
+  const side = useSide(context.buildingId!)
+  const systemModules = useSystemModules(module.systemId)
+  const { windowTypes } = useSystemsData()
+
+  // if module === END...
+  //   windowType.code === windowTypeEnd
+  // else if side === "LEFT"
+  //   windowType.code === windowTypeSide1
+  // else if side === "RIGHT"
+  //   windowType.code === windowTypeSide2
+
+  const modules = pipe(
+    systemModules as unknown as T[],
+    filterA(
+      keysFilter(
+        [
+          "sectionType",
+          "positionType",
+          "levelType",
+          "stairsType",
+          "internalLayoutType",
+          "gridType",
+          "gridUnits",
+        ],
+        module
+      )
+    ),
+    filterA(m => module.structuredDna.positionType === "END" ? )
+  )
+
+  return undefined as any
 }
