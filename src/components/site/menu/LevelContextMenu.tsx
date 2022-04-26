@@ -7,6 +7,7 @@ import {
   useLayoutOptions,
   useStairsOptions,
   useWindowOptions,
+  WindowOpt,
 } from "@/hooks/modules"
 import houses from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
@@ -84,7 +85,10 @@ const LevelContextMenu = (props: Props) => {
 
   const canChangeWindow = windowOpts.length > 1
 
-  const changeWindow = () => {}
+  const changeWindow = ({ buildingDna }: WindowOpt["value"]) => {
+    houses[buildingId].dna = buildingDna
+    props.onClose?.()
+  }
 
   return (
     <ContextMenu {...props}>

@@ -10,6 +10,7 @@ import {
   useChangeModuleLayout,
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
+import { WindowType } from "@/data/windowType"
 import context from "@/stores/context"
 import {
   all,
@@ -20,14 +21,22 @@ import {
   mapO,
   reduceA,
   reduceWithIndexRA,
+  StrEq,
   StrOrd,
   upperFirst,
 } from "@/utils"
 import { loadModule } from "@/utils/modules"
-import { findFirst, replicate } from "fp-ts/lib/Array"
+import { findFirst, findFirstMap, getEq, replicate } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { range } from "fp-ts/lib/NonEmptyArray"
-import { fromNullable, getOrElse, toNullable } from "fp-ts/lib/Option"
+import {
+  fromNullable,
+  getOrElse,
+  none,
+  Option,
+  some,
+  toNullable,
+} from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
@@ -388,7 +397,7 @@ export const useStairsOptions = <T extends BareModule>(
 
 export type WindowOpt = {
   label: string
-  value: { stairType: string; buildingDna: string[] }
+  value: { windowType: string; buildingDna: string[] }
 }
 
 export const useWindowOptions = <T extends BareModule>(
@@ -400,14 +409,13 @@ export const useWindowOptions = <T extends BareModule>(
   const systemModules = useSystemModules(module.systemId)
   const { windowTypes } = useSystemsData()
 
-  // if module === END...
-  //   windowType.code === windowTypeEnd
-  // else if side === "LEFT"
-  //   windowType.code === windowTypeSide1
-  // else if side === "RIGHT"
-  //   windowType.code === windowTypeSide2
+  const changeModule = useChangeModuleLayout(columnLayout, {
+    columnIndex,
+    levelIndex,
+    groupIndex,
+  })
 
-  const modules = pipe(
+  const options = pipe(
     systemModules as unknown as T[],
     filterA(
       keysFilter(
@@ -423,8 +431,57 @@ export const useWindowOptions = <T extends BareModule>(
         module
       )
     ),
-    filterA(m => module.structuredDna.positionType === "END" ? )
+    filterMapA((m) =>
+      pipe(
+        windowTypes,
+        findFirstMap((wt): Option<[T, WindowType]> => {
+          switch (true) {
+            case m.structuredDna.positionType === "END":
+              return wt.code === m.structuredDna.windowTypeEnd
+                ? some([m, wt])
+                : none
+            case side === "LEFT":
+              return wt.code === m.structuredDna.windowTypeSide1 &&
+                module.structuredDna.windowTypeSide2 ===
+                  m.structuredDna.windowTypeSide2
+                ? some([m, wt])
+                : none
+
+            case side === "RIGHT":
+              return wt.code === m.structuredDna.windowTypeSide2 &&
+                module.structuredDna.windowTypeSide1 ===
+                  m.structuredDna.windowTypeSide1
+                ? some([m, wt])
+                : none
+            default:
+              return none
+          }
+        })
+      )
+    ),
+    mapA(
+      ([m, wt]): WindowOpt => ({
+        label: wt.description,
+        value: { buildingDna: changeModule(m), windowType: wt.code },
+      })
+    )
   )
 
-  return undefined as any
+  const eq = getEq(StrEq)
+
+  const selected = pipe(
+    options,
+    findFirstMap(({ value }) => {
+      const buildingDna = columnLayoutToDNA(columnLayout)
+      return eq.equals(value.buildingDna, buildingDna) ? some(value) : none
+    }),
+    getOrElse(() => {
+      throw new Error("Selected window option not found in options")
+      return undefined as any
+    })
+  )
+
+  console.log({ options, selected })
+
+  return { options, selected }
 }
