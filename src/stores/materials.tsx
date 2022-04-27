@@ -93,16 +93,11 @@ export const useMaterialName = (buildingId: string, elementName: string) => {
 
 export const useMaterial = (
   materialKey: MaterialKey,
-  clippingPlaneHeight: number
+  clippingPlanes: Plane[]
 ) => {
   const { buildingId, columnIndex, levelIndex, elementName } = materialKey
 
   const { materials: sysMaterials } = useSystemsData()
-
-  const clippingPlane = useMemo(
-    () => new Plane(new Vector3(0, -1, 0), clippingPlaneHeight),
-    [clippingPlaneHeight]
-  )
 
   const materialName = useMaterialName(buildingId, elementName)
 
@@ -143,31 +138,24 @@ export const useMaterial = (
 
       return material.threeMaterial
     }
-  }, [
-    buildingId,
-    columnIndex,
-    levelIndex,
-    elementName,
-    clippingPlane,
-    materialName,
-  ])
+  }, [buildingId, columnIndex, levelIndex, elementName, materialName])
+
+  useEffect(() => {
+    material.clippingPlanes = clippingPlanes
+  }, [clippingPlanes])
 
   useEffect(() => {
     const go = () => {
       switch (true) {
         case context.levelIndex === null:
           if (material.visible === false) material.visible = true
-          if (material.clippingPlanes !== null) material.clippingPlanes = null
           break
         case context.levelIndex === levelIndex:
           if (material.visible === false) material.visible = true
-          if (material.clippingPlanes === null)
-            material.clippingPlanes = [clippingPlane]
           break
         default:
           const above = levelIndex < context.levelIndex!
           if (material.visible === !above) material.visible = above
-          if (material.clippingPlanes !== null) material.clippingPlanes = null
           break
       }
     }

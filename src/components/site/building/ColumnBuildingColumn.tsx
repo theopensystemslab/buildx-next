@@ -1,6 +1,7 @@
 import { PositionedRow } from "@/hooks/layouts"
 import { mapRA, mapWithIndexRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
+import { Plane } from "three"
 import ColumnBuildingModule from "./ColumnBuildingModule"
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
   mirror?: boolean
   gridGroups: readonly PositionedRow[]
   visible?: boolean
+  verticalCutPlanes: Plane[]
 }
 
 const BuildingHouseColumn = (props: Props) => {
@@ -20,6 +22,7 @@ const BuildingHouseColumn = (props: Props) => {
     gridGroups,
     mirror = false,
     visible = true,
+    verticalCutPlanes,
   } = props
   const levels = pipe(
     gridGroups,
@@ -44,6 +47,7 @@ const BuildingHouseColumn = (props: Props) => {
             ]}
             scale={[1, 1, mirror ? 1 : -1]}
             visible={visible}
+            verticalCutPlanes={verticalCutPlanes}
           />
         ))
       )

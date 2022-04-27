@@ -6,7 +6,7 @@ import { all, any, object3dChildOf, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import React, { useEffect, useRef } from "react"
-import { BufferGeometry, Mesh, Object3D } from "three"
+import { BufferGeometry, Mesh, Object3D, Plane } from "three"
 import { ref, subscribe } from "valtio"
 
 type Props = MeshProps & {
@@ -16,7 +16,7 @@ type Props = MeshProps & {
   groupIndex: number
   buildingId: string
   geometry: BufferGeometry
-  clippingPlaneHeight: number
+  clippingPlanes: Plane[]
 }
 
 const ColumnBuildingElement = (props: Props) => {
@@ -27,7 +27,7 @@ const ColumnBuildingElement = (props: Props) => {
     levelIndex,
     groupIndex,
     buildingId,
-    clippingPlaneHeight,
+    clippingPlanes,
   } = props
 
   const meshRef = useRef<Mesh>()
@@ -36,7 +36,7 @@ const ColumnBuildingElement = (props: Props) => {
 
   const material = useMaterial(
     { buildingId, columnIndex, elementName, materialName, levelIndex },
-    clippingPlaneHeight
+    clippingPlanes
   )
 
   useEffect(() =>
