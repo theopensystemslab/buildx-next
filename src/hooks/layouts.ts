@@ -187,6 +187,8 @@ export const useColumnLayout = (buildingId: string) => {
             module
           ) => ({
             acc:
+              module.structuredDna.positionType ===
+                prev?.structuredDna.positionType &&
               module.structuredDna.gridType === prev?.structuredDna.gridType
                 ? produce(acc, (draft) => {
                     draft[draft.length - 1].push(module)
