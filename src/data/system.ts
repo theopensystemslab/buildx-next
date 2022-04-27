@@ -55,7 +55,7 @@ export interface SystemsData {
   settings: Array<SystemSettings>
 }
 
-const CACHE_SYSTEMS_DATA = false
+const CACHE_SYSTEMS_DATA = true
 
 const addCached = (SystemsData: SystemsData): SystemsData => {
   return {
