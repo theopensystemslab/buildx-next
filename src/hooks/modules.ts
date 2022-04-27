@@ -97,7 +97,7 @@ export const useGetLoadedVanillaModule = <T extends BareModule>() => {
 
     const systemModules = pipe(
       allModules,
-      filterRA((module) => module.systemId === module.systemId)
+      filterRA((m) => m.systemId === module.systemId)
     )
 
     const vanillaModule = pipe(
