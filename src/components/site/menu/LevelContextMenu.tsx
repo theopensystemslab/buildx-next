@@ -2,7 +2,13 @@ import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
 import { columnLayoutToDNA, useColumnLayout } from "@/hooks/layouts"
-import { StairsOpt, useLayoutOptions, useStairsOptions } from "@/hooks/modules"
+import {
+  StairsOpt,
+  useLayoutOptions,
+  useStairsOptions,
+  useWindowOptions,
+  WindowOpt,
+} from "@/hooks/modules"
 import houses from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
 import { mapA } from "@/utils"
@@ -43,6 +49,8 @@ const LevelContextMenu = (props: Props) => {
     }
   )
 
+  const canChangeLayout = layoutOpts.length > 1
+
   const changeLayout = ({ buildingDna }: typeof layoutOpts[0]["value"]) => {
     houses[buildingId].dna = buildingDna
     props.onClose?.()
@@ -58,13 +66,29 @@ const LevelContextMenu = (props: Props) => {
     }
   )
 
+  const canChangeStairs = stairsOpts.length > 1
+
   const changeStairs = ({ buildingDna }: StairsOpt["value"]) => {
     houses[buildingId].dna = buildingDna
     props.onClose?.()
   }
 
-  const canChangeStairs = true
-  const canChangeLayout = true
+  const { options: windowOpts, selected: selectedWindowOpt } = useWindowOptions(
+    module,
+    columnLayout,
+    {
+      columnIndex,
+      levelIndex,
+      groupIndex,
+    }
+  )
+
+  const canChangeWindow = windowOpts.length > 1
+
+  const changeWindow = ({ buildingDna }: WindowOpt["value"]) => {
+    houses[buildingId].dna = buildingDna
+    props.onClose?.()
+  }
 
   return (
     <ContextMenu {...props}>
@@ -84,6 +108,15 @@ const LevelContextMenu = (props: Props) => {
             selected={selectedStairsOpt}
             onChange={changeStairs}
             compare={(a, b) => a.stairType === b.stairType}
+          />
+        </ContextMenuNested>
+      )}
+      {canChangeWindow && (
+        <ContextMenuNested long label="Change window">
+          <Radio
+            options={windowOpts}
+            selected={selectedWindowOpt}
+            onChange={changeWindow}
           />
         </ContextMenuNested>
       )}
