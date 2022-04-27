@@ -30,11 +30,11 @@ export const systems: Array<System> = [
     name: "3CEA-AMVIC",
     airtableId: "appsOHJyDxhPrHyxc",
   },
-  // {
-  //   id: "mobble",
-  //   name: "Mobble",
-  //   airtableId: "appYkSYalupnJmUA2",
-  // },
+  {
+    id: "mobble",
+    name: "Mobble",
+    airtableId: "app25JFkKVKKEt5io",
+  },
 ]
 
 export interface System {
