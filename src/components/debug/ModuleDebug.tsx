@@ -24,7 +24,10 @@ const ModuleDebug = () => {
         filterMap((strand) =>
           pipe(
             systemModules,
-            findFirst((module) => module.dna === strand)
+            findFirst(
+              (module) =>
+                module.systemId === houseType.systemId && module.dna === strand
+            )
           )
         ),
         (modules) => ({ houseType, modules })
