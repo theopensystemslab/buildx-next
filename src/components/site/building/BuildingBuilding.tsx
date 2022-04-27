@@ -129,6 +129,7 @@ const BuildingBuilding = (props: Props) => {
 
   const {
     position: [buildingX, buildingZ],
+    rotation,
   } = useHouse(id)
 
   const {
@@ -166,7 +167,7 @@ const BuildingBuilding = (props: Props) => {
   const { editMode } = useContext()
 
   return (
-    <group position={[buildingX, 0, buildingZ]}>
+    <group position={[buildingX, 0, buildingZ]} rotation={[0, rotation, 0]}>
       <group ref={startRef}>
         {renderColumn(startColumn)}
 
