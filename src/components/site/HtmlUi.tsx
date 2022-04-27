@@ -6,6 +6,7 @@ import { setOrthographic, useSettings } from "@/stores/settings"
 import React, { Fragment, Suspense, useState } from "react"
 import Breadcrumbs from "../ui/Breadcrumbs"
 import { SiteContextMenu } from "./menu"
+import SiteMetrics from "./SiteMetrics"
 
 const HtmlUi = () => {
   const [sidebar, setSidebar] = useState(false)
@@ -63,6 +64,7 @@ const HtmlUi = () => {
       ) : null}
       <Breadcrumbs />
       <SiteContextMenu />
+      <SiteMetrics />
     </Fragment>
   )
 }
