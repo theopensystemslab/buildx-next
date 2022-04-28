@@ -1,5 +1,5 @@
 import { LoadedModule } from "@/data/module"
-import context from "@/stores/context"
+import context, { useContext } from "@/stores/context"
 import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
@@ -8,8 +8,8 @@ import { GroupProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { toArray } from "fp-ts/lib/Map"
-import React, { useRef } from "react"
-import { Group } from "three"
+import React, { useMemo, useRef } from "react"
+import { Group, Plane, Vector3 } from "three"
 import { subscribe } from "valtio"
 import ColumnBuildingElement from "./ColumnBuildingElement"
 
@@ -20,6 +20,7 @@ type Props = GroupProps & {
   groupIndex: number
   buildingId: string
   levelY: number
+  verticalCutPlanes: Plane[]
 }
 
 const ColumnBuildingModule = (props: Props) => {
@@ -31,12 +32,20 @@ const ColumnBuildingModule = (props: Props) => {
     module,
     levelY,
     visible = true,
+    verticalCutPlanes,
     ...groupProps
   } = props
 
   const groupRef = useRef<Group>()
 
   const moduleGeometries = useModuleGeometries(module.dna, module.gltf)
+
+  const context = useContext()
+
+  const levelCutPlane: Plane = useMemo(
+    () => new Plane(new Vector3(0, -1, 0), levelY + module.height / 2),
+    []
+  )
 
   const children = pipe(
     moduleGeometries,
@@ -50,7 +59,10 @@ const ColumnBuildingModule = (props: Props) => {
           columnIndex,
           levelIndex,
           groupIndex,
-          clippingPlaneHeight: levelY + module.height / 2,
+          clippingPlanes: [
+            verticalCutPlanes,
+            context.levelIndex === levelIndex ? [levelCutPlane] : [],
+          ].flat(),
         }}
       />
     )),

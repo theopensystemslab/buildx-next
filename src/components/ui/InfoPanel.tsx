@@ -1,12 +1,12 @@
-import React from "react";
+import React from "react"
 
 export interface Props {
-  data: Array<{ label: string; value: string }>;
+  data: Array<{ label: string; value: string }>
 }
 
-export default function InfoPanel(props: Props) {
+function InfoPanel(props: Props) {
   return (
-    <div className="absolute z-10 text-gray-500 bottom-8 right-12 space-y-4">
+    <div className="absolute bottom-8 right-12 z-10 space-y-4 text-gray-500">
       {props.data.map((d, index) => (
         <div key={index}>
           <p className="text-sm">{d.label}</p>
@@ -14,5 +14,7 @@ export default function InfoPanel(props: Props) {
         </div>
       ))}
     </div>
-  );
+  )
 }
+
+export default InfoPanel

@@ -1,14 +1,18 @@
 import { PositionedColumn, useColumnLayout } from "@/hooks/layouts"
+import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import context, { useContext } from "@/stores/context"
 import { outlineGroup } from "@/stores/highlights"
-import { useHoverHouse, useUpdatePosition } from "@/stores/houses"
+import houses, { useHoverHouse, useUpdatePosition } from "@/stores/houses"
 import scopes, { ScopeTypeEnum } from "@/stores/scope"
-import { mapRA } from "@/utils"
+import { useVerticalCuts } from "@/stores/settings"
+import { filterMapWithIndexR, mapRA } from "@/utils"
 import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
+import { values } from "fp-ts-std/Record"
 import { pipe } from "fp-ts/lib/function"
-import { useEffect, useRef } from "react"
-import { Group } from "three"
+import { none, some } from "fp-ts/lib/Option"
+import { useEffect, useMemo, useRef } from "react"
+import { Group, Plane, Vector3 } from "three"
 import { subscribe } from "valtio"
 import BuildingBuilding from "./BuildingBuilding"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
@@ -83,6 +87,8 @@ const SiteBuildingMain = (props: Props) => {
 
   const columns = useColumnLayout(id)
 
+  const verticalCutPlanes = useVerticalCutPlanes(columns, id)
+
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
     <BuildingHouseColumn
       key={columnIndex}
@@ -91,6 +97,7 @@ const SiteBuildingMain = (props: Props) => {
       columnZ={z}
       gridGroups={gridGroups}
       mirror={columnIndex === columns.length - 1}
+      verticalCutPlanes={verticalCutPlanes}
     />
   )
 

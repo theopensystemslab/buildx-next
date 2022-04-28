@@ -1,10 +1,23 @@
 import SiteSidebar from "@/components/site/SiteSidebar"
-import { IconButton, IconMenu, Loader, Radio } from "@/components/ui"
-import { Check, Environment, Menu } from "@/components/ui/icons"
+import {
+  Breadcrumbs,
+  Checklist,
+  IconButton,
+  IconMenu,
+  Loader,
+  Radio,
+} from "@/components/ui"
+import { Check, Environment, Menu, SectionCuts } from "@/components/ui/icons"
 import context, { useContext } from "@/stores/context"
-import { setOrthographic, useSettings } from "@/stores/settings"
+import {
+  setOrthographic,
+  useSettings,
+  useVerticalCuts,
+} from "@/stores/settings"
+import { filterR } from "@/utils"
+import { pipe } from "fp-ts/lib/function"
+import { keys } from "fp-ts/lib/Record"
 import React, { Fragment, Suspense, useState } from "react"
-import Breadcrumbs from "../ui/Breadcrumbs"
 import { SiteContextMenu } from "./menu"
 import SiteMetrics from "./SiteMetrics"
 
@@ -21,6 +34,8 @@ const HtmlUi = () => {
       context.buildingId = null
     }
   }
+
+  const [verticalCuts, setVerticalCuts] = useVerticalCuts()
 
   return (
     <Fragment>
@@ -46,6 +61,21 @@ const HtmlUi = () => {
             ]}
             selected={orthographic}
             onChange={setOrthographic}
+          />
+        </IconMenu>
+        <IconMenu icon={SectionCuts}>
+          <Checklist
+            label="Vertical cuts"
+            options={[
+              { value: "width", label: "Width" },
+              { value: "length", label: "Length" },
+            ]}
+            selected={pipe(
+              verticalCuts,
+              filterR((x) => x),
+              keys
+            )}
+            onChange={setVerticalCuts}
           />
         </IconMenu>
       </div>

@@ -1,5 +1,6 @@
 import { PositionedColumn } from "@/hooks/layouts"
 import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
+import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import { EditModeEnum, useContext } from "@/stores/context"
@@ -11,7 +12,7 @@ import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useMemo, useRef } from "react"
-import { Color, DoubleSide, Group } from "three"
+import { Color, DoubleSide, Group, Plane } from "three"
 import { useSnapshot } from "valtio"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
@@ -96,10 +97,11 @@ type MidColumnsProps = {
   buildingId: string
   columnLayout: PositionedColumn[]
   midColumns: readonly PositionedColumn[]
+  verticalCutPlanes: Plane[]
 }
 
 const MidColumns = (props: MidColumnsProps) => {
-  const { buildingId, columnLayout, midColumns } = props
+  const { buildingId, columnLayout, midColumns, verticalCutPlanes } = props
 
   const { visibleStartIndex, visibleEndIndex } = useSnapshot(stretch)
 
@@ -114,6 +116,7 @@ const MidColumns = (props: MidColumnsProps) => {
       visible={
         columnIndex >= visibleStartIndex && columnIndex <= visibleEndIndex
       }
+      verticalCutPlanes={verticalCutPlanes}
     />
   )
 
@@ -143,6 +146,15 @@ const BuildingBuilding = (props: Props) => {
     sendDrop,
   } = useStretch(id)
 
+  const startRef = useRef<Group>(null!)
+  const endRef = useRef<Group>(null!)
+
+  const handleOffset = 1
+
+  const { editMode } = useContext()
+
+  const verticalCutPlanes = useVerticalCutPlanes(columnLayout, id)
+
   const renderColumn = (
     { columnIndex, z, gridGroups }: PositionedColumn,
     visible: boolean = true
@@ -155,15 +167,9 @@ const BuildingBuilding = (props: Props) => {
       gridGroups={gridGroups}
       mirror={columnIndex === columnLayout.length - 1}
       visible={visible}
+      verticalCutPlanes={verticalCutPlanes}
     />
   )
-
-  const startRef = useRef<Group>(null!)
-  const endRef = useRef<Group>(null!)
-
-  const handleOffset = 1
-
-  const { editMode } = useContext()
 
   return (
     <group position={[buildingX, 0, buildingZ]}>
@@ -212,6 +218,7 @@ const BuildingBuilding = (props: Props) => {
         columnLayout={columnLayout}
         buildingId={id}
         midColumns={midColumns}
+        verticalCutPlanes={verticalCutPlanes}
       />
       <StretchedColumns
         {...{ endColumn, startColumn, vanillaPositionedRows }}

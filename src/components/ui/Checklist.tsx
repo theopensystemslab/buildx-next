@@ -29,7 +29,7 @@ function ChecklistButton(props: ChecklistButtonProps) {
   )
 }
 
-export default function Checklist<T>(props: Props<T>) {
+function Checklist<T>(props: Props<T>) {
   return (
     <div>
       {props.label && (
@@ -74,3 +74,5 @@ export default function Checklist<T>(props: Props<T>) {
     </div>
   )
 }
+
+export default Checklist

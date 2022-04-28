@@ -60,6 +60,7 @@ export {
   filter as filterR,
   map as mapR,
   mapWithIndex as mapWithIndexR,
+  filterMapWithIndex as filterMapWithIndexR,
   reduce as reduceR,
 } from "fp-ts/lib/Record"
 export { map as mapT } from "fp-ts/lib/Task"
