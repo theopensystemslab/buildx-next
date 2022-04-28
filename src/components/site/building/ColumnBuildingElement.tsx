@@ -89,7 +89,7 @@ const ColumnBuildingElement = (props: Props) => {
 
       switch (scopes.secondary.type) {
         case ScopeTypeEnum.Enum.LEVEL:
-          if (scopes.secondary.hovered?.levelIndex === levelIndex) {
+          if (scopes.secondary.hovered?.levelIndex !== levelIndex) {
             scopes.secondary.hovered = { levelIndex }
             setIlluminatedLevel(buildingId, levelIndex)
           }
@@ -98,7 +98,28 @@ const ColumnBuildingElement = (props: Props) => {
 
       switch (scopes.primary.type) {
         case ScopeTypeEnum.Enum.ELEMENT:
-          scopes.primary.hovered = { elementName }
+          if (scopes.primary.hovered?.elementName !== elementName) {
+            scopes.primary.hovered = { elementName }
+          }
+          break
+
+        case ScopeTypeEnum.Enum.MODULE:
+          if (
+            scopes.primary.hovered?.columnIndex !== columnIndex ||
+            scopes.primary.hovered?.levelIndex !== levelIndex ||
+            scopes.primary.hovered?.groupIndex !== groupIndex
+          ) {
+            scopes.primary.hovered = {
+              columnIndex,
+              groupIndex,
+              levelIndex,
+            }
+          }
+          break
+        case ScopeTypeEnum.Enum.HOUSE:
+          if (scopes.primary.hovered !== buildingId) {
+            scopes.primary.hovered = buildingId
+          }
           break
       }
       invalidate()
@@ -124,6 +145,7 @@ const ColumnBuildingElement = (props: Props) => {
         elementName,
       })
       context.menu = [pageX, pageY]
+      invalidate()
     },
   })
 
