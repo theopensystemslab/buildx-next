@@ -110,7 +110,9 @@ export const useMaterial = (
       const threeMaterial = pipe(
         sysMaterials,
         findFirstMap((sysM) =>
-          sysM.name === materialName && sysM.threeMaterial
+          sysM.systemId === houses[buildingId].systemId &&
+          sysM.name === materialName &&
+          sysM.threeMaterial
             ? some(sysM.threeMaterial)
             : none
         ),
