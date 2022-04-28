@@ -1,12 +1,9 @@
 import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
 import context from "@/stores/context"
-import highlights, {
-  clearIlluminatedMaterials,
-  setIlluminatedLevel,
-} from "@/stores/highlights"
+import { clearIlluminatedMaterials } from "@/stores/highlights"
 import { setXZ } from "@/stores/pointer"
-import scopes, { initScopes, ScopeTypeEnum } from "@/stores/scope"
+import scopes from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
 import { useContextBridge } from "@react-three/drei"
 // import { store, useMapBoundary } from "@/store"
@@ -75,6 +72,7 @@ const SiteThreeInit = (props: Props) => {
           scopes.secondary.selected = []
         }}
         onNearHover={() => {
+          if (context.menu !== null) return
           scopes.primary.hovered = null
           scopes.secondary.hovered = null
           clearIlluminatedMaterials()

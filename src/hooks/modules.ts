@@ -78,7 +78,8 @@ export const useGetBareVanillaModule = <T extends BareModule>() => {
           levelLetter
             ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
             : sysModule.structuredDna.levelType ===
-                module.structuredDna.levelType
+                module.structuredDna.levelType,
+          sysModule.structuredDna.gridType === module.structuredDna.gridType
         )
       ),
       sort(
@@ -124,7 +125,8 @@ export const useGetLoadedVanillaModule = <T extends BareModule>() => {
           levelLetter
             ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
             : sysModule.structuredDna.levelType ===
-                module.structuredDna.levelType
+                module.structuredDna.levelType,
+          sysModule.structuredDna.gridType === module.structuredDna.gridType
         )
       ),
       sort(

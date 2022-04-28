@@ -53,9 +53,7 @@ export const useVanillaPositionedRows = (
           ) => {
             const isFirst: boolean = i === 0
 
-            const vanillaModuleOut = getVanillaModule(moduleIn, {
-              positionType: "MID",
-            })
+            const vanillaModuleOut = getVanillaModule(moduleIn)
 
             if (!vanillaModuleOut) throw new Error("No vanilla module")
 

@@ -1,20 +1,7 @@
 import type { System } from "@/data/system"
-import {
-  ColumnLayout,
-  columnLayoutToDNA,
-  columnLayoutToMatrix,
-} from "@/hooks/layouts"
+import { ColumnLayout, columnLayoutToDNA } from "@/hooks/layouts"
 import { useGetBareVanillaModule } from "@/hooks/modules"
-import {
-  abs,
-  filterA,
-  GltfT,
-  hamming,
-  mapA,
-  mapO,
-  pipeLog,
-  pipeLogWith,
-} from "@/utils"
+import { abs, filterA, GltfT, hamming, mapA, mapO } from "@/utils"
 import { sum } from "fp-ts-std/Array"
 import { values } from "fp-ts-std/Record"
 import {
