@@ -103,9 +103,13 @@ export const useGetLoadedVanillaModule = <T extends BareModule>() => {
   const { modules: allModules } = useSystemsData()
   return (
     module: T,
-    opts: { positionType?: string; levelLetter?: string } = {}
+    opts: {
+      positionType?: string
+      levelLetter?: string
+      constrainGridType?: boolean
+    } = {}
   ) => {
-    const { positionType, levelLetter } = opts
+    const { positionType, levelLetter, constrainGridType = true } = opts
 
     const systemModules = pipe(
       allModules,
@@ -126,7 +130,8 @@ export const useGetLoadedVanillaModule = <T extends BareModule>() => {
             ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
             : sysModule.structuredDna.levelType ===
                 module.structuredDna.levelType,
-          sysModule.structuredDna.gridType === module.structuredDna.gridType
+          !constrainGridType ||
+            sysModule.structuredDna.gridType === module.structuredDna.gridType
         )
       ),
       sort(
