@@ -1,7 +1,6 @@
 import React, { useMemo, type FC } from "react"
 
 const BasicChart: FC<{
-  label: string
   data: number[]
   explanation: string
 }> = (props) => {
@@ -21,8 +20,6 @@ const BasicChart: FC<{
   const scale = (min < 0 ? h / 2 : h) * 0.85
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm">{props.label}</p>
       <div className="space-y-2">
         <svg width="200" viewBox={`0 0 ${w} ${h}`}>
           {props.data.map((point, index) => {
@@ -62,7 +59,6 @@ const BasicChart: FC<{
         </svg>
         <p className="text-sm text-gray-400">{props.explanation}</p>
       </div>
-    </div>
   )
 }
 
