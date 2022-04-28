@@ -3,6 +3,7 @@ import { type SystemsData } from "@/data/system"
 import { type Houses } from "@/data/house"
 
 export interface DashboardData {
+  byHouse: Record<string, HouseInfo>
   unitsCount: number
   areas: { total: number; roof: number }
 }
@@ -11,10 +12,8 @@ export interface HouseInfo {
   houseModules: Module[]
   buildingArea: number
   roofArea: number
-}
-
-const truncate = (val: number): number => {
-  return Math.floor(val * 10) / 10
+  cost: number
+  embodiedCarbon: number
 }
 
 const calculateHouseInfo = (houseModules: Module[]): HouseInfo => {
@@ -34,6 +33,12 @@ const calculateHouseInfo = (houseModules: Module[]): HouseInfo => {
           : 0)
       )
     }, 0),
+    cost: houseModules.reduce((accumulator, current) => {
+      return accumulator + current.cost
+    }, 0),
+    embodiedCarbon: houseModules.reduce((accumulator, current) => {
+      return accumulator + current.embodiedCarbon
+    }, 0),
   }
 }
 
@@ -46,7 +51,7 @@ const calculate = ({
   systemsData: SystemsData
   selectedHouses: string[]
 }): DashboardData => {
-  const housesInfo = (() => {
+  const byHouse = (() => {
     const obj: Record<string, HouseInfo> = {}
 
     selectedHouses.forEach((houseId) => {
@@ -67,7 +72,7 @@ const calculate = ({
     return obj
   })()
 
-  const areas = Object.values(housesInfo).reduce(
+  const areas = Object.values(byHouse).reduce(
     ({ total, roof }, houseInfo) => {
       return {
         total: total + houseInfo.buildingArea,
@@ -78,10 +83,8 @@ const calculate = ({
   )
 
   return {
-    areas: {
-      total: truncate(areas.total),
-      roof: truncate(areas.roof),
-    },
+    byHouse,
+    areas,
     unitsCount: selectedHouses.length,
   }
 }

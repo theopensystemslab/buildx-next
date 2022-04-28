@@ -6,7 +6,9 @@ export const DataPoint: FC<{
   explanation: string
 }> = (props) => (
   <div className="text-gray-400 space-y-2">
-    <p className="text-5xl">{`${props.value}${props.unitOfMeasurement}`}</p>
+    <p className="text-5xl">{`${props.value.toLocaleString("en-GB", {
+      maximumFractionDigits: 1,
+    })}${props.unitOfMeasurement}`}</p>
     <p className="text-sm">{props.explanation}</p>
   </div>
 )
@@ -20,7 +22,12 @@ export const ChangeDataPoint: FC<{
       {props.percentage < 0 ? "↓" : "↑"}
     </span>
     <div className="space-y-2">
-      <p className="text-5xl">{`${Math.abs(props.percentage)}%`}</p>
+      <p className="text-5xl">{`${Math.abs(props.percentage).toLocaleString(
+        "en-GB",
+        {
+          maximumFractionDigits: 0,
+        }
+      )}%`}</p>
       <p className="text-sm">{props.explanation}</p>
     </div>
   </div>
