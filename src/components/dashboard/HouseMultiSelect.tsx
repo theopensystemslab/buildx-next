@@ -22,16 +22,16 @@ const HouseMultiSelect: FC<Props> = (props) => {
       .filter((v): v is { houseId: string; houseName: string } => Boolean(v))
 
   return (
-    <div className="flex py-4 border-b border-gray-700 space-x-2">
+    <div className="flex items-center py-4 border-b border-gray-700 space-x-2">
       {houseSelectOptions.length > 0 ? (
         <>
-          <div className="relative">
-            <span className="absolute pointer-events-none top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="relative rounded cursor-auto hover:bg-gray-200">
+            <span className="absolute cursor-auto pointer-events-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
               ▾
             </span>
             <input
               list="buildings"
-              className="w-10 px-2 py-1 text-transparent bg-transparent"
+              className="w-10 !cursor-default bg-transparent px-2 py-1 text-transparent"
               value=""
               onChange={(ev) => {
                 const foundHouse = Object.entries(props.houses).find(
@@ -55,7 +55,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
           </datalist>
         </>
       ) : (
-        <span className="inline-flex w-10 items-center justify-center rounded px-4 py-0.5 text-gray-400">
+        <span className="pointer-events-none inline-flex w-10 items-center justify-center rounded px-4 py-0.5 text-gray-400">
           ▾
         </span>
       )}

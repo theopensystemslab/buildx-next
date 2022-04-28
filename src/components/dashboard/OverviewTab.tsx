@@ -6,7 +6,6 @@ import BasicChart from "./BasicChart"
 const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
   const { dashboardData } = props
   const costs = Object.values(dashboardData.byHouse).map(d => d.cost)
-  console.log(costs)
   return (
     <div className="space-y-16">
       <div className="grid grid-cols-4 space-x-4">
