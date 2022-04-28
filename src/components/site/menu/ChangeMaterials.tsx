@@ -12,9 +12,11 @@ import React from "react"
 const ChangeMaterials = ({
   buildingId,
   elementName,
+  onComplete,
 }: {
   buildingId: string
   elementName: string
+  onComplete?: () => void
 }) => {
   const { elements, materials } = useSystemsData()
 
@@ -59,6 +61,7 @@ const ChangeMaterials = ({
                 ...(house.modifiedMaterials ?? {}),
                 [element.name]: newMaterial,
               }
+              onComplete?.()
             }}
           />
         </ContextMenuNested>

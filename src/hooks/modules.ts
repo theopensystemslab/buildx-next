@@ -481,7 +481,5 @@ export const useWindowOptions = <T extends BareModule>(
     })
   )
 
-  console.log({ options, selected })
-
   return { options, selected }
 }

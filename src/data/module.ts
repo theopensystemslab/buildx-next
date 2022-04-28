@@ -1,7 +1,20 @@
 import type { System } from "@/data/system"
-import { ColumnLayout, columnLayoutToDNA } from "@/hooks/layouts"
+import {
+  ColumnLayout,
+  columnLayoutToDNA,
+  columnLayoutToMatrix,
+} from "@/hooks/layouts"
 import { useGetBareVanillaModule } from "@/hooks/modules"
-import { abs, filterA, GltfT, hamming, mapA, mapO } from "@/utils"
+import {
+  abs,
+  filterA,
+  GltfT,
+  hamming,
+  mapA,
+  mapO,
+  pipeLog,
+  pipeLogWith,
+} from "@/utils"
 import { sum } from "fp-ts-std/Array"
 import { values } from "fp-ts-std/Record"
 import {
@@ -240,7 +253,10 @@ export const useChangeModuleLayout = <T extends BareModule>(
               draft[columnIndex].gridGroups[i].modules = [
                 ...draft[columnIndex].gridGroups[i].modules,
                 ...pipe(
-                  replicate(gridUnitDiff, vanillaModule),
+                  replicate(
+                    gridUnitDiff / vanillaModule.structuredDna.gridUnits,
+                    vanillaModule
+                  ),
                   mapA((module) => ({ module, z: 0 }))
                 ),
               ]
@@ -248,6 +264,7 @@ export const useChangeModuleLayout = <T extends BareModule>(
           }),
           columnLayoutToDNA
         )
+
       case sign(gridUnitDiff) === 0:
       default:
         // just swap the module

@@ -94,11 +94,14 @@ const ColumnBuildingModule = (props: Props) => {
 
   subscribe(scopes.primary, () => {
     if (
+      context.menu === null &&
       scopes.primary.type === ScopeTypeEnum.Enum.MODULE &&
       scopes.primary.hovered?.columnIndex === columnIndex &&
       context.levelIndex === levelIndex
     ) {
       outlineGroup(groupRef)
+    } else {
+      outlineGroup(groupRef, { remove: true })
     }
   })
 

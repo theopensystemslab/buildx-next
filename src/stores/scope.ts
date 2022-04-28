@@ -132,7 +132,7 @@ export const select = ({
 }) => {
   const { primary, secondary } = scopes
   switch (true) {
-    case !!context.buildingId && !context.levelIndex: {
+    case !!context.buildingId && context.levelIndex === null: {
       if (
         primary.type !== ScopeTypeEnum.Enum.ELEMENT ||
         secondary.type !== ScopeTypeEnum.Enum.LEVEL

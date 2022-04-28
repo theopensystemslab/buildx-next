@@ -4,16 +4,16 @@ import React, { PropsWithChildren } from "react"
 
 const Layout = ({ children }: PropsWithChildren<{}>) => {
   return (
-    <div className="fixed flex flex-col w-full h-full">
-      <div className="absolute top-0 z-10 flex justify-center bg-white shadow left-1/2 -translate-x-1/2 transform">
+    <div className="fixed flex h-full w-full flex-col">
+      <div className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 transform justify-center bg-white shadow">
         <IconButton href="/map">
           <Site />
         </IconButton>
-        <IconButton href="/dashboard">
-          <Data />
-        </IconButton>
         <IconButton href="/site">
           <Build />
+        </IconButton>
+        <IconButton href="/dashboard">
+          <Data />
         </IconButton>
       </div>
       {children}

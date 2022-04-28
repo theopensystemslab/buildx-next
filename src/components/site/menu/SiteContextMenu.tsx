@@ -113,7 +113,7 @@ const SiteContextMenu = () => {
 
   return !buildingId ? (
     <SiteContextMenu_ {...props} />
-  ) : !levelIndex ? (
+  ) : levelIndex === null ? (
     <BuildingContextMenu {...props} buildingId={buildingId} />
   ) : (
     <LevelContextMenu

@@ -77,16 +77,16 @@ const ColumnBuildingElement = (props: Props) => {
   const bind = useGesture<{
     hover: ThreeEvent<PointerEvent>
     onPointerDown: ThreeEvent<PointerEvent>
-    onPointerOver: ThreeEvent<PointerEvent>
     onContextMenu: ThreeEvent<PointerEvent> &
       React.MouseEvent<EventTarget, MouseEvent>
   }>({
     onHover: ({ event: { intersections } }) => {
-      if (context.menu) return
-      if (!intersections?.[0]) return
       if (!meshRef.current) return
+      if (!intersections?.[0]) return
       const obj = intersections[0].object ?? intersections[0].eventObject
       if (!object3dChildOf(obj, meshRef.current)) return
+      if (context.menu !== null) return
+
       switch (scopes.secondary.type) {
         case ScopeTypeEnum.Enum.LEVEL:
           if (scopes.secondary.hovered?.levelIndex === levelIndex) {

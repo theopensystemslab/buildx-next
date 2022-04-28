@@ -81,6 +81,13 @@ const clamp_ = clamp(NumOrd)
 
 export const pipeLog = <T extends unknown>(x: T): T => (console.log(x), x)
 
+export const pipeLogWith =
+  <T extends unknown>(f: (t: T) => void) =>
+  (t: T): T => {
+    console.log(f(t))
+    return t
+  }
+
 export const upperFirst = flow(
   split(""),
   modifyAt(0, toUpperCase),
