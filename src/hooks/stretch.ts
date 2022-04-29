@@ -1,3 +1,4 @@
+import { LoadedModule } from "@/data/module"
 import { useSystemSettings } from "@/data/settings"
 import houses, { useHouse } from "@/stores/houses"
 import { clamp, isMesh, mapRA, reduceRA, reduceWithIndexRA } from "@/utils"
@@ -15,7 +16,7 @@ import {
   PositionedRow,
   useColumnLayout,
 } from "./layouts"
-import { useGetLoadedVanillaModule } from "./modules"
+import { useGetVanillaModule } from "./modules"
 
 export const stretch = proxy({
   endVanillaColumns: 0,
@@ -38,7 +39,7 @@ const getColumnsLength = flow(
 export const useVanillaPositionedRows = (
   gridGroups: readonly PositionedRow[]
 ) => {
-  const getVanillaModule = useGetLoadedVanillaModule()
+  const getVanillaModule = useGetVanillaModule({ loadGLTF: true })
   return pipe(
     gridGroups,
     mapRA(({ levelIndex, levelType, y, modules: modulesIn }: PositionedRow) => {
@@ -56,9 +57,7 @@ export const useVanillaPositionedRows = (
             const vanillaModuleOut = getVanillaModule(moduleIn, {
               positionType: "MID",
               constrainGridType: false,
-            })
-
-            if (!vanillaModuleOut) throw new Error("No vanilla module")
+            }) as LoadedModule
 
             const z = isFirst
               ? vanillaModuleOut.length / 2

@@ -5,7 +5,7 @@ import { lookup } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { toNullable } from "fp-ts/lib/Option"
 import { rowMatrixToDna, useColumnMatrix } from "./layouts"
-import { useGetBareVanillaModule } from "./modules"
+import { useGetVanillaModule } from "./modules"
 
 export const useLevelInteractions = (
   buildingId: string,
@@ -14,7 +14,7 @@ export const useLevelInteractions = (
 ) => {
   const columnMatrix = useColumnMatrix<BareModule>(buildingId)
 
-  const getVanillaModule = useGetBareVanillaModule()
+  const getVanillaModule = useGetVanillaModule()
 
   const getLevel = (i: number) =>
     pipe(columnMatrix, transposeA, lookup(i), toNullable)

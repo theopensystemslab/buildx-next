@@ -51,56 +51,12 @@ import { useSide } from "./side"
 export const getLevelNumber = (levelLetter: string) =>
   ["F", "G", "M", "T", "R"].findIndex((x) => x === levelLetter)
 
-export const useGetBareVanillaModule = <T extends BareModule>() => {
+export const useGetVanillaModule = <T extends BareModule, B extends boolean>(
+  opts: { loadGLTF?: B } = {}
+) => {
+  const { loadGLTF = false } = opts
   const { modules: allModules } = useSystemsData()
 
-  return (
-    module: T,
-    opts: { positionType?: string; levelLetter?: string } = {}
-  ) => {
-    const { positionType, levelLetter } = opts
-
-    const systemModules = pipe(
-      allModules,
-      filterRA((module) => module.systemId === module.systemId)
-    )
-
-    const vanillaModule = pipe(
-      systemModules,
-      filterRA((sysModule) =>
-        all(
-          sysModule.structuredDna.sectionType ===
-            module.structuredDna.sectionType,
-          positionType
-            ? sysModule.structuredDna.positionType === positionType
-            : sysModule.structuredDna.positionType ===
-                module.structuredDna.positionType,
-          levelLetter
-            ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
-            : sysModule.structuredDna.levelType ===
-                module.structuredDna.levelType,
-          sysModule.structuredDna.gridType === module.structuredDna.gridType
-        )
-      ),
-      sort(
-        pipe(
-          StrOrd,
-          contramap((m: Module) => m.dna)
-        )
-      ),
-      head,
-      toNullable
-    )
-
-    if (!vanillaModule)
-      throw new Error(`No vanilla module found for ${module.dna}`)
-
-    return vanillaModule
-  }
-}
-
-export const useGetLoadedVanillaModule = <T extends BareModule>() => {
-  const { modules: allModules } = useSystemsData()
   return (
     module: T,
     opts: {
@@ -141,7 +97,7 @@ export const useGetLoadedVanillaModule = <T extends BareModule>() => {
         )
       ),
       head,
-      mapO(loadModule),
+      mapO((m) => (loadGLTF ? loadModule(m) : m)),
       toNullable
     )
 
@@ -218,7 +174,7 @@ export const useStairsOptions = <T extends BareModule>(
 ): { options: StairsOpt[]; selected: StairsOpt["value"] } => {
   const { stairTypes, modules: systemModules } = useSystemsData()
 
-  const getVanillaModule = useGetBareVanillaModule()
+  const getVanillaModule = useGetVanillaModule()
 
   const selected: StairsOpt["value"] = {
     stairType: module.structuredDna.stairsType,
