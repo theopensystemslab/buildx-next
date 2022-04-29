@@ -240,7 +240,10 @@ export const useChangeModuleLayout = <T extends BareModule>(
               draft[columnIndex].gridGroups[i].modules = [
                 ...draft[columnIndex].gridGroups[i].modules,
                 ...pipe(
-                  replicate(gridUnitDiff, vanillaModule),
+                  replicate(
+                    gridUnitDiff / vanillaModule.structuredDna.gridUnits,
+                    vanillaModule
+                  ),
                   mapA((module) => ({ module, z: 0 }))
                 ),
               ]
@@ -248,6 +251,7 @@ export const useChangeModuleLayout = <T extends BareModule>(
           }),
           columnLayoutToDNA
         )
+
       case sign(gridUnitDiff) === 0:
       default:
         // just swap the module

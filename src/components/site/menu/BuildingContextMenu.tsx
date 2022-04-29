@@ -47,7 +47,13 @@ const BuildingContextMenu = (props: Props) => {
           onClick={removeFloor}
         >{`Remove floor`}</ContextMenuButton>
       )}
-      <ChangeMaterials buildingId={buildingId} elementName={elementName} />
+      {elementName && (
+        <ChangeMaterials
+          buildingId={buildingId}
+          elementName={elementName}
+          onComplete={props.onClose}
+        />
+      )}
     </ContextMenu>
   )
 }

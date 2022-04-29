@@ -10,7 +10,7 @@ import {
   zipRA,
 } from "@/utils"
 import { transpose } from "fp-ts-std/ReadonlyArray"
-import { flow, pipe } from "fp-ts/lib/function"
+import { pipe } from "fp-ts/lib/function"
 import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useBuildingRows } from "../stores/houses"

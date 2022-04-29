@@ -78,7 +78,8 @@ export const useGetBareVanillaModule = <T extends BareModule>() => {
           levelLetter
             ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
             : sysModule.structuredDna.levelType ===
-                module.structuredDna.levelType
+                module.structuredDna.levelType,
+          sysModule.structuredDna.gridType === module.structuredDna.gridType
         )
       ),
       sort(
@@ -102,9 +103,13 @@ export const useGetLoadedVanillaModule = <T extends BareModule>() => {
   const { modules: allModules } = useSystemsData()
   return (
     module: T,
-    opts: { positionType?: string; levelLetter?: string } = {}
+    opts: {
+      positionType?: string
+      levelLetter?: string
+      constrainGridType?: boolean
+    } = {}
   ) => {
-    const { positionType, levelLetter } = opts
+    const { positionType, levelLetter, constrainGridType = true } = opts
 
     const systemModules = pipe(
       allModules,
@@ -124,7 +129,9 @@ export const useGetLoadedVanillaModule = <T extends BareModule>() => {
           levelLetter
             ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
             : sysModule.structuredDna.levelType ===
-                module.structuredDna.levelType
+                module.structuredDna.levelType,
+          !constrainGridType ||
+            sysModule.structuredDna.gridType === module.structuredDna.gridType
         )
       ),
       sort(
@@ -480,8 +487,6 @@ export const useWindowOptions = <T extends BareModule>(
       return undefined as any
     })
   )
-
-  console.log({ options, selected })
 
   return { options, selected }
 }

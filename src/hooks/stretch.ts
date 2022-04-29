@@ -55,6 +55,7 @@ export const useVanillaPositionedRows = (
 
             const vanillaModuleOut = getVanillaModule(moduleIn, {
               positionType: "MID",
+              constrainGridType: false,
             })
 
             if (!vanillaModuleOut) throw new Error("No vanilla module")

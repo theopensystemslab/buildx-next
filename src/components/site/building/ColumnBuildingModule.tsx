@@ -69,41 +69,21 @@ const ColumnBuildingModule = (props: Props) => {
     toArray(StrOrd)
   )
 
-  const bind = useGesture<{ onPointerOver: ThreeEvent<PointerEvent> }>({
-    onPointerMove: () => {
-      if (context.menu !== null) return
-      switch (true) {
-        case scopes.secondary.type === ScopeTypeEnum.Enum.LEVEL &&
-          scopes.secondary.hovered?.levelIndex !== levelIndex: {
-          scopes.secondary.hovered = {
-            levelIndex,
-          }
-        }
-        case scopes.primary.type === ScopeTypeEnum.Enum.MODULE &&
-          (scopes.primary.hovered?.columnIndex !== columnIndex ||
-            scopes.primary.hovered?.levelIndex !== levelIndex ||
-            scopes.primary.hovered?.groupIndex !== groupIndex):
-          scopes.primary.hovered = {
-            columnIndex,
-            groupIndex,
-            levelIndex,
-          }
-      }
-    },
-  })
-
   subscribe(scopes.primary, () => {
     if (
+      context.menu === null &&
       scopes.primary.type === ScopeTypeEnum.Enum.MODULE &&
       scopes.primary.hovered?.columnIndex === columnIndex &&
       context.levelIndex === levelIndex
     ) {
       outlineGroup(groupRef)
+    } else {
+      outlineGroup(groupRef, { remove: true })
     }
   })
 
   return (
-    <group ref={groupRef} {...(bind() as any)} {...groupProps}>
+    <group ref={groupRef} {...groupProps}>
       {children}
     </group>
   )
