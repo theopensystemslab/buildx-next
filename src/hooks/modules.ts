@@ -51,8 +51,8 @@ import { useSide } from "./side"
 export const getLevelNumber = (levelLetter: string) =>
   ["F", "G", "M", "T", "R"].findIndex((x) => x === levelLetter)
 
-export const useGetVanillaModule = <T extends BareModule, B extends boolean>(
-  opts: { loadGLTF?: B } = {}
+export const useGetVanillaModule = <T extends BareModule>(
+  opts: { loadGLTF?: boolean } = {}
 ) => {
   const { loadGLTF = false } = opts
   const { modules: allModules } = useSystemsData()
@@ -162,6 +162,74 @@ export const useLayoutOptions = <T extends BareModule>(
   return { options, selected }
 }
 
+export const usePadColumn = () => {
+  const getVanillaModule = useGetVanillaModule()
+
+  return <T extends BareModule = BareModule>(levels: T[][]) => {
+    const target = pipe(
+      levels,
+      reduceA(0, (b, level) => {
+        const x = pipe(
+          level,
+          reduceA(0, (c, m) => c + m.structuredDna.gridUnits)
+        )
+        return x > b ? x : b
+      })
+    )
+
+    return pipe(
+      levels,
+      mapA((level) => {
+        const levelLength = level.reduce(
+          (acc, v) => acc + v.structuredDna.gridUnits,
+          0
+        )
+        return [
+          ...level,
+          ...replicate(target - levelLength, getVanillaModule(level[0])),
+        ]
+      })
+    )
+  }
+}
+
+export const useGetStairsModule = () => {
+  const { modules: allModules } = useSystemsData()
+
+  return <M extends BareModule = BareModule>(
+    oldModule: M,
+    stairType: StairType["code"]
+  ) => {
+    const constraints = keysFilter<M>(
+      ["sectionType", "positionType", "levelType", "gridType"],
+      oldModule
+    )
+
+    const systemModules = pipe(
+      allModules,
+      filterRA((m) => m.systemId === oldModule.systemId)
+    )
+
+    return pipe(
+      systemModules as unknown as M[],
+      filterA(constraints),
+      filterA((x) => x.structuredDna.stairsType === stairType),
+      (modules) =>
+        topCandidateByHamming(
+          [
+            "internalLayoutType",
+            "windowTypeSide1",
+            "windowTypeSide2",
+            "windowTypeEnd",
+            "windowTypeTop",
+          ],
+          oldModule,
+          modules
+        )
+    )
+  }
+}
+
 export type StairsOpt = {
   label: string
   value: { stairType: string; buildingDna: string[] }
@@ -174,7 +242,8 @@ export const useStairsOptions = <T extends BareModule>(
 ): { options: StairsOpt[]; selected: StairsOpt["value"] } => {
   const { stairTypes, modules: systemModules } = useSystemsData()
 
-  const getVanillaModule = useGetVanillaModule()
+  const getStairsModule = useGetStairsModule()
+  const padColumn = usePadColumn()
 
   const selected: StairsOpt["value"] = {
     stairType: module.structuredDna.stairsType,
@@ -229,34 +298,6 @@ export const useStairsOptions = <T extends BareModule>(
     )
   )
 
-  const getStairsModule = <M extends StructuredDnaModule = StructuredDnaModule>(
-    oldModule: M,
-    stairType: StairType
-  ) => {
-    const constraints = keysFilter<M>(
-      ["sectionType", "positionType", "levelType", "gridType"],
-      oldModule
-    )
-
-    return pipe(
-      systemModules as unknown as M[],
-      filterA(constraints),
-      filterA((x) => x.structuredDna.stairsType === stairType.code),
-      (modules) =>
-        topCandidateByHamming(
-          [
-            "internalLayoutType",
-            "windowTypeSide1",
-            "windowTypeSide2",
-            "windowTypeEnd",
-            "windowTypeTop",
-          ],
-          oldModule,
-          modules
-        )
-    )
-  }
-
   const options = pipe(
     stairTypes,
     reduceA(new Map<StairType["code"], StairsOpt>(), (acc, stairType) => {
@@ -266,7 +307,7 @@ export const useStairsOptions = <T extends BareModule>(
           return pipe(
             getStairsModule(
               columnMatrix[columnIndex][levelIdx][groupIdx],
-              stairType
+              stairType.code
             ),
             fromNullable,
             mapO((newModule) =>
@@ -303,33 +344,6 @@ export const useStairsOptions = <T extends BareModule>(
       }
 
       const newColumn = [columnMatrix[columnIndex][0], ...newLevels]
-
-      const padColumn = <T extends BareModule = BareModule>(levels: T[][]) => {
-        const target = pipe(
-          levels,
-          reduceA(0, (b, level) => {
-            const x = pipe(
-              level,
-              reduceA(0, (c, m) => c + m.structuredDna.gridUnits)
-            )
-            return x > b ? x : b
-          })
-        )
-
-        return pipe(
-          levels,
-          mapA((level) => {
-            const levelLength = level.reduce(
-              (acc, v) => acc + v.structuredDna.gridUnits,
-              0
-            )
-            return [
-              ...level,
-              ...replicate(target - levelLength, getVanillaModule(level[0])),
-            ]
-          })
-        )
-      }
 
       if (newLevels.length === roofIndex - groundIndex + 1) {
         acc.set(
