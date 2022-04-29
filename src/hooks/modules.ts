@@ -57,15 +57,17 @@ export const useGetVanillaModule = <T extends BareModule>(
   const { loadGLTF = false } = opts
   const { modules: allModules } = useSystemsData()
 
+  const bugMod = "W1-END-G1-GRID1-01-ST0-L0-SIDE0-SIDE0-END1-TOP0"
+
   return (
     module: T,
     opts: {
       positionType?: string
-      levelLetter?: string
+      levelType?: string
       constrainGridType?: boolean
     } = {}
   ) => {
-    const { positionType, levelLetter, constrainGridType = true } = opts
+    const { positionType, levelType, constrainGridType = true } = opts
 
     const systemModules = pipe(
       allModules,
@@ -82,8 +84,8 @@ export const useGetVanillaModule = <T extends BareModule>(
             ? sysModule.structuredDna.positionType === positionType
             : sysModule.structuredDna.positionType ===
                 module.structuredDna.positionType,
-          levelLetter
-            ? sysModule.structuredDna.level === getLevelNumber(levelLetter)
+          levelType
+            ? sysModule.structuredDna.levelType === levelType
             : sysModule.structuredDna.levelType ===
                 module.structuredDna.levelType,
           !constrainGridType ||
@@ -198,10 +200,14 @@ export const useGetStairsModule = () => {
 
   return <M extends BareModule = BareModule>(
     oldModule: M,
-    stairType: StairType["code"]
+    opts: {
+      stairsType?: StairType["code"]
+      levelType?: string
+    } = {}
   ) => {
+    const { stairsType, levelType } = opts
     const constraints = keysFilter<M>(
-      ["sectionType", "positionType", "levelType", "gridType"],
+      ["sectionType", "positionType", "gridType"],
       oldModule
     )
 
@@ -213,7 +219,12 @@ export const useGetStairsModule = () => {
     return pipe(
       systemModules as unknown as M[],
       filterA(constraints),
-      filterA((x) => x.structuredDna.stairsType === stairType),
+      filterA(
+        (x) =>
+          x.structuredDna.stairsType ===
+            (stairsType ?? oldModule.structuredDna.stairsType) &&
+          (!levelType || x.structuredDna.levelType === levelType)
+      ),
       (modules) =>
         topCandidateByHamming(
           [
@@ -305,10 +316,9 @@ export const useStairsOptions = <T extends BareModule>(
         levelGroupIndices,
         filterMapA(([levelIdx, groupIdx]) => {
           return pipe(
-            getStairsModule(
-              columnMatrix[columnIndex][levelIdx][groupIdx],
-              stairType.code
-            ),
+            getStairsModule(columnMatrix[columnIndex][levelIdx][groupIdx], {
+              stairsType: stairType.code,
+            }),
             fromNullable,
             mapO((newModule) =>
               produce(columnMatrix[columnIndex][levelIdx], (draft) => {

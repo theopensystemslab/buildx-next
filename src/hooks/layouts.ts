@@ -14,6 +14,7 @@ import { pipe } from "fp-ts/lib/function"
 import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
 import { useBuildingRows } from "../stores/houses"
+import { usePadColumn } from "./modules"
 
 export type PositionedModule = {
   module: LoadedModule
@@ -420,3 +421,9 @@ export const rowMatrixToDna = <T extends BareModule = BareModule>(
     flattenA,
     mapA((x) => x.dna)
   )
+
+export const usePadColumnMatrix = () => {
+  const padColumn = usePadColumn()
+  return <T extends BareModule = BareModule>(columnMatrix: T[][][]) =>
+    pipe(columnMatrix, mapA(padColumn))
+}

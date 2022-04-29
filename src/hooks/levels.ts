@@ -34,6 +34,7 @@ export const useLevelInteractions = (
   const nextLevelLetter = nextLevel?.[0][0].structuredDna.levelType[0]
 
   const targetLevelLetter = nextLevelLetter === "R" ? "T" : "M"
+  const targetLevelType = targetLevelLetter + "1"
 
   const canAddFloorAbove =
     nextLevel !== null && ["R", "M", "T"].includes(targetLevelLetter)
@@ -54,14 +55,37 @@ export const useLevelInteractions = (
         ...rows.slice(0, levelIndex + 1),
         pipe(
           rows[levelIndex],
-          mapA(
-            mapA((m) => getVanillaModule(m, { levelLetter: targetLevelLetter }))
+          mapA((group) =>
+            pipe(
+              group,
+              mapA((m) => {
+                const vanillaModule = getVanillaModule(m, {
+                  levelType: targetLevelType,
+                })
+                if (m.structuredDna.stairsType === "ST0")
+                  return replicate(
+                    m.structuredDna.gridUnits /
+                      vanillaModule.structuredDna.gridUnits,
+                    vanillaModule
+                  )
+                const stairsModule = getStairsModule(m, {
+                  levelType: targetLevelType,
+                })
+                if (!stairsModule)
+                  throw new Error(
+                    `No stairs module found for ${m.dna} level ${targetLevelLetter}`
+                  )
+                return [stairsModule]
+              }),
+              flattenA
+            )
           )
         ),
         ...rows.slice(levelIndex + 1),
       ],
-      mapA(flattenA),
-      rowMatrixToDna
+      transposeA,
+      mapA(padColumn),
+      columnMatrixToDna
     )
     onComplete?.()
   }
