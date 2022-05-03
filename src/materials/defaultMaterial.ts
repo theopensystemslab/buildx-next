@@ -20,7 +20,7 @@ const defaultMaterial = new MeshStandardMaterial({
   side: DoubleSide,
   polygonOffset: true,
   polygonOffsetFactor: 1,
-  clipIntersection: true,
+  clipIntersection: false,
   shadowSide: DoubleSide,
   clipShadows: true,
   wireframe: false,

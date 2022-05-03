@@ -68,7 +68,7 @@ export const createMaterial = (config: Material) => {
     side: DoubleSide,
     polygonOffset: true,
     polygonOffsetFactor: 1,
-    clipIntersection: true,
+    clipIntersection: false,
     shadowSide: DoubleSide,
     clipShadows: true,
     clippingPlanes: [],

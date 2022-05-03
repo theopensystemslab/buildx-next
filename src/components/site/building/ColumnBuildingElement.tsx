@@ -108,8 +108,9 @@ const ColumnBuildingElement = (props: Props) => {
       if (contextMode !== SiteContextModeEnum.Enum.BUILDING) return
 
       const isOutlined =
-        highlights.outlined.filter((x) => x.id === meshRef.current!.id).length >
-        0
+        highlights.outlined.filter(
+          (x) => meshRef.current && x.id === meshRef.current.id
+        ).length > 0
 
       const isHovered =
         buildingId === scope.hovered?.buildingId &&
