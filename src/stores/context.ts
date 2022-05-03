@@ -4,34 +4,33 @@ import * as z from "zod"
 export const EditModeEnum = z.enum(["MOVE", "ROTATE", "STRETCH"])
 export type EditMode = z.infer<typeof EditModeEnum>
 
-type ContextProxy = {
+type SiteContext = {
   menu: [number, number] | null
   buildingId: string | null
   levelIndex: number | null
   editMode: EditMode | null
 }
 
-const context = proxy<ContextProxy>({
+const siteContext = proxy<SiteContext>({
   menu: null,
   buildingId: null,
   levelIndex: null,
   editMode: null,
 })
 
-export const useContext = () => useSnapshot(context)
+export const useSiteContext = () => useSnapshot(siteContext)
 
-// export const outlineMesh = (
-//   meshRef: MutableRefObject<Object3D | undefined>
-// ) => {
-//   context.outlined.push(ref(meshRef))
-// }
+export const SiteContextModeEnum = z.enum(["SITE", "BUILDING", "LEVEL"])
+export type SiteContextMode = z.infer<typeof SiteContextModeEnum>
 
-// export const removeMeshOutline = (
-//   meshRef: MutableRefObject<Object3D | undefined>
-// ) => {
-//   context.outlined = context.outlined.filter(
-//     (x) => x?.current && meshRef?.current && x.current.id !== meshRef.current.id
-//   )
-// }
+export const useSiteContextMode = () => {
+  const { buildingId, levelIndex } = useSiteContext()
 
-export default context
+  return levelIndex !== null
+    ? SiteContextModeEnum.Enum.LEVEL
+    : buildingId !== null
+    ? SiteContextModeEnum.Enum.BUILDING
+    : SiteContextModeEnum.Enum.SITE
+}
+
+export default siteContext

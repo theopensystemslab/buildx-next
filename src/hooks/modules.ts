@@ -11,7 +11,7 @@ import {
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
 import { WindowType } from "@/data/windowType"
-import context from "@/stores/context"
+import siteContext from "@/stores/context"
 import {
   all,
   filterA,
@@ -392,7 +392,7 @@ export const useWindowOptions = <T extends BareModule>(
   columnLayout: ColumnLayout,
   { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
 ): { options: WindowOpt[]; selected: WindowOpt["value"] } => {
-  const side = useSide(context.buildingId!)
+  const side = useSide(siteContext.buildingId!)
   const systemModules = useSystemModules(module.systemId)
   const { windowTypes } = useSystemsData()
 

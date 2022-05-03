@@ -1,44 +1,42 @@
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
-import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import { useSystemsData } from "@/contexts/SystemsData"
-import context, { EditModeEnum, useContext } from "@/stores/context"
+import siteContext, {
+  EditModeEnum,
+  useSiteContext,
+  useSiteContextMode,
+} from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
-import scopes, { HouseScope, ScopeTypeEnum } from "@/stores/scope"
+import scope from "@/stores/scope"
 import React, { Fragment, useState } from "react"
 import BuildingContextMenu from "./BuildingContextMenu"
 import LevelContextMenu from "./LevelContextMenu"
 import RenameHouseForm from "./RenameHouseForm"
 
 const SiteContextMenu_ = (props: ContextMenuProps) => {
-  if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) {
-    console.error("SiteContextMenu called with scope type other than HOUSE")
-    return null
-  }
+  const contextMode = useSiteContextMode()
 
-  const firstHouse = useHouse(scopes.primary.selected[0])
-  const manySelected = scopes.primary.selected.length > 1
-  const oneSelected = scopes.primary.selected.length === 1
+  if (scope.selected === null) throw new Error("scope.selected null")
+
+  const { buildingId } = scope.selected
+
+  const firstHouse = useHouse(buildingId)
 
   const { houseTypes } = useSystemsData()
 
-  const resetBuildings = () => {
-    for (let buildingId of (scopes.primary as HouseScope).selected) {
-      const house = houses[buildingId]
-      const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
-      if (houseType) {
-        houses[buildingId].dna = houseType.dna as string[]
-        houses[buildingId].modifiedMaterials = {}
-      }
+  const resetBuilding = () => {
+    const house = houses[buildingId]
+    const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
+    if (houseType) {
+      houses[buildingId].dna = houseType.dna as string[]
+      houses[buildingId].modifiedMaterials = {}
     }
     props.onClose?.()
   }
 
-  const deleteBuildings = () => {
-    for (let buildingId of (scopes.primary as HouseScope).selected) {
-      delete houses[buildingId]
-    }
-    scopes.primary.selected = []
+  const deleteBuilding = () => {
+    delete houses[buildingId]
+    scope.selected = null
     props.onClose?.()
   }
 
@@ -47,47 +45,37 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   const rename = () => setRenaming(true)
 
   const editBuilding = () => {
-    context.buildingId = firstHouse.id
-    context.editMode = EditModeEnum.Enum.STRETCH
+    siteContext.buildingId = firstHouse.id
+    siteContext.editMode = EditModeEnum.Enum.STRETCH
     props?.onClose?.()
   }
 
   return (
     <ContextMenu {...props}>
-      <ContextMenuHeading>
-        {manySelected ? `Several buildings` : firstHouse.friendlyName}
-      </ContextMenuHeading>
       {!renaming && (
         <Fragment>
-          <ContextMenuButton onClick={resetBuildings}>Reset</ContextMenuButton>
-          <ContextMenuButton onClick={deleteBuildings}>
-            Delete
+          <ContextMenuButton onClick={resetBuilding}>Reset</ContextMenuButton>
+          <ContextMenuButton onClick={deleteBuilding}>Delete</ContextMenuButton>
+          <ContextMenuButton onClick={editBuilding}>
+            {`Edit building`}
           </ContextMenuButton>
-          {oneSelected ? (
-            <ContextMenuButton onClick={editBuilding}>
-              {`Edit building`}
-            </ContextMenuButton>
-          ) : null}
         </Fragment>
       )}
-
-      {oneSelected ? (
-        <Fragment>
-          <ContextMenuButton onClick={rename}>
-            {`Rename building`}
-          </ContextMenuButton>
-          {renaming && (
-            <RenameHouseForm
-              {...props}
-              currentName={firstHouse.friendlyName}
-              onNewName={(newName) => {
-                houses[firstHouse.id].friendlyName = newName
-                setRenaming(false)
-              }}
-            />
-          )}
-        </Fragment>
-      ) : null}
+      <Fragment>
+        <ContextMenuButton onClick={rename}>
+          {`Rename building`}
+        </ContextMenuButton>
+        {renaming && (
+          <RenameHouseForm
+            {...props}
+            currentName={firstHouse.friendlyName}
+            onNewName={(newName) => {
+              houses[firstHouse.id].friendlyName = newName
+              setRenaming(false)
+            }}
+          />
+        )}
+      </Fragment>
     </ContextMenu>
   )
 }
@@ -98,7 +86,7 @@ const SiteContextMenu = () => {
     buildingId,
     levelIndex,
     // scope: { type: scopeType },
-  } = useContext()
+  } = useSiteContext()
 
   if (!menu) return null
 
@@ -106,7 +94,7 @@ const SiteContextMenu = () => {
 
   const onClose = () => {
     // scopes.primary.selected = []
-    context.menu = null
+    siteContext.menu = null
   }
 
   const props = { pageX, pageY, onClose }

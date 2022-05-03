@@ -1,10 +1,12 @@
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import { useLevelInteractions } from "@/hooks/levels"
-import context from "@/stores/context"
-import scopes, { ScopeTypeEnum } from "@/stores/scope"
+import siteContext, {
+  SiteContextModeEnum,
+  useSiteContextMode,
+} from "@/stores/context"
+import scope from "@/stores/scope"
 import React from "react"
-import { useSnapshot } from "valtio"
 import ChangeMaterials from "./ChangeMaterials"
 
 type Props = ContextMenuProps & {
@@ -13,21 +15,17 @@ type Props = ContextMenuProps & {
 
 const BuildingContextMenu = (props: Props) => {
   const { buildingId, ...restProps } = props
-  const { primary, secondary } = useSnapshot(scopes)
-  if (
-    primary.type !== ScopeTypeEnum.Enum.ELEMENT ||
-    secondary.type !== ScopeTypeEnum.Enum.LEVEL
-  )
-    throw new Error("Unexpected scopes in BuildingContextMenu")
+  const contextMode = useSiteContextMode()
 
-  if (primary.selected.length > 1 || secondary.selected.length > 1)
-    throw new Error("Multi-select not yet supported in building context")
+  if (contextMode !== SiteContextModeEnum.Enum.BUILDING)
+    throw new Error("contextMode not BUILDING in BuildingContextMenu")
 
-  const elementName = primary.selected[0].elementName
-  const levelIndex = secondary.selected[0].levelIndex
+  if (scope.selected === null) throw new Error("scope.selected null")
+
+  const { elementName, levelIndex } = scope.selected
 
   const editLevel = () => {
-    context.levelIndex = levelIndex
+    siteContext.levelIndex = levelIndex
     props.onClose?.()
   }
 

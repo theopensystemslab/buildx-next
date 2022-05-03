@@ -1,5 +1,5 @@
-import context, { EditModeEnum } from "@/stores/context"
-import scopes, { initScopes } from "@/stores/scope"
+import siteContext, { EditModeEnum } from "@/stores/context"
+import scope from "@/stores/scope"
 import { useRoute } from "@/utils/wouter"
 import { useEffect } from "react"
 import { subscribe } from "valtio"
@@ -12,13 +12,13 @@ export const useRouting = () => {
 
   let urlChange = false
 
-  subscribe(context, () => {
+  subscribe(siteContext, () => {
     if (urlChange) return
     let path = "/site"
-    if (context.buildingId) {
-      path += `?buildingId=${context.buildingId}`
-      if (context.levelIndex) {
-        path += `&levelIndex=${context.levelIndex}`
+    if (siteContext.buildingId) {
+      path += `?buildingId=${siteContext.buildingId}`
+      if (siteContext.levelIndex) {
+        path += `&levelIndex=${siteContext.levelIndex}`
       }
     }
     if (path !== window.location.pathname + window.location.search) {
@@ -31,25 +31,27 @@ export const useRouting = () => {
 
     if (params === null || typeof params === "boolean") return
     switch (true) {
-      case "buildingId" in params && context.buildingId !== params.buildingId: {
-        context.buildingId = params.buildingId
-        context.editMode = EditModeEnum.Enum.STRETCH
+      case "buildingId" in params &&
+        siteContext.buildingId !== params.buildingId: {
+        siteContext.buildingId = params.buildingId
+        siteContext.editMode = EditModeEnum.Enum.STRETCH
       }
       case "levelIndex" in params: {
         const levelIndex = Number(params.levelIndex)
-        if (context.levelIndex === levelIndex || isNaN(levelIndex)) break
-        context.levelIndex = levelIndex
-        context.editMode = null
+        if (siteContext.levelIndex === levelIndex || isNaN(levelIndex)) break
+        siteContext.levelIndex = levelIndex
+        siteContext.editMode = null
         break
       }
       case !("buildingId" in params):
-        if (context.buildingId !== null) context.buildingId = null
-        if (context.levelIndex !== null) context.levelIndex = null
-        if (context.editMode !== EditModeEnum.Enum.MOVE)
-          context.editMode = EditModeEnum.Enum.MOVE
+        if (siteContext.buildingId !== null) siteContext.buildingId = null
+        if (siteContext.levelIndex !== null) siteContext.levelIndex = null
+        if (siteContext.editMode !== EditModeEnum.Enum.MOVE)
+          siteContext.editMode = EditModeEnum.Enum.MOVE
     }
 
-    initScopes()
+    scope.selected = null
+    scope.hovered = null
     urlChange = false
   }, [params])
 }
