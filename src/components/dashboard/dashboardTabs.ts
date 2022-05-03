@@ -5,6 +5,7 @@ export enum Tab {
   BuildingAreas = "building-areas",
   BuildCosts = "build-costs",
   EnergyUse = "energy-use",
+  BuildingFabric = "building-fabric",
   OperationalCo2 = "operational-co2",
   EmbodiedCo2 = "embodied-co2",
 }
@@ -16,6 +17,7 @@ export const tabs: { id: Tab; label: string }[] = [
   { id: Tab.BuildingAreas, label: "Building Areas" },
   { id: Tab.BuildCosts, label: "Build Costs" },
   { id: Tab.EnergyUse, label: "Energy Use" },
+  { id: Tab.BuildingFabric, label: "Building Fabric" },
   { id: Tab.OperationalCo2, label: "Operational CO₂" },
   { id: Tab.EmbodiedCo2, label: "Embodied CO₂" },
 ]

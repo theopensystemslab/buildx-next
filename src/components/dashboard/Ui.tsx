@@ -3,19 +3,19 @@ import React, { type FC, type ReactNode } from "react"
 export const DataPoint: FC<{
   value: number
   unitOfMeasurement: string
-  explanation: string
+  description: string
 }> = (props) => (
   <div className="text-gray-400 space-y-2">
     <p className="text-5xl">{`${props.value.toLocaleString("en-GB", {
       maximumFractionDigits: 1,
     })}${props.unitOfMeasurement}`}</p>
-    <p className="text-sm">{props.explanation}</p>
+    <p className="text-sm">{props.description}</p>
   </div>
 )
 
 export const ChangeDataPoint: FC<{
   percentage: number
-  explanation: string
+  description: string
 }> = (props) => (
   <div className="flex text-gray-400 space-x-1">
     <span className="inline-block pt-4 text-2xl">
@@ -28,7 +28,7 @@ export const ChangeDataPoint: FC<{
           maximumFractionDigits: 0,
         }
       )}%`}</p>
-      <p className="text-sm">{props.explanation}</p>
+      <p className="text-sm">{props.description}</p>
     </div>
   </div>
 )

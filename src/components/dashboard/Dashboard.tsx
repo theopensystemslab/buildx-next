@@ -6,8 +6,13 @@ import calculate, { type DashboardData } from "./data"
 import HouseMultiSelect from "./HouseMultiSelect"
 import { Tab, tabs, fromSlug } from "./dashboardTabs"
 import { type House } from "@/data/house"
-import OverviewTab from "./OverviewTab"
-import BuildingAreasTab from "./BuildingAreasTab"
+import Overview from "./TabContents/Overview"
+import BuildingAreas from "./TabContents/BuildingAreas"
+import BuildCosts from "./TabContents/BuildCosts"
+import EnergyUse from "./TabContents/EnergyUse"
+import BuildingFabric from "./TabContents/BuildingFabric"
+import OperationalCo2 from "./TabContents/OperationalCo2"
+import EmbodiedCo2 from "./TabContents/EmbodiedCo2"
 
 export interface Props {
   slug?: string
@@ -62,10 +67,25 @@ const Dashboard: FC<Props> = (props) => {
         {dashboardData && (
           <div className="pt-8">
             {activeTab === Tab.Overview ? (
-              <OverviewTab dashboardData={dashboardData} />
+              <Overview dashboardData={dashboardData} />
             ) : null}
             {activeTab === Tab.BuildingAreas ? (
-              <BuildingAreasTab dashboardData={dashboardData} />
+              <BuildingAreas dashboardData={dashboardData} />
+            ) : null}
+            {activeTab === Tab.BuildCosts ? (
+              <BuildCosts dashboardData={dashboardData} />
+            ) : null}
+            {activeTab === Tab.EnergyUse ? (
+              <EnergyUse dashboardData={dashboardData} />
+            ) : null}
+            {activeTab === Tab.BuildingFabric ? (
+              <BuildingFabric dashboardData={dashboardData} />
+            ) : null}
+            {activeTab === Tab.OperationalCo2 ? (
+              <OperationalCo2 dashboardData={dashboardData} />
+            ) : null}
+            {activeTab === Tab.EmbodiedCo2 ? (
+              <EmbodiedCo2 dashboardData={dashboardData} />
             ) : null}
           </div>
         )}

@@ -2,7 +2,7 @@ import React, { useMemo, type FC } from "react"
 
 const BasicChart: FC<{
   data: number[]
-  explanation: string
+  description: string
 }> = (props) => {
   const { max, min } = useMemo(
     () => ({
@@ -59,7 +59,7 @@ const BasicChart: FC<{
           strokeWidth="0.5"
         />
       </svg>
-      <p className="text-sm text-gray-400">{props.explanation}</p>
+      <p className="text-sm text-gray-400">{props.description}</p>
     </div>
   )
 }
