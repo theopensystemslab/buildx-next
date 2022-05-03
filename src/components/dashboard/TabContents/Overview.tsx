@@ -1,14 +1,20 @@
-import React, { type FC } from "react"
+import React, { type FC, type ReactNode } from "react"
 import { type DashboardData } from "../data"
 import { DataPoint, ChangeDataPoint, Labeled } from "../Ui"
 import BasicChart from "../BasicChart"
 
+const GridLayout: FC<{ children: ReactNode }> = (props) => (
+  <div className="grid grid-cols-1 gap-x-4 space-y-16 md:grid-cols-4 md:space-y-0">
+    {props.children}
+  </div>
+)
+
 const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
   const { dashboardData } = props
-  const costs = Object.values(dashboardData.byHouse).map(d => d.cost)
+  const costs = Object.values(dashboardData.byHouse).map((d) => d.cost)
   return (
     <div className="space-y-16">
-      <div className="grid grid-cols-4 space-x-4">
+      <GridLayout>
         <Labeled label="Total site area">
           <DataPoint
             value={350}
@@ -30,8 +36,8 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             description="new buildings"
           />
         </Labeled>
-      </div>
-      <div className="grid grid-cols-4 space-x-4">
+      </GridLayout>
+      <GridLayout>
         <Labeled label="Estimated total building cost">
           <BasicChart data={[...costs, 500000]} description="Euros" />
           <ChangeDataPoint
@@ -48,7 +54,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
         <Labeled label="Total embodied CO₂">
           <BasicChart data={[4, 1]} description="gross internal area" />
         </Labeled>
-      </div>
+      </GridLayout>
     </div>
   )
 }

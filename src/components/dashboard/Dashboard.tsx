@@ -41,13 +41,13 @@ const Dashboard: FC<Props> = (props) => {
 
   return (
     <div className="w-full h-full overflow-auto bg-gray-100">
-      <div className="max-w-5xl pt-20 pb-16 mx-auto space-y-8">
+      <div className="max-w-5xl pt-20 pb-16 pl-4 pr-4 mx-auto space-y-8">
         <HouseMultiSelect
           houses={houses}
           selectedHouses={selectedHouses}
           setSelectedHouses={setSelectedHouses}
         />
-        <div className="flex items-center justify-start space-x-8">
+        <div className="flex flex-wrap items-center justify-start space-x-4">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id
             return (
