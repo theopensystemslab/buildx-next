@@ -9,6 +9,7 @@ import siteContext, {
 import houses, { useHouse } from "@/stores/houses"
 import scope from "@/stores/scope"
 import React, { Fragment, useState } from "react"
+import { useSnapshot } from "valtio"
 import BuildingContextMenu from "./BuildingContextMenu"
 import LevelContextMenu from "./LevelContextMenu"
 import RenameHouseForm from "./RenameHouseForm"
@@ -81,19 +82,14 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
 }
 
 const SiteContextMenu = () => {
-  const {
-    menu,
-    buildingId,
-    levelIndex,
-    // scope: { type: scopeType },
-  } = useSiteContext()
+  const { menu, buildingId, levelIndex } = useSiteContext()
 
   if (!menu) return null
 
   const [pageX, pageY] = menu
 
   const onClose = () => {
-    // scopes.primary.selected = []
+    // scope.selected = null
     siteContext.menu = null
   }
 
@@ -102,13 +98,9 @@ const SiteContextMenu = () => {
   return !buildingId ? (
     <SiteContextMenu_ {...props} />
   ) : levelIndex === null ? (
-    <BuildingContextMenu {...props} buildingId={buildingId} />
+    <BuildingContextMenu {...props} />
   ) : (
-    <LevelContextMenu
-      {...props}
-      buildingId={buildingId}
-      levelIndex={levelIndex}
-    />
+    <LevelContextMenu {...props} />
   )
 }
 
