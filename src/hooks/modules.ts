@@ -121,10 +121,13 @@ type LayoutOpt = {
 }
 
 export const useLayoutOptions = <T extends BareModule>(
-  module: T,
   columnLayout: ColumnLayout,
   { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
 ): { options: LayoutOpt[]; selected: LayoutOpt["value"] } => {
+  const module = columnLayout[columnIndex].gridGroups[levelIndex].modules[
+    groupIndex
+  ].module as unknown as T
+
   const systemModules = useSystemModules(module.systemId)
 
   const changeModuleLayout = useChangeModuleLayout(columnLayout, {
@@ -247,10 +250,13 @@ export type StairsOpt = {
 }
 
 export const useStairsOptions = <T extends BareModule>(
-  module: T,
   columnLayout: ColumnLayout,
   { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
 ): { options: StairsOpt[]; selected: StairsOpt["value"] } => {
+  const module = columnLayout[columnIndex].gridGroups[levelIndex].modules[
+    groupIndex
+  ].module as unknown as T
+
   const { stairTypes, modules: systemModules } = useSystemsData()
 
   const getStairsModule = useGetStairsModule()
@@ -388,10 +394,13 @@ export type WindowOpt = {
 }
 
 export const useWindowOptions = <T extends BareModule>(
-  module: T,
   columnLayout: ColumnLayout,
   { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
 ): { options: WindowOpt[]; selected: WindowOpt["value"] } => {
+  const module = columnLayout[columnIndex].gridGroups[levelIndex].modules[
+    groupIndex
+  ].module as unknown as T
+
   const side = useSide(siteContext.buildingId!)
   const systemModules = useSystemModules(module.systemId)
   const { windowTypes } = useSystemsData()

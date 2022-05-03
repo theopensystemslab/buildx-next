@@ -13,25 +13,16 @@ import houses from "@/stores/houses"
 import scope from "@/stores/scope"
 import React from "react"
 
-type Props = ContextMenuProps & {
-  buildingId: string
-  levelIndex: number
-}
+type Props = ContextMenuProps
 
 const LevelContextMenu = (props: Props) => {
-  const { buildingId, levelIndex } = props
-
   if (scope.selected === null) throw new Error("scope.selected null")
 
-  const { columnIndex, groupIndex } = scope.selected
+  const { groupIndex, levelIndex, columnIndex, buildingId } = scope.selected
 
   const columnLayout = useColumnLayout(buildingId)
 
-  const module =
-    columnLayout[columnIndex].gridGroups[levelIndex].modules[groupIndex].module
-
   const { options: layoutOpts, selected: selectedLayoutOpt } = useLayoutOptions(
-    module,
     columnLayout,
     {
       columnIndex,
@@ -48,7 +39,6 @@ const LevelContextMenu = (props: Props) => {
   }
 
   const { options: stairsOpts, selected: selectedStairsOpt } = useStairsOptions(
-    module,
     columnLayout,
     {
       columnIndex,
@@ -65,7 +55,6 @@ const LevelContextMenu = (props: Props) => {
   }
 
   const { options: windowOpts, selected: selectedWindowOpt } = useWindowOptions(
-    module,
     columnLayout,
     {
       columnIndex,
