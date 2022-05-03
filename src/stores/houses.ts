@@ -19,9 +19,13 @@ import { MutableRefObject, useCallback, useEffect } from "react"
 import { Group } from "three"
 import { proxy, subscribe, useSnapshot } from "valtio"
 import { setCameraEnabled } from "./camera"
-import { useContext } from "./context"
+import {
+  SiteContextModeEnum,
+  useSiteContext,
+  useSiteContextMode,
+} from "./context"
 import pointer from "./pointer"
-import scopes, { ScopeTypeEnum } from "./scope"
+import scope, { ScopeItem } from "./scope"
 
 export const getInitialHouses = () =>
   SSR
@@ -80,8 +84,11 @@ export const useUpdatePosition = (
   )
   useEffect(onPositionUpdate, [onPositionUpdate])
 
+  const contextMode = useSiteContextMode()
+
   return ({ first, last }) => {
-    if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
+    if (contextMode !== SiteContextModeEnum.Enum.SITE) return
+    if (scope.selected === null) return
     if (first) {
       setCameraEnabled(false)
     }
@@ -90,10 +97,10 @@ export const useUpdatePosition = (
     const [x, z] = houses[houseId].position
     const [dx, dz] = [px - x, pz - z].map(snapToGrid)
 
-    for (let k of scopes.primary.selected) {
-      houses[k].position[0] += dx
-      houses[k].position[1] += dz
-    }
+    const { buildingId } = scope.selected
+
+    houses[buildingId].position[0] += dx
+    houses[buildingId].position[1] += dz
 
     invalidate()
 
@@ -103,7 +110,7 @@ export const useUpdatePosition = (
 
 export const useFocusedBuilding = () => {
   const houses = useHouses()
-  const { buildingId } = useContext()
+  const { buildingId } = useSiteContext()
   return buildingId ? houses[buildingId] : null
 }
 
@@ -159,18 +166,6 @@ export const modulesToRows = (
 export const useBuildingRows = (buildingId: string) => {
   const houseModules = useBuildingModules(buildingId)
   return modulesToRows(houseModules)
-}
-
-export const useHoverHouse = (id: string) => {
-  return (hover: boolean = true) => {
-    if (scopes.primary.type === ScopeTypeEnum.Enum.HOUSE) {
-      if (scopes.primary.hovered !== id && hover) {
-        scopes.primary.hovered = id
-      } else if (scopes.primary.hovered === id && !hover) {
-        scopes.primary.hovered = null
-      }
-    }
-  }
 }
 
 export default houses

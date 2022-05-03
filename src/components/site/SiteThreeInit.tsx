@@ -1,9 +1,9 @@
 import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
-import context from "@/stores/context"
+import siteContext from "@/stores/context"
 import { clearIlluminatedMaterials } from "@/stores/highlights"
 import { setXZ } from "@/stores/pointer"
-import scopes from "@/stores/scope"
+import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
 import { useContextBridge } from "@react-three/drei"
 // import { store, useMapBoundary } from "@/store"
@@ -67,14 +67,12 @@ const SiteThreeInit = (props: Props) => {
       <HorizontalPlane
         onChange={setXZ}
         onNearClick={() => {
-          context.menu = null
-          scopes.primary.selected = []
-          scopes.secondary.selected = []
+          siteContext.menu = null
+          scope.selected = null
         }}
         onNearHover={() => {
-          if (context.menu !== null) return
-          scopes.primary.hovered = null
-          scopes.secondary.hovered = null
+          if (siteContext.menu !== null) return
+          scope.hovered = null
           clearIlluminatedMaterials()
         }}
       />

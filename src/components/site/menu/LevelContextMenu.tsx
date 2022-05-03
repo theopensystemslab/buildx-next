@@ -1,7 +1,7 @@
 import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
-import { columnLayoutToDNA, useColumnLayout } from "@/hooks/layouts"
+import { useColumnLayout } from "@/hooks/layouts"
 import {
   StairsOpt,
   useLayoutOptions,
@@ -10,14 +10,8 @@ import {
   WindowOpt,
 } from "@/hooks/modules"
 import houses from "@/stores/houses"
-import scopes, { ScopeTypeEnum } from "@/stores/scope"
-import { mapA } from "@/utils"
-import { findFirst } from "fp-ts/lib/Array"
-import { pipe } from "fp-ts/lib/function"
-import { getOrElse } from "fp-ts/lib/Option"
-import produce from "immer"
+import scope from "@/stores/scope"
 import React from "react"
-import { useSnapshot } from "valtio"
 
 type Props = ContextMenuProps & {
   buildingId: string
@@ -25,14 +19,11 @@ type Props = ContextMenuProps & {
 }
 
 const LevelContextMenu = (props: Props) => {
-  if (scopes.primary.type !== ScopeTypeEnum.Enum.MODULE)
-    throw new Error("LevelContextMenu scope invalid")
-
   const { buildingId, levelIndex } = props
 
-  const scope = useSnapshot(scopes.primary)
+  if (scope.selected === null) throw new Error("scope.selected null")
 
-  const { columnIndex, groupIndex } = scope.selected[0]
+  const { columnIndex, groupIndex } = scope.selected
 
   const columnLayout = useColumnLayout(buildingId)
 

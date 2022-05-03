@@ -3,7 +3,7 @@ import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
-import { EditModeEnum, useContext } from "@/stores/context"
+import { EditModeEnum, useSiteContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
 import { mapRA } from "@/utils"
@@ -151,7 +151,7 @@ const BuildingBuilding = (props: Props) => {
 
   const handleOffset = 1
 
-  const { editMode } = useContext()
+  const { editMode } = useSiteContext()
 
   const verticalCutPlanes = useVerticalCutPlanes(columnLayout, id)
 
