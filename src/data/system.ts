@@ -2,22 +2,16 @@ import { safeLocalStorageGet } from "../utils"
 import { createMaterial } from "../utils/three"
 import { useState, useEffect, useRef } from "react"
 import { flatten } from "ramda"
-import type { HouseType } from "./houseType"
-import { getEnergyInfo } from "./energyInfo"
-import type { EnergyInfo } from "./energyInfo"
-import { getHouseTypes } from "./houseType"
-import type { Module } from "./module"
-import { getModules } from "./module"
-import type { Material } from "./material"
-import { getMaterials } from "./material"
-import type { InternalLayoutType } from "./internalLayoutType"
-import { getInternalLayoutTypes } from "./internalLayoutType"
-import type { Element } from "./element"
-import { getElements } from "./element"
-import type { WindowType } from "./windowType"
-import { getWindowTypes } from "./windowType"
-import { getSystemSettings, SystemSettings } from "./settings"
-import { getStairTypes, StairType } from "./stairType"
+import { getEnergyInfo, type EnergyInfo } from "./energyInfo"
+import { type HouseType, getHouseTypes } from "./houseType"
+import { getModules, type Module } from "./module"
+import { type Material, getMaterials } from "./material"
+import { type InternalLayoutType, getInternalLayoutTypes } from "./internalLayoutType"
+import { type Element, getElements } from "./element"
+import { type WindowType, getWindowTypes } from "./windowType"
+import { type SpaceType, getSpaceTypes } from "./spaceType"
+import { getSystemSettings, type SystemSettings } from "./settings"
+import { getStairTypes, type StairType } from "./stairType"
 
 export const systems: Array<System> = [
   {
@@ -52,10 +46,11 @@ export interface SystemsData {
   stairTypes: Array<StairType>
   internalLayoutTypes: Array<InternalLayoutType>
   energyInfo: Array<EnergyInfo>
+  spaceTypes: Array<SpaceType>
   settings: Array<SystemSettings>
 }
 
-const CACHE_SYSTEMS_DATA = true
+const CACHE_SYSTEMS_DATA = false
 
 const addCached = (SystemsData: SystemsData): SystemsData => {
   return {
@@ -116,6 +111,10 @@ export const useSystemsData = (): SystemsData | "error" | null => {
         systems.map(getInternalLayoutTypes)
       ).then(flatten)
 
+      const spaceTypes = await Promise.all(
+        systems.map(getSpaceTypes)
+      ).then(flatten)
+
       const houseTypes = await Promise.all(
         systems.map((system) => getHouseTypes(system))
       )
@@ -149,6 +148,7 @@ export const useSystemsData = (): SystemsData | "error" | null => {
         stairTypes,
         internalLayoutTypes,
         energyInfo,
+        spaceTypes,
         settings,
       })
     } catch (err) {

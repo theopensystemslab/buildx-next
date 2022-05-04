@@ -2,6 +2,7 @@ import { useSystemsData } from "@/data/system"
 import { useHouses } from "@/stores/houses"
 import React, { useMemo, useState, type FC } from "react"
 import Link from "next/link"
+import Loader from "@/components/ui/Loader"
 import calculate, { type DashboardData } from "./data"
 import HouseMultiSelect from "./HouseMultiSelect"
 import { Tab, tabs, fromSlug } from "./dashboardTabs"
@@ -39,6 +40,14 @@ const Dashboard: FC<Props> = (props) => {
     })
   }, [systemsData, houses, selectedHouses])
 
+  if (!dashboardData) {
+    return (
+      <div className="flex items-center justify-center w-full h-full bg-gray-100">
+        <Loader />
+      </div>
+    )
+  }
+
   return (
     <div className="w-full h-full overflow-auto bg-gray-100">
       <div className="max-w-5xl pt-20 pb-16 pl-4 pr-4 mx-auto space-y-8">
@@ -64,31 +73,29 @@ const Dashboard: FC<Props> = (props) => {
             )
           })}
         </div>
-        {dashboardData && (
-          <div className="pt-8">
-            {activeTab === Tab.Overview ? (
-              <Overview dashboardData={dashboardData} />
-            ) : null}
-            {activeTab === Tab.BuildingAreas ? (
-              <BuildingAreas dashboardData={dashboardData} />
-            ) : null}
-            {activeTab === Tab.BuildCosts ? (
-              <BuildCosts dashboardData={dashboardData} />
-            ) : null}
-            {activeTab === Tab.EnergyUse ? (
-              <EnergyUse dashboardData={dashboardData} />
-            ) : null}
-            {activeTab === Tab.BuildingFabric ? (
-              <BuildingFabric dashboardData={dashboardData} />
-            ) : null}
-            {activeTab === Tab.OperationalCo2 ? (
-              <OperationalCo2 dashboardData={dashboardData} />
-            ) : null}
-            {activeTab === Tab.EmbodiedCo2 ? (
-              <EmbodiedCo2 dashboardData={dashboardData} />
-            ) : null}
-          </div>
-        )}
+        <div className="pt-8">
+          {activeTab === Tab.Overview ? (
+            <Overview dashboardData={dashboardData} />
+          ) : null}
+          {activeTab === Tab.BuildingAreas ? (
+            <BuildingAreas dashboardData={dashboardData} />
+          ) : null}
+          {activeTab === Tab.BuildCosts ? (
+            <BuildCosts dashboardData={dashboardData} />
+          ) : null}
+          {activeTab === Tab.EnergyUse ? (
+            <EnergyUse dashboardData={dashboardData} />
+          ) : null}
+          {activeTab === Tab.BuildingFabric ? (
+            <BuildingFabric dashboardData={dashboardData} />
+          ) : null}
+          {activeTab === Tab.OperationalCo2 ? (
+            <OperationalCo2 dashboardData={dashboardData} />
+          ) : null}
+          {activeTab === Tab.EmbodiedCo2 ? (
+            <EmbodiedCo2 dashboardData={dashboardData} />
+          ) : null}
+        </div>
       </div>
     </div>
   )

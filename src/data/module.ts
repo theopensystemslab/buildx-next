@@ -48,31 +48,41 @@ export type LoadedModule = BareModule & {
   gltf: GltfT
 }
 
-export const getModules = (system: System): Promise<Array<Module>> =>
-  getAirtableEntries({ tableId: system.airtableId, tab: "modules" })
-    .then((res) =>
-      res.records.map((record: any) => {
-        const dna = record.fields?.["module_code"] ?? ""
-        return {
-          id: record.id,
-          systemId: system.id,
-          dna,
-          structuredDna: parseDna(dna),
-          modelUrl: record.fields?.["GLB_model"]?.[0]?.url ?? "",
-          width: record.fields?.["section_width"]?.[0] ?? 1,
-          height: record.fields?.["level_height"]?.[0] ?? 1,
-          length: record.fields?.["length_dims"] ?? 0,
-          cost: record.fields?.["baseline_module_cost"] ?? 1500,
-          embodiedCarbon: record.fields?.["embodied_carbon"] ?? -400,
-          visualReference: record.fields?.["visual_reference"]?.[0]?.url,
-          description: record.fields?.["description"],
-        }
-      })
-    )
-    .catch((err) => {
-      console.warn(err)
-      return Promise.resolve([])
+export const getModules = async (system: System): Promise<Array<Module>> => {
+  try {
+    const moduleRecords = await getAirtableEntries({
+      tableId: system.airtableId,
+      tab: "modules",
     })
+    const spaceTypesRecords = await getAirtableEntries({
+      tableId: system.airtableId,
+      tab: "space_type",
+    })
+
+    console.log(spaceTypesRecords, moduleRecords)
+
+    return moduleRecords.records.map((record: any) => {
+      const dna = record.fields?.["module_code"] ?? ""
+      return {
+        id: record.id,
+        systemId: system.id,
+        dna,
+        structuredDna: parseDna(dna),
+        modelUrl: record.fields?.["GLB_model"]?.[0]?.url ?? "",
+        width: record.fields?.["section_width"]?.[0] ?? 1,
+        height: record.fields?.["level_height"]?.[0] ?? 1,
+        length: record.fields?.["length_dims"] ?? 0,
+        cost: record.fields?.["baseline_module_cost"] ?? 1500,
+        embodiedCarbon: record.fields?.["embodied_carbon"] ?? -400,
+        visualReference: record.fields?.["visual_reference"]?.[0]?.url,
+        description: record.fields?.["description"],
+      }
+    })
+  } catch (err) {
+    console.warn(err)
+    return []
+  }
+}
 
 export const filterCompatibleModules =
   (ks: Array<keyof StructuredDna>) => (module: BareModule) =>

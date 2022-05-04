@@ -13,7 +13,7 @@ const BasicChart: FC<{
   )
 
   const w = 60
-  const h = 100
+  const h = 80
 
   const baseline = min < 0 ? h / 2 : h
 
