@@ -1,6 +1,6 @@
 import { useSystemsData } from "@/data/system"
 import { useHouses } from "@/stores/houses"
-import React, { useMemo, useState, type FC } from "react"
+import React, { useEffect, useMemo, useState, type FC } from "react"
 import Link from "next/link"
 import Loader from "@/components/ui/Loader"
 import calculate, { type DashboardData } from "./data"
@@ -14,6 +14,7 @@ import EnergyUse from "./TabContents/EnergyUse"
 import BuildingFabric from "./TabContents/BuildingFabric"
 import OperationalCo2 from "./TabContents/OperationalCo2"
 import EmbodiedCo2 from "./TabContents/EmbodiedCo2"
+import JSZip from "jszip"
 
 export interface Props {
   slug?: string
@@ -39,6 +40,35 @@ const Dashboard: FC<Props> = (props) => {
       selectedHouses,
     })
   }, [systemsData, houses, selectedHouses])
+
+  const [zipUrl, setZipUrl] = useState<string>("")
+
+  useEffect(() => {
+    if (!dashboardData) {
+      return
+    }
+    const zip = new JSZip()
+    const houses = zip.folder("houses")
+
+    Object.entries(dashboardData.byHouse).forEach(([houseId, info]) => {
+      const data = info.houseModules.map((module) => ({
+        dna: module.dna,
+        width: module.width,
+        height: module.height,
+      }))
+      houses?.file(
+        `${houseId}.csv`,
+        `"Code","Width","Height"\n${data
+          .map((d) => `"${d.dna}","${d.width}","${d.height}"`)
+          .join("\n")}`
+      )
+    })
+
+    zip.generateAsync({ type: "base64" }).then((b64) => {
+      const url = `data:application/zip;base64,${b64}`
+      setZipUrl(url)
+    })
+  }, [dashboardData, setZipUrl])
 
   if (!dashboardData) {
     return (
@@ -74,6 +104,11 @@ const Dashboard: FC<Props> = (props) => {
               )
             })}
           </div>
+        </div>
+        <div className="p-2">
+          <a className="text-xs underline" href={zipUrl}>
+            Download
+          </a>
         </div>
         <div>
           {activeTab === Tab.Overview ? (
