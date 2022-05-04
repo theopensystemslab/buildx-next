@@ -1,3 +1,4 @@
+import { useRotateVector } from "@/hooks/geometry"
 import { PositionedColumn } from "@/hooks/layouts"
 import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
@@ -172,18 +173,7 @@ const BuildingBuilding = (props: Props) => {
     />
   )
 
-  const rotationMatrix = useRef(new Matrix4())
-
-  const rotatePointerVector = ([x0, z0]: [number, number]): [
-    number,
-    number
-  ] => {
-    const vec = new Vector3(x0, 0, z0)
-    rotationMatrix.current.makeRotationY(-houses[id].rotation)
-    vec.applyMatrix4(rotationMatrix.current)
-    const [x1, , z1] = vec.toArray()
-    return [x1, z1]
-  }
+  const rotateVector = useRotateVector(id)
 
   return (
     <group position={[buildingX, 0, buildingZ]} rotation={[0, rotation, 0]}>
@@ -193,8 +183,8 @@ const BuildingBuilding = (props: Props) => {
         {editMode === EditModeEnum.Enum.STRETCH && (
           <StretchHandle
             onDrag={({ last }) => {
-              const [, pz] = rotatePointerVector(pointer.xz)
-              const [, bz] = rotatePointerVector([buildingX, buildingZ])
+              const [, pz] = rotateVector(pointer.xz)
+              const [, bz] = rotateVector([buildingX, buildingZ])
 
               const z = pipe(handleOffset + pz - bz, startClamp)
 
@@ -216,8 +206,8 @@ const BuildingBuilding = (props: Props) => {
         {editMode === EditModeEnum.Enum.STRETCH && (
           <StretchHandle
             onDrag={({ last }) => {
-              const [, pz] = rotatePointerVector(pointer.xz)
-              const [, bz] = rotatePointerVector([buildingX, buildingZ])
+              const [, pz] = rotateVector(pointer.xz)
+              const [, bz] = rotateVector([buildingX, buildingZ])
 
               const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
 

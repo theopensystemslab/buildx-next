@@ -9,6 +9,7 @@ import produce from "immer"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import { proxy } from "valtio"
+import { useRotateVector } from "./geometry"
 import {
   columnLayoutToDNA,
   PositionedColumn,
@@ -127,6 +128,8 @@ export const useStretch = (buildingId: string) => {
 
   const house = useHouse(buildingId)
 
+  const rotateVector = useRotateVector(buildingId)
+
   const { startColumn, endColumn, midColumns } = pipe(
     columnLayout,
     partition(
@@ -229,6 +232,13 @@ export const useStretch = (buildingId: string) => {
         }),
         endColumn,
       ]) as string[]
+
+      if (startVanillaColumns > 0) {
+        const dz = startVanillaColumns * vanillaColumnLength
+        const [dx1, dz1] = rotateVector([0, dz])
+        houses[buildingId].position[0] += dx1
+        houses[buildingId].position[1] -= dz1
+      }
     } else if (
       visibleStartIndex > 0 ||
       visibleEndIndex < columnLayout.length - 1
@@ -238,35 +248,14 @@ export const useStretch = (buildingId: string) => {
         ...midColumns.slice(visibleStartIndex, visibleEndIndex),
         endColumn,
       ]) as string[]
-    }
 
-    // const realN = pipe(
-    //   columnLayout,
-    //   spanLeft(
-    //     ({ columnIndex }) =>
-    //       columnIndex !== (isStart ? columnLayout.length - 1 : 1)
-    //   ),
-    //   ({ init, rest }) => [
-    //     ...init,
-    //     ...replicate(realN, {
-    //       columnIndex: 0,
-    //       gridGroups: positionedRows,
-    //       z: 0,
-    //     }),
-    //     ...rest,
-    //   ]
-    // )
-    // // add some vanilla
-    // if (stretch.endVanillaColumns > 0) {
-    //   // start
-    //     // end
-    //   } else {
-    //   }
-    //   // subtract from start
-    // } else if (stretch.visibleStartIndex > startColumn.columnIndex) {
-    //   // subtract from end
-    // } else if (stretch.visibleEndIndex < endColumn.columnIndex) {
-    // }
+      if (visibleStartIndex > 0) {
+        const dz = visibleStartIndex * vanillaColumnLength
+        const [dx1, dz1] = rotateVector([0, dz])
+        houses[buildingId].position[0] -= dx1
+        houses[buildingId].position[1] += dz1
+      }
+    }
 
     // reset
     stretch.visibleStartIndex = -1
