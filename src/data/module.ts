@@ -54,12 +54,6 @@ export const getModules = async (system: System): Promise<Array<Module>> => {
       tableId: system.airtableId,
       tab: "modules",
     })
-    const spaceTypesRecords = await getAirtableEntries({
-      tableId: system.airtableId,
-      tab: "space_type",
-    })
-
-    console.log(spaceTypesRecords, moduleRecords)
 
     return moduleRecords.records.map((record: any) => {
       const dna = record.fields?.["module_code"] ?? ""
