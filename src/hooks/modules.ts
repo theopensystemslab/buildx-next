@@ -57,8 +57,6 @@ export const useGetVanillaModule = <T extends BareModule>(
   const { loadGLTF = false } = opts
   const { modules: allModules } = useSystemsData()
 
-  const bugMod = "W1-END-G1-GRID1-01-ST0-L0-SIDE0-SIDE0-END1-TOP0"
-
   return (
     module: T,
     opts: {
@@ -226,7 +224,9 @@ export const useGetStairsModule = () => {
         (x) =>
           x.structuredDna.stairsType ===
             (stairsType ?? oldModule.structuredDna.stairsType) &&
-          (!levelType || x.structuredDna.levelType === levelType)
+          (!levelType
+            ? x.structuredDna.levelType === oldModule.structuredDna.levelType
+            : x.structuredDna.levelType === levelType)
       ),
       (modules) =>
         topCandidateByHamming(
