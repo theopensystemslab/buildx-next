@@ -3,7 +3,7 @@ import { useSystemsData } from "@/contexts/SystemsData"
 import { Houses } from "@/data/house"
 import { LoadedModule, Module } from "@/data/module"
 import { snapToGrid, SSR, useGLTF } from "@/utils"
-import { ThreeEvent, useThree } from "@react-three/fiber"
+import { invalidate, ThreeEvent } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
@@ -15,17 +15,19 @@ import {
   reduceWithIndex,
 } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
-import { MutableRefObject, useCallback, useEffect } from "react"
-import { Group } from "three"
+import { MutableRefObject, useCallback, useEffect, useRef } from "react"
+import { Group, Matrix4, Vector3 } from "three"
 import { proxy, subscribe, useSnapshot } from "valtio"
+import { subscribeKey } from "valtio/utils"
 import { setCameraEnabled } from "./camera"
 import {
+  EditModeEnum,
   SiteContextModeEnum,
   useSiteContext,
   useSiteContextMode,
 } from "./context"
 import pointer from "./pointer"
-import scope, { ScopeItem } from "./scope"
+import scope from "./scope"
 
 export const getInitialHouses = () =>
   SSR
@@ -66,46 +68,93 @@ export const useHouseType = (houseId: string) => {
   return houseType
 }
 
-export const useUpdatePosition = (
-  houseId: string,
+export const usePositionRotation = (
+  buildingId: string,
   groupRef: MutableRefObject<Group | undefined>
-): Handler<"drag", ThreeEvent<PointerEvent>> => {
-  const invalidate = useThree((three) => three.invalidate)
-
+) => {
   const onPositionUpdate = useCallback(() => {
     if (!groupRef.current) return
-    const [x, z] = houses[houseId].position
+    const [x, z] = houses[buildingId].position
     groupRef.current.position.set(x, 0, z)
-  }, [houseId])
+  }, [buildingId])
 
-  useEffect(
-    () => subscribe(houses[houseId].position, onPositionUpdate),
-    [houseId, onPositionUpdate]
+  useEffect(() => {
+    onPositionUpdate()
+    return subscribe(houses[buildingId].position, onPositionUpdate)
+  }, [buildingId, onPositionUpdate])
+
+  const rotationMatrix = useRef(
+    new Matrix4().makeRotationY(houses[buildingId].rotation)
   )
-  useEffect(onPositionUpdate, [onPositionUpdate])
+
+  const onRotationUpdate = useCallback(() => {
+    if (!groupRef.current) return
+    groupRef.current.rotation.set(0, houses[buildingId].rotation, 0)
+    rotationMatrix.current.makeRotationY(houses[buildingId].rotation)
+  }, [buildingId])
+
+  useEffect(() => {
+    onRotationUpdate()
+    return subscribeKey(houses[buildingId], "rotation", onRotationUpdate)
+  }, [buildingId, onRotationUpdate])
 
   const contextMode = useSiteContextMode()
+  const { editMode } = useSiteContext()
 
-  return ({ first, last }) => {
-    if (contextMode !== SiteContextModeEnum.Enum.SITE) return
-    if (scope.selected === null) return
-    if (first) {
-      setCameraEnabled(false)
+  const lastPointer = useRef<[number, number]>([0, 0])
+
+  // const rotatePointerVector = (): [number, number] => {
+  //   const [x0, z0] = pointer.xz
+  //   const vec = new Vector3(x0, 0, z0)
+  //   vec.applyMatrix4(rotationMatrix.current)
+  //   const [x1, , z1] = vec.toArray()
+  //   return [x1, z1]
+  // }
+
+  const buildingDragHandler: Handler<"drag", ThreeEvent<PointerEvent>> = ({
+    first,
+    last,
+  }) => {
+    if (
+      contextMode !== SiteContextModeEnum.Enum.SITE ||
+      editMode !== EditModeEnum.Enum.MOVE_ROTATE
+    ) {
+      return
     }
 
-    const [px, pz] = pointer.xz
-    const [x, z] = houses[houseId].position
-    const [dx, dz] = [px - x, pz - z].map(snapToGrid)
+    if (scope.selected?.buildingId !== buildingId) return
 
-    const { buildingId } = scope.selected
+    if (first) {
+      setCameraEnabled(false)
+      lastPointer.current = pointer.xz
+    }
+
+    const [px0, pz0] = lastPointer.current
+    const [px1, pz1] = pointer.xz
+
+    const [dx, dz] = [px1 - px0, pz1 - pz0]
 
     houses[buildingId].position[0] += dx
     houses[buildingId].position[1] += dz
 
+    console.log(houses[buildingId].position)
+
     invalidate()
 
-    if (last) setCameraEnabled(true)
+    if (last) {
+      setCameraEnabled(true)
+      const [x, z] = houses[buildingId].position.map(snapToGrid) as [
+        number,
+        number
+      ]
+      houses[buildingId].position[0] = x
+      houses[buildingId].position[1] = z
+    }
+
+    lastPointer.current = pointer.xz
   }
+
+  return { buildingDragHandler }
 }
 
 export const useFocusedBuilding = () => {

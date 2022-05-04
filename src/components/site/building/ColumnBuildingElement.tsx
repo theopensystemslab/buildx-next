@@ -78,8 +78,32 @@ const ColumnBuildingElement = (props: Props) => {
     },
     onContextMenu: ({ event, event: { intersections, pageX, pageY } }) => {
       event.preventDefault?.()
-      const obj = intersections[0].object ?? intersections[0].eventObject
       if (!meshRef.current) return
+      const obj = intersections[0].object ?? intersections[0].eventObject
+
+      const returnIf = any(
+        undef(intersections?.[0]),
+        intersections[0].object.id !== meshRef.current?.id,
+        siteContext.buildingId !== null &&
+          siteContext.buildingId !== buildingId,
+        !object3dChildOf(obj, meshRef.current)
+      )
+      if (returnIf) return
+
+      // scope.selected = {
+      //   elementName,
+      //   groupIndex,
+      //   levelIndex,
+      //   columnIndex,
+      //   buildingId,
+      // }
+
+      siteContext.menu = [pageX, pageY]
+      invalidate()
+    },
+    onPointerDown: ({ event, event: { intersections } }) => {
+      if (!meshRef.current) return
+      const obj = intersections[0].object ?? intersections[0].eventObject
 
       const returnIf = any(
         undef(intersections?.[0]),
@@ -98,7 +122,6 @@ const ColumnBuildingElement = (props: Props) => {
         buildingId,
       }
 
-      siteContext.menu = [pageX, pageY]
       invalidate()
     },
   })

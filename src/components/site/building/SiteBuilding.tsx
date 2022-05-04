@@ -8,8 +8,10 @@ import {
   useSiteContextMode,
 } from "@/stores/context"
 import { outlineGroup } from "@/stores/highlights"
+import { usePositionRotation } from "@/stores/houses"
 import scope from "@/stores/scope"
 import { mapRA } from "@/utils"
+import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useEffect, useRef } from "react"
 import { Group } from "three"
@@ -57,9 +59,13 @@ const SiteBuildingMain = (props: Props) => {
   const buildingLength = columns.reduce((acc, v) => acc + v.length, 0)
   const buildingWidth = columns[0].gridGroups[0].modules[0].module.width
 
+  const { buildingDragHandler } = usePositionRotation(id, groupRef)
+
+  const bind = useDrag(buildingDragHandler)
+
   return (
     <Fragment>
-      <group ref={groupRef}>
+      <group ref={groupRef} {...(bind() as any)}>
         {pipe(columns, mapRA(renderColumn))}
         {editMode === EditModeEnum.Enum.MOVE_ROTATE && (
           <RotateHandles
