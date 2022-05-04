@@ -4,7 +4,7 @@ import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import { EditModeEnum, useSiteContext } from "@/stores/context"
-import { useHouse } from "@/stores/houses"
+import houses, { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
 import { mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
@@ -12,7 +12,7 @@ import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useMemo, useRef } from "react"
-import { Color, DoubleSide, Group, Plane } from "three"
+import { Color, DoubleSide, Group, Matrix4, Plane, Vector3 } from "three"
 import { useSnapshot } from "valtio"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
@@ -172,6 +172,19 @@ const BuildingBuilding = (props: Props) => {
     />
   )
 
+  const rotationMatrix = useRef(new Matrix4())
+
+  const rotatePointerVector = ([x0, z0]: [number, number]): [
+    number,
+    number
+  ] => {
+    const vec = new Vector3(x0, 0, z0)
+    rotationMatrix.current.makeRotationY(-houses[id].rotation)
+    vec.applyMatrix4(rotationMatrix.current)
+    const [x1, , z1] = vec.toArray()
+    return [x1, z1]
+  }
+
   return (
     <group position={[buildingX, 0, buildingZ]} rotation={[0, rotation, 0]}>
       <group ref={startRef}>
@@ -180,12 +193,15 @@ const BuildingBuilding = (props: Props) => {
         {editMode === EditModeEnum.Enum.STRETCH && (
           <StretchHandle
             onDrag={({ last }) => {
-              const z = pipe(
-                handleOffset + pointer.xz[1] - buildingZ,
-                startClamp
-              )
+              const [, pz] = rotatePointerVector(pointer.xz)
+              const [, bz] = rotatePointerVector([buildingX, buildingZ])
+
+              const z = pipe(handleOffset + pz - bz, startClamp)
+
               startRef.current.position.z = z
+
               sendDrag(z, { isStart: true })
+
               if (last) {
                 startRef.current.position.z = 0
                 sendDrop()
@@ -200,12 +216,15 @@ const BuildingBuilding = (props: Props) => {
         {editMode === EditModeEnum.Enum.STRETCH && (
           <StretchHandle
             onDrag={({ last }) => {
-              const z = pipe(
-                -(endColumn.z + handleOffset) + pointer.xz[1] - buildingZ,
-                endClamp
-              )
+              const [, pz] = rotatePointerVector(pointer.xz)
+              const [, bz] = rotatePointerVector([buildingX, buildingZ])
+
+              const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
+
               endRef.current.position.z = z
+
               sendDrag(z, { isStart: false })
+
               if (last) {
                 endRef.current.position.z = 0
                 sendDrop()

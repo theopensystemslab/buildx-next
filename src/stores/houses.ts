@@ -83,14 +83,9 @@ export const usePositionRotation = (
     return subscribe(houses[buildingId].position, onPositionUpdate)
   }, [buildingId, onPositionUpdate])
 
-  const rotationMatrix = useRef(
-    new Matrix4().makeRotationY(houses[buildingId].rotation)
-  )
-
   const onRotationUpdate = useCallback(() => {
     if (!groupRef.current) return
     groupRef.current.rotation.set(0, houses[buildingId].rotation, 0)
-    rotationMatrix.current.makeRotationY(houses[buildingId].rotation)
   }, [buildingId])
 
   useEffect(() => {
@@ -102,14 +97,6 @@ export const usePositionRotation = (
   const { editMode } = useSiteContext()
 
   const lastPointer = useRef<[number, number]>([0, 0])
-
-  // const rotatePointerVector = (): [number, number] => {
-  //   const [x0, z0] = pointer.xz
-  //   const vec = new Vector3(x0, 0, z0)
-  //   vec.applyMatrix4(rotationMatrix.current)
-  //   const [x1, , z1] = vec.toArray()
-  //   return [x1, z1]
-  // }
 
   const buildingDragHandler: Handler<"drag", ThreeEvent<PointerEvent>> = ({
     first,
