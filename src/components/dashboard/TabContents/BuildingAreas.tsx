@@ -2,32 +2,34 @@ import React, { type FC } from "react"
 import { type DashboardData } from "../data"
 import DataTable from "../DataTable"
 
-const BuildingAreas: FC<{ dashboardData: DashboardData }> = () => {
+const BuildingAreas: FC<{ dashboardData: DashboardData }> = (props) => {
+  const { areas } = props.dashboardData
+
   return (
     <DataTable
       data={[
         {
           label: "Footprint area",
           description: "total foundation area",
-          value: 0,
+          value: areas.foundation,
           unitOfMeasurement: "m²",
         },
         {
           label: "Ground floor area",
           description: "",
-          value: 0,
+          value: areas.groundFloor,
           unitOfMeasurement: "m²",
         },
         {
           label: "First floor area",
           description: "",
-          value: 0,
+          value: areas.firstFloor,
           unitOfMeasurement: "m²",
         },
         {
           label: "Second floor area",
           description: "",
-          value: 0,
+          value: areas.secondFloor,
           unitOfMeasurement: "m²",
         },
         {

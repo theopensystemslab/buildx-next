@@ -5,40 +5,95 @@ import { type Houses } from "@/data/house"
 export interface DashboardData {
   byHouse: Record<string, HouseInfo>
   unitsCount: number
-  areas: { total: number; roof: number }
+  areas: Areas
 }
+
+// Areas
+
+export interface Areas {
+  building: number
+  foundation: number
+  groundFloor: number
+  firstFloor: number
+  secondFloor: number
+  roof: number
+}
+
+const emptyAreas = (): Areas => ({
+  building: 0,
+  foundation: 0,
+  groundFloor: 0,
+  firstFloor: 0,
+  secondFloor: 0,
+  roof: 0,
+})
+
+const accumulateAreas = (areas: Areas[]): Areas =>
+  areas.reduce((accumulator, current) => {
+    return {
+      building: accumulator.building + current.building,
+      foundation: accumulator.foundation + current.foundation,
+      groundFloor: accumulator.groundFloor + current.groundFloor,
+      firstFloor: accumulator.firstFloor + current.firstFloor,
+      secondFloor: accumulator.secondFloor + current.secondFloor,
+      roof: accumulator.roof + current.roof,
+    }
+  }, emptyAreas())
+
+// Costs
 
 export interface HouseInfo {
   houseModules: Module[]
-  buildingArea: number
-  roofArea: number
+  areas: Areas
   cost: number
   embodiedCarbon: number
 }
 
 const calculateHouseInfo = (houseModules: Module[]): HouseInfo => {
+  const accumulateIf = (
+    fn: (module: Module) => boolean,
+    getValue: (module: Module) => number
+  ) => {
+    return houseModules.reduce((accumulator, current) => {
+      return accumulator + (fn(current) ? getValue(current) : 0)
+    }, 0)
+  }
   return {
     houseModules,
-    buildingArea: houseModules.reduce((accumulator, current) => {
-      return (
-        accumulator +
-        (current.structuredDna.level === 0 ? current.width * current.length : 0)
-      )
-    }, 0),
-    roofArea: houseModules.reduce((accumulator, current) => {
-      return (
-        accumulator +
-        (current.structuredDna.levelType[0] === "R"
-          ? current.width * current.length
-          : 0)
-      )
-    }, 0),
-    cost: houseModules.reduce((accumulator, current) => {
-      return accumulator + current.cost
-    }, 0),
-    embodiedCarbon: houseModules.reduce((accumulator, current) => {
-      return accumulator + current.embodiedCarbon
-    }, 0),
+    areas: {
+      building: accumulateIf(
+        (module) => module.structuredDna.levelType[0] === "G",
+        (module) => module.width * module.height
+      ),
+      foundation: accumulateIf(
+        (module) => module.structuredDna.levelType[0] === "F",
+        (module) => module.width * module.height
+      ),
+      groundFloor: accumulateIf(
+        (module) => module.structuredDna.levelType[0] === "G",
+        (module) => module.width * module.height
+      ),
+      firstFloor: accumulateIf(
+        (module) => module.structuredDna.levelType[0] === "M",
+        (module) => module.width * module.height
+      ),
+      secondFloor: accumulateIf(
+        (module) => module.structuredDna.levelType[0] === "T",
+        (module) => module.width * module.height
+      ),
+      roof: accumulateIf(
+        (module) => module.structuredDna.levelType[0] === "R",
+        (module) => module.width * module.height
+      ),
+    },
+    cost: accumulateIf(
+      () => true,
+      (module) => module.cost
+    ),
+    embodiedCarbon: accumulateIf(
+      () => true,
+      (module) => module.embodiedCarbon
+    ),
   }
 }
 
@@ -72,15 +127,7 @@ const calculate = ({
     return obj
   })()
 
-  const areas = Object.values(byHouse).reduce(
-    ({ total, roof }, houseInfo) => {
-      return {
-        total: total + houseInfo.buildingArea,
-        roof: roof + houseInfo.roofArea,
-      }
-    },
-    { total: 0, roof: 0 }
-  )
+  const areas = accumulateAreas(Object.values(byHouse).map(houseInfo => houseInfo.areas))
 
   return {
     byHouse,
