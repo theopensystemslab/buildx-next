@@ -2,7 +2,7 @@ import CameraControls from "camera-controls"
 import { useEffect } from "react"
 import { Vector3 } from "three"
 import { proxy } from "valtio"
-import { useContext } from "./context"
+import { useSiteContext } from "./context"
 import { useFocusedBuilding, useHouses } from "./houses"
 
 type CameraProxy = {
@@ -24,7 +24,7 @@ export const setCameraEnabled = (b: boolean) => {
 
 export const useCameraFocus = () => {
   const houses = useHouses()
-  const { buildingId } = useContext()
+  const { buildingId } = useSiteContext()
   const house = buildingId ? houses[buildingId] : null
 
   useEffect(() => {

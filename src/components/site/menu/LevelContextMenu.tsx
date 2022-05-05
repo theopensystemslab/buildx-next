@@ -1,7 +1,7 @@
 import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
-import { columnLayoutToDNA, useColumnLayout } from "@/hooks/layouts"
+import { useColumnLayout } from "@/hooks/layouts"
 import {
   StairsOpt,
   useLayoutOptions,
@@ -10,37 +10,19 @@ import {
   WindowOpt,
 } from "@/hooks/modules"
 import houses from "@/stores/houses"
-import scopes, { ScopeTypeEnum } from "@/stores/scope"
-import { mapA } from "@/utils"
-import { findFirst } from "fp-ts/lib/Array"
-import { pipe } from "fp-ts/lib/function"
-import { getOrElse } from "fp-ts/lib/Option"
-import produce from "immer"
+import scope from "@/stores/scope"
 import React from "react"
-import { useSnapshot } from "valtio"
 
-type Props = ContextMenuProps & {
-  buildingId: string
-  levelIndex: number
-}
+type Props = ContextMenuProps
 
 const LevelContextMenu = (props: Props) => {
-  if (scopes.primary.type !== ScopeTypeEnum.Enum.MODULE)
-    throw new Error("LevelContextMenu scope invalid")
+  if (scope.selected === null) throw new Error("scope.selected null")
 
-  const { buildingId, levelIndex } = props
-
-  const scope = useSnapshot(scopes.primary)
-
-  const { columnIndex, groupIndex } = scope.selected[0]
+  const { groupIndex, levelIndex, columnIndex, buildingId } = scope.selected
 
   const columnLayout = useColumnLayout(buildingId)
 
-  const module =
-    columnLayout[columnIndex].gridGroups[levelIndex].modules[groupIndex].module
-
   const { options: layoutOpts, selected: selectedLayoutOpt } = useLayoutOptions(
-    module,
     columnLayout,
     {
       columnIndex,
@@ -57,7 +39,6 @@ const LevelContextMenu = (props: Props) => {
   }
 
   const { options: stairsOpts, selected: selectedStairsOpt } = useStairsOptions(
-    module,
     columnLayout,
     {
       columnIndex,
@@ -74,7 +55,6 @@ const LevelContextMenu = (props: Props) => {
   }
 
   const { options: windowOpts, selected: selectedWindowOpt } = useWindowOptions(
-    module,
     columnLayout,
     {
       columnIndex,

@@ -1,14 +1,19 @@
+import RotateHandles from "@/components/ui-3d/RotateHandles"
 import { PositionedColumn, useColumnLayout } from "@/hooks/layouts"
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
-import context, { useContext } from "@/stores/context"
+import {
+  EditModeEnum,
+  SiteContextModeEnum,
+  useSiteContext,
+  useSiteContextMode,
+} from "@/stores/context"
 import { outlineGroup } from "@/stores/highlights"
-import { useHoverHouse, useUpdatePosition } from "@/stores/houses"
-import scopes, { ScopeTypeEnum } from "@/stores/scope"
+import { usePositionRotation } from "@/stores/houses"
+import scope from "@/stores/scope"
 import { mapRA } from "@/utils"
-import { ThreeEvent } from "@react-three/fiber"
-import { useGesture } from "@use-gesture/react"
+import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { useEffect, useRef } from "react"
+import { Fragment, useEffect, useRef } from "react"
 import { Group } from "three"
 import { subscribe } from "valtio"
 import BuildingBuilding from "./BuildingBuilding"
@@ -21,66 +26,19 @@ type Props = {
 const SiteBuildingMain = (props: Props) => {
   const { id } = props
   const groupRef = useRef<Group>()
+  const contextMode = useSiteContextMode()
+  const { editMode } = useSiteContext()
 
   useEffect(() => {
-    scopes.secondary = {
-      type: ScopeTypeEnum.Enum.ZERO,
-      hovered: null,
-      selected: [],
-    }
-  }, [])
+    if (contextMode !== SiteContextModeEnum.Enum.SITE) return
 
-  const hoverHouse = useHoverHouse(id)
-
-  const onDrag = useUpdatePosition(id, groupRef)
-
-  const bind = useGesture<{
-    drag: ThreeEvent<PointerEvent>
-    hover: ThreeEvent<PointerEvent>
-    onPointerDown: ThreeEvent<PointerEvent>
-  }>({
-    onDrag,
-    onPointerOver: () => {
-      if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
-      hoverHouse()
-    },
-    onPointerOut: () => {
-      if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
-      hoverHouse(false)
-    },
-    onContextMenu: ({ event, event: { pageX, pageY, shiftKey } }) => {
-      event.preventDefault?.()
-      if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
-      if (!scopes.primary.selected.includes(id)) {
-        if (!shiftKey) {
-          scopes.primary.selected = [id]
-        } else {
-          scopes.primary.selected.push(id)
-        }
-      }
-      context.menu = [pageX, pageY]
-    },
-    onPointerDown: ({ shiftKey }) => {
-      if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
-      if (!scopes.primary.selected.includes(id)) {
-        if (!shiftKey) {
-          scopes.primary.selected = [id]
-        } else {
-          scopes.primary.selected.push(id)
-        }
-      }
-    },
-  })
-
-  subscribe(scopes.primary, () => {
-    if (scopes.primary.type === ScopeTypeEnum.Enum.HOUSE) {
+    return subscribe(scope, () => {
       outlineGroup(groupRef, {
         remove:
-          scopes.primary.hovered !== id &&
-          !scopes.primary.selected.includes(id),
+          scope.hovered?.buildingId !== id && scope.selected?.buildingId !== id,
       })
-    }
-  })
+    })
+  }, [contextMode])
 
   const columns = useColumnLayout(id)
 
@@ -98,15 +56,31 @@ const SiteBuildingMain = (props: Props) => {
     />
   )
 
+  const buildingLength = columns.reduce((acc, v) => acc + v.length, 0)
+  const buildingWidth = columns[0].gridGroups[0].modules[0].module.width
+
+  const { buildingDragHandler } = usePositionRotation(id, groupRef)
+
+  const bind = useDrag(buildingDragHandler)
+
   return (
-    <group ref={groupRef} {...(bind() as any)}>
-      {pipe(columns, mapRA(renderColumn))}
-    </group>
+    <Fragment>
+      <group ref={groupRef} {...(bind() as any)}>
+        {pipe(columns, mapRA(renderColumn))}
+        {editMode === EditModeEnum.Enum.MOVE_ROTATE && (
+          <RotateHandles
+            buildingId={id}
+            buildingLength={buildingLength}
+            buildingWidth={buildingWidth}
+          />
+        )}
+      </group>
+    </Fragment>
   )
 }
 
 const SiteBuilding = ({ id }: Props) => {
-  const { buildingId } = useContext()
+  const { buildingId } = useSiteContext()
 
   return buildingId !== id ? (
     <SiteBuildingMain id={id} />

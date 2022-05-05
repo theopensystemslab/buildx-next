@@ -3,7 +3,7 @@ import { useSystemsData } from "@/contexts/SystemsData"
 import { Houses } from "@/data/house"
 import { LoadedModule, Module } from "@/data/module"
 import { snapToGrid, SSR, useGLTF } from "@/utils"
-import { ThreeEvent, useThree } from "@react-three/fiber"
+import { invalidate, ThreeEvent } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
@@ -15,13 +15,19 @@ import {
   reduceWithIndex,
 } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
-import { MutableRefObject, useCallback, useEffect } from "react"
-import { Group } from "three"
+import { MutableRefObject, useCallback, useEffect, useRef } from "react"
+import { Group, Matrix4, Vector3 } from "three"
 import { proxy, subscribe, useSnapshot } from "valtio"
+import { subscribeKey } from "valtio/utils"
 import { setCameraEnabled } from "./camera"
-import { useContext } from "./context"
+import {
+  EditModeEnum,
+  SiteContextModeEnum,
+  useSiteContext,
+  useSiteContextMode,
+} from "./context"
 import pointer from "./pointer"
-import scopes, { ScopeTypeEnum } from "./scope"
+import scope from "./scope"
 
 export const getInitialHouses = () =>
   SSR
@@ -62,48 +68,85 @@ export const useHouseType = (houseId: string) => {
   return houseType
 }
 
-export const useUpdatePosition = (
-  houseId: string,
+export const usePositionRotation = (
+  buildingId: string,
   groupRef: MutableRefObject<Group | undefined>
-): Handler<"drag", ThreeEvent<PointerEvent>> => {
-  const invalidate = useThree((three) => three.invalidate)
-
+) => {
   const onPositionUpdate = useCallback(() => {
     if (!groupRef.current) return
-    const [x, z] = houses[houseId].position
+    const [x, z] = houses[buildingId].position
     groupRef.current.position.set(x, 0, z)
-  }, [houseId])
+  }, [buildingId])
 
-  useEffect(
-    () => subscribe(houses[houseId].position, onPositionUpdate),
-    [houseId, onPositionUpdate]
-  )
-  useEffect(onPositionUpdate, [onPositionUpdate])
+  useEffect(() => {
+    onPositionUpdate()
+    return subscribe(houses[buildingId].position, onPositionUpdate)
+  }, [buildingId, onPositionUpdate])
 
-  return ({ first, last }) => {
-    if (scopes.primary.type !== ScopeTypeEnum.Enum.HOUSE) return
+  const onRotationUpdate = useCallback(() => {
+    if (!groupRef.current) return
+    groupRef.current.rotation.set(0, houses[buildingId].rotation, 0)
+  }, [buildingId])
+
+  useEffect(() => {
+    onRotationUpdate()
+    return subscribeKey(houses[buildingId], "rotation", onRotationUpdate)
+  }, [buildingId, onRotationUpdate])
+
+  const contextMode = useSiteContextMode()
+  const { editMode } = useSiteContext()
+
+  const lastPointer = useRef<[number, number]>([0, 0])
+
+  const buildingDragHandler: Handler<"drag", ThreeEvent<PointerEvent>> = ({
+    first,
+    last,
+  }) => {
+    if (
+      contextMode !== SiteContextModeEnum.Enum.SITE ||
+      editMode !== EditModeEnum.Enum.MOVE_ROTATE
+    ) {
+      return
+    }
+
+    if (scope.selected?.buildingId !== buildingId) return
+
     if (first) {
       setCameraEnabled(false)
+      lastPointer.current = pointer.xz
     }
 
-    const [px, pz] = pointer.xz
-    const [x, z] = houses[houseId].position
-    const [dx, dz] = [px - x, pz - z].map(snapToGrid)
+    const [px0, pz0] = lastPointer.current
+    const [px1, pz1] = pointer.xz
 
-    for (let k of scopes.primary.selected) {
-      houses[k].position[0] += dx
-      houses[k].position[1] += dz
-    }
+    const [dx, dz] = [px1 - px0, pz1 - pz0]
+
+    houses[buildingId].position[0] += dx
+    houses[buildingId].position[1] += dz
+
+    console.log(houses[buildingId].position)
 
     invalidate()
 
-    if (last) setCameraEnabled(true)
+    if (last) {
+      setCameraEnabled(true)
+      const [x, z] = houses[buildingId].position.map(snapToGrid) as [
+        number,
+        number
+      ]
+      houses[buildingId].position[0] = x
+      houses[buildingId].position[1] = z
+    }
+
+    lastPointer.current = pointer.xz
   }
+
+  return { buildingDragHandler }
 }
 
 export const useFocusedBuilding = () => {
   const houses = useHouses()
-  const { buildingId } = useContext()
+  const { buildingId } = useSiteContext()
   return buildingId ? houses[buildingId] : null
 }
 
@@ -159,18 +202,6 @@ export const modulesToRows = (
 export const useBuildingRows = (buildingId: string) => {
   const houseModules = useBuildingModules(buildingId)
   return modulesToRows(houseModules)
-}
-
-export const useHoverHouse = (id: string) => {
-  return (hover: boolean = true) => {
-    if (scopes.primary.type === ScopeTypeEnum.Enum.HOUSE) {
-      if (scopes.primary.hovered !== id && hover) {
-        scopes.primary.hovered = id
-      } else if (scopes.primary.hovered === id && !hover) {
-        scopes.primary.hovered = null
-      }
-    }
-  }
 }
 
 export default houses

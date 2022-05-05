@@ -1,6 +1,6 @@
 import { CamControls } from "@/components/ui-3d/CamControls"
 import camera, { defaultCamPos, useCameraFocus } from "@/stores/camera"
-import { useContext } from "@/stores/context"
+import { useSiteContext } from "@/stores/context"
 import { useSettings } from "@/stores/settings"
 import { useUserAgent } from "@oieduardorabelo/use-user-agent"
 import { OrthographicCamera, PerspectiveCamera } from "@react-three/drei"
@@ -11,7 +11,7 @@ import { ref } from "valtio"
 
 const SiteCamControls = () => {
   const { orthographic, shadows } = useSettings()
-  const { buildingId } = useContext()
+  const { buildingId } = useSiteContext()
   const size = useThree(({ size }) => size)
   const ratio = 10
   const userAgent = useUserAgent()

@@ -1,13 +1,17 @@
-import context from "@/stores/context"
+import siteContext, {
+  SiteContextModeEnum,
+  useSiteContextMode,
+} from "@/stores/context"
 import highlights, { setIlluminatedLevel } from "@/stores/highlights"
 import { useMaterial, useMaterialName } from "@/stores/materials"
-import scopes, { ScopeTypeEnum, select } from "@/stores/scope"
-import { all, any, object3dChildOf, undef } from "@/utils"
+import scope from "@/stores/scope"
+import { all, any, objComp, object3dChildOf, undef } from "@/utils"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import React, { useEffect, useRef } from "react"
 import { BufferGeometry, Mesh, Object3D, Plane } from "three"
-import { ref, subscribe } from "valtio"
+import { ref } from "valtio"
+import { subscribeKey } from "valtio/utils"
 
 type Props = MeshProps & {
   elementName: string
@@ -39,40 +43,7 @@ const ColumnBuildingElement = (props: Props) => {
     clippingPlanes
   )
 
-  useEffect(() =>
-    subscribe(scopes.primary, () => {
-      if (scopes.primary.type !== ScopeTypeEnum.Enum.ELEMENT) return
-
-      const isOutlined =
-        highlights.outlined.filter((x) => x.id === meshRef.current!.id).length >
-        0
-
-      const isHovered =
-        context.buildingId === buildingId &&
-        scopes.primary.hovered?.elementName === elementName
-
-      const isSelected = !undef(
-        scopes.primary.selected.find((x) => x.elementName === elementName)
-      )
-
-      if ((isHovered || isSelected) && !isOutlined) {
-        highlights.outlined.push(ref(meshRef.current as Object3D))
-      }
-      if (
-        all(
-          context.menu === null,
-          isOutlined,
-          !isHovered,
-          !isSelected,
-          !!meshRef.current
-        )
-      ) {
-        highlights.outlined = highlights.outlined.filter(
-          (x) => x.id !== meshRef.current!.id
-        )
-      }
-    })
-  )
+  const contextMode = useSiteContextMode()
 
   const bind = useGesture<{
     hover: ThreeEvent<PointerEvent>
@@ -85,69 +56,111 @@ const ColumnBuildingElement = (props: Props) => {
       if (!intersections?.[0]) return
       const obj = intersections[0].object ?? intersections[0].eventObject
       if (!object3dChildOf(obj, meshRef.current)) return
-      if (context.menu !== null) return
+      if (siteContext.menu !== null) return
 
-      switch (scopes.secondary.type) {
-        case ScopeTypeEnum.Enum.LEVEL:
-          if (scopes.secondary.hovered?.levelIndex !== levelIndex) {
-            scopes.secondary.hovered = { levelIndex }
-            setIlluminatedLevel(buildingId, levelIndex)
-          }
-          break
+      const key = {
+        elementName,
+        groupIndex,
+        levelIndex,
+        columnIndex,
+        buildingId,
       }
 
-      switch (scopes.primary.type) {
-        case ScopeTypeEnum.Enum.ELEMENT:
-          if (scopes.primary.hovered?.elementName !== elementName) {
-            scopes.primary.hovered = { elementName }
-          }
-          break
-
-        case ScopeTypeEnum.Enum.MODULE:
-          if (
-            scopes.primary.hovered?.columnIndex !== columnIndex ||
-            scopes.primary.hovered?.levelIndex !== levelIndex ||
-            scopes.primary.hovered?.groupIndex !== groupIndex
-          ) {
-            scopes.primary.hovered = {
-              columnIndex,
-              groupIndex,
-              levelIndex,
-            }
-          }
-          break
-        case ScopeTypeEnum.Enum.HOUSE:
-          if (scopes.primary.hovered !== buildingId) {
-            scopes.primary.hovered = buildingId
-          }
-          break
+      if (scope.hovered === null || !objComp(scope.hovered, key)) {
+        scope.hovered = key
       }
+
+      if (contextMode === SiteContextModeEnum.Enum.BUILDING) {
+        setIlluminatedLevel(buildingId, levelIndex)
+      }
+
       invalidate()
     },
     onContextMenu: ({ event, event: { intersections, pageX, pageY } }) => {
       event.preventDefault?.()
-      const obj = intersections[0].object ?? intersections[0].eventObject
       if (!meshRef.current) return
+      const obj = intersections[0].object ?? intersections[0].eventObject
 
       const returnIf = any(
         undef(intersections?.[0]),
         intersections[0].object.id !== meshRef.current?.id,
-        context.buildingId !== null && context.buildingId !== buildingId,
+        siteContext.buildingId !== null &&
+          siteContext.buildingId !== buildingId,
         !object3dChildOf(obj, meshRef.current)
       )
       if (returnIf) return
 
-      select({
-        buildingId: context.buildingId!,
-        columnIndex,
-        levelIndex: context.levelIndex ?? levelIndex,
-        groupIndex,
+      // scope.selected = {
+      //   elementName,
+      //   groupIndex,
+      //   levelIndex,
+      //   columnIndex,
+      //   buildingId,
+      // }
+
+      siteContext.menu = [pageX, pageY]
+      invalidate()
+    },
+    onPointerDown: ({ event, event: { intersections } }) => {
+      if (!meshRef.current) return
+      const obj = intersections[0].object ?? intersections[0].eventObject
+
+      const returnIf = any(
+        undef(intersections?.[0]),
+        intersections[0].object.id !== meshRef.current?.id,
+        siteContext.buildingId !== null &&
+          siteContext.buildingId !== buildingId,
+        !object3dChildOf(obj, meshRef.current)
+      )
+      if (returnIf) return
+
+      scope.selected = {
         elementName,
-      })
-      context.menu = [pageX, pageY]
+        groupIndex,
+        levelIndex,
+        columnIndex,
+        buildingId,
+      }
+
       invalidate()
     },
   })
+
+  useEffect(() =>
+    subscribeKey(scope, "hovered", () => {
+      if (contextMode !== SiteContextModeEnum.Enum.BUILDING) return
+
+      const isOutlined =
+        highlights.outlined.filter(
+          (x) => meshRef.current && x.id === meshRef.current.id
+        ).length > 0
+
+      const isHovered =
+        buildingId === scope.hovered?.buildingId &&
+        elementName === scope.hovered?.elementName
+
+      const isSelected =
+        scope.selected?.buildingId === buildingId &&
+        scope.selected?.elementName === elementName
+
+      if ((isHovered || isSelected) && !isOutlined) {
+        highlights.outlined.push(ref(meshRef.current as Object3D))
+      }
+      if (
+        all(
+          siteContext.menu === null,
+          isOutlined,
+          !isHovered,
+          !isSelected,
+          !!meshRef.current
+        )
+      ) {
+        highlights.outlined = highlights.outlined.filter(
+          (x) => x.id !== meshRef.current!.id
+        )
+      }
+    })
+  )
 
   return (
     <mesh

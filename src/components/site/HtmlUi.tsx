@@ -8,7 +8,7 @@ import {
   Radio,
 } from "@/components/ui"
 import { Check, Environment, Menu, SectionCuts } from "@/components/ui/icons"
-import context, { useContext } from "@/stores/context"
+import siteContext, { useSiteContext } from "@/stores/context"
 import {
   setOrthographic,
   useSettings,
@@ -24,14 +24,18 @@ import SiteMetrics from "./SiteMetrics"
 const HtmlUi = () => {
   const [sidebar, setSidebar] = useState(false)
   const { orthographic } = useSettings()
-  const { buildingId, levelIndex } = useContext()
 
-  const check = buildingId !== null || levelIndex !== null
+  const { buildingId, levelIndex, editMode } = useSiteContext()
+
+  const check = buildingId !== null || levelIndex !== null || editMode !== null
+
   const onCheck = () => {
     if (levelIndex !== null) {
-      context.levelIndex = null
+      siteContext.levelIndex = null
     } else if (buildingId !== null) {
-      context.buildingId = null
+      siteContext.buildingId = null
+    } else if (editMode !== null) {
+      siteContext.editMode = null
     }
   }
 

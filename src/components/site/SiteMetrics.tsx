@@ -1,5 +1,5 @@
 import { getHouseStats, HouseStats, sumHouseStats } from "@/data/energyInfo"
-import { useContext } from "@/stores/context"
+import { useSiteContext } from "@/stores/context"
 import houses from "@/stores/houses"
 import { mapRR } from "@/utils"
 import { values } from "fp-ts-std/ReadonlyRecord"
@@ -105,7 +105,7 @@ const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
 }
 
 const SiteMetrics = () => {
-  const { buildingId } = useContext()
+  const { buildingId } = useSiteContext()
 
   switch (true) {
     case buildingId !== null:

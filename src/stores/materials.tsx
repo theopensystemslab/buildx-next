@@ -16,7 +16,7 @@ import {
 } from "three"
 import { subscribe, useSnapshot } from "valtio"
 import { proxyMap, subscribeKey } from "valtio/utils"
-import context from "./context"
+import siteContext from "./context"
 import houses from "./houses"
 
 export type ColorOpts = {
@@ -149,20 +149,20 @@ export const useMaterial = (
   useEffect(() => {
     const go = () => {
       switch (true) {
-        case context.levelIndex === null:
+        case siteContext.levelIndex === null:
           if (material.visible === false) material.visible = true
           break
-        case context.levelIndex === levelIndex:
+        case siteContext.levelIndex === levelIndex:
           if (material.visible === false) material.visible = true
           break
         default:
-          const above = levelIndex < context.levelIndex!
+          const above = levelIndex < siteContext.levelIndex!
           if (material.visible === !above) material.visible = above
           break
       }
     }
     go()
-    return subscribeKey(context, "levelIndex", go)
+    return subscribeKey(siteContext, "levelIndex", go)
   }, [])
 
   useEffect(
