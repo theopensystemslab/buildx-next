@@ -22,10 +22,6 @@ import Modal from "@/components/ui/Modal"
 import { Build, Site, AlertTriangle, Crosshair } from "@/components/ui/icons"
 import IconLink from "@/components/ui/IconLink"
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
-
-console.log({ accessToken: mapboxgl.accessToken })
-
 const maxAllowedBound = maxMeters / degreeToMeters
 
 const Map: FC<{}> = () => {
@@ -56,6 +52,7 @@ const Map: FC<{}> = () => {
       style: "mapbox://styles/mapbox/satellite-v9", // style URL
       center: [5, 50], // starting position [lng, lat]
       zoom: 3.8, // starting zoom
+      accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!,
     })
 
     const geocoder = new MapboxGeocoder({
