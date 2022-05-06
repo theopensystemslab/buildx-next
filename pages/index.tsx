@@ -1,1 +1,1 @@
-export { default } from "./site/[[...slug]]"
+export { default } from "./map"

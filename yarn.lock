@@ -637,6 +637,20 @@
     rw "^1.3.3"
     sort-object "^0.3.2"
 
+"@mapbox/mapbox-gl-style-spec@^13.23.1":
+  version "13.24.0"
+  resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-style-spec/-/mapbox-gl-style-spec-13.24.0.tgz#38e6dbf64eeb934c148cb76b251710d00c0c124f"
+  integrity sha512-9yhRSqnKX+59MrG647x2pACfR2Ewk8Ii5X75Ag8oToEKZU+PSY0+r10EirIVCTDwuHPzp/VuuN3j6n+Hv/gGpQ==
+  dependencies:
+    "@mapbox/jsonlint-lines-primitives" "~2.0.2"
+    "@mapbox/point-geometry" "^0.1.0"
+    "@mapbox/unitbezier" "^0.0.0"
+    csscolorparser "~1.0.2"
+    json-stringify-pretty-compact "^2.0.0"
+    minimist "^1.2.5"
+    rw "^1.3.3"
+    sort-object "^0.3.2"
+
 "@mapbox/mapbox-gl-supported@^2.0.0":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-supported/-/mapbox-gl-supported-2.0.1.tgz#c15367178d8bfe4765e6b47b542fe821ce259c7b"
@@ -3623,6 +3637,14 @@ ol-mapbox-style@^6.8.2:
     "@mapbox/mapbox-gl-style-spec" "^13.20.1"
     mapbox-to-css-font "^2.4.1"
     webfont-matcher "^1.1.0"
+
+ol-mapbox-style@^8.0.7:
+  version "8.0.7"
+  resolved "https://registry.yarnpkg.com/ol-mapbox-style/-/ol-mapbox-style-8.0.7.tgz#7525a3b1c3f05a96bd53a05e9d07f50c1593710e"
+  integrity sha512-odbvGq1SW6qw2ewj4PoWRm3m9oDZh/fjPImb4Hx/IsyOM6QLjVtL3v+K9tSr0CSSYpmPumk9ejS5cgRK9cYNdw==
+  dependencies:
+    "@mapbox/mapbox-gl-style-spec" "^13.23.1"
+    mapbox-to-css-font "^2.4.1"
 
 ol@^6.12.0:
   version "6.12.0"

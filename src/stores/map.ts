@@ -88,3 +88,5 @@ export const useMapBoundary = () => {
 
   return [geometry, material] as const
 }
+
+export default mapPolygon

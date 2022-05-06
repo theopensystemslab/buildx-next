@@ -7,8 +7,7 @@ export interface Props {
   onClick?: () => void
   href?: string
 }
-
-const className =
+export const iconButtonStyles =
   "w-12 inline-block h-12 hover:bg-[rgba(0,0,0,0.1)] transition-colors duration-200 ease-in-out focus:outline-none focus:shadow-[0 0 0 3px rgba(0,0,0,0.2))]"
 
 const IconButton: FC<Props> = (props) => {
@@ -18,14 +17,14 @@ const IconButton: FC<Props> = (props) => {
     const isActive = router.pathname.startsWith(props.href)
     return (
       <Link href={props.href}>
-        <a className={`${className} ${isActive ? "" : "opacity-50"}`}>
+        <a className={`${iconButtonStyles} ${isActive ? "" : "opacity-50"}`}>
           <div>{props.children}</div>
         </a>
       </Link>
     )
   }
   return (
-    <button className={className} onClick={props.onClick}>
+    <button className={iconButtonStyles} onClick={props.onClick}>
       {props.children}
     </button>
   )
