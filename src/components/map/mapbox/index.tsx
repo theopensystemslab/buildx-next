@@ -1,3 +1,4 @@
+import Layout from "@/components/layouts"
 import IconButton from "@/components/ui/IconButton"
 import IconLink from "@/components/ui/IconLink"
 import { AlertTriangle, Build, Site } from "@/components/ui/icons"
@@ -19,14 +20,14 @@ import type { Map as MapboxMap } from "mapbox-gl"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { max, reduce } from "ramda"
-import type { FC } from "react"
+import type { FC, ReactElement } from "react"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
 
 const maxAllowedBound = maxMeters / degreeToMeters
 
-const Map: FC<{}> = () => {
+const Map = () => {
   const [mapPolygons, setMapPolygons] = useState<MapPolygons | null>(
     getMapPolygons()
   )
@@ -139,7 +140,7 @@ const Map: FC<{}> = () => {
   }
 
   return (
-    <div className="absolute flex h-full w-full flex-col items-center justify-center">
+    <div className="relative flex h-full w-full flex-col items-center justify-center">
       {warningModal && (
         <Modal
           title="Map bounds are too large"
@@ -190,6 +191,10 @@ const Map: FC<{}> = () => {
       {/* <div id="geocoder" className="absolute "></div> */}
     </div>
   )
+}
+
+Map.getLayout = (page: ReactElement) => {
+  return <Layout>{page}</Layout>
 }
 
 export default Map
