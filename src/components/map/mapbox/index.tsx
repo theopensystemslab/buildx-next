@@ -1,26 +1,28 @@
-import React, { useEffect, useState, useMemo, useRef } from "react"
-import type { FC } from "react"
-import mapboxgl from "mapbox-gl"
-import type { Map as MapboxMap } from "mapbox-gl"
+import IconButton from "@/components/ui/IconButton"
+import IconLink from "@/components/ui/IconLink"
+import { AlertTriangle, Build, Site } from "@/components/ui/icons"
+import Modal from "@/components/ui/Modal"
+import type { MapPolygons } from "@/data/mapPolygon"
+import {
+  degreeToMeters,
+  getMapPolygons,
+  mapPolygonInfo,
+  maxMeters,
+  saveMapPolygons,
+  scaleMapPolygon,
+} from "@/data/mapPolygon"
 import MapboxDraw from "@mapbox/mapbox-gl-draw"
-import "mapbox-gl/dist/mapbox-gl.css"
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css"
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css"
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
-import {
-  mapPolygonInfo,
-  scaleMapPolygon,
-  getMapPolygons,
-  saveMapPolygons,
-  maxMeters,
-  degreeToMeters,
-} from "@/data/mapPolygon"
-import { reduce, max } from "ramda"
-import type { MapPolygons } from "@/data/mapPolygon"
-import IconButton from "@/components/ui/IconButton"
-import Modal from "@/components/ui/Modal"
-import { Build, Site, AlertTriangle, Crosshair } from "@/components/ui/icons"
-import IconLink from "@/components/ui/IconLink"
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css"
+import type { Map as MapboxMap } from "mapbox-gl"
+import mapboxgl from "mapbox-gl"
+import "mapbox-gl/dist/mapbox-gl.css"
+import { max, reduce } from "ramda"
+import type { FC } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
 
 const maxAllowedBound = maxMeters / degreeToMeters
 
@@ -52,7 +54,7 @@ const Map: FC<{}> = () => {
       style: "mapbox://styles/mapbox/satellite-v9", // style URL
       center: [5, 50], // starting position [lng, lat]
       zoom: 3.8, // starting zoom
-      accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!,
+      accessToken: mapboxgl.accessToken,
     })
 
     const geocoder = new MapboxGeocoder({
