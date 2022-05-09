@@ -165,14 +165,6 @@ const Map = () => {
           </div>
         </Modal>
       )}
-      <div className="absolute top-0 left-1/2 z-10 flex -translate-x-1/2 transform justify-center bg-white shadow">
-        <IconLink to="/map">
-          <Site />
-        </IconLink>
-        <IconLink to="/site">
-          <Build />
-        </IconLink>
-      </div>
       <div className="absolute left-0 top-1/2 z-10 flex -translate-y-1/2 transform flex-col justify-center bg-white shadow">
         {maxBound > maxAllowedBound ? (
           <IconButton
