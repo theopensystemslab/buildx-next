@@ -3,6 +3,7 @@ import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
 import { mapRA, reduceRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
+import { groupBy } from "fp-ts/lib/NonEmptyArray"
 import { none, some } from "fp-ts/lib/Option"
 import {
   filterMap,
@@ -11,10 +12,10 @@ import {
 } from "fp-ts/lib/ReadonlyArray"
 import { useControls } from "leva"
 import { Fragment, Suspense, useEffect, useState } from "react"
-import ModuleDebugModule from "./ModuleDebugModule"
+import DebugModule from "./DebugModule"
 
-const ModuleDebug = () => {
-  const { houseTypes, modules: systemModules } = useSystemsData()
+const DebugHouseType = () => {
+  const { houseTypes, modules: allModules } = useSystemsData()
 
   const houseTypeModules = pipe(
     houseTypes,
@@ -23,7 +24,7 @@ const ModuleDebug = () => {
         houseType.dna,
         filterMap((strand) =>
           pipe(
-            systemModules,
+            allModules,
             findFirst(
               (module) =>
                 module.systemId === houseType.systemId && module.dna === strand
@@ -80,7 +81,7 @@ const ModuleDebug = () => {
           i === moduleIndex
             ? some(
                 <Suspense key={i} fallback={null}>
-                  <ModuleDebugModule module={module} />
+                  <DebugModule module={module} />
                 </Suspense>
               )
             : none
@@ -90,4 +91,4 @@ const ModuleDebug = () => {
   )
 }
 
-export default ModuleDebug
+export default DebugHouseType

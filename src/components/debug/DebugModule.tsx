@@ -8,7 +8,7 @@ import produce from "immer"
 import { Fragment } from "react"
 import { Mesh } from "three"
 
-const ModuleDebugModule = ({ module }: { module: Module }) => {
+const DebugModule = ({ module }: { module: Module }) => {
   const gltf = useGLTF(module.modelUrl)
 
   const meshes = pipe(
@@ -41,4 +41,4 @@ const ModuleDebugModule = ({ module }: { module: Module }) => {
   )
 }
 
-export default ModuleDebugModule
+export default DebugModule
