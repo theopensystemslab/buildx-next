@@ -1,9 +1,9 @@
 import { useSystemsData } from "@/contexts/SystemsData"
 import { systems } from "@/data/system"
-import { StrOrd } from "@/utils"
-import { sort, filterMap } from "fp-ts/lib/Array"
+import { StrEq, StrOrd } from "@/utils"
+import { sort, filterMap, findFirstMap, uniq } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { none, some } from "fp-ts/lib/Option"
+import { getOrElse, none, some, toNullable } from "fp-ts/lib/Option"
 import { useControls } from "leva"
 import { Fragment, Suspense } from "react"
 import DebugModule from "./DebugModule"
@@ -25,6 +25,7 @@ const DebugSystem = () => {
     filterMap((module) =>
       module.systemId === system ? some(module.dna) : none
     ),
+    uniq(StrEq),
     sort(StrOrd)
   )
 
@@ -42,7 +43,7 @@ const DebugSystem = () => {
     <Fragment>
       {pipe(
         allModules,
-        filterMap((module) =>
+        findFirstMap((module) =>
           module.systemId === system && module.dna === moduleDna
             ? some(
                 <Suspense key={moduleDna} fallback={null}>
@@ -50,7 +51,8 @@ const DebugSystem = () => {
                 </Suspense>
               )
             : none
-        )
+        ),
+        toNullable
       )}
     </Fragment>
   )
