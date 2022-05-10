@@ -1,8 +1,8 @@
-.layoutRoot select {
+.root select {
   background-color: gray;
   overflow: hidden;
 }
 
-.layoutRoot select + div {
+.root select + div {
   overflow: hidden;
 }
