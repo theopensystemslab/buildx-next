@@ -5,6 +5,7 @@ import { SiteContextMenu } from "@/components/site/menu"
 import { Loader } from "@/components/ui"
 import Container from "@/components/ui/Container"
 import { SystemsDataProvider } from "@/contexts/SystemsData"
+import { Leva } from "leva"
 import dynamic from "next/dynamic"
 import React, { Fragment, Suspense } from "react"
 
@@ -33,6 +34,7 @@ const ModuleDebugPage = () => {
             <DebugHouseType />
           </SiteThreeInit>
         </SystemsDataProvider>
+        <Leva />
       </Layout>
       <Suspense fallback={<Loader />}>
         <SiteContextMenu />
