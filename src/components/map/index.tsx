@@ -1,18 +1,16 @@
+import {
+  BUILDX_LOCAL_STORAGE_HOUSES_KEY,
+  BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
+} from "@/CONSTANTS"
 import mapProxy, {
   getMapPolygonCentre,
   useMapMode,
   useMapPolygon,
 } from "@/stores/map"
-import {
-  ArrowRight24,
-  ArrowRight32,
-  Search24,
-  TrashCan24,
-  TrashCan32,
-} from "@carbon/icons-react"
+import { ArrowRight24, Search24, TrashCan24 } from "@carbon/icons-react"
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css"
-import { Popover, Snackbar } from "@mui/material"
+import { Snackbar } from "@mui/material"
 import clsx from "clsx"
 import { Feature, Polygon } from "geojson"
 import mapboxgl from "mapbox-gl"
@@ -31,9 +29,9 @@ import Fill from "ol/style/Fill"
 import Stroke from "ol/style/Stroke"
 import Style from "ol/style/Style"
 import React, { useEffect, useRef, useState } from "react"
-import { useSnapshot } from "valtio"
+import { subscribe } from "valtio"
+import { subscribeKey } from "valtio/utils"
 import { IconButton } from "../ui"
-import { Search } from "../ui/icons"
 import css from "./index.module.css"
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
@@ -48,7 +46,7 @@ const MapIndex = () => {
 
   const [mode, setMode] = useMapMode()
 
-  const [mapPolygon, setMapPolygon] = useMapPolygon()
+  const [mapPolygon] = useMapPolygon()
 
   const vectorSource = useRef(new VectorSource())
 
@@ -80,6 +78,16 @@ const MapIndex = () => {
       }
     })
   }, [])
+
+  useEffect(() =>
+    subscribeKey(mapProxy, "polygon", () => {
+      if (mapProxy.polygon !== null)
+        localStorage.setItem(
+          BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
+          JSON.stringify(mapProxy.polygon)
+        )
+    })
+  )
 
   const [map] = useState(
     new Map({
@@ -178,6 +186,10 @@ const MapIndex = () => {
     }
   }, [mode])
 
+  useEffect(() => {
+    if (mapPolygon !== null && mode === "SEARCH") setMode("DRAW")
+  }, [mapPolygon])
+
   const rootRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -200,6 +212,7 @@ const MapIndex = () => {
           <IconButton
             onClick={() => {
               mapProxy.polygon = null
+              localStorage.setItem(BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY, "null")
               vectorSource.current.clear()
             }}
           >

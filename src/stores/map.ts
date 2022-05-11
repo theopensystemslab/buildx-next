@@ -1,36 +1,22 @@
 import { dropRight, flatten, map, reduce } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { Polygon, Position } from "geojson"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { BufferAttribute, BufferGeometry, LineBasicMaterial } from "three"
 import { proxy, useSnapshot } from "valtio"
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "../CONSTANTS"
 import { SSR } from "../utils"
 
-const localStorageKey: string = "buildx-v1-polygon-features"
-
-export const initialMapPolygon = ((): Polygon | null => {
-  if (SSR) return null
-  const rawStoragePayload = localStorage.getItem(
-    BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY
-  )
-  if (!rawStoragePayload) {
-    return null
-  }
-  return JSON.parse(rawStoragePayload)
-})()
-
 const mapProxy = proxy<{
   polygon: Polygon | null
   mode: "SEARCH" | "DRAW"
 }>({
-  polygon: initialMapPolygon,
+  polygon: null,
   mode: "SEARCH",
 })
 
 export const setMapPolygon = (mapPolygon: Polygon) => {
   mapProxy.polygon = mapPolygon
-  localStorage.setItem(localStorageKey, JSON.stringify(mapPolygon))
 }
 
 export const getMapPolygonCentre = (polygon: Polygon) =>
@@ -65,6 +51,15 @@ export const polygonToCoordinates = (polygon: Polygon) => {
 
 export const useMapBoundary = () => {
   const { polygon } = useSnapshot(mapProxy) as typeof mapProxy
+
+  useEffect(() => {
+    const rawStoragePayload = localStorage.getItem(
+      BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY
+    )
+    if (rawStoragePayload) {
+      mapProxy.polygon = JSON.parse(rawStoragePayload)
+    }
+  }, [])
 
   const material = useMemo(
     () =>
@@ -104,9 +99,14 @@ export const useMapMode = () => {
 export const useMapPolygon = () => {
   const { polygon } = useSnapshot(mapProxy) as typeof mapProxy
 
-  const setMapPolygon = (mp: typeof mapProxy.polygon) => {
-    mapProxy.polygon = mp
-  }
+  useEffect(() => {
+    const rawStoragePayload = localStorage.getItem(
+      BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY
+    )
+    if (rawStoragePayload) {
+      mapProxy.polygon = JSON.parse(rawStoragePayload)
+    }
+  }, [])
 
   return [polygon, setMapPolygon] as const
 }
