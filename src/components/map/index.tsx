@@ -1,13 +1,24 @@
+import { TrashCan32 } from "@carbon/icons-react"
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css"
 import clsx from "clsx"
+import { Feature, Polygon } from "geojson"
 import mapboxgl from "mapbox-gl"
 import { Map, View } from "ol"
+import GeoJSON from "ol/format/GeoJSON"
+import { Draw, Modify, Snap } from "ol/interaction"
 import TileLayer from "ol/layer/Tile"
+import VectorLayer from "ol/layer/Vector"
 import "ol/ol.css"
 import { fromLonLat } from "ol/proj"
+import VectorSource from "ol/source/Vector"
 import XYZ from "ol/source/XYZ"
+import Fill from "ol/style/Fill"
+import Stroke from "ol/style/Stroke"
+import Style from "ol/style/Style"
 import React, { useEffect, useRef, useState } from "react"
+import { IconButton } from "../ui"
+import { Search } from "../ui/icons"
 import css from "./index.module.css"
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
@@ -20,7 +31,9 @@ const MapIndex = () => {
 
   const maxZoom = 19
 
-  const [searchedOnce, setSearchedOnce] = useState(false)
+  const [mode, setMode] = useState<"SEARCH" | "DRAW">("SEARCH")
+
+  const vectorSource = useRef(new VectorSource())
 
   const [map] = useState(
     new Map({
@@ -31,24 +44,25 @@ const MapIndex = () => {
             maxZoom,
           }),
         }),
-        // new VectorLayer({
-        //   source: source,
-        //   style: new Style({
-        //     fill: new Fill({
-        //       color: "rgba(255, 255, 255, 0.2)",
-        //     }),
-        //     stroke: new Stroke({
-        //       color: "#ffcc33",
-        //       width: 2,
-        //     }),
-        //   }),
-        // }),
+        new VectorLayer({
+          source: vectorSource.current,
+          style: new Style({
+            fill: new Fill({
+              color: "rgba(255, 255, 255, 0.2)",
+            }),
+            stroke: new Stroke({
+              color: "#ffcc33",
+              width: 2,
+            }),
+          }),
+        }),
       ],
       view: new View({
         center: almere,
         zoom: 10,
         maxZoom,
       }),
+      controls: [],
     })
   )
 
@@ -78,8 +92,8 @@ const MapIndex = () => {
       map.getView().setCenter(target)
       map.getView().setZoom(maxZoom)
 
-      if (!searchedOnce) setSearchedOnce(true)
-      // flyTo()
+      console.log("setting mode draw")
+      setMode("DRAW")
     })
 
     return () => {
@@ -88,13 +102,61 @@ const MapIndex = () => {
     }
   }, [])
 
+  useEffect(() => {
+    const source = vectorSource.current
+
+    const modify = new Modify({ source })
+    map.addInteraction(modify)
+
+    const draw = new Draw({
+      source,
+      type: "Polygon",
+    })
+
+    draw.on("drawstart", (event) => {
+      source.clear()
+    })
+
+    draw.on("drawend", ({ feature }) => {
+      const polyFeature = JSON.parse(
+        new GeoJSON().writeFeature(feature)
+      ) as Feature<Polygon>
+
+      console.log({ polyFeature })
+
+      // onPolygonCoordinates?.(polyFeature.geometry)
+    })
+
+    const snap = new Snap({ source })
+
+    if (mode === "DRAW") {
+      map.addInteraction(draw)
+      map.addInteraction(snap)
+    } else {
+      map.removeInteraction(draw)
+      map.removeInteraction(snap)
+    }
+  }, [mode])
+
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center">
       <div ref={mapDiv} className="w-full flex-1" />
       <div
         ref={geocoderDiv}
-        className={clsx(css.geocoder, searchedOnce && css.searchedGeocoder)}
+        className={clsx(css.geocoder, mode === "DRAW" && "hidden")}
       />
+      {mode === "DRAW" && (
+        <div className="absolute left-0 flex flex-col items-center justify-center bg-white">
+          <IconButton onClick={() => void setMode("SEARCH")}>
+            <Search />
+          </IconButton>
+          <IconButton onClick={() => void vectorSource.current.clear()}>
+            <div className="flex items-center justify-center">
+              <TrashCan32 />
+            </div>
+          </IconButton>
+        </div>
+      )}
     </div>
   )
 }
