@@ -1,11 +1,25 @@
-import { TrashCan32 } from "@carbon/icons-react"
+import mapProxy, {
+  getMapPolygonCentre,
+  useMapMode,
+  useMapPolygon,
+} from "@/stores/map"
+import {
+  ArrowRight24,
+  ArrowRight32,
+  Search24,
+  TrashCan24,
+  TrashCan32,
+} from "@carbon/icons-react"
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css"
+import { Popover, Snackbar } from "@mui/material"
 import clsx from "clsx"
 import { Feature, Polygon } from "geojson"
 import mapboxgl from "mapbox-gl"
-import { Map, View } from "ol"
+import Link from "next/link"
+import { Feature as OLFeature, Map, View } from "ol"
 import GeoJSON from "ol/format/GeoJSON"
+import OLPolygon from "ol/geom/Polygon"
 import { Draw, Modify, Snap } from "ol/interaction"
 import TileLayer from "ol/layer/Tile"
 import VectorLayer from "ol/layer/Vector"
@@ -17,6 +31,7 @@ import Fill from "ol/style/Fill"
 import Stroke from "ol/style/Stroke"
 import Style from "ol/style/Style"
 import React, { useEffect, useRef, useState } from "react"
+import { useSnapshot } from "valtio"
 import { IconButton } from "../ui"
 import { Search } from "../ui/icons"
 import css from "./index.module.css"
@@ -31,9 +46,40 @@ const MapIndex = () => {
 
   const maxZoom = 19
 
-  const [mode, setMode] = useState<"SEARCH" | "DRAW">("SEARCH")
+  const [mode, setMode] = useMapMode()
+
+  const [mapPolygon, setMapPolygon] = useMapPolygon()
 
   const vectorSource = useRef(new VectorSource())
+
+  const draw = useRef(
+    new Draw({
+      source: vectorSource.current,
+      type: "Polygon",
+    })
+  )
+
+  const modify = useRef(new Modify({ source: vectorSource.current }))
+
+  const snap = useRef(new Snap({ source: vectorSource.current }))
+
+  useEffect(() => {
+    draw.current.on("drawstart", (event) => {
+      mapProxy.polygon = null
+      vectorSource.current.clear()
+    })
+
+    draw.current.on("drawend", ({ feature }) => {
+      const polyFeature = JSON.parse(
+        new GeoJSON().writeFeature(feature)
+      ) as Feature<Polygon>
+
+      mapProxy.polygon = {
+        coordinates: polyFeature.geometry.coordinates,
+        type: polyFeature.geometry.type,
+      }
+    })
+  }, [])
 
   const [map] = useState(
     new Map({
@@ -92,7 +138,6 @@ const MapIndex = () => {
       map.getView().setCenter(target)
       map.getView().setZoom(maxZoom)
 
-      console.log("setting mode draw")
       setMode("DRAW")
     })
 
@@ -103,43 +148,43 @@ const MapIndex = () => {
   }, [])
 
   useEffect(() => {
-    const source = vectorSource.current
-
-    const modify = new Modify({ source })
-    map.addInteraction(modify)
-
-    const draw = new Draw({
-      source,
-      type: "Polygon",
-    })
-
-    draw.on("drawstart", (event) => {
-      source.clear()
-    })
-
-    draw.on("drawend", ({ feature }) => {
-      const polyFeature = JSON.parse(
-        new GeoJSON().writeFeature(feature)
-      ) as Feature<Polygon>
-
-      console.log({ polyFeature })
-
-      // onPolygonCoordinates?.(polyFeature.geometry)
-    })
-
-    const snap = new Snap({ source })
-
     if (mode === "DRAW") {
-      map.addInteraction(draw)
-      map.addInteraction(snap)
+      map.addInteraction(modify.current)
+      map.addInteraction(draw.current)
+      map.addInteraction(snap.current)
     } else {
-      map.removeInteraction(draw)
-      map.removeInteraction(snap)
+      map.removeInteraction(modify.current)
+      map.removeInteraction(draw.current)
+      map.removeInteraction(snap.current)
     }
   }, [mode])
 
+  const [snack, setSnack] = useState(false)
+
+  useEffect(() => {
+    if (mode === "DRAW" && !mapPolygon) {
+      setSnack(true)
+    } else if (mapPolygon) {
+      vectorSource.current.clear()
+      vectorSource.current.addFeature(
+        new OLFeature({
+          geometry: new OLPolygon(mapPolygon.coordinates),
+        })
+      )
+      map.getView().setCenter(getMapPolygonCentre(mapPolygon))
+      map.getView().setZoom(maxZoom)
+    } else {
+      setSnack(false)
+    }
+  }, [mode])
+
+  const rootRef = useRef<HTMLDivElement>(null)
+
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center">
+    <div
+      ref={rootRef}
+      className="relative flex h-full w-full flex-col items-center justify-center"
+    >
       <div ref={mapDiv} className="w-full flex-1" />
       <div
         ref={geocoderDiv}
@@ -148,13 +193,43 @@ const MapIndex = () => {
       {mode === "DRAW" && (
         <div className="absolute left-0 flex flex-col items-center justify-center bg-white">
           <IconButton onClick={() => void setMode("SEARCH")}>
-            <Search />
-          </IconButton>
-          <IconButton onClick={() => void vectorSource.current.clear()}>
             <div className="flex items-center justify-center">
-              <TrashCan32 />
+              <Search24 />
             </div>
           </IconButton>
+          <IconButton
+            onClick={() => {
+              mapProxy.polygon = null
+              vectorSource.current.clear()
+            }}
+          >
+            <div className="flex items-center justify-center">
+              <TrashCan24 />
+            </div>
+          </IconButton>
+        </div>
+      )}
+      <Snackbar
+        autoHideDuration={6000}
+        open={snack}
+        onClose={() => void setSnack(false)}
+        message="Draw your site boundary"
+      />
+      {mapPolygon !== null && (
+        <div className="absolute bottom-0 right-0 w-64">
+          <Link href="/site">
+            <a>
+              <div className="flex items-center justify-between bg-white p-2 text-black">
+                <div className="text-lg">Continue</div>
+                <div>
+                  <ArrowRight24 />
+                </div>
+              </div>
+            </a>
+          </Link>
+          <div className="bg-black p-2 text-white opacity-50">
+            You will be able to change this boundary again at any time
+          </div>
         </div>
       )}
     </div>

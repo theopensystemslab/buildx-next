@@ -1,4 +1,4 @@
-import React, { SVGProps } from "react"
+import React from "react"
 
 export const Bom = () => (
   <svg viewBox="0 0 50 50" fill="none">
