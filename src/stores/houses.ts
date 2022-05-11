@@ -124,8 +124,6 @@ export const usePositionRotation = (
     houses[buildingId].position[0] += dx
     houses[buildingId].position[1] += dz
 
-    console.log(houses[buildingId].position)
-
     invalidate()
 
     if (last) {

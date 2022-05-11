@@ -69,8 +69,7 @@ export const useMapBoundary = () => {
   const material = useMemo(
     () =>
       new LineBasicMaterial({
-        // color: "#454545",
-        color: "#ff0000",
+        color: "#454545",
       }),
     []
   )

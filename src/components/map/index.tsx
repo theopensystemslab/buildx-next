@@ -97,7 +97,7 @@ const MapIndex = () => {
               color: "rgba(255, 255, 255, 0.2)",
             }),
             stroke: new Stroke({
-              color: "#ffcc33",
+              color: "#fff",
               width: 2,
             }),
           }),
