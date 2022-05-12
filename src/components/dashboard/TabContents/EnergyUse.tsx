@@ -13,7 +13,7 @@ const EnergyUse: FC<{ dashboardData: DashboardData }> = () => {
           unitOfMeasurement: "kWh/year",
         },
         {
-          label: "Space heading demand",
+          label: "Space heating demand",
           description: "",
           value: 0,
           unitOfMeasurement: "kWh/year",
