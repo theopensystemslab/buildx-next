@@ -17,7 +17,7 @@ export const ChangeDataPoint: FC<{
   percentage: number
   description: string
 }> = (props) => (
-  <div className="flex text-white space-x-1">
+  <div className="flex text-gray-300 space-x-1">
     <span className="inline-block pt-4 text-2xl">
       {props.percentage < 0 ? "↓" : "↑"}
     </span>

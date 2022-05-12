@@ -67,11 +67,11 @@ const HouseMultiSelect: FC<Props> = (props) => {
         return (
           <p
             key={houseId}
-            className="inline-flex items-center bg-[#FAFF00] space-x-1 rounded-full"
+            className="inline-flex items-center bg-[#FAFF00] space-x-1 rounded-full overflow-hidden"
           >
             <span className="inline-block py-1 pl-3">{house.friendlyName}</span>
             <button
-              className="h-8 w-8 p-0.5 hover:bg-gray-50"
+              className="h-8 w-8 p-0.5 transition-colors duration-200 hover:bg-[rgba(0,0,0,0.05)]"
               onClick={() => {
                 props.setSelectedHouses((prev) =>
                   prev.filter((id) => id !== houseId)

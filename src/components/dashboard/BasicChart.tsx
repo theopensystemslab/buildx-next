@@ -34,12 +34,12 @@ const BasicChart: FC<{
                 width={width}
                 height={Math.abs(height)}
                 stroke="none"
-                fill={index < props.data.length - 1 ? "#3EFF80" : "#9D9D9D"}
+                fill={index < props.data.length - 1 ? "#FAFF00" : "#9D9D9D"}
               />
               <text
                 x={x + width / 2}
                 y={baseline - height - (height < 0 ? -6 : 3)}
-                fill="#9D9D9D"
+                fill="#fff"
                 textAnchor="middle"
                 style={{ fontSize: 4 }}
               >
@@ -59,7 +59,7 @@ const BasicChart: FC<{
           strokeWidth="0.5"
         />
       </svg>
-      <p className="text-sm text-gray-400">{props.description}</p>
+      <p className="text-sm text-white">{props.description}</p>
     </div>
   )
 }
