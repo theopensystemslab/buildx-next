@@ -5,7 +5,7 @@ export const DataPoint: FC<{
   unitOfMeasurement: string
   description: string
 }> = (props) => (
-  <div className="text-gray-400 space-y-2">
+  <div className="text-white space-y-2">
     <p className="text-5xl">{`${props.value.toLocaleString("en-GB", {
       maximumFractionDigits: 1,
     })}${props.unitOfMeasurement}`}</p>
@@ -17,7 +17,7 @@ export const ChangeDataPoint: FC<{
   percentage: number
   description: string
 }> = (props) => (
-  <div className="flex text-gray-400 space-x-1">
+  <div className="flex text-white space-x-1">
     <span className="inline-block pt-4 text-2xl">
       {props.percentage < 0 ? "↓" : "↑"}
     </span>
@@ -35,7 +35,7 @@ export const ChangeDataPoint: FC<{
 
 export const Labeled: FC<{ label: string; children: ReactNode }> = (props) => (
   <div className="space-y-8">
-    <p className="text-sm">{props.label}</p>
+    <p className="text-sm text-white">{props.label}</p>
     <div className="space-y-4">{props.children}</div>
   </div>
 )

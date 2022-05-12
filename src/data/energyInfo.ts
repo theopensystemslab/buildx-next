@@ -16,6 +16,10 @@ export interface EnergyInfo {
   primaryEnergyDemand: number // kWh/m2/yr
   generationEnergy: number // kWh/m2/yr
   electricityTariff: number // EUR
+  glazingUValue: number
+  wallUValue: number
+  floorUValue: number
+  roofUValue: number
 }
 
 const getEnergyEntry = (fieldName: string, records: Array<any>): number => {
@@ -44,6 +48,10 @@ export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
       primaryEnergyDemand: getEnergyEntry("Primary Energy Demand ", records),
       generationEnergy: getEnergyEntry("Generation Energy", records),
       electricityTariff: getEnergyEntry("Electricity tariff", records),
+      glazingUValue: getEnergyEntry("Glazing u-value", records),
+      wallUValue: getEnergyEntry("Wall u-value", records),
+      floorUValue: getEnergyEntry("Floor u-value", records),
+      roofUValue: getEnergyEntry("Roof u-value", records),
     }
   } catch (err) {
     console.warn(err)
@@ -57,6 +65,10 @@ export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
       primaryEnergyDemand: 0,
       generationEnergy: 0,
       electricityTariff: 0,
+      glazingUValue: 0,
+      wallUValue: 0,
+      floorUValue: 0,
+      roofUValue: 0,
     }
   }
 }

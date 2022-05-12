@@ -22,7 +22,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
       .filter((v): v is { houseId: string; houseName: string } => Boolean(v))
 
   return (
-    <div className="flex flex-wrap items-center py-4 border-b border-gray-700 space-x-2">
+    <div className="flex flex-wrap items-center py-4 space-x-2">
       {houseSelectOptions.length > 0 ? (
         <>
           <div className="relative rounded cursor-auto hover:bg-gray-200">
@@ -67,7 +67,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
         return (
           <p
             key={houseId}
-            className="inline-flex items-center bg-white space-x-1"
+            className="inline-flex items-center bg-[#FAFF00] space-x-1 rounded-full"
           >
             <span className="inline-block py-1 pl-3">{house.friendlyName}</span>
             <button

@@ -9,14 +9,20 @@ interface Props {
   }[]
 }
 
+const format = (no: number) => {
+  return new Intl.NumberFormat("en-GB", {
+    maximumFractionDigits: 2,
+  }).format(no)
+}
+
 const DataTable: FC<Props> = (props) => {
   return (
-    <div className="table w-full">
+    <div className="table w-full text-white">
       {props.data.map((row, rowIndex) => (
-        <div key={rowIndex} className="table-row bg-white">
+        <div key={rowIndex} className="table-row bg-gray-500">
           <div className={"table-cell px-4 py-2"}>{row.label}</div>
           <div className={"table-cell px-4 py-2 italic"}>{row.description}</div>
-          <div className={"table-cell px-4 py-2"}>{row.value}</div>
+          <div className={"table-cell px-4 py-2"}>{format(row.value)}</div>
           <div className={"table-cell px-4 py-2"}>{row.unitOfMeasurement}</div>
         </div>
       ))}

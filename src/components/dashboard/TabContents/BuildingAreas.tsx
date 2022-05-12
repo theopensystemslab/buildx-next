@@ -3,7 +3,9 @@ import { type DashboardData } from "../data"
 import DataTable from "../DataTable"
 
 const BuildingAreas: FC<{ dashboardData: DashboardData }> = (props) => {
-  const { areas } = props.dashboardData
+  const {
+    dashboardData: { areas },
+  } = props
 
   return (
     <DataTable

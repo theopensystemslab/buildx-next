@@ -2,50 +2,53 @@ import React, { type FC } from "react"
 import { type DashboardData } from "../data"
 import DataTable from "../DataTable"
 
-const BuildCosts: FC<{ dashboardData: DashboardData }> = () => {
+const BuildCosts: FC<{ dashboardData: DashboardData }> = (props) => {
+  const {
+    dashboardData: { costs },
+  } = props
   return (
     <DataTable
       data={[
         {
           label: "Foundation cost",
           description: "",
-          value: 0,
+          value: costs.foundation,
           unitOfMeasurement: "€",
         },
         {
           label: "Roof structure cost",
           description: "",
-          value: 0,
+          value: costs.roofStructure,
           unitOfMeasurement: "€",
         },
         {
           label: "Superstructure cost",
           description: "",
-          value: 0,
+          value: costs.superstructure,
           unitOfMeasurement: "€",
         },
         {
           label: "Roof covering cost",
           description: "",
-          value: 0,
+          value: costs.roofCovering,
           unitOfMeasurement: "€",
         },
         {
           label: "Internal lining cost",
           description: "",
-          value: 0,
+          value: costs.internalLining,
           unitOfMeasurement: "€",
         },
         {
           label: "Cladding cost",
           description: "",
-          value: 0,
+          value: costs.cladding,
           unitOfMeasurement: "€",
         },
         {
           label: "Total build cost",
           description: "",
-          value: 0,
+          value: costs.total,
           unitOfMeasurement: "€",
         },
       ]}
