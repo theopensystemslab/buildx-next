@@ -32,6 +32,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { subscribe } from "valtio"
 import { subscribeKey } from "valtio/utils"
 import { IconButton } from "../ui"
+import { useClickAway, useEscape } from "../ui/utils"
 import css from "./index.module.css"
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
@@ -192,10 +193,19 @@ const MapIndex = () => {
 
   const rootRef = useRef<HTMLDivElement>(null)
 
+  const discardSearch = () => {
+    if (mode === "SEARCH" && mapPolygon !== null) {
+      setMode("DRAW")
+    }
+  }
+
+  useEscape(discardSearch)
+
   return (
     <div
       ref={rootRef}
       className="relative flex h-full w-full flex-col items-center justify-center"
+      onClick={discardSearch}
     >
       <div ref={mapDiv} className="w-full flex-1" />
       <div
