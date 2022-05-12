@@ -2,7 +2,7 @@ import { proxy, useSnapshot } from "valtio"
 
 const settings = proxy({
   orthographic: false,
-  shadows: false,
+  shadows: true,
   verticalCuts: {
     width: false,
     length: false,

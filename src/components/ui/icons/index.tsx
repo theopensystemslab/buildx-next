@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 
 export const Bom = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -27,7 +27,7 @@ export const Bom = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Files = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -37,7 +37,7 @@ export const Files = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Data = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -66,7 +66,7 @@ export const Data = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Build = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -76,7 +76,7 @@ export const Build = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Site = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -86,7 +86,7 @@ export const Site = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Environment = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -95,7 +95,7 @@ export const Environment = () => (
       fill="currentColor"
     />
   </svg>
-);
+)
 
 export const Layers = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -110,7 +110,7 @@ export const Layers = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const SectionCuts = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -125,7 +125,7 @@ export const SectionCuts = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Search = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -143,7 +143,7 @@ export const Search = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Menu = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -151,7 +151,7 @@ export const Menu = () => (
     <circle cx="25.5" cy="24.5" r="1.5" fill="currentColor" />
     <circle cx="25.5" cy="31.5" r="1.5" fill="currentColor" />
   </svg>
-);
+)
 
 export const Bookmark = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -161,7 +161,7 @@ export const Bookmark = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Close = () => (
   <svg viewBox="0 0 50 50" fill="none">
@@ -182,7 +182,7 @@ export const Close = () => (
       strokeWidth="2"
     />
   </svg>
-);
+)
 
 export const Info = () => (
   <svg
@@ -198,7 +198,7 @@ export const Info = () => (
       fill="black"
     />
   </svg>
-);
+)
 
 export const Check = () => (
   <svg
@@ -211,7 +211,7 @@ export const Check = () => (
   >
     <polyline points="20 6 9 17 4 12"></polyline>
   </svg>
-);
+)
 
 export const AlertTriangle = () => (
   <svg
@@ -226,7 +226,7 @@ export const AlertTriangle = () => (
     <line x1="12" y1="9" x2="12" y2="13"></line>
     <line x1="12" y1="17" x2="12.01" y2="17"></line>
   </svg>
-);
+)
 
 export const Crosshair = () => (
   <svg
@@ -243,4 +243,4 @@ export const Crosshair = () => (
     <line x1="12" y1="6" x2="12" y2="2"></line>
     <line x1="12" y1="22" x2="12" y2="18"></line>
   </svg>
-);
+)

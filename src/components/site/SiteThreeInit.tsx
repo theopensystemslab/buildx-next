@@ -2,6 +2,7 @@ import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
 import siteContext from "@/stores/context"
 import { clearIlluminatedMaterials } from "@/stores/highlights"
+import { useMapBoundary } from "@/stores/map"
 import { setXZ } from "@/stores/pointer"
 import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
@@ -35,7 +36,7 @@ const SiteThreeInit = (props: Props) => {
   //   }, 100)
   // }, [orthographic, setUnmountToReinitialize])
 
-  // const [boundary, boundaryMaterial] = useMapBoundary()
+  const [boundary, boundaryMaterial] = useMapBoundary()
 
   // if (unmountToReinitialize) {
   //   return (
@@ -82,7 +83,7 @@ const SiteThreeInit = (props: Props) => {
           <ShadowPlane />
         </>
       )}
-      {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
+      {boundary && <lineLoop args={[boundary, boundaryMaterial]} />}
       <Effects />
       <SiteCamControls />
       <ContextBridge>{children}</ContextBridge>
