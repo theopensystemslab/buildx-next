@@ -55,7 +55,7 @@ const BasicChart: FC<{
           y1={baseline - 0.25}
           x2={w}
           y2={baseline - 0.25}
-          stroke="#000"
+          stroke="#fff"
           strokeWidth="0.5"
         />
       </svg>
