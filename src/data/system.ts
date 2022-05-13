@@ -6,7 +6,10 @@ import { getEnergyInfo, type EnergyInfo } from "./energyInfo"
 import { type HouseType, getHouseTypes } from "./houseType"
 import { getModules, type Module } from "./module"
 import { type Material, getMaterials } from "./material"
-import { type InternalLayoutType, getInternalLayoutTypes } from "./internalLayoutType"
+import {
+  type InternalLayoutType,
+  getInternalLayoutTypes,
+} from "./internalLayoutType"
 import { type Element, getElements } from "./element"
 import { type WindowType, getWindowTypes } from "./windowType"
 import { type SpaceType, getSpaceTypes } from "./spaceType"
@@ -28,6 +31,11 @@ export const systems: Array<System> = [
     id: "mobble",
     name: "Mobble",
     airtableId: "app25JFkKVKKEt5io",
+  },
+  {
+    id: "swift",
+    name: "Swift",
+    airtableId: "appGlzQcCZpDNRFsE",
   },
 ]
 
@@ -111,9 +119,9 @@ export const useSystemsData = (): SystemsData | "error" | null => {
         systems.map(getInternalLayoutTypes)
       ).then(flatten)
 
-      const spaceTypes = await Promise.all(
-        systems.map(getSpaceTypes)
-      ).then(flatten)
+      const spaceTypes = await Promise.all(systems.map(getSpaceTypes)).then(
+        flatten
+      )
 
       const houseTypes = await Promise.all(
         systems.map((system) => getHouseTypes(system))
