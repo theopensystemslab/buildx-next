@@ -6,6 +6,20 @@ interface Props {
   unitOfMeasurement: string
 }
 
+const formatWithUnit = (d: number, unitOfMeasurement: string) => {
+  const formatted =
+    Math.abs(d) > 1000
+      ? `${Math.floor(d / 1000)}k`
+      : d.toLocaleString("en-GB", {
+          maximumFractionDigits: 1,
+        })
+  const formattedWithUnit =
+    unitOfMeasurement === "€"
+      ? `${unitOfMeasurement}${formatted}`
+      : `${formatted}${unitOfMeasurement}`
+  return formattedWithUnit
+}
+
 const SquareChart: FC<Props> = (props) => {
   const w = 60
   const h = 80
@@ -22,14 +36,25 @@ const SquareChart: FC<Props> = (props) => {
         const height = (d / total) * h
         accumulatedY += height
         return (
-          <rect
-            key={index}
-            x="0"
-            y={currentAccummulatedY}
-            fill={colorScheme[index]}
-            width={w}
-            height={height}
-          />
+          <g transform={`translate(0 ${currentAccummulatedY})`}>
+            <rect
+              key={index}
+              x="0"
+              y={0}
+              fill={colorScheme[index]}
+              width={w}
+              height={height}
+            />
+            <text
+              x={w / 2}
+              y={height / 2 + 2}
+              fill="#000"
+              textAnchor="middle"
+              style={{ fontSize: 4 }}
+            >
+              {formatWithUnit(d, props.unitOfMeasurement)}
+            </text>
+          </g>
         )
       })}
     </svg>

@@ -1,8 +1,9 @@
 import React, { type FC, type ReactNode } from "react"
 import { type DashboardData } from "../data"
-import { DataPoint, ChangeDataPoint, Labeled } from "../Ui"
+import { ChangeDataPoint, Labeled, Titled } from "../Ui"
 import StackedBarChart from "../charts/StackedBarChart"
 import SquareChart from "../charts/SquareChart"
+import CircleChart from "../charts/CircleChart"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
   <div className="grid grid-cols-1 gap-x-4 space-y-16 md:grid-cols-4 md:space-y-0">
@@ -15,77 +16,58 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
 
   const costs = Object.values(dashboardData.byHouse).map((d) => d.costs)
 
+  const embodiedCo2 = Object.values(dashboardData.byHouse).map((d) => d.embodiedCo2)
+
+  const operationalCo2 = Object.values(dashboardData.byHouse).map((d) => d.operationalCo2)
+
   return (
     <div className="space-y-16">
       <GridLayout>
-        <Labeled label="Total building area">
-          <DataPoint
-            value={dashboardData.areas.totalFloor}
-            unitOfMeasurement="m²"
-            description="gross internal area"
-          />
-        </Labeled>
-        <Labeled label="Number of units">
-          <DataPoint
-            value={dashboardData.unitsCount}
-            unitOfMeasurement=""
-            description="new buildings"
-          />
-        </Labeled>
-        <Labeled label="Number of units">
-          <SquareChart
-            data={Object.values(dashboardData.byHouse).map(
-              (houseInfo) => houseInfo.areas.totalFloor
-            )}
-            unitOfMeasurement="T"
-          />
-        </Labeled>
-      </GridLayout>
-      <GridLayout>
-        <Labeled label="Estimated total building cost">
+        <Titled title="Build cost" subtitle="Estimated EUR">
           <StackedBarChart
             data={[
               costs.map((cost) => cost.total),
               costs.map((cost) => cost.comparative),
             ]}
-            description="Euros"
             unitOfMeasurement="€"
           />
-          <ChangeDataPoint
-            percentage={-30}
-            description="compared to traditional construction cost"
+        </Titled>
+        <Titled title="Floor area" subtitle="Gross internal area m²">
+          <SquareChart
+            data={Object.values(dashboardData.byHouse).map(
+              (houseInfo) => houseInfo.areas.totalFloor
+            )}
+            unitOfMeasurement="m²"
           />
-        </Labeled>
-        <Labeled label="Annual energy demand">
+        </Titled>
+        <Titled title="Energy use" subtitle="Estimated annual">
+          <CircleChart
+            data={Object.values(dashboardData.byHouse).map(
+              (houseInfo) => houseInfo.energyUse.totalHeatingCost
+            )}
+            unitOfMeasurement="€"
+          />
+        </Titled>
+        <Titled title="Carbon emissions" subtitle="Estimated annual">
           <StackedBarChart
             data={[
-              [-2, -4],
-              [2, 3],
+              operationalCo2.map((co2) => co2.annualTotal),
+              operationalCo2.map((co2) => co2.annualComparative),
             ]}
-            unitOfMeasurement=""
-            description="gross internal area"
+            unitOfMeasurement="T"
           />
-        </Labeled>
-        <Labeled label="Total operational CO₂">
+        </Titled>
+      </GridLayout>
+      <GridLayout>
+        <Titled title="Carbon emissions" subtitle="Estimated upfront">
           <StackedBarChart
             data={[
-              [4, 1],
-              [2, 3],
+              embodiedCo2.map((co2) => co2.total),
+              embodiedCo2.map((co2) => co2.comparative),
             ]}
-            unitOfMeasurement=""
-            description="gross internal area"
+            unitOfMeasurement="T"
           />
-        </Labeled>
-        <Labeled label="Total embodied CO₂">
-          <StackedBarChart
-            data={[
-              [4, 1],
-              [1, 2],
-            ]}
-            unitOfMeasurement=""
-            description="gross internal area"
-          />
-        </Labeled>
+        </Titled>
       </GridLayout>
     </div>
   )

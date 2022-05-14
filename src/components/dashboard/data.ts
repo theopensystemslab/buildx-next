@@ -414,10 +414,6 @@ const calculateHouseInfo = (
     costs,
     operationalCo2,
     embodiedCo2,
-    cost: accumulateIf(
-      () => true,
-      (module) => module.cost
-    ),
     energyUse,
     embodiedCarbon: accumulateIf(
       () => true,
