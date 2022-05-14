@@ -1,12 +1,25 @@
 import React, { type FC, type ReactNode } from "react"
 
+export const colorScheme = [
+  "#FAFF00",
+  "#ADFF00",
+  "#3EFF80",
+  "#7DFFE0",
+  "#90EBFF",
+  "#4193FF",
+  "#E09EFF",
+  "#FFA1E4",
+  "#F73063",
+  "#FF7426",
+]
+
 export const DataPoint: FC<{
   value: number
   unitOfMeasurement: string
   description: string
 }> = (props) => {
   return (
-    <div className="space-y-2 text-white">
+    <div className="text-white space-y-2">
       <p className="text-5xl">{`${props.value.toLocaleString("en-GB", {
         maximumFractionDigits: 1,
       })}${props.unitOfMeasurement}`}</p>
@@ -20,7 +33,7 @@ export const ChangeDataPoint: FC<{
   description: string
 }> = (props) => {
   return (
-    <div className="flex space-x-1 text-gray-300">
+    <div className="flex text-gray-300 space-x-1">
       <span className="inline-block pt-4 text-2xl">
         {props.percentage < 0 ? "↓" : "↑"}
       </span>

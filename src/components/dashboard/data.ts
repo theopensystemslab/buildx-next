@@ -17,6 +17,7 @@ export interface DashboardData {
 // Areas
 
 export interface Areas {
+  totalFloor: number
   foundation: number
   groundFloor: number
   firstFloor: number
@@ -33,6 +34,7 @@ export interface Areas {
 }
 
 const emptyAreas = (): Areas => ({
+  totalFloor: 0,
   foundation: 0,
   groundFloor: 0,
   firstFloor: 0,
@@ -51,6 +53,7 @@ const emptyAreas = (): Areas => ({
 const accumulateAreas = (areas: Areas[]): Areas =>
   areas.reduce((accumulator, current) => {
     return {
+      totalFloor: accumulator.totalFloor + current.totalFloor,
       foundation: accumulator.foundation + current.foundation,
       groundFloor: accumulator.groundFloor + current.groundFloor,
       firstFloor: accumulator.firstFloor + current.firstFloor,
@@ -197,6 +200,15 @@ const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
     }
   }, emptyEnergyUse())
 
+// u-values
+
+export interface UValues {
+  glazingUValue: number
+  wallUValue: number
+  floorUValue: number
+  roofUValue: number
+}
+
 export interface HouseInfo {
   houseModules: Module[]
   areas: Areas
@@ -206,6 +218,7 @@ export interface HouseInfo {
   energyUse: EnergyUse
   cost: number
   embodiedCarbon: number
+  uValues: UValues
 }
 
 // TODO: retrieve from Airtable instead of hard-coding
@@ -258,6 +271,7 @@ const calculateHouseInfo = (
   )
 
   const areas: Areas = {
+    totalFloor: totalFloorArea,
     foundation: accumulateIf(
       (module) => module.structuredDna.levelType[0] === "F",
       (module) => module.floorArea
@@ -377,9 +391,18 @@ const calculateHouseInfo = (
     primaryEnergyDemand: totalFloorArea * energyInfo.primaryEnergyDemand,
     dhwCost:
       totalFloorArea * energyInfo.dhwDemand * energyInfo.electricityTariff,
-    spaceHeatingCost: totalFloorArea * energyInfo.spaceHeatingDemand * energyInfo.electricityTariff,
-    totalHeatingCost: totalFloorArea * energyInfo.totalHeatingDemand * energyInfo.electricityTariff,
-    primaryEnergyCost: totalFloorArea * energyInfo.primaryEnergyDemand * energyInfo.electricityTariff,
+    spaceHeatingCost:
+      totalFloorArea *
+      energyInfo.spaceHeatingDemand *
+      energyInfo.electricityTariff,
+    totalHeatingCost:
+      totalFloorArea *
+      energyInfo.totalHeatingDemand *
+      energyInfo.electricityTariff,
+    primaryEnergyCost:
+      totalFloorArea *
+      energyInfo.primaryEnergyDemand *
+      energyInfo.electricityTariff,
   }
 
   return {
@@ -397,6 +420,12 @@ const calculateHouseInfo = (
       () => true,
       (module) => module.embodiedCarbon
     ),
+    uValues: {
+      glazingUValue: energyInfo.glazingUValue,
+      wallUValue: energyInfo.wallUValue,
+      floorUValue: energyInfo.floorUValue,
+      roofUValue: energyInfo.roofUValue,
+    },
   }
 }
 
