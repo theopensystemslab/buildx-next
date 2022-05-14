@@ -2,6 +2,7 @@ import React, { type FC, type ReactNode } from "react"
 import { type DashboardData } from "../data"
 import { DataPoint, ChangeDataPoint, Labeled } from "../Ui"
 import StackedBarChart from "../charts/StackedBarChart"
+import SquareChart from "../charts/SquareChart"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
   <div className="grid grid-cols-1 gap-x-4 space-y-16 md:grid-cols-4 md:space-y-0">
@@ -17,16 +18,9 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
   return (
     <div className="space-y-16">
       <GridLayout>
-        <Labeled label="Total site area">
-          <DataPoint
-            value={350}
-            unitOfMeasurement="m²"
-            description="gross internal area"
-          />
-        </Labeled>
         <Labeled label="Total building area">
           <DataPoint
-            value={dashboardData.areas.foundation}
+            value={dashboardData.areas.totalFloor}
             unitOfMeasurement="m²"
             description="gross internal area"
           />
@@ -36,6 +30,14 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             value={dashboardData.unitsCount}
             unitOfMeasurement=""
             description="new buildings"
+          />
+        </Labeled>
+        <Labeled label="Number of units">
+          <SquareChart
+            data={Object.values(dashboardData.byHouse).map(
+              (houseInfo) => houseInfo.areas.totalFloor
+            )}
+            unitOfMeasurement="T"
           />
         </Labeled>
       </GridLayout>
