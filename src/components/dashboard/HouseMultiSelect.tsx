@@ -51,7 +51,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
       })}
       {houseSelectOptions.length > 0 ? (
         <>
-          <div className="relative rounded cursor-auto hover:bg-gray-200">
+          <div className="relative rounded cursor-auto hover:bg-gray-500 transition-colors duration-200">
             <span className="absolute text-2xl text-white cursor-auto pointer-events-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
               +
             </span>
