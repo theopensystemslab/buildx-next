@@ -80,6 +80,7 @@ export interface Costs {
   internalLining: number
   cladding: number
   total: number
+  comparative: number
 }
 
 const emptyCosts = (): Costs => ({
@@ -90,6 +91,7 @@ const emptyCosts = (): Costs => ({
   internalLining: 0,
   cladding: 0,
   total: 0,
+  comparative: 0,
 })
 
 const accumulateCosts = (areas: Costs[]): Costs =>
@@ -102,6 +104,7 @@ const accumulateCosts = (areas: Costs[]): Costs =>
       internalLining: accumulator.internalLining + current.internalLining,
       cladding: accumulator.cladding + current.cladding,
       total: accumulator.total + current.total,
+      comparative: accumulator.comparative + current.comparative,
     }
   }, emptyCosts())
 
@@ -216,7 +219,6 @@ export interface HouseInfo {
   operationalCo2: OperationalCo2
   embodiedCo2: EmbodiedCo2
   energyUse: EnergyUse
-  cost: number
   embodiedCarbon: number
   uValues: UValues
 }
@@ -354,6 +356,7 @@ const calculateHouseInfo = (
       // TODO: add roof, lining and cladding
       (module) => module.cost
     ),
+    comparative: totalFloorArea * comparative.cost
   }
 
   const annualTotalOperationalCo2 = totalFloorArea * energyInfo.operationalCo2
