@@ -3,3 +3,8 @@
   * roof area: material associated with the 'Roofing' element.
   * same with 'Cladding', 'Internal wall lining' etc.
 * show u-values per building.
+
+## New questions
+
+* foundation / footprint area: what are these exactly? All foundation modules have a floor area of 0.
+* electricity tariff is not filled out (value 'p')

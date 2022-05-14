@@ -24,7 +24,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
         </Labeled>
         <Labeled label="Total building area">
           <DataPoint
-            value={dashboardData.areas.building}
+            value={dashboardData.areas.foundation}
             unitOfMeasurement="m²"
             description="gross internal area"
           />

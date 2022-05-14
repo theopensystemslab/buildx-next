@@ -35,6 +35,11 @@ export interface Module {
   height: number
   length: number
   cost: number // Euros
+  floorArea: number
+  claddingArea: number
+  liningArea: number
+  roofingArea: number
+  spaceType?: string
   embodiedCarbon: number // kgCO2
   visualReference?: string
   description?: string
@@ -66,6 +71,11 @@ export const getModules = async (system: System): Promise<Array<Module>> => {
         width: record.fields?.["section_width"]?.[0] ?? 1,
         height: record.fields?.["level_height"]?.[0] ?? 1,
         length: record.fields?.["length_dims"] ?? 0,
+        floorArea: record.fields?.["floor_area"] ?? 0,
+        claddingArea: record.fields?.["floor_area"] ?? 0,
+        liningArea: record.fields?.["floor_area"] ?? 0,
+        roofingArea: record.fields?.["roofing_area"] ?? 0,
+        spaceType: record.fields?.["space_type"]?.[0],
         cost: record.fields?.["baseline_module_cost"] ?? 1500,
         embodiedCarbon: record.fields?.["embodied_carbon"] ?? -400,
         visualReference: record.fields?.["visual_reference"]?.[0]?.url,

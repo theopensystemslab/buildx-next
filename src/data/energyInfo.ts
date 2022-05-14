@@ -10,7 +10,7 @@ export interface EnergyInfo {
   systemId: string
   dhwDemand: number // kWh/m2/yr
   spaceHeatingDemand: number // kWh/m2/yr
-  totalHeadingDemand: number // kWh/m2/yr
+  totalHeatingDemand: number // kWh/m2/yr
   freshAirRequirement: number // m3
   operationalCo2: number // kg/m2/yr
   primaryEnergyDemand: number // kWh/m2/yr
@@ -42,7 +42,7 @@ export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
       systemId: system.id,
       dhwDemand: getEnergyEntry("DHW demand", records),
       spaceHeatingDemand: getEnergyEntry("Space Heating Demand", records),
-      totalHeadingDemand: getEnergyEntry("Total Heating Demand", records),
+      totalHeatingDemand: getEnergyEntry("Total Heating Demand", records),
       freshAirRequirement: getEnergyEntry("Fresh Air Requirment", records),
       operationalCo2: getEnergyEntry("Operational Co2", records),
       primaryEnergyDemand: getEnergyEntry("Primary Energy Demand ", records),
@@ -59,7 +59,7 @@ export const getEnergyInfo = async (system: System): Promise<EnergyInfo> => {
       systemId: system.id,
       dhwDemand: 0,
       spaceHeatingDemand: 0,
-      totalHeadingDemand: 0,
+      totalHeatingDemand: 0,
       freshAirRequirement: 0,
       operationalCo2: 0,
       primaryEnergyDemand: 0,
@@ -149,11 +149,11 @@ export const getHouseStats = ({
       0
     ),
     totalHeatingDemand: Math.round(
-      relevantEnergyInfo.totalHeadingDemand * surface
+      relevantEnergyInfo.totalHeatingDemand * surface
     ),
     operationalCo2: Math.round(relevantEnergyInfo.operationalCo2 * surface),
     estimatedHeatingCosts: Math.round(
-      relevantEnergyInfo.totalHeadingDemand *
+      relevantEnergyInfo.totalHeatingDemand *
         surface *
         relevantEnergyInfo.electricityTariff
     ),
