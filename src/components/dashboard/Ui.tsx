@@ -56,3 +56,17 @@ export const Labeled: FC<{ label: string; children: ReactNode }> = (props) => (
     <div className="space-y-4">{props.children}</div>
   </div>
 )
+
+export const Titled: FC<{
+  title: string
+  subtitle: string
+  children: ReactNode
+}> = (props) => (
+  <div className="space-y-8">
+    <div className="space-y-1">
+      <h3 className="text-xl text-white">{props.title}</h3>
+      <p className="text-sm text-white">{props.subtitle}</p>
+    </div>
+    <div className="space-y-4">{props.children}</div>
+  </div>
+)
