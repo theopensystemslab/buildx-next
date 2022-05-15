@@ -16,10 +16,11 @@ const StackedBarChart: FC<{
     [props.data]
   )
 
-  const { max, min } = useMemo(
+  const { max, min, absoluteMax } = useMemo(
     () => ({
       max: Math.max(...aggregates),
       min: Math.min(...aggregates),
+      absoluteMax: Math.max(...aggregates.map(Math.abs)),
     }),
     [aggregates]
   )
@@ -85,15 +86,17 @@ const StackedBarChart: FC<{
                           }%)`
                     }
                   />
-                  <text
-                    x={x + width / 2}
-                    y={y + Math.abs(height) / 2 + 2}
-                    fill="#000"
-                    textAnchor="middle"
-                    style={{ fontSize: 4 }}
-                  >
-                    {formatWithUnit(point, props.unitOfMeasurement)}
-                  </text>
+                  {Math.abs(point) > absoluteMax * 0.05 && (
+                    <text
+                      x={x + width / 2}
+                      y={y + Math.abs(height) / 2 + 2}
+                      fill="#000"
+                      textAnchor="middle"
+                      style={{ fontSize: 4 }}
+                    >
+                      {formatWithUnit(point, props.unitOfMeasurement)}
+                    </text>
+                  )}
                 </g>
               )
             })}
