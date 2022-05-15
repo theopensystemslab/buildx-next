@@ -17,11 +17,10 @@ const format = (no: number) => {
 
 const DataTable: FC<Props> = (props) => {
   return (
-    <div className="table w-full text-white">
+    <div className="table w-full text-white border-separate space-y-1">
       {props.data.map((row, rowIndex) => (
         <div key={rowIndex} className="table-row bg-gray-500">
           <div className={"table-cell px-4 py-2"}>{row.label}</div>
-          <div className={"table-cell px-4 py-2 italic"}>{row.description}</div>
           <div className={"table-cell px-4 py-2"}>
             {typeof row.value === "number" ? format(row.value) : row.value}
           </div>

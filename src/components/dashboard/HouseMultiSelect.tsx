@@ -23,7 +23,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
       .filter((v): v is { houseId: string; houseName: string } => Boolean(v))
 
   return (
-    <div className="flex flex-wrap items-center py-4 space-x-2">
+    <div className="flex flex-wrap items-center px-4 py-4 space-x-2">
       {props.selectedHouses.map((houseId, index) => {
         const house = props.houses[houseId]
         if (!house) {

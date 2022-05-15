@@ -1,23 +1,10 @@
 import React, { type FC } from "react"
 import { colorScheme } from "../Ui"
+import { formatWithUnit } from "../data"
 
 interface Props {
   data: number[]
   unitOfMeasurement: string
-}
-
-const formatWithUnit = (d: number, unitOfMeasurement: string) => {
-  const formatted =
-    Math.abs(d) > 1000
-      ? `${Math.floor(d / 1000)}k`
-      : d.toLocaleString("en-GB", {
-          maximumFractionDigits: 1,
-        })
-  const formattedWithUnit =
-    unitOfMeasurement === "€"
-      ? `${unitOfMeasurement}${formatted}`
-      : `${formatted}${unitOfMeasurement}`
-  return formattedWithUnit
 }
 
 const CircleChart: FC<Props> = (props) => {
@@ -27,7 +14,7 @@ const CircleChart: FC<Props> = (props) => {
   const total = props.data.reduce((a, b) => a + b, 0)
 
   return (
-    <svg width="200" viewBox={`0 0 ${w} ${h}`}>
+    <svg viewBox={`0 0 ${w} ${h}`}>
       {props.data.map((d, index) => {
         return (
           <circle

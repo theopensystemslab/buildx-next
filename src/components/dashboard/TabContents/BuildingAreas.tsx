@@ -58,10 +58,11 @@ const BuildingAreas: FC<{ dashboardData: DashboardData }> = (props) => {
           value: areas.kitchen,
           unitOfMeasurement: "m²",
         },
+        // TODO: calculate
         {
           label: "Stair areas",
           description: "",
-          value: areas.stairs,
+          value: 0,
           unitOfMeasurement: "m²",
         },
         {
