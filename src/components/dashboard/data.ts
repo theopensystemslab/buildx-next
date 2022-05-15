@@ -252,6 +252,7 @@ const calculateMaterialCosts = (
       element.systemId === house.systemId && element.name === "Roofing"
   )
 
+  // TODO: account for material overrides as opposed to relying on default
   const claddingMaterial: Material | undefined =
     claddingElement &&
     context.materials.find(
@@ -260,6 +261,7 @@ const calculateMaterialCosts = (
         material.name === claddingElement.defaultMaterial
     )
 
+  // TODO: account for material overrides as opposed to relying on default
   const internalLiningMaterial: Material | undefined =
     internalLiningElement &&
     context.materials.find(
@@ -268,6 +270,7 @@ const calculateMaterialCosts = (
         material.name === internalLiningElement.defaultMaterial
     )
 
+  // TODO: account for material overrides as opposed to relying on default
   const roofingMaterial: Material | undefined =
     roofingElement &&
     context.materials.find(
