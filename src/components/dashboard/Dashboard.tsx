@@ -50,7 +50,7 @@ const Dashboard: FC<Props> = (props) => {
 
   return (
     <div className="w-full h-full overflow-auto bg-gray-600">
-      <div className="max-w-5xl pt-20 pb-16 pl-4 pr-4 mx-auto space-y-8">
+      <div className="pt-20 pb-16 pl-4 pr-4 mx-auto space-y-8">
         <div>
           <HouseMultiSelect
             houses={houses}

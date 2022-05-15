@@ -15,29 +15,55 @@ const formatWithUnit = (d: number, unitOfMeasurement: string) => {
   return formattedWithUnit
 }
 
+/*
+ * NOTE: this chart is not designed to handle all edge cases. Specifically:
+ * - within one data set, all values have the same sign, e.g. [[-1, -2], [3, 4]]
+ * - the case where all values are negative are not handled
+ */
 const StackedBarChart: FC<{
   data: number[][]
   unitOfMeasurement: string
 }> = (props) => {
-  const aggregates = props.data.map((d) => d.reduce((a, b) => a + b, 0))
+  const aggregates = useMemo(
+    () => props.data.map((d) => d.reduce((a, b) => a + b, 0)),
+    [props.data]
+  )
 
   const { max, min } = useMemo(
     () => ({
       max: Math.max(...aggregates),
       min: Math.min(...aggregates),
     }),
-    [props.data]
+    [aggregates]
   )
+
+  if (max === min) {
+    return null
+  }
 
   const w = 60
   const h = 80
 
-  const baseline = min < 0 ? h / 2 : h
+  const baseline = min < 0 ? (h * max) / (max - min) : h
 
-  const scale = (min < 0 ? h / 2 : h) * 0.85
+  const scale = (min < 0 ? (h * max) / (max - min) : h) * 0.95
 
   return (
     <svg width="200" viewBox={`0 0 ${w} ${h}`}>
+      {
+        /* render bounding box for debugging purposes */
+        false && (
+          <rect
+            x="0"
+            y="0"
+            width={w}
+            height={h}
+            stroke="teal"
+            strokeWidth="1"
+            fill="none"
+          />
+        )
+      }
       {props.data.map((stack, index) => {
         const width = (w / (props.data.length + 1)) * 0.8
         const x = (w * (index + 1)) / (props.data.length + 1) - width / 2
