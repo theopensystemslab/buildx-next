@@ -4,6 +4,8 @@ import { type House, type Houses } from "@/data/house"
 import { type EnergyInfo } from "@/data/energyInfo"
 import { type SpaceType } from "@/data/spaceType"
 import { type WindowType } from "@/data/windowType"
+import { type Element } from "@/data/element"
+import { type Material } from "@/data/material"
 
 export interface DashboardData {
   byHouse: Record<string, HouseInfo>
@@ -74,7 +76,7 @@ export interface Costs {
   foundation: number
   roofStructure: number
   superstructure: number
-  roofCovering: number
+  roofing: number
   internalLining: number
   cladding: number
   total: number
@@ -85,7 +87,7 @@ const emptyCosts = (): Costs => ({
   foundation: 0,
   roofStructure: 0,
   superstructure: 0,
-  roofCovering: 0,
+  roofing: 0,
   internalLining: 0,
   cladding: 0,
   total: 0,
@@ -98,7 +100,7 @@ const accumulateCosts = (areas: Costs[]): Costs =>
       foundation: accumulator.foundation + current.foundation,
       roofStructure: accumulator.roofStructure + current.roofStructure,
       superstructure: accumulator.superstructure + current.superstructure,
-      roofCovering: accumulator.roofCovering + current.roofCovering,
+      roofing: accumulator.roofing + current.roofing,
       internalLining: accumulator.internalLining + current.internalLining,
       cladding: accumulator.cladding + current.cladding,
       total: accumulator.total + current.total,
@@ -230,6 +232,57 @@ const comparative = {
   electricityTariff: 0.2,
 }
 
+const calculateMaterialCosts = (
+  house: House,
+  context: { elements: Element[]; materials: Material[] }
+) => {
+  const claddingElement = context.elements.find(
+    (element) =>
+      element.systemId === house.systemId && element.name === "Cladding"
+  )
+
+  const internalLiningElement = context.elements.find(
+    (element) =>
+      element.systemId === house.systemId &&
+      element.name === "Internal wall lining"
+  )
+
+  const roofingElement = context.elements.find(
+    (element) =>
+      element.systemId === house.systemId && element.name === "Roofing"
+  )
+
+  const claddingMaterial: Material | undefined =
+    claddingElement &&
+    context.materials.find(
+      (material) =>
+        material.systemId === house.systemId &&
+        material.name === claddingElement.defaultMaterial
+    )
+
+  const internalLiningMaterial: Material | undefined =
+    internalLiningElement &&
+    context.materials.find(
+      (material) =>
+        material.systemId === house.systemId &&
+        material.name === internalLiningElement.defaultMaterial
+    )
+
+  const roofingMaterial: Material | undefined =
+    roofingElement &&
+    context.materials.find(
+      (material) =>
+        material.systemId === house.systemId &&
+        material.name === roofingElement.defaultMaterial
+    )
+
+  return {
+    cladding: claddingMaterial?.costPerM2 || 0,
+    internalLining: internalLiningMaterial?.costPerM2 || 0,
+    roofing: roofingMaterial?.costPerM2 || 0,
+  }
+}
+
 const calculateHouseInfo = (
   house: House,
   houseModules: Module[],
@@ -237,9 +290,11 @@ const calculateHouseInfo = (
     energyInfo: EnergyInfo
     spaceTypes: SpaceType[]
     windowTypes: WindowType[]
+    elements: Element[]
+    materials: Material[]
   }
 ): HouseInfo => {
-  const { energyInfo, spaceTypes, windowTypes } = context
+  const { energyInfo, spaceTypes, windowTypes, elements, materials } = context
 
   const accumulateIf = (
     fn: (module: Module) => boolean,
@@ -249,6 +304,11 @@ const calculateHouseInfo = (
       return accumulator + (fn(current) ? getValue(current) : 0)
     }, 0)
   }
+
+  const materialCosts = calculateMaterialCosts(house, {
+    elements,
+    materials,
+  })
 
   const bedroomId = spaceTypes.find(
     (spaceType) =>
@@ -342,6 +402,21 @@ const calculateHouseInfo = (
     ),
   }
 
+  const roofingCost = accumulateIf(
+    () => true,
+    (module) => module.roofingArea * materialCosts.roofing
+  )
+
+  const internalLiningCost = accumulateIf(
+    () => true,
+    (module) => module.liningArea * materialCosts.internalLining
+  )
+
+  const claddingCost = accumulateIf(
+    () => true,
+    (module) => module.claddingArea * materialCosts.cladding
+  )
+
   const costs: Costs = {
     foundation: accumulateIf(
       (module) => module.structuredDna.levelType[0] === "F",
@@ -357,16 +432,12 @@ const calculateHouseInfo = (
         module.structuredDna.levelType[0] !== "R",
       (module) => module.cost
     ),
-    // TODO: calculate
-    roofCovering: 0,
-    // TODO: calculate
-    internalLining: 0,
-    // TODO: calculate
-    cladding: 0,
+    roofing: roofingCost,
+    internalLining: internalLiningCost,
+    cladding: claddingCost,
     total: accumulateIf(
       () => true,
-      // TODO: add roof, lining and cladding
-      (module) => module.cost
+      (module) => module.cost + roofingCost + internalLiningCost + claddingCost
     ),
     comparative: totalFloorArea * comparative.cost,
   }
@@ -478,6 +549,8 @@ const calculate = ({
         energyInfo,
         spaceTypes: systemsData.spaceTypes,
         windowTypes: systemsData.windowTypes,
+        materials: systemsData.materials,
+        elements: systemsData.elements,
       })
     })
     return obj

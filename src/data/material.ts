@@ -19,6 +19,7 @@ export interface Material {
   specularityUrl?: string
   roughnessUrl?: string
   aoUrl?: string
+  costPerM2: number
   threeMaterial?: MeshStandardMaterial
 }
 
@@ -71,6 +72,7 @@ export const getMaterials = async (
           defaultFor: materialField(["default_material_for"]) || [],
           optionalFor: materialField(["optional_material_for"]) || [],
           defaultColor: materialField(["default_colour"]),
+          costPerM2: materialField(["material_cost_per_m2"]) || 0,
           textureUrl,
           bumpUrl,
           glossUrl,
