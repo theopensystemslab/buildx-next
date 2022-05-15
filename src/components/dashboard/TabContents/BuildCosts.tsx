@@ -30,7 +30,7 @@ const BuildCosts: FC<{ dashboardData: DashboardData }> = (props) => {
         {
           label: "Roof covering cost",
           description: "",
-          value: costs.roofCovering,
+          value: costs.roofing,
           unitOfMeasurement: "€",
         },
         {
