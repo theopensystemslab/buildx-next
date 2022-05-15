@@ -29,23 +29,22 @@ export const DataPoint: FC<{
 }
 
 export const ChangeDataPoint: FC<{
-  percentage: number
+  value: number
+  reference: number
   description: string
 }> = (props) => {
+  const percentage = (props.value / props.reference) * 100 - 100
   return (
-    <div className="flex text-gray-300 space-x-1">
-      <span className="inline-block pt-4 text-2xl">
-        {props.percentage < 0 ? "↓" : "↑"}
-      </span>
-      <div className="space-y-2">
-        <p className="text-5xl">{`${Math.abs(props.percentage).toLocaleString(
-          "en-GB",
-          {
-            maximumFractionDigits: 0,
-          }
-        )}%`}</p>
-        <p className="text-sm">{props.description}</p>
-      </div>
+    <div className="text-gray-300 space-y-1">
+      <p className="text-3xl">
+        <span className="inline-block pt-1 text-xl">
+          {percentage < 0 ? "↓ " : "↑ "}
+        </span>
+        <span>{`${Math.abs(percentage).toLocaleString("en-GB", {
+          maximumFractionDigits: 0,
+        })}%`}</span>
+      </p>
+      <p className="text-sm">{props.description}</p>
     </div>
   )
 }

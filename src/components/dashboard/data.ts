@@ -3,6 +3,7 @@ import { type SystemsData } from "@/data/system"
 import { type House, type Houses } from "@/data/house"
 import { type EnergyInfo } from "@/data/energyInfo"
 import { type SpaceType } from "@/data/spaceType"
+import { type WindowType } from "@/data/windowType"
 
 export interface DashboardData {
   byHouse: Record<string, HouseInfo>
@@ -29,7 +30,6 @@ export interface Areas {
   bathroom: number
   living: number
   kitchen: number
-  stairs: number
   windowsAndDoors: number
 }
 
@@ -46,7 +46,6 @@ const emptyAreas = (): Areas => ({
   bathroom: 0,
   living: 0,
   kitchen: 0,
-  stairs: 0,
   windowsAndDoors: 0,
 })
 
@@ -65,7 +64,6 @@ const accumulateAreas = (areas: Areas[]): Areas =>
       bathroom: accumulator.bathroom + current.bathroom,
       living: accumulator.living + current.living,
       kitchen: accumulator.kitchen + current.kitchen,
-      stairs: accumulator.stairs + current.stairs,
       windowsAndDoors: accumulator.windowsAndDoors + current.windowsAndDoors,
     }
   }, emptyAreas())
@@ -235,9 +233,14 @@ const comparative = {
 const calculateHouseInfo = (
   house: House,
   houseModules: Module[],
-  energyInfo: EnergyInfo,
-  spaceTypes: SpaceType[]
+  context: {
+    energyInfo: EnergyInfo
+    spaceTypes: SpaceType[]
+    windowTypes: WindowType[]
+  }
 ): HouseInfo => {
+  const { energyInfo, spaceTypes, windowTypes } = context
+
   const accumulateIf = (
     fn: (module: Module) => boolean,
     getValue: (module: Module) => number
@@ -318,15 +321,24 @@ const calculateHouseInfo = (
       (module) => module.spaceType === kitchenId,
       (module) => module.floorArea
     ),
-    // TODO: calculate
-    stairs: accumulateIf(
-      () => true,
-      (module) => module.floorArea
-    ),
-    // TODO: calculate
     windowsAndDoors: accumulateIf(
       () => true,
-      (module) => module.floorArea
+      (module) => {
+        const glazingAreas = [
+          module.structuredDna.windowTypeEnd,
+          module.structuredDna.windowTypeTop,
+          module.structuredDna.windowTypeSide1,
+          module.structuredDna.windowTypeSide2,
+        ].map(
+          (code) =>
+            windowTypes.find(
+              (windowType) =>
+                windowType.code === code &&
+                windowType.systemId === house.systemId
+            )?.glazingArea || 0
+        )
+        return glazingAreas.reduce((a, b) => a + b, 0)
+      }
     ),
   }
 
@@ -356,7 +368,7 @@ const calculateHouseInfo = (
       // TODO: add roof, lining and cladding
       (module) => module.cost
     ),
-    comparative: totalFloorArea * comparative.cost
+    comparative: totalFloorArea * comparative.cost,
   }
 
   const annualTotalOperationalCo2 = totalFloorArea * energyInfo.operationalCo2
@@ -364,7 +376,7 @@ const calculateHouseInfo = (
   const operationalCo2: OperationalCo2 = {
     annualTotal: annualTotalOperationalCo2,
     annualComparative: totalFloorArea * comparative.operationalCo2,
-    lifetime: annualTotalOperationalCo2 * 60,
+    lifetime: annualTotalOperationalCo2 * 100,
   }
 
   const embodiedCo2: EmbodiedCo2 = {
@@ -462,12 +474,11 @@ const calculate = ({
         )
         .filter((module): module is Module => Boolean(module))
 
-      obj[houseId] = calculateHouseInfo(
-        house,
-        modules,
+      obj[houseId] = calculateHouseInfo(house, modules, {
         energyInfo,
-        systemsData.spaceTypes
-      )
+        spaceTypes: systemsData.spaceTypes,
+        windowTypes: systemsData.windowTypes,
+      })
     })
     return obj
   })()
@@ -491,6 +502,33 @@ const calculate = ({
     ),
     unitsCount: selectedHouses.length,
   }
+}
+
+// Helpers
+
+export const formatWithUnit = (d: number, unitOfMeasurement: string) => {
+  const formatted =
+    Math.abs(d) > 1000
+      ? `${Math.floor(d / 1000)}k`
+      : d.toLocaleString("en-GB", {
+          maximumFractionDigits: 1,
+        })
+  const formattedWithUnit =
+    unitOfMeasurement === "€"
+      ? `${unitOfMeasurement}${formatted}`
+      : `${formatted}${unitOfMeasurement}`
+  return formattedWithUnit
+}
+
+export const formatWithUnitLong = (d: number, unitOfMeasurement: string) => {
+  const formatted = d.toLocaleString("en-GB", {
+    maximumFractionDigits: Math.abs(d) > 100 ? 0 : 1,
+  })
+  const formattedWithUnit =
+    unitOfMeasurement === "€"
+      ? `${unitOfMeasurement}${formatted}`
+      : `${formatted}${unitOfMeasurement}`
+  return formattedWithUnit
 }
 
 export default calculate

@@ -1,19 +1,6 @@
 import React, { useMemo, type FC } from "react"
 import { colorScheme } from "../Ui"
-
-const formatWithUnit = (d: number, unitOfMeasurement: string) => {
-  const formatted =
-    Math.abs(d) > 1000
-      ? `${Math.floor(d / 1000)}k`
-      : d.toLocaleString("en-GB", {
-          maximumFractionDigits: 1,
-        })
-  const formattedWithUnit =
-    unitOfMeasurement === "€"
-      ? `${unitOfMeasurement}${formatted}`
-      : `${formatted}${unitOfMeasurement}`
-  return formattedWithUnit
-}
+import { formatWithUnit } from "../data"
 
 /*
  * NOTE: this chart is not designed to handle all edge cases. Specifically:
@@ -49,7 +36,7 @@ const StackedBarChart: FC<{
   const scale = (min < 0 ? (h * max) / (max - min) : h) * 0.95
 
   return (
-    <svg width="200" viewBox={`0 0 ${w} ${h}`}>
+    <svg viewBox={`0 0 ${w} ${h}`}>
       {
         /* render bounding box for debugging purposes */
         false && (
@@ -115,11 +102,11 @@ const StackedBarChart: FC<{
       })}
       <line
         x1="0"
-        y1={baseline - 0.25}
+        y1={baseline - 0.15}
         x2={w}
-        y2={baseline - 0.25}
+        y2={baseline - 0.15}
         stroke="#fff"
-        strokeWidth="0.5"
+        strokeWidth="0.3"
       />
     </svg>
   )
