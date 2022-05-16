@@ -3,7 +3,9 @@ import { type DashboardData } from "../data"
 import DataTable from "../DataTable"
 
 const BuildingAreas: FC<{ dashboardData: DashboardData }> = (props) => {
-  const { areas } = props.dashboardData
+  const {
+    dashboardData: { areas },
+  } = props
 
   return (
     <DataTable
@@ -35,27 +37,28 @@ const BuildingAreas: FC<{ dashboardData: DashboardData }> = (props) => {
         {
           label: "Bedroom areas",
           description: "",
-          value: 0,
+          value: areas.bedroom,
           unitOfMeasurement: "m²",
         },
         {
           label: "Bathroom areas",
           description: "",
-          value: 0,
+          value: areas.bathroom,
           unitOfMeasurement: "m²",
         },
         {
           label: "Living areas",
           description: "",
-          value: 0,
+          value: areas.living,
           unitOfMeasurement: "m²",
         },
         {
           label: "Kitchen areas",
           description: "",
-          value: 0,
+          value: areas.kitchen,
           unitOfMeasurement: "m²",
         },
+        // TODO: calculate
         {
           label: "Stair areas",
           description: "",
@@ -65,25 +68,25 @@ const BuildingAreas: FC<{ dashboardData: DashboardData }> = (props) => {
         {
           label: "Cladding",
           description: "",
-          value: 0,
+          value: areas.cladding,
           unitOfMeasurement: "m²",
         },
         {
           label: "Internal lining",
           description: "",
-          value: 0,
+          value: areas.internalLining,
           unitOfMeasurement: "m²",
         },
         {
           label: "Roofing",
           description: "",
-          value: 0,
+          value: areas.roofing,
           unitOfMeasurement: "m²",
         },
         {
           label: "Glazing/opening areas",
           description: "",
-          value: 0,
+          value: areas.windowsAndDoors,
           unitOfMeasurement: "m²",
         },
       ]}

@@ -1,59 +1,140 @@
 import React, { type FC, type ReactNode } from "react"
 import { type DashboardData } from "../data"
-import { DataPoint, ChangeDataPoint, Labeled } from "../Ui"
-import BasicChart from "../BasicChart"
+import { ChangeDataPoint, Titled } from "../Ui"
+import StackedBarChart from "../charts/StackedBarChart"
+import SquareChart from "../charts/SquareChart"
+import CircleChart from "../charts/CircleChart"
+import { formatWithUnit, formatWithUnitLong } from "../data"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
-  <div className="grid grid-cols-1 gap-x-4 space-y-16 md:grid-cols-4 md:space-y-0">
+  <div className="px-4 py-16 border-b border-gray-400 grid grid-cols-1 gap-x-8 last:border-b-0 md:grid-cols-4 md:space-y-0">
     {props.children}
   </div>
 )
 
 const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
   const { dashboardData } = props
-  const costs = Object.values(dashboardData.byHouse).map((d) => d.cost)
+
+  const costs = Object.values(dashboardData.byHouse).map((d) => d.costs)
+
+  const embodiedCo2 = Object.values(dashboardData.byHouse).map(
+    (d) => d.embodiedCo2
+  )
+
+  const operationalCo2 = Object.values(dashboardData.byHouse).map(
+    (d) => d.operationalCo2
+  )
+
+  const totalCost = costs.reduce(
+    (accumulator, cost) => accumulator + cost.total,
+    0
+  )
+  const totalComparativeCost = costs.reduce(
+    (accumulator, cost) => accumulator + cost.comparative,
+    0
+  )
+
+  const totalOperationalCo2 = operationalCo2.reduce(
+    (accumulator, co2) => accumulator + co2.annualTotal / 1000,
+    0
+  )
+
+  const totalOperationalCo2Comparative = operationalCo2.reduce(
+    (accumulator, co2) => accumulator + co2.annualComparative / 1000,
+    0
+  )
+
+  const totalEmbodiedCo2 = embodiedCo2.reduce(
+    (accumulator, co2) => accumulator + co2.total / 1000,
+    0
+  )
+
   return (
-    <div className="space-y-16">
+    <div className="text-white">
       <GridLayout>
-        <Labeled label="Total site area">
-          <DataPoint
-            value={350}
+        <Titled title="Build cost" subtitle="Estimated EUR">
+          <StackedBarChart
+            data={[
+              costs.map((cost) => cost.total),
+              costs.map((cost) => cost.comparative),
+            ]}
+            unitOfMeasurement="€"
+          />
+          <div className="flex space-x-8">
+            <p className="text-5xl">{formatWithUnit(totalCost, "€")}</p>
+            <ChangeDataPoint
+              value={totalCost}
+              reference={totalComparativeCost}
+              description="Compared to traditional new build"
+            />
+          </div>
+        </Titled>
+        <Titled title="Floor area" subtitle="Gross internal area m²">
+          <SquareChart
+            data={Object.values(dashboardData.byHouse).map(
+              (houseInfo) => houseInfo.areas.totalFloor
+            )}
             unitOfMeasurement="m²"
-            description="gross internal area"
           />
-        </Labeled>
-        <Labeled label="Total building area">
-          <DataPoint
-            value={dashboardData.areas.building}
-            unitOfMeasurement="m²"
-            description="gross internal area"
+          <div className="flex space-x-8">
+            <p className="text-5xl">
+              {formatWithUnit(dashboardData.areas.totalFloor, "m²")}
+            </p>
+            <div className="text-gray-300 space-y-1">
+              <p className="text-3xl">
+                {formatWithUnitLong(
+                  dashboardData.costs.total / dashboardData.areas.totalFloor,
+                  "€/m²"
+                )}
+              </p>
+              <p className="text-sm">cost per floor area</p>
+            </div>
+          </div>
+        </Titled>
+        <Titled title="Energy use" subtitle="Estimated annual">
+          <CircleChart
+            data={Object.values(dashboardData.byHouse).map(
+              (houseInfo) => houseInfo.energyUse.totalHeatingCost
+            )}
+            unitOfMeasurement="€"
           />
-        </Labeled>
-        <Labeled label="Number of units">
-          <DataPoint
-            value={dashboardData.unitsCount}
-            unitOfMeasurement=""
-            description="new buildings"
+        </Titled>
+        <Titled title="Carbon emissions" subtitle="Estimated annual">
+          <StackedBarChart
+            data={[
+              operationalCo2.map((co2) => co2.annualTotal / 1000),
+              operationalCo2.map((co2) => co2.annualComparative / 1000),
+            ]}
+            unitOfMeasurement="T"
           />
-        </Labeled>
+          <div className="flex space-x-8">
+            <p className="text-5xl">
+              {formatWithUnit(totalOperationalCo2, "T")}
+            </p>
+            <ChangeDataPoint
+              value={totalOperationalCo2}
+              reference={totalOperationalCo2Comparative}
+              description="Compared to traditional new build"
+            />
+          </div>
+        </Titled>
       </GridLayout>
       <GridLayout>
-        <Labeled label="Estimated total building cost">
-          <BasicChart data={[...costs, 500000]} description="Euros" />
-          <ChangeDataPoint
-            percentage={-30}
-            description="compared to traditional construction cost"
+        <Titled title="Carbon emissions" subtitle="Estimated upfront">
+          <StackedBarChart
+            data={[
+              embodiedCo2.map((co2) => co2.total / 1000),
+              embodiedCo2.map((co2) => co2.comparative / 1000),
+            ]}
+            unitOfMeasurement="T"
           />
-        </Labeled>
-        <Labeled label="Annual energy demand">
-          <BasicChart data={[-2, 8]} description="gross internal area" />
-        </Labeled>
-        <Labeled label="Total operational CO₂">
-          <BasicChart data={[4, 1]} description="gross internal area" />
-        </Labeled>
-        <Labeled label="Total embodied CO₂">
-          <BasicChart data={[4, 1]} description="gross internal area" />
-        </Labeled>
+          <div className="flex space-x-8">
+            <p className="text-5xl">{formatWithUnit(totalEmbodiedCo2, "T")}</p>
+            <p className="text-gray-300 text-sm">
+              Project will remove carbon dioxide from the atmosphere
+            </p>
+          </div>
+        </Titled>
       </GridLayout>
     </div>
   )

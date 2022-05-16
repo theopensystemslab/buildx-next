@@ -49,31 +49,33 @@ const Dashboard: FC<Props> = (props) => {
   }
 
   return (
-    <div className="w-full h-full overflow-auto bg-gray-100">
-      <div className="max-w-5xl pt-20 pb-16 pl-4 pr-4 mx-auto space-y-8">
-        <HouseMultiSelect
-          houses={houses}
-          selectedHouses={selectedHouses}
-          setSelectedHouses={setSelectedHouses}
-        />
-        <div className="flex flex-wrap items-center justify-start space-x-4">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id
-            return (
-              <Link key={tab.id} href={`/dashboard/${tab.id}`}>
-                <span
-                  className={[
-                    "inline-block cursor-pointer whitespace-pre px-2 py-1 font-bold",
-                    isActive ? "text-gray-700" : "text-gray-300",
-                  ].join(" ")}
-                >
-                  {tab.label}
-                </span>
-              </Link>
-            )
-          })}
+    <div className="w-full h-full overflow-auto bg-gray-600">
+      <div className="pt-16 pb-16 mx-auto">
+        <div>
+          <HouseMultiSelect
+            houses={houses}
+            selectedHouses={selectedHouses}
+            setSelectedHouses={setSelectedHouses}
+          />
+          <div className="flex flex-wrap items-center justify-start px-4 py-4 border-b border-gray-400 space-x-4">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id
+              return (
+                <Link key={tab.id} href={`/dashboard/${tab.id}`}>
+                  <span
+                    className={[
+                      "inline-block cursor-pointer whitespace-pre py-1 transition-colors duration-200",
+                      isActive ? "text-white" : "text-gray-400 hover:text-gray-300",
+                    ].join(" ")}
+                  >
+                    {tab.label}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
         </div>
-        <div className="pt-8">
+        <div>
           {activeTab === Tab.Overview ? (
             <Overview dashboardData={dashboardData} />
           ) : null}
