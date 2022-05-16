@@ -91,7 +91,7 @@ export const useModuleGeometries = (moduleDna: string, gltf: GltfT) => {
     toArray,
     reduceA({}, (acc: { [e: string]: Mesh[] }, [nodeType, node]) => {
       const element = getElement(nodeType)
-      if (!element || element.name === "Appliance") return acc
+      if (!element) return acc
       return produce(acc, (draft) => {
         node.traverse((child) => {
           if (isMesh(child)) {
