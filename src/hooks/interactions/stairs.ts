@@ -102,26 +102,6 @@ export const useStairsOptions = <T extends BareModule>(
               })
             )
           )
-
-          // const oldModule: BareModule =
-          //   columnMatrix[columnIndex][levelIdx][groupIdx]
-          // const newModule =
-
-          // if (newModule === null) return none
-
-          // rewrite here
-
-          // const gridUnitDiff =
-          //   newModule.structuredDna.gridUnits -
-          //   oldModule.structuredDna.gridUnits
-
-          // return some({
-          //   levelIdx,
-          //   groupIdx,
-          //   oldModule,
-          //   newModule,
-          //   gridUnitDiff,
-          // })
         })
       )
 
