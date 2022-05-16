@@ -1,6 +1,6 @@
-import { pipe } from 'fp-ts/lib/function'
-import { reduce } from 'fp-ts/lib/ReadonlyArray'
-import { Box3, Vector3, Matrix4 } from 'three'
+import { pipe } from "fp-ts/lib/function"
+import { reduce } from "fp-ts/lib/ReadonlyArray"
+import { Box3, Vector3, Matrix4 } from "three"
 
 const minPt2 = ([x1, y1]: Pt2, [x2, y2]: Pt2): Pt2 => {
   return [Math.min(x1, x2), Math.min(y1, y2)]
@@ -23,7 +23,7 @@ export const boundingBox = (points: Array<Pt2>): [Pt2, Pt2] | null => {
       ],
       ([currentMin, currentMax], currentPt) => [
         minPt2(currentMin, currentPt),
-        minPt2(currentMax, currentPt),
+        maxPt2(currentMax, currentPt),
       ]
     )
   )
