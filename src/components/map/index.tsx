@@ -1,7 +1,4 @@
-import {
-  BUILDX_LOCAL_STORAGE_HOUSES_KEY,
-  BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
-} from "@/CONSTANTS"
+import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "@/CONSTANTS"
 import mapProxy, {
   getMapPolygonCentre,
   useMapMode,
@@ -29,17 +26,19 @@ import Fill from "ol/style/Fill"
 import Stroke from "ol/style/Stroke"
 import Style from "ol/style/Style"
 import React, { useEffect, useRef, useState } from "react"
-import { subscribe } from "valtio"
 import { subscribeKey } from "valtio/utils"
 import { IconButton } from "../ui"
 import { Menu } from "../ui/icons"
 import UniversalMenu from "../ui/UniversalMenu"
-import { useClickAway, useEscape } from "../ui/utils"
+import { useEscape } from "../ui/utils"
 import css from "./index.module.css"
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
 
-const almere = fromLonLat([5.2647, 52.3508]) as [number, number]
+// const almere = fromLonLat([5.2647, 52.3508]) as [number, number]
+// const westerngrund = fromLonLat([9.1515, 50.68]) as [number, number]
+
+const gadheim = fromLonLat([9.902056, 49.843]) as [number, number]
 
 const MapIndex = () => {
   const [universalMenu, setUniversalMenu] = useState(false)
@@ -117,8 +116,8 @@ const MapIndex = () => {
         }),
       ],
       view: new View({
-        center: almere,
-        zoom: 10,
+        center: gadheim,
+        zoom: 5,
         maxZoom,
       }),
       controls: [],
