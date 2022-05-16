@@ -171,6 +171,7 @@ const ColumnBuildingElement = (props: Props) => {
       ref={meshRef}
       geometry={geometry}
       material={material}
+      castShadow
       {...(bind() as any)}
     />
   )
