@@ -1,6 +1,8 @@
 import { useSystemsData } from "@/contexts/SystemsData"
 import { filterR, fuzzyMatch, GltfT, isMesh, mapR, reduceA } from "@/utils"
+import { findFirst } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
+import { toUndefined } from "fp-ts/lib/Option"
 import { toArray } from "fp-ts/lib/Record"
 import produce from "immer"
 import { BufferGeometry, Mesh } from "three"
@@ -21,18 +23,36 @@ export const useModuleGeometries = (moduleDna: string, gltf: GltfT) => {
 
   const elementMap = new Map<ElementName, BufferGeometry>()
 
-  const getElement = (nodeType: string) =>
-    fuzzyMatch(elements, {
-      keys: ["ifc4Variable"],
-      threshold: 0.5,
-    })(nodeType)
+  const getElement = (nodeType: string) => {
+    const strippedNodeType = nodeType
+      .replace(/I?None.*/, "")
+      .replace(/Component.*/, "")
+      .replaceAll(/[0-9]/g, "")
+      .replace(/Object/, "")
+      .replace(/(Ifc.*)(Ifc.*)/, "$1")
+    const result = pipe(
+      elements,
+      findFirst((el) => {
+        return el.ifc4Variable === strippedNodeType
+      }),
+      toUndefined
+    )
+
+    if (result === undefined && nodeType.startsWith("Ifc")) {
+      console.log({
+        unmatchedNodeType: { nodeType, strippedNodeType, moduleDna },
+      })
+    }
+
+    return result
+  }
 
   const elementMeshes = pipe(
     gltf.nodes,
     toArray,
     reduceA({}, (acc: { [e: string]: Mesh[] }, [nodeType, node]) => {
       const element = getElement(nodeType)
-      if (!element || element.name === "Appliance") return acc
+      if (!element) return acc
       return produce(acc, (draft) => {
         node.traverse((child) => {
           if (isMesh(child)) {
