@@ -9,13 +9,20 @@ import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import { proxyMap } from "valtio/utils"
 
-type ModuleDna = string
+type SystemIdModuleDna = string
 
 type ElementName = string
 
-const geometries = proxyMap<ModuleDna, Map<ElementName, BufferGeometry>>()
+const geometries = proxyMap<
+  SystemIdModuleDna,
+  Map<ElementName, BufferGeometry>
+>()
 
-export const useModuleGeometries = (moduleDna: string, gltf: GltfT) => {
+export const useModuleGeometries = (
+  systemId: string,
+  moduleDna: string,
+  gltf: GltfT
+) => {
   const { elements } = useSystemsData()
 
   const maybeModuleGeometries = geometries.get(moduleDna)
@@ -72,7 +79,7 @@ export const useModuleGeometries = (moduleDna: string, gltf: GltfT) => {
     elementMap.set(k, v)
   })
 
-  geometries.set(moduleDna, elementMap)
+  geometries.set(`${systemId}:${moduleDna}`, elementMap)
 
   return elementMap
 }

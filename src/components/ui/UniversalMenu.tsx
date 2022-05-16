@@ -1,4 +1,5 @@
 import Sidebar from "@/components/ui/Sidebar"
+import houses from "@/stores/houses"
 import { useRouter } from "next/router"
 import React, { useState } from "react"
 import usePortal from "react-cool-portal"
@@ -21,6 +22,9 @@ const UniversalMenu = ({ open, close }: Props) => {
   const reallyDelete = () => {
     setDeleting(true)
     localStorage.clear()
+    Object.keys(houses).forEach((k) => {
+      delete houses[k]
+    })
     if (path === "map") {
       router.reload()
     } else {
