@@ -32,6 +32,8 @@ import React, { useEffect, useRef, useState } from "react"
 import { subscribe } from "valtio"
 import { subscribeKey } from "valtio/utils"
 import { IconButton } from "../ui"
+import { Menu } from "../ui/icons"
+import UniversalMenu from "../ui/UniversalMenu"
 import { useClickAway, useEscape } from "../ui/utils"
 import css from "./index.module.css"
 
@@ -40,6 +42,8 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
 const almere = fromLonLat([5.2647, 52.3508]) as [number, number]
 
 const MapIndex = () => {
+  const [universalMenu, setUniversalMenu] = useState(false)
+
   const geocoderDiv = useRef<HTMLDivElement>(null)
   const mapDiv = useRef<HTMLDivElement>(null)
 
@@ -207,6 +211,15 @@ const MapIndex = () => {
       className="relative flex h-full w-full flex-col items-center justify-center"
       onClick={discardSearch}
     >
+      <div className="absolute top-0 right-0 z-10 flex items-center justify-center text-white">
+        <IconButton onClick={() => setUniversalMenu(true)}>
+          <Menu />
+        </IconButton>
+      </div>
+      <UniversalMenu
+        open={universalMenu}
+        close={() => setUniversalMenu(false)}
+      />
       <div ref={mapDiv} className="w-full flex-1" />
       <div
         ref={geocoderDiv}

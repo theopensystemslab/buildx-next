@@ -4296,6 +4296,11 @@ react-composer@^5.0.2:
   dependencies:
     prop-types "^15.6.0"
 
+react-cool-portal@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/react-cool-portal/-/react-cool-portal-1.2.0.tgz#f8b419d8163e2d3d2e3276e57b16e3436a4bbce3"
+  integrity sha512-g31UuCgV2sSqYmiVrrnOimLGJFTI8QmIqssnRfGdpjSdgjdjVOaq6V2MFLjud8Vw+9u/HTIJAXR+pgoArWqaMQ==
+
 react-dom@^18.0.0:
   version "18.0.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.0.0.tgz#26b88534f8f1dbb80853e1eabe752f24100d8023"

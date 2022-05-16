@@ -6,6 +6,7 @@ export type EditMode = z.infer<typeof EditModeEnum>
 
 type SiteContext = {
   menu: [number, number] | null
+  sidebar: boolean
   buildingId: string | null
   levelIndex: number | null
   editMode: EditMode | null
@@ -13,6 +14,7 @@ type SiteContext = {
 
 const siteContext = proxy<SiteContext>({
   menu: null,
+  sidebar: false,
   buildingId: null,
   levelIndex: null,
   editMode: null,

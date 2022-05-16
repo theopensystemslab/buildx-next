@@ -74,6 +74,7 @@ const SiteSidebar = ({ open, close }: Props) => {
                       modifiedMaterialsPreview: {},
                       friendlyName: `Building ${keys(houses).length + 1}`,
                     }
+                    close()
                   }}
                 />
               ) : null
