@@ -51,6 +51,10 @@ export const exampleModules: Array<Module> = [
     length: 1,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
   {
     id: "mod-1",
@@ -76,6 +80,10 @@ export const exampleModules: Array<Module> = [
     length: 1,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
   {
     id: "mod-1",
@@ -101,6 +109,10 @@ export const exampleModules: Array<Module> = [
     length: 1,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
   // Cell 2
   {
@@ -127,6 +139,10 @@ export const exampleModules: Array<Module> = [
     length: 2,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
   {
     id: "mod-1",
@@ -152,6 +168,10 @@ export const exampleModules: Array<Module> = [
     length: 2,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
   {
     id: "mod-1",
@@ -177,6 +197,10 @@ export const exampleModules: Array<Module> = [
     length: 2,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
   // Cell 3
   {
@@ -203,6 +227,10 @@ export const exampleModules: Array<Module> = [
     length: 1,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
   {
     id: "mod-1",
@@ -228,6 +256,10 @@ export const exampleModules: Array<Module> = [
     length: 1,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
   {
     id: "mod-1",
@@ -253,6 +285,10 @@ export const exampleModules: Array<Module> = [
     length: 1,
     cost: 0,
     embodiedCarbon: 0,
+    claddingArea: 0,
+    floorArea: 0,
+    liningArea: 0,
+    roofingArea: 0,
   },
 ]
 
