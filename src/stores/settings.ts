@@ -25,4 +25,14 @@ export const useVerticalCuts = () => {
 
 export const useSettings = () => useSnapshot(settings)
 
+export const setShadows = (b: boolean) => {
+  settings.shadows = b
+}
+
+export const useShadows = () => {
+  const { shadows } = useSettings()
+
+  return [shadows, setShadows] as const
+}
+
 export default settings

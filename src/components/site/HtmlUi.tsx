@@ -12,10 +12,11 @@ import siteContext, { useSiteContext } from "@/stores/context"
 import {
   setOrthographic,
   useSettings,
+  useShadows,
   useVerticalCuts,
 } from "@/stores/settings"
 import { filterR } from "@/utils"
-import { Add24, Add32 } from "@carbon/icons-react"
+import { Add32 } from "@carbon/icons-react"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/Record"
 import React, { Fragment, Suspense, useState } from "react"
@@ -28,6 +29,8 @@ const HtmlUi = () => {
   const [universalMenu, setUniversalMenu] = useState(false)
 
   const { orthographic } = useSettings()
+
+  const [shadows, setShadows] = useShadows()
 
   const { buildingId, levelIndex, editMode } = useSiteContext()
 
@@ -89,6 +92,18 @@ const HtmlUi = () => {
               keys
             )}
             onChange={setVerticalCuts}
+          />
+          <Radio
+            id="ground-plane"
+            label="Ground Plane"
+            options={[
+              { value: false, label: "None" },
+              { value: true, label: "Regular" },
+            ]}
+            selected={shadows}
+            onChange={(newValue) => {
+              setShadows(newValue)
+            }}
           />
         </IconMenu>
       </div>
