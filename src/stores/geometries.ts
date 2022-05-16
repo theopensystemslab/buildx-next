@@ -26,6 +26,7 @@ export const useModuleGeometries = (moduleDna: string, gltf: GltfT) => {
   const getElement = (nodeType: string) => {
     const strippedNodeType = nodeType
       .replace(/I?None.*/, "")
+      .replace(/Component.*/, "")
       .replaceAll(/[0-9]/g, "")
       .replace(/Object/, "")
       .replace(/(Ifc.*)(Ifc.*)/, "$1")
