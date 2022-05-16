@@ -1,6 +1,8 @@
 import { useSystemsData } from "@/contexts/SystemsData"
 import { filterR, fuzzyMatch, GltfT, isMesh, mapR, reduceA } from "@/utils"
+import { findFirst } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
+import { toUndefined } from "fp-ts/lib/Option"
 import { toArray } from "fp-ts/lib/Record"
 import produce from "immer"
 import { BufferGeometry, Mesh } from "three"
@@ -12,8 +14,6 @@ type ModuleDna = string
 type ElementName = string
 
 const geometries = proxyMap<ModuleDna, Map<ElementName, BufferGeometry>>()
-
-// maybe it's Map<ModuleDna, Map<ElementName, Geometry>>
 
 export const useGeometry = (
   moduleDna: string,
@@ -28,17 +28,18 @@ export const useGeometry = (
   const elementMap = new Map<ElementName, BufferGeometry>()
 
   const getElement = (nodeType: string) =>
-    fuzzyMatch(elements, {
-      keys: ["ifc4Variable"],
-      threshold: 0.5,
-    })(nodeType)
+    pipe(
+      elements,
+      findFirst((el) => el.ifc4Variable === nodeType),
+      toUndefined
+    )
 
   const elementMeshes = pipe(
     gltf.nodes,
     toArray,
     reduceA({}, (acc: { [e: string]: Mesh[] }, [nodeType, node]) => {
       const element = getElement(nodeType)
-      if (!element || element.name === "Appliance") return acc
+      if (!element) return acc
       return produce(acc, (draft) => {
         node.traverse((child) => {
           if (isMesh(child)) {
@@ -65,11 +66,6 @@ export const useGeometry = (
   if (!geometry) throw new Error("No buffer geometry for element")
 
   return geometry
-
-  // otherwise collect the meshes for that element in the gltf
-  // merge them
-  // set in map
-  // return geometry
 }
 
 export const useModuleGeometries = (moduleDna: string, gltf: GltfT) => {

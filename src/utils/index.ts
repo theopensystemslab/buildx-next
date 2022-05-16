@@ -15,7 +15,9 @@ export const fuzzyMatch =
   <T extends unknown>(list: ReadonlyArray<T>, options?: Fuse.IFuseOptions<T>) =>
   (queriedToken: string) => {
     const fuse = new Fuse(list, options)
-    return fuse.search(queriedToken)[0]?.item
+    const result = fuse.search(queriedToken)[0]?.item
+    console.log({ list, result })
+    return result
   }
 
 export const guardRef = <T extends unknown>(
