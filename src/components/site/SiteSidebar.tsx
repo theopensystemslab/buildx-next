@@ -1,5 +1,6 @@
 import Sidebar from "@/components/ui/Sidebar"
 import { useSystemsData } from "@/contexts/SystemsData"
+import { addNewPoint } from "@/data/collisions"
 import { System, systems } from "@/data/system"
 import houses from "@/stores/houses"
 import { pipe } from "fp-ts/lib/function"
@@ -60,14 +61,18 @@ const SiteSidebar = ({ open, close }: Props) => {
                   houseType={houseType}
                   onAdd={() => {
                     const id = nanoid()
+
+                    const housePositions = Object.values(houses).map(
+                      (house) => house.position
+                    )
+
+                    const position = addNewPoint(housePositions)
+
                     houses[id] = {
                       id,
                       houseTypeId: houseType.id,
                       systemId: houseType.systemId,
-                      position: [0, 0],
-                      // addNewPoint(
-                      //   Object.values(prevHouses).map((house) => house.position)
-                      // ),
+                      position,
                       rotation: 0,
                       dna: houseType.dna as string[],
                       modifiedMaterials: {},
