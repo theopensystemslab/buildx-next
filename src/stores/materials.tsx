@@ -28,6 +28,7 @@ export type MaterialKey = {
   buildingId: string
   columnIndex: number
   levelIndex: number
+  groupIndex: number
   elementName: string
   materialName: string
 }
@@ -47,6 +48,7 @@ export const hashMaterialKey = ({
   buildingId,
   columnIndex,
   levelIndex,
+  groupIndex,
   elementName,
   materialName,
 }: MaterialKey) =>
@@ -54,6 +56,7 @@ export const hashMaterialKey = ({
     buildingId,
     columnIndex,
     levelIndex,
+    groupIndex,
     elementName,
     materialName,
   ])
@@ -95,7 +98,8 @@ export const useMaterial = (
   materialKey: MaterialKey,
   clippingPlanes: Plane[]
 ) => {
-  const { buildingId, columnIndex, levelIndex, elementName } = materialKey
+  const { buildingId, columnIndex, levelIndex, groupIndex, elementName } =
+    materialKey
 
   const { materials: sysMaterials } = useSystemsData()
 
@@ -140,7 +144,14 @@ export const useMaterial = (
 
       return material.threeMaterial
     }
-  }, [buildingId, columnIndex, levelIndex, elementName, materialName])
+  }, [
+    buildingId,
+    columnIndex,
+    levelIndex,
+    groupIndex,
+    elementName,
+    materialName,
+  ])
 
   useEffect(() => {
     material.clippingPlanes = clippingPlanes

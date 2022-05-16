@@ -70,11 +70,12 @@ const SiteThreeInit = (props: Props) => {
         onNearClick={() => {
           siteContext.menu = null
           scope.selected = null
+          clearIlluminatedMaterials()
         }}
         onNearHover={() => {
           if (siteContext.menu !== null) return
           scope.hovered = null
-          clearIlluminatedMaterials()
+          if (scope.selected === null) clearIlluminatedMaterials()
         }}
       />
       {shadows && (
