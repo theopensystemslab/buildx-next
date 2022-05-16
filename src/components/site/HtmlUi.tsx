@@ -15,14 +15,18 @@ import {
   useVerticalCuts,
 } from "@/stores/settings"
 import { filterR } from "@/utils"
+import { Add24, Add32 } from "@carbon/icons-react"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/Record"
 import React, { Fragment, Suspense, useState } from "react"
+import UniversalMenu from "../ui/UniversalMenu"
 import { SiteContextMenu } from "./menu"
 import SiteMetrics from "./SiteMetrics"
 
 const HtmlUi = () => {
-  const [sidebar, setSidebar] = useState(false)
+  const [houseTypeMenu, setHouseTypeMenu] = useState(false)
+  const [universalMenu, setUniversalMenu] = useState(false)
+
   const { orthographic } = useSettings()
 
   const { buildingId, levelIndex, editMode } = useSiteContext()
@@ -43,8 +47,13 @@ const HtmlUi = () => {
 
   return (
     <Fragment>
-      <div className="absolute top-0 right-0 z-10">
-        <IconButton onClick={() => setSidebar(true)}>
+      <div className="absolute top-0 right-0 z-10 flex items-center justify-center">
+        <IconButton onClick={() => setHouseTypeMenu(true)}>
+          <div className="flex items-center justify-center">
+            <Add32 />
+          </div>
+        </IconButton>
+        <IconButton onClick={() => setUniversalMenu(true)}>
           <Menu />
         </IconButton>
       </div>
@@ -84,8 +93,15 @@ const HtmlUi = () => {
         </IconMenu>
       </div>
       <Suspense fallback={<Loader />}>
-        <SiteSidebar open={sidebar} close={() => setSidebar(false)} />
+        <SiteSidebar
+          open={houseTypeMenu}
+          close={() => setHouseTypeMenu(false)}
+        />
       </Suspense>
+      <UniversalMenu
+        open={universalMenu}
+        close={() => setUniversalMenu(false)}
+      />
       {check ? (
         <div className="absolute left-1/2 top-16 z-10 flex -translate-x-1/2 transform justify-center">
           <button
