@@ -2,13 +2,10 @@ import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
+import { useLevelInteractions } from "@/hooks/interactions/levels"
+import { useWindowOptions, WindowOpt } from "@/hooks/interactions/windows"
 import { useColumnLayout } from "@/hooks/layouts"
-import { useLevelInteractions } from "@/hooks/levels"
-import { useWindowOptions, WindowOpt } from "@/hooks/modules"
-import siteContext, {
-  SiteContextModeEnum,
-  useSiteContextMode,
-} from "@/stores/context"
+import siteContext from "@/stores/context"
 import houses from "@/stores/houses"
 import scope from "@/stores/scope"
 import React from "react"

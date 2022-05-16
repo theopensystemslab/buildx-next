@@ -1,14 +1,10 @@
 import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
+import { useLayoutOptions } from "@/hooks/interactions/layout"
+import { StairsOpt, useStairsOptions } from "@/hooks/interactions/stairs"
+import { useWindowOptions, WindowOpt } from "@/hooks/interactions/windows"
 import { useColumnLayout } from "@/hooks/layouts"
-import {
-  StairsOpt,
-  useLayoutOptions,
-  useStairsOptions,
-  useWindowOptions,
-  WindowOpt,
-} from "@/hooks/modules"
 import houses from "@/stores/houses"
 import scope from "@/stores/scope"
 import React from "react"

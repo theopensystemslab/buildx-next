@@ -4,12 +4,12 @@ import { flattenA, mapA, transposeA } from "@/utils"
 import { lookup, replicate } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { toNullable } from "fp-ts/lib/Option"
-import { columnMatrixToDna, rowMatrixToDna, useColumnMatrix } from "./layouts"
+import { columnMatrixToDna, rowMatrixToDna, useColumnMatrix } from "../layouts"
 import {
   useGetStairsModule,
   useGetVanillaModule,
   usePadColumn,
-} from "./modules"
+} from "../modules"
 
 export const useLevelInteractions = (
   buildingId: string,
