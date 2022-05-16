@@ -42,7 +42,11 @@ const ColumnBuildingModule = (props: Props) => {
 
   const groupRef = useRef<Group>()
 
-  const moduleGeometries = useModuleGeometries(module.dna, module.gltf)
+  const moduleGeometries = useModuleGeometries(
+    module.systemId,
+    module.dna,
+    module.gltf
+  )
 
   const context = useSiteContext()
 

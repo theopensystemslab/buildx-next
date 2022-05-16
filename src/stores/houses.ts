@@ -2,7 +2,7 @@ import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { Houses } from "@/data/house"
 import { LoadedModule, Module } from "@/data/module"
-import { snapToGrid, SSR, useGLTF } from "@/utils"
+import { mapO, snapToGrid, SSR, useGLTF } from "@/utils"
 import { invalidate, ThreeEvent } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
 import { pipe } from "fp-ts/lib/function"
@@ -14,6 +14,7 @@ import {
   findFirst,
   reduceWithIndex,
 } from "fp-ts/lib/ReadonlyArray"
+import { lookup } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
 import { MutableRefObject, useCallback, useEffect, useRef } from "react"
 import { Group, Matrix4, Vector3 } from "three"
@@ -163,6 +164,7 @@ export const useBuildingModules = (buildingId: string) => {
       )
     )
   )
+
   const gltfs = useGLTF(modules.map(({ modelUrl }) => modelUrl))
   return modules.map(({ modelUrl, ...rest }, i) => ({
     ...rest,
@@ -170,6 +172,35 @@ export const useBuildingModules = (buildingId: string) => {
   }))
 }
 
+export const useMaybeBuildingLength = (buildingId: string | null) => {
+  const { modules: sysModules } = useSystemsData()
+  const housesSnap = useSnapshot(houses)
+
+  const modules = pipe(
+    housesSnap,
+    lookup(buildingId ?? ""),
+    mapO((house) =>
+      pipe(
+        house.dna,
+        filterMap((dna) =>
+          pipe(
+            sysModules,
+            findFirst(
+              (sysM: Module) =>
+                sysM.systemId === house.systemId && sysM.dna === dna
+            )
+          )
+        )
+      )
+    )
+  )
+
+  return modules
+
+  // todo: finish me
+}
+
+// maybe T extends?
 export const modulesToRows = (
   modules: readonly LoadedModule[]
 ): LoadedModule[][] => {
