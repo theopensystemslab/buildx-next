@@ -65,6 +65,27 @@ export const setIlluminatedLevel = (
       pushIlluminatedMaterial(material.key)
     }
   })
+  invalidate()
+}
+
+export const setIlluminatedModule = ({
+  buildingId,
+  columnIndex,
+  levelIndex,
+  groupIndex,
+}: Omit<MaterialKey, "elementName" | "materialName">) => {
+  clearIlluminatedMaterials()
+  materials.forEach((material) => {
+    if (
+      material.key.buildingId === buildingId &&
+      material.key.columnIndex === columnIndex &&
+      material.key.levelIndex === levelIndex &&
+      material.key.groupIndex === groupIndex
+    ) {
+      pushIlluminatedMaterial(material.key)
+    }
+  })
+  invalidate()
 }
 
 export const outlineGroup = (

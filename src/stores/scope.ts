@@ -1,6 +1,4 @@
 import { proxy } from "valtio"
-import siteContext from "./context"
-import highlights, { clearIlluminatedMaterials } from "./highlights"
 
 export type ScopeItem = {
   elementName: string
