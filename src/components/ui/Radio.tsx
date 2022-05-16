@@ -1,3 +1,5 @@
+import { any } from "@/utils"
+import { pipe } from "fp-ts/lib/function"
 import type { ReactElement } from "react"
 import React from "react"
 
@@ -16,10 +18,10 @@ interface Props<T> {
 }
 
 export default function Radio<T>(props: Props<T>) {
-  // const anyThumbnails = any(
-  //   (option) => Boolean(option.thumbnail),
-  //   props.options
-  // )
+  const anyThumbnails = props.options.reduce(
+    (acc, v) => acc || Boolean(v.thumbnail),
+    false
+  )
 
   // const hoverStream = useStream<T | null>()
 
@@ -52,7 +54,7 @@ export default function Radio<T>(props: Props<T>) {
           <label
             key={index}
             htmlFor={`radio-${props.id}-${index}`}
-            className="flex w-full cursor-pointer justify-between hover:bg-gray-100"
+            className="flex w-full cursor-pointer items-center justify-between hover:bg-gray-100"
             // onMouseOver={() => {
             //   hoverStream.sendNext(option.value)
             // }}
@@ -69,16 +71,14 @@ export default function Radio<T>(props: Props<T>) {
                 props.onChange(option.value)
               }}
             />
-            {/* {anyThumbnails && (
-            <div
-              className="flex-none w-[36px] h-[36px] bg-center bg-cover"
-              style={{ background: `url(${option.thumbnail})` }}
-            ></div>
-          )} */}
+            {anyThumbnails && (
+              <div
+                className="h-[36px] w-[36px] flex-none bg-cover bg-center"
+                style={{ backgroundImage: `url(${option.thumbnail})` }}
+              ></div>
+            )}
             {typeof option.label === "string" ? (
-              <p className="flex flex-1 break-all px-3 py-2 text-sm">
-                {option.label}
-              </p>
+              <p className="flex flex-1 px-3 py-2 text-sm">{option.label}</p>
             ) : (
               option.label
             )}

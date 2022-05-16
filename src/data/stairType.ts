@@ -6,6 +6,7 @@ export interface StairType {
   systemId: string
   code: string
   description: string
+  imageUrl: string
 }
 
 export const getStairTypes = (system: System): Promise<Array<StairType>> =>
@@ -17,6 +18,7 @@ export const getStairTypes = (system: System): Promise<Array<StairType>> =>
           systemId: system.id,
           code: record.fields?.["stair_code"] || "",
           description: record.fields?.["description"] || "",
+          imageUrl: record.fields?.["image"]?.[0]?.url || "",
         }
       })
     )
