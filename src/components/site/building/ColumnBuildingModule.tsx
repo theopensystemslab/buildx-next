@@ -62,6 +62,7 @@ const ColumnBuildingModule = (props: Props) => {
         {...{
           elementName,
           geometry,
+          systemId: module.systemId,
           buildingId,
           columnIndex,
           levelIndex,

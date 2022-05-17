@@ -68,12 +68,16 @@ export const setMaterialColor = (
   material.colorValue = color
 }
 
-export const useMaterialName = (buildingId: string, elementName: string) => {
+export const useMaterialName = (
+  systemId: string,
+  buildingId: string,
+  elementName: string
+) => {
   const { elements } = useSystemsData()
 
   const defaultMaterialName =
-    elements.find((e) => e.name === elementName)?.defaultMaterial ??
-    DEFAULT_MATERIAL_NAME
+    elements.find((e) => e.systemId === systemId && e.name === elementName)
+      ?.defaultMaterial ?? DEFAULT_MATERIAL_NAME
 
   const { modifiedMaterials, modifiedMaterialsPreview } = useSnapshot(
     houses[buildingId]
@@ -92,12 +96,16 @@ export const useMaterial = (
   materialKey: MaterialKey,
   clippingPlanes: Plane[]
 ) => {
-  const { buildingId, columnIndex, levelIndex, groupIndex, elementName } =
-    materialKey
+  const {
+    buildingId,
+    columnIndex,
+    levelIndex,
+    groupIndex,
+    elementName,
+    materialName,
+  } = materialKey
 
   const { materials: sysMaterials } = useSystemsData()
-
-  const materialName = useMaterialName(buildingId, elementName)
 
   const material = useMemo(() => {
     const hashKey = hashMaterialKey(materialKey)

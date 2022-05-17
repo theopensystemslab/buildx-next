@@ -14,6 +14,7 @@ import { ref } from "valtio"
 import { subscribeKey } from "valtio/utils"
 
 type Props = MeshProps & {
+  systemId: string
   elementName: string
   columnIndex: number
   levelIndex: number
@@ -25,6 +26,7 @@ type Props = MeshProps & {
 
 const ColumnBuildingElement = (props: Props) => {
   const {
+    systemId,
     geometry,
     elementName,
     columnIndex,
@@ -36,7 +38,7 @@ const ColumnBuildingElement = (props: Props) => {
 
   const meshRef = useRef<Mesh>()
 
-  const materialName = useMaterialName(buildingId, elementName)
+  const materialName = useMaterialName(systemId, buildingId, elementName)
 
   const material = useMaterial(
     {
