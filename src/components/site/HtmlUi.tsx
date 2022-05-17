@@ -7,8 +7,8 @@ import {
   Loader,
   Radio,
 } from "@/components/ui"
-import { Check, Environment, Menu, SectionCuts } from "@/components/ui/icons"
-import siteContext, { EditModeEnum, useSiteContext } from "@/stores/context"
+import { Check, Menu, SectionCuts } from "@/components/ui/icons"
+import siteContext, { useSiteContext } from "@/stores/context"
 import {
   setOrthographic,
   useSettings,
@@ -16,7 +16,7 @@ import {
   useVerticalCuts,
 } from "@/stores/settings"
 import { filterR } from "@/utils"
-import { Add32 } from "@carbon/icons-react"
+import { Add32, View24 } from "@carbon/icons-react"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/Record"
 import React, { Fragment, Suspense, useState } from "react"
@@ -62,7 +62,7 @@ const HtmlUi = () => {
         </IconButton>
       </div>
       <div className="absolute left-0 top-1/2 z-10 flex -translate-y-1/2 transform flex-col justify-center bg-white shadow">
-        <IconMenu icon={Environment}>
+        <IconMenu icon={() => <View24 className="m-auto" />}>
           <Radio
             id="camera"
             label="Camera"
