@@ -16,14 +16,15 @@ const SiteCamControls = () => {
   const ratio = 10
   const userAgent = useUserAgent()
   const buildingMode = buildingId !== null
-  const dollyToCursor = !buildingMode
-  const truckSpeed = !buildingMode ? 2.0 : 0.0
+  const dollyToCursor = true // !buildingMode
+  const truckSpeed = 2.0 // !buildingMode ? 2.0 : 0.0
 
   useEffect(() => {
     if (!camera.controls) return
-    camera.controls.mouseButtons.right = buildingMode
-      ? CameraControls.ACTION.NONE
-      : CameraControls.ACTION.TRUCK
+    camera.controls.mouseButtons.right = CameraControls.ACTION.TRUCK
+    // buildingMode
+    //   ? CameraControls.ACTION.NONE
+    //   : CameraControls.ACTION.TRUCK
   }, [buildingMode, orthographic])
 
   useCameraFocus()
