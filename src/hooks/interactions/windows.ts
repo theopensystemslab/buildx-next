@@ -58,6 +58,7 @@ export const useWindowOptions = <T extends BareModule>(
     filterMapA((m) =>
       pipe(
         windowTypes,
+        filterA((x) => x.systemId === module.systemId),
         findFirstMap((wt): Option<[T, WindowType]> => {
           switch (true) {
             case m.structuredDna.positionType === "END":
