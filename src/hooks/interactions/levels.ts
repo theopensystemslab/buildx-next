@@ -134,7 +134,11 @@ export const useLevelTypeOptions = (
   buildingId: string,
   columnLayout: ColumnLayout,
   { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
-): { options: LevelTypeOpt[]; selected: LevelTypeOpt["value"] } => {
+): {
+  options: LevelTypeOpt[]
+  selected: LevelTypeOpt["value"]
+  levelString: string
+} => {
   const systemModules = useSystemModules(houses[buildingId].systemId)
 
   const padColumn = usePadColumn()
@@ -245,5 +249,15 @@ export const useLevelTypeOptions = (
       )
     ),
     selected: selectedOption.value,
+    levelString: (() => {
+      switch (thisLevelType?.[0]) {
+        case "F":
+          return "foundations"
+        case "R":
+          return "roof"
+        default:
+          return "level"
+      }
+    })(),
   }
 }

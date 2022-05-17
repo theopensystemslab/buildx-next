@@ -47,12 +47,15 @@ const BuildingContextMenu = (props: ContextMenuProps) => {
     props.onClose?.()
   }
 
-  const { options: levelTypeOptions, selected: selectedLevelType } =
-    useLevelTypeOptions(buildingId, columnLayout, {
-      columnIndex,
-      levelIndex,
-      groupIndex,
-    })
+  const {
+    options: levelTypeOptions,
+    selected: selectedLevelType,
+    levelString,
+  } = useLevelTypeOptions(buildingId, columnLayout, {
+    columnIndex,
+    levelIndex,
+    groupIndex,
+  })
 
   const canChangeLevelType = levelTypeOptions.length > 1
 
@@ -75,7 +78,7 @@ const BuildingContextMenu = (props: ContextMenuProps) => {
         >{`Remove floor`}</ContextMenuButton>
       )}
       {canChangeLevelType && (
-        <ContextMenuNested long label="Change level type">
+        <ContextMenuNested long label={`Change ${levelString} type`}>
           <Radio
             options={levelTypeOptions}
             selected={selectedLevelType}
