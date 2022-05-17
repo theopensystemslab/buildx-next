@@ -1,14 +1,29 @@
-import { BareModule } from "@/data/module"
+import {
+  BareModule,
+  ColumnModuleKey,
+  filterCompatibleModules,
+  keysFilter,
+  topCandidateByHamming,
+} from "@/data/module"
 import houses from "@/stores/houses"
-import { flattenA, mapA, transposeA } from "@/utils"
-import { lookup, replicate } from "fp-ts/lib/Array"
+import { filterA, flattenA, mapA, StrEq, StrOrd, transposeA } from "@/utils"
+import { filterMap, lookup, replicate, sort, uniq } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { toNullable } from "fp-ts/lib/Option"
-import { columnMatrixToDna, rowMatrixToDna, useColumnMatrix } from "../layouts"
+import { none, some, toNullable } from "fp-ts/lib/Option"
+import { contramap } from "fp-ts/lib/Ord"
+import produce from "immer"
+import {
+  ColumnLayout,
+  columnLayoutToMatrix,
+  columnMatrixToDna,
+  rowMatrixToDna,
+  useColumnMatrix,
+} from "../layouts"
 import {
   useGetStairsModule,
   useGetVanillaModule,
   usePadColumn,
+  useSystemModules,
 } from "../modules"
 
 export const useLevelInteractions = (
@@ -107,5 +122,128 @@ export const useLevelInteractions = (
     removeFloor,
     canAddFloorAbove,
     canRemoveFloor,
+  }
+}
+
+export type LevelTypeOpt = {
+  label: string
+  value: { levelType: string; buildingDna: string[] }
+}
+
+export const useLevelTypeOptions = (
+  buildingId: string,
+  columnLayout: ColumnLayout,
+  { columnIndex, levelIndex, groupIndex }: ColumnModuleKey
+): { options: LevelTypeOpt[]; selected: LevelTypeOpt["value"] } => {
+  const systemModules = useSystemModules(houses[buildingId].systemId)
+
+  const padColumn = usePadColumn()
+
+  const columnMatrix = columnLayoutToMatrix<BareModule>(columnLayout)
+
+  const rowMatrix = transposeA(columnMatrix)
+
+  const thisLevel = rowMatrix[levelIndex]
+
+  const thisModule =
+    columnLayout[columnIndex].gridGroups[levelIndex].modules[groupIndex].module
+
+  const thisLevelType = thisModule.structuredDna.levelType
+
+  const selectedOption: LevelTypeOpt = {
+    label: thisLevelType,
+    value: {
+      buildingDna: columnMatrixToDna(columnMatrix),
+      levelType: thisLevelType,
+    },
+  }
+
+  const otherOptions = pipe(
+    systemModules,
+    filterCompatibleModules(["sectionType", "positionType", "level"])(
+      thisModule
+    ),
+    mapA((x) => x.structuredDna.levelType),
+    uniq(StrEq),
+    filterMap((levelType) => {
+      if (levelType === thisLevelType) return none
+
+      let fail = false
+
+      const newLevel = pipe(
+        thisLevel,
+        mapA((gridGroup) =>
+          pipe(
+            gridGroup,
+            mapA((module) =>
+              pipe(
+                systemModules as BareModule[],
+                filterA(
+                  keysFilter(
+                    ["sectionType", "positionType", "levelType", "gridType"],
+                    produce(module, (draft) => {
+                      draft.structuredDna.levelType = levelType
+                    })
+                  )
+                ),
+                (modules) => {
+                  const candidate = topCandidateByHamming(
+                    [
+                      "gridUnits",
+                      "stairsType",
+                      "internalLayoutType",
+                      "windowTypeSide1",
+                      "windowTypeSide2",
+                      "windowTypeEnd",
+                      "windowTypeTop",
+                    ],
+                    module,
+                    modules
+                  )
+                  if (candidate === null) {
+                    fail = true
+                  }
+                  return candidate as BareModule
+                }
+              )
+            )
+          )
+        )
+      )
+
+      if (fail) return none
+
+      return some(
+        pipe(
+          produce(rowMatrix, (draft) => {
+            draft[levelIndex] = newLevel
+          }),
+          transposeA,
+          mapA(padColumn),
+          columnMatrixToDna,
+          (buildingDna) =>
+            ({
+              label: levelType,
+              value: {
+                buildingDna,
+                levelType,
+              },
+            } as LevelTypeOpt)
+        )
+      )
+    })
+  )
+
+  return {
+    options: pipe(
+      [selectedOption, ...otherOptions],
+      sort(
+        pipe(
+          StrOrd,
+          contramap((opt: LevelTypeOpt) => opt.label)
+        )
+      )
+    ),
+    selected: selectedOption.value,
   }
 }

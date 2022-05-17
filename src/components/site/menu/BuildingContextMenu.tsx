@@ -2,7 +2,11 @@ import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
-import { useLevelInteractions } from "@/hooks/interactions/levels"
+import {
+  LevelTypeOpt,
+  useLevelInteractions,
+  useLevelTypeOptions,
+} from "@/hooks/interactions/levels"
 import { useWindowOptions, WindowOpt } from "@/hooks/interactions/windows"
 import { useColumnLayout } from "@/hooks/layouts"
 import siteContext from "@/stores/context"
@@ -43,6 +47,20 @@ const BuildingContextMenu = (props: ContextMenuProps) => {
     props.onClose?.()
   }
 
+  const { options: levelTypeOptions, selected: selectedLevelType } =
+    useLevelTypeOptions(buildingId, columnLayout, {
+      columnIndex,
+      levelIndex,
+      groupIndex,
+    })
+
+  const canChangeLevelType = levelTypeOptions.length > 1
+
+  const changeLevelType = ({ buildingDna }: LevelTypeOpt["value"]) => {
+    houses[buildingId].dna = buildingDna
+    props.onClose?.()
+  }
+
   return (
     <ContextMenu {...props}>
       <ContextMenuButton onClick={editLevel}>{`Edit level`}</ContextMenuButton>
@@ -55,6 +73,15 @@ const BuildingContextMenu = (props: ContextMenuProps) => {
         <ContextMenuButton
           onClick={removeFloor}
         >{`Remove floor`}</ContextMenuButton>
+      )}
+      {canChangeLevelType && (
+        <ContextMenuNested long label="Change level type">
+          <Radio
+            options={levelTypeOptions}
+            selected={selectedLevelType}
+            onChange={changeLevelType}
+          />
+        </ContextMenuNested>
       )}
       {elementName && (
         <ChangeMaterials
