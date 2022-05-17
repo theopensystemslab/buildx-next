@@ -7,13 +7,7 @@ import { findFirstMap } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse, none, some } from "fp-ts/lib/Option"
 import { useEffect, useMemo } from "react"
-import {
-  Color,
-  MeshPhysicalMaterial,
-  MeshStandardMaterial,
-  Plane,
-  Vector3,
-} from "three"
+import { Color, MeshPhysicalMaterial, MeshStandardMaterial, Plane } from "three"
 import { subscribe, useSnapshot } from "valtio"
 import { proxyMap, subscribeKey } from "valtio/utils"
 import siteContext from "./context"

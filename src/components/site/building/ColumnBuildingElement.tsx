@@ -2,7 +2,7 @@ import siteContext, {
   SiteContextModeEnum,
   useSiteContextMode,
 } from "@/stores/context"
-import highlights, { setIlluminatedLevel } from "@/stores/highlights"
+import highlights from "@/stores/highlights"
 import { useMaterial, useMaterialName } from "@/stores/materials"
 import scope from "@/stores/scope"
 import { all, any, objComp, object3dChildOf, undef } from "@/utils"
