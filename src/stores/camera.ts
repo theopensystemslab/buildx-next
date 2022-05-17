@@ -1,9 +1,12 @@
+import { useRotateVector } from "@/hooks/geometry"
 import CameraControls from "camera-controls"
+import { pipe } from "fp-ts/lib/function"
+import { getOrElse } from "fp-ts/lib/Option"
 import { useEffect } from "react"
 import { Vector3 } from "three"
 import { proxy } from "valtio"
 import { useSiteContext } from "./context"
-import { useFocusedBuilding, useHouses } from "./houses"
+import { useFocusedBuilding, useHouses, useMaybeBuildingLength } from "./houses"
 
 type CameraProxy = {
   controls: CameraControls | null
@@ -27,6 +30,13 @@ export const useCameraFocus = () => {
   const { buildingId } = useSiteContext()
   const house = buildingId ? houses[buildingId] : null
 
+  const buildingLength = pipe(
+    useMaybeBuildingLength(buildingId),
+    getOrElse(() => 0)
+  )
+
+  const rotateVector = useRotateVector(buildingId)
+
   useEffect(() => {
     if (!camera.controls) return
 
@@ -36,8 +46,10 @@ export const useCameraFocus = () => {
       camera.controls.setLookAt(...camera.lastLookAt, true)
     } else {
       const {
-        position: [x, z],
+        position: [x0, z0],
       } = house
+      const [mx, mz] = rotateVector([0, buildingLength / 2])
+      const [x, z] = [x0 + mx, z0 + mz]
       const v3Pos = new Vector3()
       const v3Tgt = new Vector3()
       camera.controls.getPosition(v3Pos)

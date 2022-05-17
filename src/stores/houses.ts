@@ -1,10 +1,20 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { Houses } from "@/data/house"
-import { LoadedModule, Module } from "@/data/module"
-import { mapO, snapToGrid, SSR, useGLTF } from "@/utils"
+import { LoadedModule, Module, StructuredDnaModule } from "@/data/module"
+import { StructuredDna } from "@/data/moduleLayout"
+import {
+  filterMapA,
+  flattenO,
+  mapO,
+  reduceA,
+  snapToGrid,
+  SSR,
+  useGLTF,
+} from "@/utils"
 import { invalidate, ThreeEvent } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
+import { head } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
 import {
@@ -14,10 +24,10 @@ import {
   findFirst,
   reduceWithIndex,
 } from "fp-ts/lib/ReadonlyArray"
-import { lookup } from "fp-ts/lib/ReadonlyRecord"
+import { lookup } from "fp-ts/lib/Record"
 import produce from "immer"
 import { MutableRefObject, useCallback, useEffect, useRef } from "react"
-import { Group, Matrix4, Vector3 } from "three"
+import { Group } from "three"
 import { proxy, subscribe, useSnapshot } from "valtio"
 import { subscribeKey } from "valtio/utils"
 import { setCameraEnabled } from "./camera"
@@ -174,7 +184,7 @@ export const useBuildingModules = (buildingId: string) => {
 
 export const useMaybeBuildingLength = (buildingId: string | null) => {
   const { modules: sysModules } = useSystemsData()
-  const housesSnap = useSnapshot(houses)
+  const housesSnap = useSnapshot(houses) as typeof houses
 
   const modules = pipe(
     housesSnap,
@@ -182,7 +192,7 @@ export const useMaybeBuildingLength = (buildingId: string | null) => {
     mapO((house) =>
       pipe(
         house.dna,
-        filterMap((dna) =>
+        filterMapA((dna) =>
           pipe(
             sysModules,
             findFirst(
@@ -190,9 +200,18 @@ export const useMaybeBuildingLength = (buildingId: string | null) => {
                 sysM.systemId === house.systemId && sysM.dna === dna
             )
           )
+        ),
+        modulesToRows,
+        head,
+        mapO((row) =>
+          pipe(
+            row,
+            reduceA(0, (acc: number, module: Module) => acc + module.length)
+          )
         )
       )
-    )
+    ),
+    flattenO
   )
 
   return modules
@@ -200,10 +219,9 @@ export const useMaybeBuildingLength = (buildingId: string | null) => {
   // todo: finish me
 }
 
-// maybe T extends?
-export const modulesToRows = (
-  modules: readonly LoadedModule[]
-): LoadedModule[][] => {
+export const modulesToRows = <T extends StructuredDnaModule>(
+  modules: T[]
+): T[][] => {
   const jumpIndices = pipe(
     modules,
     filterMapWithIndex((i, m) =>
@@ -214,17 +232,14 @@ export const modulesToRows = (
 
   return pipe(
     modules,
-    reduceWithIndex(
-      [],
-      (moduleIndex, modules: LoadedModule[][], module: LoadedModule) => {
-        return jumpIndices.includes(moduleIndex)
-          ? [...modules, [{ ...module, moduleIndex }]]
-          : produce(
-              (draft) =>
-                void draft[draft.length - 1].push({ ...module, moduleIndex })
-            )(modules)
-      }
-    )
+    reduceWithIndex([], (moduleIndex, modules: T[][], module: T) => {
+      return jumpIndices.includes(moduleIndex)
+        ? [...modules, [{ ...module, moduleIndex }]]
+        : produce(
+            (draft) =>
+              void draft[draft.length - 1].push({ ...module, moduleIndex })
+          )(modules)
+    })
   )
 }
 

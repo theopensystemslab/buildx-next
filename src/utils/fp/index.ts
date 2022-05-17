@@ -2,7 +2,7 @@ import { reduce, zipWith } from "fp-ts/lib/Array"
 import { flow, pipe } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
 import { Ord as NumOrd, Eq as NumEq } from "fp-ts/lib/number"
-import { map as mapO } from "fp-ts/lib/Option"
+import { map as mapO, flatten as flattenO } from "fp-ts/lib/Option"
 import { clamp } from "fp-ts/lib/Ord"
 import { modifyAt } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/Record"
@@ -66,7 +66,7 @@ export {
 export { map as mapT } from "fp-ts/lib/Task"
 export { min, max, abs, sign }
 export { clamp_ as clamp }
-export { mapO }
+export { mapO, flattenO }
 export {
   map as mapM,
   reduce as reduceM,

@@ -86,8 +86,10 @@ const SiteThreeInit = (props: Props) => {
       )}
       {boundary && <lineLoop args={[boundary, boundaryMaterial]} />}
       <Effects />
-      <SiteCamControls />
-      <ContextBridge>{children}</ContextBridge>
+      <ContextBridge>
+        <SiteCamControls />
+        {children}
+      </ContextBridge>
     </Canvas>
   )
 }

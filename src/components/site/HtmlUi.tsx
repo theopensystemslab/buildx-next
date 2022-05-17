@@ -8,7 +8,7 @@ import {
   Radio,
 } from "@/components/ui"
 import { Check, Environment, Menu, SectionCuts } from "@/components/ui/icons"
-import siteContext, { useSiteContext } from "@/stores/context"
+import siteContext, { EditModeEnum, useSiteContext } from "@/stores/context"
 import {
   setOrthographic,
   useSettings,
@@ -41,6 +41,7 @@ const HtmlUi = () => {
       siteContext.levelIndex = null
     } else if (buildingId !== null) {
       siteContext.buildingId = null
+      siteContext.editMode = null
     } else if (editMode !== null) {
       siteContext.editMode = null
     }
