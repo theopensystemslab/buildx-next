@@ -21,18 +21,17 @@ const ChangeMaterials = ({
   const { elements, materials } = useSystemsData()
 
   const house = useHouse(buildingId)
-  const houseType = useHouseType(buildingId)
 
   return pipe(
     elements,
-    findFirst((x) => x.name === elementName),
+    findFirst((x) => x.systemId === house.systemId && x.name === elementName),
     mapO((element) => {
       const thumbnailsByMaterial = element
         ? (() => {
             const record: Record<string, string> = {}
             materials.forEach((material) => {
               if (
-                material.systemId === houseType.systemId &&
+                material.systemId === house.systemId &&
                 element.materialOptions.includes(material.name)
               ) {
                 record[material.name] = material.textureUrl
