@@ -33,7 +33,7 @@ const StretchHandle = (props: StretchHandleProps) => {
   return (
     <mesh rotation-x={-Math.PI / 2} {...meshProps} {...(bind() as any)}>
       <circleBufferGeometry args={[0.5, 10]} />
-      <meshBasicMaterial color="steelblue" side={DoubleSide} />
+      <meshBasicMaterial color="white" side={DoubleSide} />
     </mesh>
   )
 }
