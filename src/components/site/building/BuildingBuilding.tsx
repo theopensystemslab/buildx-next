@@ -32,8 +32,14 @@ const StretchHandle = (props: StretchHandleProps) => {
   })
   return (
     <mesh rotation-x={-Math.PI / 2} {...meshProps} {...(bind() as any)}>
-      <circleBufferGeometry args={[0.5, 10]} />
-      <meshBasicMaterial color="white" side={DoubleSide} />
+      <circleBufferGeometry args={[0.5, 24]} />
+      <meshPhongMaterial
+        color="white"
+        emissive="white"
+        specular="white"
+        shininess={9999999}
+        side={DoubleSide}
+      />
     </mesh>
   )
 }
@@ -220,7 +226,7 @@ const BuildingBuilding = (props: Props) => {
                 sendDrop()
               }
             }}
-            position-z={endColumn.z + handleOffset}
+            position-z={endColumn.z + endColumn.length + handleOffset}
           />
         )}
       </group>
