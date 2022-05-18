@@ -232,7 +232,7 @@ const comparative = {
   electricityTariff: 0.2,
 }
 
-const calculateMaterialCosts = (
+export const calculateMaterialCosts = (
   house: House,
   context: { elements: Element[]; materials: Material[] }
 ) => {
