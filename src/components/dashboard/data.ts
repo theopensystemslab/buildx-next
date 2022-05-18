@@ -236,47 +236,57 @@ const calculateMaterialCosts = (
   house: House,
   context: { elements: Element[]; materials: Material[] }
 ) => {
+  const claddingElementName = "Cladding"
+
   const claddingElement = context.elements.find(
     (element) =>
-      element.systemId === house.systemId && element.name === "Cladding"
+      element.systemId === house.systemId &&
+      element.name === claddingElementName
   )
+
+  const internalLiningElementName = "Internal wall lining"
 
   const internalLiningElement = context.elements.find(
     (element) =>
       element.systemId === house.systemId &&
-      element.name === "Internal wall lining"
+      element.name === internalLiningElementName
   )
+
+  const roofingElementName = "Roofing"
 
   const roofingElement = context.elements.find(
     (element) =>
-      element.systemId === house.systemId && element.name === "Roofing"
+      element.systemId === house.systemId && element.name === roofingElementName
   )
 
-  // TODO: account for material overrides as opposed to relying on default
   const claddingMaterial: Material | undefined =
     claddingElement &&
     context.materials.find(
       (material) =>
         material.systemId === house.systemId &&
-        material.name === claddingElement.defaultMaterial
+        material.name ===
+          (house.modifiedMaterials[claddingElementName] ||
+            claddingElement.defaultMaterial)
     )
 
-  // TODO: account for material overrides as opposed to relying on default
   const internalLiningMaterial: Material | undefined =
     internalLiningElement &&
     context.materials.find(
       (material) =>
         material.systemId === house.systemId &&
-        material.name === internalLiningElement.defaultMaterial
+        material.name ===
+          (house.modifiedMaterials[internalLiningElementName] ||
+            internalLiningElement.defaultMaterial)
     )
 
-  // TODO: account for material overrides as opposed to relying on default
   const roofingMaterial: Material | undefined =
     roofingElement &&
     context.materials.find(
       (material) =>
         material.systemId === house.systemId &&
-        material.name === roofingElement.defaultMaterial
+        material.name ===
+          (house.modifiedMaterials[roofingElementName] ||
+            roofingElement.defaultMaterial)
     )
 
   return {
