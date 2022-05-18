@@ -9,7 +9,7 @@ interface Props {
 
 const SquareChart: FC<Props> = (props) => {
   const w = 60
-  const h = 80
+  const h = 60
 
   const total = props.data.reduce((a, b) => a + b, 0)
 

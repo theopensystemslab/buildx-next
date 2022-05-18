@@ -7,7 +7,7 @@ import CircleChart from "../charts/CircleChart"
 import { formatWithUnit, formatWithUnitLong } from "../data"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
-  <div className="px-4 py-16 border-b border-gray-400 grid grid-cols-1 gap-x-8 last:border-b-0 md:grid-cols-4 md:space-y-0">
+  <div className="px-4 py-16 border-b border-gray-400 grid grid-cols-1 gap-x-16 last:border-b-0 md:grid-cols-4 md:space-y-0">
     {props.children}
   </div>
 )
@@ -48,6 +48,8 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
     (accumulator, co2) => accumulator + co2.total / 1000,
     0
   )
+
+  const { totalHeatingDemand, energyDemandComparative } = dashboardData.energyUse
 
   return (
     <div className="text-white">
@@ -93,10 +95,9 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
         </Titled>
         <Titled title="Energy use" subtitle="Estimated annual">
           <CircleChart
-            data={Object.values(dashboardData.byHouse).map(
-              (houseInfo) => houseInfo.energyUse.totalHeatingCost
-            )}
-            unitOfMeasurement="€"
+            value={totalHeatingDemand}
+            comparative={energyDemandComparative}
+            unitOfMeasurement="kWhr/year"
           />
         </Titled>
         <Titled title="Carbon emissions" subtitle="Estimated annual">
@@ -130,7 +131,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
           />
           <div className="flex space-x-8">
             <p className="text-5xl">{formatWithUnit(totalEmbodiedCo2, "T")}</p>
-            <p className="text-gray-300 text-sm">
+            <p className="text-sm text-gray-300">
               Project will remove carbon dioxide from the atmosphere
             </p>
           </div>

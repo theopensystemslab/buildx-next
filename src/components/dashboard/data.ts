@@ -168,10 +168,12 @@ export interface EnergyUse {
   spaceHeatingDemand: number
   totalHeatingDemand: number
   primaryEnergyDemand: number
+  energyDemandComparative: number
   dhwCost: number
   spaceHeatingCost: number
   totalHeatingCost: number
   primaryEnergyCost: number
+  energyCostComparative: number
 }
 
 const emptyEnergyUse = (): EnergyUse => ({
@@ -179,10 +181,12 @@ const emptyEnergyUse = (): EnergyUse => ({
   spaceHeatingDemand: 0,
   totalHeatingDemand: 0,
   primaryEnergyDemand: 0,
+  energyDemandComparative: 0,
   dhwCost: 0,
   spaceHeatingCost: 0,
   totalHeatingCost: 0,
   primaryEnergyCost: 0,
+  energyCostComparative: 0,
 })
 
 const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
@@ -195,11 +199,15 @@ const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
         accumulator.totalHeatingDemand + current.totalHeatingDemand,
       primaryEnergyDemand:
         accumulator.primaryEnergyDemand + current.primaryEnergyDemand,
+      energyDemandComparative:
+        accumulator.energyDemandComparative + current.energyDemandComparative,
       dhwCost: accumulator.dhwCost + current.dhwCost,
       spaceHeatingCost: accumulator.spaceHeatingCost + current.spaceHeatingCost,
       totalHeatingCost: accumulator.totalHeatingCost + current.totalHeatingCost,
       primaryEnergyCost:
         accumulator.primaryEnergyCost + current.primaryEnergyCost,
+      energyCostComparative:
+        accumulator.energyCostComparative + current.energyCostComparative,
     }
   }, emptyEnergyUse())
 
@@ -488,6 +496,7 @@ const calculateHouseInfo = (
     spaceHeatingDemand: totalFloorArea * energyInfo.spaceHeatingDemand,
     totalHeatingDemand: totalFloorArea * energyInfo.totalHeatingDemand,
     primaryEnergyDemand: totalFloorArea * energyInfo.primaryEnergyDemand,
+    energyDemandComparative: comparative.energyUse * totalFloorArea,
     dhwCost:
       totalFloorArea * energyInfo.dhwDemand * energyInfo.electricityTariff,
     spaceHeatingCost:
@@ -502,6 +511,8 @@ const calculateHouseInfo = (
       totalFloorArea *
       energyInfo.primaryEnergyDemand *
       energyInfo.electricityTariff,
+    energyCostComparative:
+      comparative.energyUse * totalFloorArea * energyInfo.electricityTariff,
   }
 
   return {
@@ -592,13 +603,18 @@ const calculate = ({
 
 // Helpers
 
-export const formatWithUnit = (d: number, unitOfMeasurement: string) => {
+export const format = (d: number) => {
   const formatted =
     Math.abs(d) > 1000
       ? `${Math.floor(d / 1000)}k`
       : d.toLocaleString("en-GB", {
           maximumFractionDigits: 1,
         })
+  return formatted
+}
+
+export const formatWithUnit = (d: number, unitOfMeasurement: string) => {
+  const formatted = format(d)
   const formattedWithUnit =
     unitOfMeasurement === "€"
       ? `${unitOfMeasurement}${formatted}`

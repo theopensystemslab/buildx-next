@@ -54,7 +54,7 @@ const StackedBarChart: FC<{
   }
 
   const w = 60
-  const h = 80
+  const h = 60
 
   const baseline = min < 0 ? (h * max) / (max - min) : h
 
