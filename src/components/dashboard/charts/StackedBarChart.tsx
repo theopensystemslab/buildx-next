@@ -2,6 +2,30 @@ import React, { useMemo, type FC } from "react"
 import { colorScheme } from "../Ui"
 import { formatWithUnit } from "../data"
 
+/**
+ * Returns whether members of an array have alternating signs
+ * alternatingSigns([0, 1, 2, 3]) === false
+ * alternatingSigns([0, 1, -2, 3]) === true
+ */
+const alternatingSigns = (list: number[]): boolean => {
+  let foundNegative = false
+  let foundPositive = false
+  for (const member of list) {
+    if (member < 0) {
+      foundNegative = true
+      if (foundPositive) {
+        return true
+      }
+    } else if (member > 0) {
+      foundPositive = true
+      if (foundNegative) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
 /*
  * NOTE: this chart is not designed to handle all edge cases. Specifically:
  * - within one data set, all values have the same sign, e.g. [[-1, -2], [3, 4]]
@@ -57,9 +81,11 @@ const StackedBarChart: FC<{
         const x = (w * (index + 1)) / (props.data.length + 1) - width / 2
         // Start an accumulating y coordinate to stack bars on top of each other
         let accumulatedY = 0
+        const renderAggregate = alternatingSigns(stack)
+        const renderedStack = renderAggregate ? [aggregates[index]] : stack
         return (
           <g key={index}>
-            {stack.map((point, pointIndex) => {
+            {renderedStack.map((point, pointIndex) => {
               const height = (point * scale) / max
               const y = baseline - Math.max(height, 0)
               const currentAccummulatedY = accumulatedY
@@ -76,7 +102,9 @@ const StackedBarChart: FC<{
                     height={Math.abs(height)}
                     stroke="none"
                     fill={
-                      index < props.data.length - 1
+                      renderAggregate
+                        ? "#fff"
+                        : index < props.data.length - 1
                         ? colorScheme[pointIndex]
                         : `hsl(0,0%,${
                             70 +
