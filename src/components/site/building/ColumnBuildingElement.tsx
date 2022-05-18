@@ -6,7 +6,12 @@ import highlights from "@/stores/highlights"
 import { useMaterial, useMaterialName } from "@/stores/materials"
 import scope from "@/stores/scope"
 import { all, any, objComp, object3dChildOf, undef } from "@/utils"
-import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
+import {
+  Intersection,
+  invalidate,
+  MeshProps,
+  ThreeEvent,
+} from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import React, { useEffect, useRef } from "react"
 import { BufferGeometry, Mesh, Object3D, Plane } from "three"
@@ -54,6 +59,46 @@ const ColumnBuildingElement = (props: Props) => {
 
   const contextMode = useSiteContextMode()
 
+  const key = {
+    elementName,
+    groupIndex,
+    levelIndex,
+    columnIndex,
+    buildingId,
+  }
+
+  const checks = (intersections: Intersection[]): boolean => {
+    if (siteContext.menu !== null) return false
+    if (!meshRef.current) return false
+
+    const ixs =
+      siteContext.levelIndex !== null && clippingPlanes.length > 0
+        ? intersections.filter((ix) =>
+            clippingPlanes.every((elem2) => elem2.distanceToPoint(ix.point) > 0)
+          )
+        : intersections
+
+    if (!ixs?.[0]) return false
+
+    const obj = ixs?.[0].object ?? ixs?.[0].eventObject
+
+    if (
+      !obj ||
+      obj.id !== meshRef.current?.id ||
+      !object3dChildOf(obj, meshRef.current)
+    )
+      return false
+
+    if (
+      (siteContext.buildingId !== null &&
+        siteContext.buildingId !== buildingId) ||
+      (siteContext.levelIndex !== null && siteContext.levelIndex !== levelIndex)
+    )
+      return false
+
+    return true
+  }
+
   const bind = useGesture<{
     hover: ThreeEvent<PointerEvent>
     onPointerDown: ThreeEvent<PointerEvent>
@@ -61,113 +106,21 @@ const ColumnBuildingElement = (props: Props) => {
       React.MouseEvent<EventTarget, MouseEvent>
   }>({
     onHover: ({ event: { intersections } }) => {
-      if (!meshRef.current) return
-      if (
-        siteContext.levelIndex !== null &&
-        siteContext.levelIndex !== levelIndex
-      )
-        return
-
-      const ixs =
-        siteContext.levelIndex !== null && clippingPlanes.length > 0
-          ? intersections.filter((ix) =>
-              clippingPlanes.every(
-                (elem2) => elem2.distanceToPoint(ix.point) > 0
-              )
-            )
-          : intersections
-
-      if (!ixs?.[0]) return
-
-      const obj = ixs[0].object ?? ixs[0].eventObject
-
-      if (!object3dChildOf(obj, meshRef.current)) return
-      if (siteContext.menu !== null) return
-
-      const key = {
-        elementName,
-        groupIndex,
-        levelIndex,
-        columnIndex,
-        buildingId,
-      }
-
+      if (!checks(intersections)) return
       if (scope.hovered === null || !objComp(scope.hovered, key)) {
         scope.hovered = key
       }
-
       invalidate()
     },
     onContextMenu: ({ event, event: { intersections, pageX, pageY } }) => {
       event.preventDefault?.()
-      if (!meshRef.current) return
-
-      const ixs =
-        siteContext.levelIndex !== null && clippingPlanes.length > 0
-          ? intersections.filter((ix) =>
-              clippingPlanes.every(
-                (elem2) => elem2.distanceToPoint(ix.point) > 0
-              )
-            )
-          : intersections
-
-      const obj = ixs?.[0].object ?? ixs?.[0].eventObject
-
-      const returnIf = any(
-        undef(ixs?.[0]),
-        ixs[0].object.id !== meshRef.current?.id,
-        siteContext.buildingId !== null &&
-          siteContext.buildingId !== buildingId,
-        siteContext.levelIndex !== null &&
-          siteContext.levelIndex !== levelIndex,
-        !object3dChildOf(obj, meshRef.current)
-      )
-      if (returnIf) return
-
-      // scope.selected = {
-      //   elementName,
-      //   groupIndex,
-      //   levelIndex,
-      //   columnIndex,
-      //   buildingId,
-      // }
-
+      if (!checks(intersections)) return
       siteContext.menu = [pageX, pageY]
       invalidate()
     },
-    onPointerDown: ({ event, event: { intersections } }) => {
-      if (!meshRef.current) return
-
-      const ixs =
-        siteContext.levelIndex !== null && clippingPlanes.length > 0
-          ? intersections.filter((ix) =>
-              clippingPlanes.every(
-                (elem2) => elem2.distanceToPoint(ix.point) > 0
-              )
-            )
-          : intersections
-
-      const obj = ixs[0].object ?? ixs[0].eventObject
-
-      const returnIf = any(
-        undef(ixs?.[0]),
-        ixs[0].object.id !== meshRef.current?.id,
-        siteContext.buildingId !== null &&
-          siteContext.buildingId !== buildingId,
-        siteContext.levelIndex !== null &&
-          siteContext.levelIndex !== levelIndex,
-        !object3dChildOf(obj, meshRef.current)
-      )
-      if (returnIf) return
-
-      scope.selected = {
-        elementName,
-        groupIndex,
-        levelIndex,
-        columnIndex,
-        buildingId,
-      }
-
+    onPointerDown: ({ event: { intersections } }) => {
+      if (!checks(intersections)) return
+      scope.selected = key
       invalidate()
     },
   })
