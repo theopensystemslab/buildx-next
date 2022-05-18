@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { proxy, useSnapshot } from "valtio"
 import * as z from "zod"
 
@@ -28,11 +29,22 @@ export type SiteContextMode = z.infer<typeof SiteContextModeEnum>
 export const useSiteContextMode = () => {
   const { buildingId, levelIndex } = useSiteContext()
 
-  return levelIndex !== null
-    ? SiteContextModeEnum.Enum.LEVEL
-    : buildingId !== null
-    ? SiteContextModeEnum.Enum.BUILDING
-    : SiteContextModeEnum.Enum.SITE
+  const mode =
+    levelIndex !== null
+      ? SiteContextModeEnum.Enum.LEVEL
+      : buildingId !== null
+      ? SiteContextModeEnum.Enum.BUILDING
+      : SiteContextModeEnum.Enum.SITE
+
+  useEffect(() => {
+    if (mode === SiteContextModeEnum.Enum.LEVEL) {
+      siteContext.editMode = null
+    } else if (mode === SiteContextModeEnum.Enum.BUILDING) {
+      siteContext.editMode = EditModeEnum.Enum.STRETCH
+    }
+  }, [mode])
+
+  return mode
 }
 
 export default siteContext
