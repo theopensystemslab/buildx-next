@@ -1,7 +1,10 @@
+import { calculateMaterialCosts } from "@/components/dashboard/data"
 import type { System } from "@/data/system"
 import { find } from "ramda"
+import { Element } from "./element"
 import type { House } from "./house"
 import type { HouseType } from "./houseType"
+import { Material } from "./material"
 import type { Module } from "./module"
 import { moduleLayout } from "./moduleLayout"
 import { getAirtableEntries } from "./utils"
@@ -109,11 +112,15 @@ export const getHouseStats = ({
   modules,
   houseTypes,
   energyInfo,
+  elements,
+  materials,
 }: {
   house: House
   modules: Array<Module>
   houseTypes: Array<HouseType>
   energyInfo: Array<EnergyInfo>
+  elements: Element[]
+  materials: Material[]
 }): HouseStats => {
   const relevantEnergyInfo = find(
     (info) => info.systemId === house.systemId,
@@ -139,9 +146,19 @@ export const getHouseStats = ({
     return runningTotal + width * (layout.cellLengths[index] || 0)
   }, 0)
 
+  const materialCosts = calculateMaterialCosts(house, {
+    elements,
+    materials,
+  })
+
   return {
     cost: houseModules.reduce(
-      (accumulator, module) => accumulator + module.cost,
+      (accumulator, module) =>
+        accumulator +
+        module.cost +
+        materialCosts.cladding * module.claddingArea +
+        materialCosts.internalLining * module.liningArea +
+        materialCosts.roofing * module.roofingArea,
       0
     ),
     embodiedCarbon: houseModules.reduce(

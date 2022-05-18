@@ -11,7 +11,8 @@ import { useSnapshot } from "valtio"
 import { InfoPanel } from "../ui"
 
 const SiteInfoPanel = () => {
-  const { modules, houseTypes, energyInfo } = useSystemsData()
+  const { modules, houseTypes, energyInfo, elements, materials } =
+    useSystemsData()
 
   const housesSnap = useSnapshot(houses)
 
@@ -23,6 +24,8 @@ const SiteInfoPanel = () => {
         modules,
         houseTypes,
         energyInfo,
+        elements,
+        materials,
       })
     ),
     values,
@@ -62,7 +65,8 @@ const SiteInfoPanel = () => {
 
 const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
   const house = useSnapshot(houses?.[buildingId])
-  const { modules, houseTypes, energyInfo } = useSystemsData()
+  const { modules, houseTypes, energyInfo, elements, materials } =
+    useSystemsData()
 
   const houseStats = useMemo(
     () =>
@@ -74,6 +78,8 @@ const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
             modules,
             houseTypes,
             energyInfo,
+            elements,
+            materials,
           }),
         (stats) => sumHouseStats([stats] as HouseStats[])
       ),
