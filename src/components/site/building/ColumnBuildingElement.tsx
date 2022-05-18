@@ -62,8 +62,25 @@ const ColumnBuildingElement = (props: Props) => {
   }>({
     onHover: ({ event: { intersections } }) => {
       if (!meshRef.current) return
-      if (!intersections?.[0]) return
-      const obj = intersections[0].object ?? intersections[0].eventObject
+      if (
+        siteContext.levelIndex !== null &&
+        siteContext.levelIndex !== levelIndex
+      )
+        return
+
+      const ixs =
+        siteContext.levelIndex !== null && clippingPlanes.length > 0
+          ? intersections.filter((ix) =>
+              clippingPlanes.every(
+                (elem2) => elem2.distanceToPoint(ix.point) > 0
+              )
+            )
+          : intersections
+
+      if (!ixs?.[0]) return
+
+      const obj = ixs[0].object ?? ixs[0].eventObject
+
       if (!object3dChildOf(obj, meshRef.current)) return
       if (siteContext.menu !== null) return
 
@@ -84,13 +101,25 @@ const ColumnBuildingElement = (props: Props) => {
     onContextMenu: ({ event, event: { intersections, pageX, pageY } }) => {
       event.preventDefault?.()
       if (!meshRef.current) return
-      const obj = intersections[0].object ?? intersections[0].eventObject
+
+      const ixs =
+        siteContext.levelIndex !== null && clippingPlanes.length > 0
+          ? intersections.filter((ix) =>
+              clippingPlanes.every(
+                (elem2) => elem2.distanceToPoint(ix.point) > 0
+              )
+            )
+          : intersections
+
+      const obj = ixs?.[0].object ?? ixs?.[0].eventObject
 
       const returnIf = any(
-        undef(intersections?.[0]),
-        intersections[0].object.id !== meshRef.current?.id,
+        undef(ixs?.[0]),
+        ixs[0].object.id !== meshRef.current?.id,
         siteContext.buildingId !== null &&
           siteContext.buildingId !== buildingId,
+        siteContext.levelIndex !== null &&
+          siteContext.levelIndex !== levelIndex,
         !object3dChildOf(obj, meshRef.current)
       )
       if (returnIf) return
@@ -108,13 +137,25 @@ const ColumnBuildingElement = (props: Props) => {
     },
     onPointerDown: ({ event, event: { intersections } }) => {
       if (!meshRef.current) return
-      const obj = intersections[0].object ?? intersections[0].eventObject
+
+      const ixs =
+        siteContext.levelIndex !== null && clippingPlanes.length > 0
+          ? intersections.filter((ix) =>
+              clippingPlanes.every(
+                (elem2) => elem2.distanceToPoint(ix.point) > 0
+              )
+            )
+          : intersections
+
+      const obj = ixs[0].object ?? ixs[0].eventObject
 
       const returnIf = any(
-        undef(intersections?.[0]),
-        intersections[0].object.id !== meshRef.current?.id,
+        undef(ixs?.[0]),
+        ixs[0].object.id !== meshRef.current?.id,
         siteContext.buildingId !== null &&
           siteContext.buildingId !== buildingId,
+        siteContext.levelIndex !== null &&
+          siteContext.levelIndex !== levelIndex,
         !object3dChildOf(obj, meshRef.current)
       )
       if (returnIf) return
