@@ -1,3 +1,4 @@
+import handleMaterial from "@/materials/handleMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import houses from "@/stores/houses"
 import pointer from "@/stores/pointer"
@@ -62,18 +63,18 @@ const RotateHandles = (props: Props) => {
       <mesh
         rotation-x={-Math.PI / 2}
         position={[0, 0, -1.5]}
+        material={handleMaterial}
         {...(bind(0) as any)}
       >
         <circleBufferGeometry args={[0.5, 10]} />
-        <meshBasicMaterial color="steelblue" side={DoubleSide} />
       </mesh>
       <mesh
         rotation-x={-Math.PI / 2}
         position={[-buildingWidth / 2 - 1.5, 0, buildingLength / 2]}
+        material={handleMaterial}
         {...(bind(1) as any)}
       >
         <circleBufferGeometry args={[0.5, 10]} />
-        <meshBasicMaterial color="steelblue" side={DoubleSide} />
       </mesh>
     </Fragment>
   )

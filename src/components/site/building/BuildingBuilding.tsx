@@ -3,6 +3,7 @@ import { PositionedColumn } from "@/hooks/layouts"
 import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import defaultMaterial from "@/materials/defaultMaterial"
+import handleMaterial from "@/materials/handleMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import { EditModeEnum, useSiteContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
@@ -31,15 +32,13 @@ const StretchHandle = (props: StretchHandleProps) => {
     invalidate()
   })
   return (
-    <mesh rotation-x={-Math.PI / 2} {...meshProps} {...(bind() as any)}>
+    <mesh
+      rotation-x={-Math.PI / 2}
+      {...meshProps}
+      {...(bind() as any)}
+      material={handleMaterial}
+    >
       <circleBufferGeometry args={[0.5, 24]} />
-      <meshPhongMaterial
-        color="white"
-        emissive="white"
-        specular="white"
-        shininess={9999999}
-        side={DoubleSide}
-      />
     </mesh>
   )
 }
