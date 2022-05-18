@@ -59,29 +59,14 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
           <ContextMenuButton onClick={editBuilding}>
             {`Edit building`}
           </ContextMenuButton>
+          <ContextMenuButton onClick={moveRotate}>
+            {`Move/rotate building`}
+          </ContextMenuButton>
         </Fragment>
       )}
-      <Fragment>
-        <ContextMenuButton onClick={rename}>
-          {`Rename building`}
-        </ContextMenuButton>
-        {renaming && (
-          <RenameHouseForm
-            {...props}
-            currentName={firstHouse.friendlyName}
-            onNewName={(newName) => {
-              houses[firstHouse.id].friendlyName = newName
-              setRenaming(false)
-            }}
-          />
-        )}
-      </Fragment>
-      <ContextMenuButton onClick={moveRotate}>
-        {`Move/rotate building`}
-      </ContextMenuButton>
 
       <Fragment>
-        <ContextMenuButton onClick={rename}>
+        <ContextMenuButton onClick={rename} className="focus:outline-none">
           {`Rename building`}
         </ContextMenuButton>
         {renaming && (
