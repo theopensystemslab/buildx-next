@@ -8,13 +8,15 @@ import { useColumnLayout } from "@/hooks/layouts"
 import houses from "@/stores/houses"
 import scope from "@/stores/scope"
 import React from "react"
+import ChangeMaterials from "./ChangeMaterials"
 
 type Props = ContextMenuProps
 
 const LevelContextMenu = (props: Props) => {
   if (scope.selected === null) throw new Error("scope.selected null")
 
-  const { groupIndex, levelIndex, columnIndex, buildingId } = scope.selected
+  const { groupIndex, levelIndex, columnIndex, buildingId, elementName } =
+    scope.selected
 
   const columnLayout = useColumnLayout(buildingId)
 
@@ -86,6 +88,14 @@ const LevelContextMenu = (props: Props) => {
             compare={(a, b) => a.stairType === b.stairType}
           />
         </ContextMenuNested>
+      )}
+
+      {elementName && (
+        <ChangeMaterials
+          buildingId={buildingId}
+          elementName={elementName}
+          onComplete={props.onClose}
+        />
       )}
       {canChangeWindow && (
         <ContextMenuNested long label="Change window">
