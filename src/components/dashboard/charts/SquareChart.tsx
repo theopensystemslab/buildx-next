@@ -32,15 +32,17 @@ const SquareChart: FC<Props> = (props) => {
               width={w}
               height={height}
             />
-            <text
-              x={w / 2}
-              y={height / 2 + 2}
-              fill="#000"
-              textAnchor="middle"
-              style={{ fontSize: 4 }}
-            >
-              {formatWithUnit(d, props.unitOfMeasurement)}
-            </text>
+            {d > total * 0.05 && (
+              <text
+                x={w / 2}
+                y={height / 2 + 2}
+                fill="#000"
+                textAnchor="middle"
+                style={{ fontSize: 4 }}
+              >
+                {formatWithUnit(d, props.unitOfMeasurement)}
+              </text>
+            )}
           </g>
         )
       })}
