@@ -32,6 +32,11 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   const deleteBuilding = () => {
     delete houses[buildingId]
     scope.selected = null
+    if (Object.keys(houses).length === 0) {
+      siteContext.editMode = null
+      siteContext.buildingId = null
+      siteContext.levelIndex = null
+    }
     props.onClose?.()
   }
 
