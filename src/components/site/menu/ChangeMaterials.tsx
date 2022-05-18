@@ -24,7 +24,10 @@ const ChangeMaterials = ({
 
   return pipe(
     elements,
-    findFirst((x) => x.systemId === house.systemId && x.name === elementName),
+    findFirst(
+      (element) =>
+        element.systemId === house.systemId && element.name === elementName
+    ),
     mapO((element) => {
       const thumbnailsByMaterial = element
         ? (() => {
@@ -34,7 +37,7 @@ const ChangeMaterials = ({
                 material.systemId === house.systemId &&
                 element.materialOptions.includes(material.name)
               ) {
-                record[material.name] = material.textureUrl
+                record[material.name] = material.imageUrl
               }
             })
             return record
