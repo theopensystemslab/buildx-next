@@ -49,12 +49,25 @@ const StackedBarChart: FC<{
     [aggregates]
   )
 
-  if (max === min) {
-    return null
-  }
-
   const w = 60
-  const h = 80
+  const h = 60
+
+  if (max === min) {
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`}>
+        <rect x="0" y="0" width={w} height={h} fill="rgba(0,0,0,0.08)"></rect>
+        <text
+          x={w / 2}
+          y={h / 2}
+          fill="#fff"
+          textAnchor="middle"
+          style={{ fontSize: 3 }}
+        >
+          No data available
+        </text>
+      </svg>
+    )
+  }
 
   const baseline = min < 0 ? (h * max) / (max - min) : h
 

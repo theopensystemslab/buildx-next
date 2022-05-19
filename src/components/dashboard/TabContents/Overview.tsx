@@ -7,7 +7,7 @@ import CircleChart from "../charts/CircleChart"
 import { formatWithUnit, formatWithUnitLong } from "../data"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
-  <div className="px-4 py-16 border-b border-gray-400 grid grid-cols-1 gap-x-8 last:border-b-0 md:grid-cols-4 md:space-y-0">
+  <div className="px-4 py-16 border-b border-gray-400 grid grid-cols-1 gap-x-16 last:border-b-0 md:grid-cols-4 md:space-y-0">
     {props.children}
   </div>
 )
@@ -49,6 +49,9 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
     0
   )
 
+  const { totalHeatingDemand, energyDemandComparative } =
+    dashboardData.energyUse
+
   return (
     <div className="text-white">
       <GridLayout>
@@ -80,24 +83,32 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             <p className="text-5xl">
               {formatWithUnit(dashboardData.areas.totalFloor, "m²")}
             </p>
-            <div className="text-gray-300 space-y-1">
-              <p className="text-3xl">
-                {formatWithUnitLong(
-                  dashboardData.costs.total / dashboardData.areas.totalFloor,
-                  "€/m²"
-                )}
-              </p>
-              <p className="text-sm">cost per floor area</p>
-            </div>
+            {dashboardData.areas.totalFloor > 0 && (
+              <div className="text-gray-300 space-y-1">
+                <p className="text-3xl">
+                  {formatWithUnitLong(
+                    dashboardData.costs.total / dashboardData.areas.totalFloor,
+                    "€/m²"
+                  )}
+                </p>
+                <p className="text-sm">cost per floor area</p>
+              </div>
+            )}
           </div>
         </Titled>
         <Titled title="Energy use" subtitle="Estimated annual">
           <CircleChart
-            data={Object.values(dashboardData.byHouse).map(
-              (houseInfo) => houseInfo.energyUse.totalHeatingCost
-            )}
-            unitOfMeasurement="€"
+            value={totalHeatingDemand}
+            comparative={energyDemandComparative}
+            unitOfMeasurement="kWhr/year"
           />
+          <div className="flex justify-end">
+            <ChangeDataPoint
+              value={totalHeatingDemand}
+              reference={energyDemandComparative}
+              description="Compared to traditional new build"
+            />
+          </div>
         </Titled>
         <Titled title="Carbon emissions" subtitle="Estimated annual">
           <StackedBarChart
@@ -128,12 +139,16 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             ]}
             unitOfMeasurement="T"
           />
-          <div className="flex space-x-8">
-            <p className="text-5xl">{formatWithUnit(totalEmbodiedCo2, "T")}</p>
-            <p className="text-gray-300 text-sm">
-              Project will remove carbon dioxide from the atmosphere
-            </p>
-          </div>
+          {totalEmbodiedCo2 < 0 && (
+            <div className="flex space-x-8">
+              <p className="text-5xl">
+                {formatWithUnit(totalEmbodiedCo2, "T")}
+              </p>
+              <p className="text-sm text-gray-300">
+                Project will remove carbon dioxide from the atmosphere
+              </p>
+            </div>
+          )}
         </Titled>
       </GridLayout>
     </div>

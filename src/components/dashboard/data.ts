@@ -168,10 +168,12 @@ export interface EnergyUse {
   spaceHeatingDemand: number
   totalHeatingDemand: number
   primaryEnergyDemand: number
+  energyDemandComparative: number
   dhwCost: number
   spaceHeatingCost: number
   totalHeatingCost: number
   primaryEnergyCost: number
+  energyCostComparative: number
 }
 
 const emptyEnergyUse = (): EnergyUse => ({
@@ -179,10 +181,12 @@ const emptyEnergyUse = (): EnergyUse => ({
   spaceHeatingDemand: 0,
   totalHeatingDemand: 0,
   primaryEnergyDemand: 0,
+  energyDemandComparative: 0,
   dhwCost: 0,
   spaceHeatingCost: 0,
   totalHeatingCost: 0,
   primaryEnergyCost: 0,
+  energyCostComparative: 0,
 })
 
 const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
@@ -195,11 +199,15 @@ const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
         accumulator.totalHeatingDemand + current.totalHeatingDemand,
       primaryEnergyDemand:
         accumulator.primaryEnergyDemand + current.primaryEnergyDemand,
+      energyDemandComparative:
+        accumulator.energyDemandComparative + current.energyDemandComparative,
       dhwCost: accumulator.dhwCost + current.dhwCost,
       spaceHeatingCost: accumulator.spaceHeatingCost + current.spaceHeatingCost,
       totalHeatingCost: accumulator.totalHeatingCost + current.totalHeatingCost,
       primaryEnergyCost:
         accumulator.primaryEnergyCost + current.primaryEnergyCost,
+      energyCostComparative:
+        accumulator.energyCostComparative + current.energyCostComparative,
     }
   }, emptyEnergyUse())
 
@@ -309,13 +317,17 @@ const calculateHouseInfo = (
 ): HouseInfo => {
   const { energyInfo, spaceTypes, windowTypes, elements, materials } = context
 
-  const accumulateIf = (
+  const accumulateModuleDataIf = (
     fn: (module: Module) => boolean,
     getValue: (module: Module) => number
   ) => {
     return houseModules.reduce((accumulator, current) => {
       return accumulator + (fn(current) ? getValue(current) : 0)
     }, 0)
+  }
+
+  const accumulateModuleData = (getValue: (module: Module) => number) => {
+    return accumulateModuleDataIf(() => true, getValue)
   }
 
   const materialCosts = calculateMaterialCosts(house, {
@@ -343,103 +355,90 @@ const calculateHouseInfo = (
       spaceType.systemId === house.systemId && spaceType.code === "KITC"
   )?.id
 
-  const totalFloorArea = accumulateIf(
-    () => true,
-    (module) => module.floorArea
-  )
+  const totalFloorArea = accumulateModuleData((module) => module.floorArea)
 
   const areas: Areas = {
     totalFloor: totalFloorArea,
-    foundation: accumulateIf(
+    foundation: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] === "F",
       (module) => module.floorArea
     ),
-    groundFloor: accumulateIf(
+    groundFloor: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] === "G",
       (module) => module.floorArea
     ),
-    firstFloor: accumulateIf(
+    firstFloor: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] === "M",
       (module) => module.floorArea
     ),
-    secondFloor: accumulateIf(
+    secondFloor: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] === "T",
       (module) => module.floorArea
     ),
-    internalLining: accumulateIf(
+    internalLining: accumulateModuleDataIf(
       () => true,
       (module) => module.liningArea
     ),
-    cladding: accumulateIf(
-      () => true,
-      (module) => module.claddingArea
-    ),
-    roofing: accumulateIf(
-      () => true,
-      (module) => module.roofingArea
-    ),
-    bedroom: accumulateIf(
+    cladding: accumulateModuleData((module) => module.claddingArea),
+    roofing: accumulateModuleData((module) => module.roofingArea),
+    bedroom: accumulateModuleDataIf(
       (module) => module.spaceType === bedroomId,
       (module) => module.floorArea
     ),
-    bathroom: accumulateIf(
+    bathroom: accumulateModuleDataIf(
       (module) => module.spaceType === bathroomId,
       (module) => module.floorArea
     ),
-    living: accumulateIf(
+    living: accumulateModuleDataIf(
       (module) => module.spaceType === livingId,
       (module) => module.floorArea
     ),
-    kitchen: accumulateIf(
+    kitchen: accumulateModuleDataIf(
       (module) => module.spaceType === kitchenId,
       (module) => module.floorArea
     ),
-    windowsAndDoors: accumulateIf(
-      () => true,
-      (module) => {
-        const glazingAreas = [
-          module.structuredDna.windowTypeEnd,
-          module.structuredDna.windowTypeTop,
-          module.structuredDna.windowTypeSide1,
-          module.structuredDna.windowTypeSide2,
-        ].map(
-          (code) =>
-            windowTypes.find(
-              (windowType) =>
-                windowType.code === code &&
-                windowType.systemId === house.systemId
-            )?.glazingArea || 0
-        )
-        return glazingAreas.reduce((a, b) => a + b, 0)
-      }
-    ),
+    windowsAndDoors: accumulateModuleData((module) => {
+      const glazingAreas = [
+        module.structuredDna.windowTypeEnd,
+        module.structuredDna.windowTypeTop,
+        module.structuredDna.windowTypeSide1,
+        module.structuredDna.windowTypeSide2,
+      ].map(
+        (code) =>
+          windowTypes.find(
+            (windowType) =>
+              windowType.code === code && windowType.systemId === house.systemId
+          )?.glazingArea || 0
+      )
+      return glazingAreas.reduce((a, b) => a + b, 0)
+    }),
   }
 
-  const roofingCost = accumulateIf(
+  const roofingCost = accumulateModuleDataIf(
     () => true,
     (module) => module.roofingArea * materialCosts.roofing
   )
 
-  const internalLiningCost = accumulateIf(
+  const internalLiningCost = accumulateModuleDataIf(
     () => true,
     (module) => module.liningArea * materialCosts.internalLining
   )
 
-  const claddingCost = accumulateIf(
+  const claddingCost = accumulateModuleDataIf(
     () => true,
     (module) => module.claddingArea * materialCosts.cladding
   )
 
   const costs: Costs = {
-    foundation: accumulateIf(
+    foundation: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] === "F",
       (module) => module.cost
     ),
-    roofStructure: accumulateIf(
+    roofStructure: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] === "R",
       (module) => module.cost
     ),
-    superstructure: accumulateIf(
+    superstructure: accumulateModuleDataIf(
       (module) =>
         module.structuredDna.levelType[0] !== "F" &&
         module.structuredDna.levelType[0] !== "R",
@@ -448,7 +447,7 @@ const calculateHouseInfo = (
     roofing: roofingCost,
     internalLining: internalLiningCost,
     cladding: claddingCost,
-    total: accumulateIf(
+    total: accumulateModuleDataIf(
       () => true,
       (module) => module.cost + roofingCost + internalLiningCost + claddingCost
     ),
@@ -464,23 +463,20 @@ const calculateHouseInfo = (
   }
 
   const embodiedCo2: EmbodiedCo2 = {
-    foundations: accumulateIf(
+    foundations: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] === "F",
       (module) => module.embodiedCarbon
     ),
-    modules: accumulateIf(
+    modules: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] !== "F",
       (module) => module.embodiedCarbon
     ),
-    cladding: accumulateIf(
+    cladding: accumulateModuleDataIf(
       (module) => module.structuredDna.levelType[0] === "R",
       (module) => module.embodiedCarbon
     ),
     comparative: totalFloorArea * comparative.embodiedCo2,
-    total: accumulateIf(
-      () => true,
-      (module) => module.embodiedCarbon
-    ),
+    total: accumulateModuleData((module) => module.embodiedCarbon),
   }
 
   const energyUse: EnergyUse = {
@@ -488,6 +484,7 @@ const calculateHouseInfo = (
     spaceHeatingDemand: totalFloorArea * energyInfo.spaceHeatingDemand,
     totalHeatingDemand: totalFloorArea * energyInfo.totalHeatingDemand,
     primaryEnergyDemand: totalFloorArea * energyInfo.primaryEnergyDemand,
+    energyDemandComparative: comparative.energyUse * totalFloorArea,
     dhwCost:
       totalFloorArea * energyInfo.dhwDemand * energyInfo.electricityTariff,
     spaceHeatingCost:
@@ -502,6 +499,8 @@ const calculateHouseInfo = (
       totalFloorArea *
       energyInfo.primaryEnergyDemand *
       energyInfo.electricityTariff,
+    energyCostComparative:
+      comparative.energyUse * totalFloorArea * energyInfo.electricityTariff,
   }
 
   return {
@@ -511,7 +510,7 @@ const calculateHouseInfo = (
     operationalCo2,
     embodiedCo2,
     energyUse,
-    embodiedCarbon: accumulateIf(
+    embodiedCarbon: accumulateModuleDataIf(
       () => true,
       (module) => module.embodiedCarbon
     ),
@@ -592,13 +591,18 @@ const calculate = ({
 
 // Helpers
 
-export const formatWithUnit = (d: number, unitOfMeasurement: string) => {
+export const format = (d: number) => {
   const formatted =
     Math.abs(d) > 1000
       ? `${Math.floor(d / 1000)}k`
       : d.toLocaleString("en-GB", {
           maximumFractionDigits: 1,
         })
+  return formatted
+}
+
+export const formatWithUnit = (d: number, unitOfMeasurement: string) => {
+  const formatted = format(d)
   const formattedWithUnit =
     unitOfMeasurement === "€"
       ? `${unitOfMeasurement}${formatted}`
