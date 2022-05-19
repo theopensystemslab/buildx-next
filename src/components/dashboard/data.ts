@@ -553,15 +553,15 @@ const calculateHouseInfo = (
   }
 }
 
-const calculate = ({
-  houses,
-  systemsData,
-  selectedHouses,
-}: {
+const calculate = (data: {
   houses: Houses
   systemsData: SystemsData
-  selectedHouses: string[]
+  selectedHouses?: string[]
 }): DashboardData => {
+  const { houses, systemsData } = data
+
+  const selectedHouses: string[] = data.selectedHouses || Object.keys(houses)
+
   const byHouse = (() => {
     const obj: Record<string, HouseInfo> = {}
 
