@@ -29,7 +29,8 @@ export const useWindowOptions = <T extends BareModule>(
     groupIndex
   ].module as unknown as T
 
-  const side = useSide(siteContext.buildingId!)
+  const side = useSide(siteContext.buildingId!)()
+
   const systemModules = useSystemModules(module.systemId)
   const { windowTypes } = useSystemsData()
 

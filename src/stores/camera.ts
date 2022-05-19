@@ -6,7 +6,7 @@ import { useEffect } from "react"
 import { Vector3 } from "three"
 import { proxy } from "valtio"
 import { useSiteContext } from "./context"
-import { useFocusedBuilding, useHouses, useMaybeBuildingLength } from "./houses"
+import { useHouses, useMaybeBuildingLength } from "./houses"
 
 type CameraProxy = {
   controls: CameraControls | null
