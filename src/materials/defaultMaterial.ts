@@ -1,4 +1,4 @@
-import { DoubleSide, MeshStandardMaterial } from "three";
+import { DoubleSide, MeshStandardMaterial } from "three"
 
 const defaultMaterial = new MeshStandardMaterial({
   color: 0xff0000,
@@ -20,13 +20,13 @@ const defaultMaterial = new MeshStandardMaterial({
   side: DoubleSide,
   polygonOffset: true,
   polygonOffsetFactor: 1,
-  clipIntersection: true,
+  clipIntersection: false,
   shadowSide: DoubleSide,
   clipShadows: true,
-  refractionRatio: 1,
   wireframe: false,
   wireframeLinewidth: 1,
   flatShading: false,
-});
+  transparent: true,
+})
 
-export default defaultMaterial;
+export default defaultMaterial

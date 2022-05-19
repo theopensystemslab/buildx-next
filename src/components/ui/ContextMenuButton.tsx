@@ -7,17 +7,17 @@ export interface Props extends HTMLProps<HTMLElement> {
   to?: string
 }
 
-const className =
+const styles =
   "py-2 px-3 block hover:bg-gray-100 w-full text-left text-sm whitespace-pre"
 
 export default function ContextMenuButton(props: Props) {
-  const { to, children, ...rest } = props
+  const { to, children, className, ...rest } = props
   return to ? (
     <Link href={to} {...(rest as any)}>
-      <a className={className}>{children}</a>
+      <a className={[styles, className].join(" ")}>{children}</a>
     </Link>
   ) : (
-    <button className={className} {...(rest as any)}>
+    <button className={[styles, className].join(" ")} {...(rest as any)}>
       {children}
     </button>
   )

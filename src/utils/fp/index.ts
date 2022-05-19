@@ -1,22 +1,48 @@
-import { boolean } from "fp-ts"
-import { flow } from "fp-ts/lib/function"
+import { reduce, zipWith } from "fp-ts/lib/Array"
+import { flow, pipe } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
-import { map as mapO } from "fp-ts/lib/Option"
+import { Ord as NumOrd, Eq as NumEq } from "fp-ts/lib/number"
+import { map as mapO, flatten as flattenO } from "fp-ts/lib/Option"
+import { clamp } from "fp-ts/lib/Ord"
 import { modifyAt } from "fp-ts/lib/ReadonlyArray"
-import { Monoid, split, toUpperCase } from "fp-ts/lib/string"
+import { keys } from "fp-ts/lib/Record"
+import {
+  Monoid,
+  split,
+  toUpperCase,
+  Eq as StrEq,
+  Ord as StrOrd,
+} from "fp-ts/lib/string"
+
+export { NumOrd, NumEq, StrOrd, StrEq }
+
+const { min, max, abs, sign } = Math
 
 export {
   filter as filterA,
+  filterMap as filterMapA,
   map as mapA,
+  mapWithIndex as mapWithIndexA,
   reduce as reduceA,
+  reduceWithIndex as reduceWithIndexA,
+  flatten as flattenA,
 } from "fp-ts/lib/Array"
+export {
+  filter as filterNEA,
+  head as headNEA,
+  map as mapNEA,
+  reduce as reduceNEA,
+} from "fp-ts/lib/NonEmptyArray"
 export {
   chunksOf as chunksOfRA,
   filter as filterRA,
+  filterMap as filterMapRA,
+  filterMapWithIndex as filterMapWithIndexRA,
   map as mapRA,
   mapWithIndex as mapWithIndexRA,
   reduce as reduceRA,
   reduceWithIndex as reduceWithIndexRA,
+  zip as zipRA,
 } from "fp-ts/lib/ReadonlyArray"
 export {
   chunksOf as chunksOfRNA,
@@ -27,17 +53,40 @@ export {
   filterMap as filterMapRR,
   filterMapWithIndex as filterMapWithIndexRR,
   map as mapRR,
+  mapWithIndex as mapWithIndexRR,
   reduce as reduceRR,
 } from "fp-ts/lib/ReadonlyRecord"
 export {
   filter as filterR,
   map as mapR,
+  mapWithIndex as mapWithIndexR,
+  filterMapWithIndex as filterMapWithIndexR,
   reduce as reduceR,
 } from "fp-ts/lib/Record"
 export { map as mapT } from "fp-ts/lib/Task"
-export { mapO }
+export { min, max, abs, sign }
+export { clamp_ as clamp }
+export { mapO, flattenO }
+export {
+  map as mapM,
+  reduce as reduceM,
+  mapWithIndex as mapWithIndexM,
+  reduceWithIndex as reduceWithIndexM,
+} from "fp-ts/lib/Map"
+
+export { transpose as transposeA } from "fp-ts-std/Array"
+export { transpose as transposeRA } from "fp-ts-std/ReadonlyArray"
+
+const clamp_ = clamp(NumOrd)
 
 export const pipeLog = <T extends unknown>(x: T): T => (console.log(x), x)
+
+export const pipeLogWith =
+  <T extends unknown>(f: (t: T) => void) =>
+  (t: T): T => {
+    console.log(f(t))
+    return t
+  }
 
 export const upperFirst = flow(
   split(""),
@@ -78,3 +127,17 @@ export const findA2 =
     }
     return indices
   }
+
+export const objComp = (a: Record<string, any>, b: Record<string, any>) =>
+  pipe(
+    keys(a),
+    reduce(true, (acc, k) => acc && a[k] === b[k])
+  )
+
+export const hamming = (a: string, b: string) => {
+  if (a.length !== b.length) throw new Error("Hamming of different lengths")
+
+  return zipWith(a.split(""), b.split(""), (a, b) =>
+    abs(a.codePointAt(0)! - b.codePointAt(0)!)
+  ).reduce((acc, v) => acc + v, 0)
+}

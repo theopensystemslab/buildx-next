@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import type { RefObject } from "react"
+import { type RefObject } from "react"
 
 export const useClickAway = (
   ref: RefObject<HTMLElement | null>,

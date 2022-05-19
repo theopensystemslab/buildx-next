@@ -1,12 +1,15 @@
 import { RaycasterLayer } from "@/CONSTANTS"
-import { BuildSystemsDataContext } from "@/contexts/BuildSystemsData"
-import { setPointer } from "@/stores/context"
+import { SystemsDataContext } from "@/contexts/SystemsData"
+import siteContext from "@/stores/context"
+import { clearIlluminatedMaterials } from "@/stores/highlights"
+import { useMapBoundary } from "@/stores/map"
+import { setXZ } from "@/stores/pointer"
 import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
 import { useContextBridge } from "@react-three/drei"
 // import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
-import React, { PropsWithChildren, Suspense } from "react"
+import React, { PropsWithChildren } from "react"
 import { BasicShadowMap } from "three"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
@@ -21,7 +24,7 @@ type Props = PropsWithChildren<{}>
 const SiteThreeInit = (props: Props) => {
   const { children } = props
   const { orthographic, shadows } = useSettings()
-  const ContextBridge = useContextBridge(BuildSystemsDataContext)
+  const ContextBridge = useContextBridge(SystemsDataContext)
 
   // Re-initialize canvas if settings like orthographic camera are changed
   // const [unmountToReinitialize, setUnmountToReinitialize] = useState(true)
@@ -33,7 +36,7 @@ const SiteThreeInit = (props: Props) => {
   //   }, 100)
   // }, [orthographic, setUnmountToReinitialize])
 
-  // const [boundary, boundaryMaterial] = useMapBoundary()
+  const [boundary, boundaryMaterial] = useMapBoundary()
 
   // if (unmountToReinitialize) {
   //   return (
@@ -42,14 +45,14 @@ const SiteThreeInit = (props: Props) => {
   //     </div>
   //   )
   // }
+
   return (
     <Canvas
       frameloop="demand"
-      mode="concurrent"
       shadows={{ enabled: true, type: BasicShadowMap }}
       onCreated={({ gl, raycaster }) => {
         gl.localClippingEnabled = true
-        raycaster.layers.enableAll()
+        raycaster.layers.enable(RaycasterLayer.clickable)
         raycaster.layers.disable(RaycasterLayer.non_clickable)
       }}
     >
@@ -63,13 +66,16 @@ const SiteThreeInit = (props: Props) => {
       />
       {/* </group> */}
       <HorizontalPlane
-        onChange={setPointer}
+        onChange={setXZ}
         onNearClick={() => {
-          scope.selected = []
-          // store.contextMenu = null
+          siteContext.menu = null
+          scope.selected = null
+          clearIlluminatedMaterials()
         }}
         onNearHover={() => {
+          if (siteContext.menu !== null) return
           scope.hovered = null
+          if (scope.selected === null) clearIlluminatedMaterials()
         }}
       />
       {shadows && (
@@ -78,10 +84,12 @@ const SiteThreeInit = (props: Props) => {
           <ShadowPlane />
         </>
       )}
-      {/* {boundary && <lineLoop args={[boundary, boundaryMaterial]} />} */}
+      {boundary && <lineLoop args={[boundary, boundaryMaterial]} />}
       <Effects />
-      <SiteCamControls />
-      <ContextBridge>{children}</ContextBridge>
+      <ContextBridge>
+        <SiteCamControls />
+        {children}
+      </ContextBridge>
     </Canvas>
   )
 }

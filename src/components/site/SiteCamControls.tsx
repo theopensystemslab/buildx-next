@@ -1,6 +1,6 @@
 import { CamControls } from "@/components/ui-3d/CamControls"
-import camera, { defaultCamPos, useCameraFocus } from "@/stores/camera"
-import { useContext } from "@/stores/context"
+import camera, { defaultCamPos } from "@/stores/camera"
+import { useSiteContext } from "@/stores/context"
 import { useSettings } from "@/stores/settings"
 import { useUserAgent } from "@oieduardorabelo/use-user-agent"
 import { OrthographicCamera, PerspectiveCamera } from "@react-three/drei"
@@ -11,22 +11,21 @@ import { ref } from "valtio"
 
 const SiteCamControls = () => {
   const { orthographic, shadows } = useSettings()
-  const { buildingId } = useContext()
+  const { buildingId } = useSiteContext()
   const size = useThree(({ size }) => size)
   const ratio = 10
   const userAgent = useUserAgent()
   const buildingMode = buildingId !== null
-  const dollyToCursor = !buildingMode
-  const truckSpeed = !buildingMode ? 2.0 : 0.0
+  const dollyToCursor = true // !buildingMode
+  const truckSpeed = 2.0 // !buildingMode ? 2.0 : 0.0
 
   useEffect(() => {
     if (!camera.controls) return
-    camera.controls.mouseButtons.right = buildingMode
-      ? CameraControls.ACTION.NONE
-      : CameraControls.ACTION.TRUCK
+    camera.controls.mouseButtons.right = CameraControls.ACTION.TRUCK
+    // buildingMode
+    //   ? CameraControls.ACTION.NONE
+    //   : CameraControls.ACTION.TRUCK
   }, [buildingMode, orthographic])
-
-  useCameraFocus()
 
   return (
     <Fragment>

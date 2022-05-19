@@ -1,7 +1,7 @@
 import type { Material } from "./material"
 import { getField, getAirtableEntries } from "./utils"
 import { includes } from "ramda"
-import { BuildSystem } from "@/data/buildSystem"
+import { System } from "@/data/system"
 
 export interface Element {
   id: string
@@ -13,7 +13,7 @@ export interface Element {
 }
 
 export const getElements = (
-  system: BuildSystem,
+  system: System,
   materials: Array<Material>
 ): Promise<Array<Element>> =>
   getAirtableEntries({

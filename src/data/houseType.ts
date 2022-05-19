@@ -1,4 +1,4 @@
-import { BuildSystem } from "@/data/buildSystem"
+import { System } from "@/data/system"
 import { getAirtableEntries } from "./utils"
 
 export interface HouseType {
@@ -9,10 +9,11 @@ export interface HouseType {
   imageUrl: string
   cost: number
   carbon: number
+  description: string
 }
 
 export const getHouseTypes = async (
-  system: BuildSystem
+  system: System
 ): Promise<Array<HouseType>> => {
   try {
     const modulesByHouseType: Array<any> = (
@@ -44,6 +45,7 @@ export const getHouseTypes = async (
         imageUrl: record.fields?.["image"]?.[0]?.url || "",
         cost: record.fields?.["cost"] || 100,
         carbon: record.fields?.["embodied_carbon"] || -100,
+        description: record.fields?.["description"] ?? "",
       }
     })
 

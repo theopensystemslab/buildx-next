@@ -1,56 +1,45 @@
-import { House as HouseT } from "@/data/house"
-import context, { useContext } from "@/stores/context"
-import { useHouse, useHouses } from "@/stores/houses"
-import { ScopeTypeEnum, setScopeType } from "@/stores/scope"
-import { mapRR } from "@/utils"
+import { useRouting } from "@/hooks/routing"
+import { useSiteContext } from "@/stores/context"
+import highlights, { clearIlluminatedMaterials } from "@/stores/highlights"
+import { useHouses } from "@/stores/houses"
+import scope from "@/stores/scope"
+import { mapRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
-import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
+import { keys } from "fp-ts/lib/ReadonlyRecord"
 import React, { Suspense, useEffect } from "react"
-import BuildingHouse from "../building/BuildingHouse"
 import Loader3D from "../ui-3d/Loader3D"
-import SiteHouse from "./SiteHouse"
-
-const BuildingMode = ({ buildingId }: { buildingId: string }) => {
-  const house = useHouse(buildingId)
-
-  return (
-    <Suspense key={house.id} fallback={<Loader3D />}>
-      <BuildingHouse house={house as HouseT} />
-    </Suspense>
-  )
-}
-
-const SiteMode = () => {
-  const houses = useHouses()
-
-  return (
-    <group>
-      {pipe(
-        houses,
-        mapRR((house) => (
-          <Suspense key={house.id} fallback={<Loader3D />}>
-            <SiteHouse house={house as HouseT} />
-          </Suspense>
-        )),
-        toReadonlyArray
-      )}
-    </group>
-  )
-}
+import SiteBuilding from "./building/SiteBuilding"
 
 const SiteThreeApp = () => {
-  const { buildingId } = useContext()
+  const { buildingId, levelIndex } = useSiteContext()
 
   useEffect(() => {
-    if (buildingId === null) {
-      setScopeType(ScopeTypeEnum.Enum.HOUSE)
-    } else {
-      setScopeType(ScopeTypeEnum.Enum.ELEMENT)
-    }
-    context.outlined = []
-  }, [buildingId])
+    highlights.outlined = []
+    clearIlluminatedMaterials()
+    scope.hovered = null
+    scope.selected = null
+  }, [buildingId, levelIndex])
 
-  return !buildingId ? <SiteMode /> : <BuildingMode buildingId={buildingId} />
+  const houses = useHouses()
+
+  useRouting()
+
+  return buildingId === null ? (
+    <group>
+      {pipe(
+        keys(houses),
+        mapRA((id) => (
+          <Suspense key={id} fallback={<Loader3D />}>
+            <SiteBuilding id={id} />
+          </Suspense>
+        ))
+      )}
+    </group>
+  ) : (
+    <Suspense fallback={<Loader3D />}>
+      <SiteBuilding id={buildingId} />
+    </Suspense>
+  )
 }
 
 export default SiteThreeApp

@@ -1,33 +1,22 @@
-import { dropRight } from "fp-ts/lib/Array"
+import { dropRight, flatten, map, reduce } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { flatten, map, reduce } from "fp-ts/lib/ReadonlyArray"
 import { Polygon, Position } from "geojson"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { BufferAttribute, BufferGeometry, LineBasicMaterial } from "three"
 import { proxy, useSnapshot } from "valtio"
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "../CONSTANTS"
 import { SSR } from "../utils"
 
-const emptyMapPolygon: Polygon = {
-  coordinates: [],
-  type: "Polygon",
-}
-
-const mapPolygon = proxy(emptyMapPolygon)
-
-export const initialMapPolygon = ((): Polygon => {
-  if (SSR) return emptyMapPolygon
-  const rawStoragePayload = localStorage.getItem(
-    BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY
-  )
-  if (!rawStoragePayload) {
-    return emptyMapPolygon
-  }
-  return JSON.parse(rawStoragePayload)
-})()
+const mapProxy = proxy<{
+  polygon: Polygon | null
+  mode: "SEARCH" | "DRAW"
+}>({
+  polygon: null,
+  mode: "SEARCH",
+})
 
 export const setMapPolygon = (mapPolygon: Polygon) => {
-  mapPolygon = mapPolygon
+  mapProxy.polygon = mapPolygon
 }
 
 export const getMapPolygonCentre = (polygon: Polygon) =>
@@ -61,30 +50,65 @@ export const polygonToCoordinates = (polygon: Polygon) => {
 // return { center, bound, points };
 
 export const useMapBoundary = () => {
-  const { coordinates, type } = useSnapshot(mapPolygon)
+  const { polygon } = useSnapshot(mapProxy) as typeof mapProxy
+
+  useEffect(() => {
+    const rawStoragePayload = localStorage.getItem(
+      BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY
+    )
+    if (rawStoragePayload) {
+      mapProxy.polygon = JSON.parse(rawStoragePayload)
+    }
+  }, [])
 
   const material = useMemo(
     () =>
       new LineBasicMaterial({
-        // color: "#454545",
-        color: "#ff0000",
+        color: "#454545",
       }),
     []
   )
 
   const geometry = useMemo(() => {
     const geometry = new BufferGeometry()
-    if (coordinates.length > 0) {
+    if (polygon !== null && polygon.coordinates.length > 0) {
       geometry.setAttribute(
         "position",
         new BufferAttribute(
-          new Float32Array(pipe(mapPolygon, polygonToCoordinates, flatten)),
+          new Float32Array(pipe(polygon, polygonToCoordinates, flatten)),
           3
         )
       )
     }
     return geometry
-  }, [coordinates, type])
+  }, [polygon])
 
   return [geometry, material] as const
 }
+
+export const useMapMode = () => {
+  const { mode } = useSnapshot(mapProxy)
+
+  const setMode = (m: typeof mode) => {
+    mapProxy.mode = m
+  }
+
+  return [mode, setMode] as const
+}
+
+export const useMapPolygon = () => {
+  const { polygon } = useSnapshot(mapProxy) as typeof mapProxy
+
+  useEffect(() => {
+    const rawStoragePayload = localStorage.getItem(
+      BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY
+    )
+    if (rawStoragePayload) {
+      mapProxy.polygon = JSON.parse(rawStoragePayload)
+    }
+  }, [])
+
+  return [polygon, setMapPolygon] as const
+}
+
+export default mapProxy

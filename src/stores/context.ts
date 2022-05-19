@@ -1,34 +1,38 @@
-import { MutableRefObject } from "react"
-import { Object3D } from "three"
 import { proxy, useSnapshot } from "valtio"
 import * as z from "zod"
-import scope, { Scope } from "./scope"
 
-export const EditModeEnum = z.enum(["MOVE", "ROTATE", "STRETCH"])
+export const EditModeEnum = z.enum(["MOVE_ROTATE", "STRETCH"])
 export type EditMode = z.infer<typeof EditModeEnum>
 
-type ContextProxy = {
-  scope: Scope
+type SiteContext = {
   menu: [number, number] | null
-  outlined: Array<MutableRefObject<Object3D | undefined>>
-  pointer: [number, number]
+  sidebar: boolean
   buildingId: string | null
+  levelIndex: number | null
   editMode: EditMode | null
 }
 
-const context = proxy<ContextProxy>({
-  scope,
+const siteContext = proxy<SiteContext>({
   menu: null,
-  outlined: [],
-  pointer: [0, 0],
+  sidebar: false,
   buildingId: null,
+  levelIndex: null,
   editMode: null,
 })
 
-export const useContext = () => useSnapshot(context)
+export const useSiteContext = () => useSnapshot(siteContext)
 
-export const setPointer = ([x, y]: [number, number]) => {
-  context.pointer = [x, y]
+export const SiteContextModeEnum = z.enum(["SITE", "BUILDING", "LEVEL"])
+export type SiteContextMode = z.infer<typeof SiteContextModeEnum>
+
+export const useSiteContextMode = () => {
+  const { buildingId, levelIndex } = useSiteContext()
+
+  return levelIndex !== null
+    ? SiteContextModeEnum.Enum.LEVEL
+    : buildingId !== null
+    ? SiteContextModeEnum.Enum.BUILDING
+    : SiteContextModeEnum.Enum.SITE
 }
 
-export default context
+export default siteContext

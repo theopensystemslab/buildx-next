@@ -1,4 +1,4 @@
-import type { BuildSystem } from "@/data/buildSystem"
+import type { System } from "@/data/system"
 import { getAirtableEntries } from "./utils"
 
 export interface InternalLayoutType {
@@ -9,7 +9,7 @@ export interface InternalLayoutType {
 }
 
 export const getInternalLayoutTypes = (
-  system: BuildSystem
+  system: System
 ): Promise<Array<InternalLayoutType>> =>
   getAirtableEntries({
     tableId: system.airtableId,

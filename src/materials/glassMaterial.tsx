@@ -1,5 +1,5 @@
 // import { MeshPhysicalMaterialProps } from 'react-three-fiber'
-import { MeshPhysicalMaterial, MeshPhysicalMaterialParameters } from "three";
+import { MeshPhysicalMaterial, MeshPhysicalMaterialParameters } from "three"
 
 export const glassMaterialProps: MeshPhysicalMaterialParameters = {
   // -- thickness of the clear coat layer, from 0.0 to 1.0
@@ -22,8 +22,9 @@ export const glassMaterialProps: MeshPhysicalMaterialParameters = {
   depthWrite: false,
   opacity: 1, // set material.opacity to 1 when material.transmission is non-zero
   transparent: true,
-};
+  clipShadows: true,
+}
 
-const glassMaterial = new MeshPhysicalMaterial(glassMaterialProps);
+const glassMaterial = new MeshPhysicalMaterial(glassMaterialProps)
 
-export default glassMaterial;
+export default glassMaterial

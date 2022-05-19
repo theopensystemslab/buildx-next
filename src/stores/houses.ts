@@ -1,10 +1,20 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
-import { useBuildSystemsData } from "@/contexts/BuildSystemsData"
+import { useSystemsData } from "@/contexts/SystemsData"
 import { Houses } from "@/data/house"
-import { LoadedModule, Module } from "@/data/module"
-import { snapToGrid, SSR, useGLTF } from "@/utils"
-import { ThreeEvent, useThree } from "@react-three/fiber"
+import { LoadedModule, Module, StructuredDnaModule } from "@/data/module"
+import { StructuredDna } from "@/data/moduleLayout"
+import {
+  filterMapA,
+  flattenO,
+  mapO,
+  reduceA,
+  snapToGrid,
+  SSR,
+  useGLTF,
+} from "@/utils"
+import { invalidate, ThreeEvent } from "@react-three/fiber"
 import { Handler } from "@use-gesture/core/types"
+import { head } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
 import {
@@ -14,13 +24,21 @@ import {
   findFirst,
   reduceWithIndex,
 } from "fp-ts/lib/ReadonlyArray"
+import { lookup } from "fp-ts/lib/Record"
 import produce from "immer"
-import { MutableRefObject, useCallback, useEffect } from "react"
+import { MutableRefObject, useCallback, useEffect, useRef } from "react"
 import { Group } from "three"
 import { proxy, subscribe, useSnapshot } from "valtio"
+import { subscribeKey } from "valtio/utils"
 import { setCameraEnabled } from "./camera"
-import context, { useContext } from "./context"
-import scope, { ScopeTypeEnum } from "./scope"
+import {
+  EditModeEnum,
+  SiteContextModeEnum,
+  useSiteContext,
+  useSiteContextMode,
+} from "./context"
+import pointer from "./pointer"
+import scope from "./scope"
 
 export const getInitialHouses = () =>
   SSR
@@ -55,147 +73,94 @@ export const useBuildingDna = (buildingId: string) => {
 
 export const useHouseType = (houseId: string) => {
   const house = useHouse(houseId)
-  const { houseTypes } = useBuildSystemsData()
+  const { houseTypes } = useSystemsData()
   const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
   if (!houseType) throw new Error("houseType not found")
   return houseType
 }
 
-export const useUpdatePosition = (
-  houseId: string,
+export const usePositionRotation = (
+  buildingId: string,
   groupRef: MutableRefObject<Group | undefined>
-): Handler<"drag", ThreeEvent<PointerEvent>> => {
-  const invalidate = useThree((three) => three.invalidate)
-
+) => {
   const onPositionUpdate = useCallback(() => {
     if (!groupRef.current) return
-    const [x, z] = houses[houseId].position
+    const [x, z] = houses[buildingId].position
     groupRef.current.position.set(x, 0, z)
-  }, [houseId])
+  }, [buildingId])
 
-  useEffect(
-    () => subscribe(houses[houseId].position, onPositionUpdate),
-    [houseId, onPositionUpdate]
-  )
-  useEffect(onPositionUpdate, [onPositionUpdate])
+  useEffect(() => {
+    onPositionUpdate()
+    return subscribe(houses[buildingId].position, onPositionUpdate)
+  }, [buildingId, onPositionUpdate])
 
-  return ({ first, last }) => {
-    if (scope.type !== ScopeTypeEnum.Enum.HOUSE) return
+  const onRotationUpdate = useCallback(() => {
+    if (!groupRef.current) return
+    groupRef.current.rotation.set(0, houses[buildingId].rotation, 0)
+  }, [buildingId])
+
+  useEffect(() => {
+    onRotationUpdate()
+    return subscribeKey(houses[buildingId], "rotation", onRotationUpdate)
+  }, [buildingId, onRotationUpdate])
+
+  const contextMode = useSiteContextMode()
+  const { editMode } = useSiteContext()
+
+  const lastPointer = useRef<[number, number]>([0, 0])
+
+  const buildingDragHandler: Handler<"drag", ThreeEvent<PointerEvent>> = ({
+    first,
+    last,
+  }) => {
+    if (
+      contextMode !== SiteContextModeEnum.Enum.SITE ||
+      editMode !== EditModeEnum.Enum.MOVE_ROTATE
+    ) {
+      return
+    }
+
+    if (scope.selected?.buildingId !== buildingId) return
+
     if (first) {
       setCameraEnabled(false)
+      lastPointer.current = pointer.xz
     }
 
-    const [px, pz] = context.pointer
-    const [x, z] = houses[houseId].position
-    const [dx, dz] = [px - x, pz - z].map(snapToGrid)
+    const [px0, pz0] = lastPointer.current
+    const [px1, pz1] = pointer.xz
 
-    for (let k of scope.selected) {
-      houses[k].position[0] += dx
-      houses[k].position[1] += dz
-    }
+    const [dx, dz] = [px1 - px0, pz1 - pz0]
+
+    houses[buildingId].position[0] += dx
+    houses[buildingId].position[1] += dz
 
     invalidate()
 
-    if (last) setCameraEnabled(true)
+    if (last) {
+      setCameraEnabled(true)
+      const [x, z] = houses[buildingId].position.map(snapToGrid) as [
+        number,
+        number
+      ]
+      houses[buildingId].position[0] = x
+      houses[buildingId].position[1] = z
+    }
+
+    lastPointer.current = pointer.xz
   }
+
+  return { buildingDragHandler }
 }
 
 export const useFocusedBuilding = () => {
   const houses = useHouses()
-  const { buildingId } = useContext()
+  const { buildingId } = useSiteContext()
   return buildingId ? houses[buildingId] : null
 }
 
-export const useBuildingTransforms = () => {
-  const { buildingId } = useContext()
-  if (buildingId === null)
-    throw new Error("useStretchTransforms called with null buildingId")
-
-  const building = houses[buildingId]
-  const rows = useBuildingRows(buildingId)
-
-  // const rowsWithUnits = pipe(
-  //   rows,
-  //   mapRA(({ row }) =>
-  //     pipe(
-  //       row,
-  //       reduceRA(0, (gridUnits, { module }) => {
-  //         return gridUnits + module.structuredDna.gridUnits
-  //         // return gridUnits + module.structuredDna.
-  //       })
-  //     )
-  //   )
-  // )
-
-  // const deleteRow = (rowIndex: number) => {
-  //   building.dna = pipe(
-  //     rows,
-  //     filterWithIndex((i) => i !== rowIndex),
-  //     mapRA(({ row }) =>
-  //       pipe(
-  //         row,
-  //         mapRA(({ module }) => module.dna)
-  //       )
-  //     ),
-  //     flatten
-  //   ) as string[]
-  // }
-
-  const insertFrontColumn = () => {
-    const col = pipe(
-      rows
-      // z changes, hmmm...
-      //
-      // mapRA(({ row, vanillaModules, y }) => ({
-      //   row: pipe(
-      //     row,
-      //     reduceWithIndex([], (i, b, {module, z}) => {
-      //       return i === 1 ? [...b, [{module: vanillaModules.MID, }, { module, z }]] :
-      //     })
-      //   ),
-      //   vanillaModules,
-      //   y,
-      // }))
-    )
-  }
-
-  const insertBackColumn = () => {}
-
-  const deleteColumn = (back: boolean) => {
-    // var modules -> repeats
-
-    const foo = pipe(rows)
-
-    // skip the ends (verify ends?)
-
-    // find the biggest grid unit of the column
-    // delete that one
-    // check if lengths are even
-    // otherwise delete from longest row(s)
-
-    // f: getRowLengths
-  }
-
-  // func to go from house dna to rows/cols of modules
-
-  // func to go from rows/cols of modules to position/scale etc
-
-  return {
-    // insertRow,
-    // insertColumn,
-    // deleteRow,
-    // deleteColumn
-  }
-
-  // return
-  //    f : dna -> dna // new row @
-  //    g : dna -> dna // new col @
-  //    h : dna -> dna // del row
-  //    i : dna -> dna // del col
-}
-
 export const useBuildingModules = (buildingId: string) => {
-  const { modules: sysModules } = useBuildSystemsData()
+  const { modules: sysModules } = useSystemsData()
   const house = useSnapshot(houses)[buildingId]
 
   const modules = pipe(
@@ -209,6 +174,7 @@ export const useBuildingModules = (buildingId: string) => {
       )
     )
   )
+
   const gltfs = useGLTF(modules.map(({ modelUrl }) => modelUrl))
   return modules.map(({ modelUrl, ...rest }, i) => ({
     ...rest,
@@ -216,9 +182,46 @@ export const useBuildingModules = (buildingId: string) => {
   }))
 }
 
-export const modulesToRows = (
-  modules: readonly LoadedModule[]
-): LoadedModule[][] => {
+export const useMaybeBuildingLength = (buildingId: string | null) => {
+  const { modules: sysModules } = useSystemsData()
+  const housesSnap = useSnapshot(houses) as typeof houses
+
+  const modules = pipe(
+    housesSnap,
+    lookup(buildingId ?? ""),
+    mapO((house) =>
+      pipe(
+        house.dna,
+        filterMapA((dna) =>
+          pipe(
+            sysModules,
+            findFirst(
+              (sysM: Module) =>
+                sysM.systemId === house.systemId && sysM.dna === dna
+            )
+          )
+        ),
+        modulesToRows,
+        head,
+        mapO((row) =>
+          pipe(
+            row,
+            reduceA(0, (acc: number, module: Module) => acc + module.length)
+          )
+        )
+      )
+    ),
+    flattenO
+  )
+
+  return modules
+
+  // todo: finish me
+}
+
+export const modulesToRows = <T extends StructuredDnaModule>(
+  modules: T[]
+): T[][] => {
   const jumpIndices = pipe(
     modules,
     filterMapWithIndex((i, m) =>
@@ -229,17 +232,14 @@ export const modulesToRows = (
 
   return pipe(
     modules,
-    reduceWithIndex(
-      [],
-      (moduleIndex, modules: LoadedModule[][], module: LoadedModule) => {
-        return jumpIndices.includes(moduleIndex)
-          ? [...modules, [{ ...module, moduleIndex }]]
-          : produce(
-              (draft) =>
-                void draft[draft.length - 1].push({ ...module, moduleIndex })
-            )(modules)
-      }
-    )
+    reduceWithIndex([], (moduleIndex, modules: T[][], module: T) => {
+      return jumpIndices.includes(moduleIndex)
+        ? [...modules, [{ ...module, moduleIndex }]]
+        : produce(
+            (draft) =>
+              void draft[draft.length - 1].push({ ...module, moduleIndex })
+          )(modules)
+    })
   )
 }
 
