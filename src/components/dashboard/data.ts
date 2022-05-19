@@ -240,10 +240,10 @@ const comparative = {
   electricityTariff: 0.2,
 }
 
-export const calculateMaterialCosts = (
+export const matchSpecialMaterials = (
   house: House,
   context: { elements: Element[]; materials: Material[] }
-) => {
+): { cladding?: Material; roofing?: Material; internalLining?: Material } => {
   const claddingElementName = "Cladding"
 
   const claddingElement = context.elements.find(
@@ -298,9 +298,9 @@ export const calculateMaterialCosts = (
     )
 
   return {
-    cladding: claddingMaterial?.costPerM2 || 0,
-    internalLining: internalLiningMaterial?.costPerM2 || 0,
-    roofing: roofingMaterial?.costPerM2 || 0,
+    cladding: claddingMaterial,
+    internalLining: internalLiningMaterial,
+    roofing: roofingMaterial,
   }
 }
 
@@ -330,7 +330,7 @@ const calculateHouseInfo = (
     return accumulateModuleDataIf(() => true, getValue)
   }
 
-  const materialCosts = calculateMaterialCosts(house, {
+  const specialMaterials = matchSpecialMaterials(house, {
     elements,
     materials,
   })
@@ -414,19 +414,18 @@ const calculateHouseInfo = (
     }),
   }
 
-  const roofingCost = accumulateModuleDataIf(
-    () => true,
-    (module) => module.roofingArea * materialCosts.roofing
+  const roofingCost = accumulateModuleData(
+    (module) => module.roofingArea * (specialMaterials.roofing?.costPerM2 || 0)
   )
 
-  const internalLiningCost = accumulateModuleDataIf(
-    () => true,
-    (module) => module.liningArea * materialCosts.internalLining
+  const internalLiningCost = accumulateModuleData(
+    (module) =>
+      module.liningArea * (specialMaterials.internalLining?.costPerM2 || 0)
   )
 
-  const claddingCost = accumulateModuleDataIf(
-    () => true,
-    (module) => module.claddingArea * materialCosts.cladding
+  const claddingCost = accumulateModuleData(
+    (module) =>
+      module.claddingArea * (specialMaterials.cladding?.costPerM2 || 0)
   )
 
   const costs: Costs = {

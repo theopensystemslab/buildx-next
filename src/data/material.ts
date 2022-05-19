@@ -12,6 +12,7 @@ export interface Material {
   imageUrl: string
   defaultColor?: string
   costPerM2: number
+  embodiedCarbonPerM2: number // kg
   threeMaterial?: MeshStandardMaterial
 }
 
@@ -40,6 +41,7 @@ export const getMaterials = async (
           optionalFor: materialField(["optional_material_for"]) || [],
           defaultColor: materialField(["default_colour"]),
           costPerM2: materialField(["material_cost_per_m2"]) || 0,
+          embodiedCarbonPerM2: materialField(["embodied_carbon_per_m2"]) || 0,
           imageUrl: materialField(["material_image"])?.[0]?.url ?? "",
         }
       })
