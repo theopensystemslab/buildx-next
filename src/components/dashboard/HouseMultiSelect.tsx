@@ -45,7 +45,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
   }
 
   return (
-    <div className="flex flex-wrap items-center px-4 py-4 space-x-2">
+    <div className="flex flex-wrap items-center px-4 space-x-2">
       {props.selectedHouses.map((houseId, index) => {
         const house = props.houses[houseId]
         if (!house) {
@@ -75,7 +75,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
       {houseSelectOptions.length > 0 && (
         <div className="relative" ref={dropdownRef}>
           <button
-            className="w-10 py-4 text-2xl text-center text-white text-gray-400 transition-colors duration-200 hover:text-white"
+            className="w-10 py-1 text-2xl leading-none text-center text-white text-gray-400 transition-colors duration-200 hover:text-white"
             onClick={() => {
               setExpanded((prev) => !prev)
             }}
