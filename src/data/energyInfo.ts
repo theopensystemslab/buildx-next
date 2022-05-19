@@ -1,6 +1,6 @@
 import calculate from "@/components/dashboard/data"
 import { useSystemsData } from "@/contexts/SystemsData"
-import type { System } from "@/data/system"
+import type { System, SystemsData } from "@/data/system"
 import houses from "@/stores/houses"
 import { find } from "ramda"
 import { Element } from "./element"
@@ -111,19 +111,13 @@ export const sumHouseStats = (houseStats: Array<HouseStats>) => {
 
 export const getHouseStats = ({
   house,
-  modules,
-  houseTypes,
-  energyInfo,
-  elements,
-  materials,
+  systemsData,
 }: {
   house: House
-  modules: Array<Module>
-  houseTypes: Array<HouseType>
-  energyInfo: Array<EnergyInfo>
-  elements: Element[]
-  materials: Material[]
+  systemsData: SystemsData
 }): HouseStats => {
+  const { energyInfo } = systemsData
+
   const relevantEnergyInfo = find(
     (info) => info.systemId === house.systemId,
     energyInfo
@@ -132,40 +126,16 @@ export const getHouseStats = ({
     return noHouseStats
   }
 
-  const houseModules: Array<Module> = house.dna
-    .map((sequence) =>
-      find(
-        (module) =>
-          module.systemId === house.systemId && module.dna === sequence,
-        modules
-      )
-    )
-    .filter((m): m is Module => Boolean(m))
-
-  const layout = moduleLayout(houseModules)
-
-  const surface = layout.cellWidths.reduce((runningTotal, width, index) => {
-    return runningTotal + width * (layout.cellLengths[index] || 0)
-  }, 0)
-
-  const systemsData = useSystemsData()
-
   const {
     costs: { total: cost },
     embodiedCo2: { total: embodiedCarbon },
   } = calculate({ houses, systemsData })
 
   return {
-    cost,
-    embodiedCarbon,
-    totalHeatingDemand: Math.round(
-      relevantEnergyInfo.totalHeatingDemand * surface
-    ),
-    operationalCo2: Math.round(relevantEnergyInfo.operationalCo2 * surface),
-    estimatedHeatingCosts: Math.round(
-      relevantEnergyInfo.totalHeatingDemand *
-        surface *
-        relevantEnergyInfo.electricityTariff
-    ),
+    cost: Math.round(cost),
+    embodiedCarbon: Math.round(embodiedCarbon),
+    totalHeatingDemand: Math.round(relevantEnergyInfo.totalHeatingDemand),
+    operationalCo2: Math.round(relevantEnergyInfo.operationalCo2),
+    estimatedHeatingCosts: Math.round(relevantEnergyInfo.totalHeatingDemand),
   }
 }
