@@ -1,5 +1,7 @@
-import { matchSpecialMaterials } from "@/components/dashboard/data"
+import calculate from "@/components/dashboard/data"
+import { useSystemsData } from "@/contexts/SystemsData"
 import type { System } from "@/data/system"
+import houses from "@/stores/houses"
 import { find } from "ramda"
 import { Element } from "./element"
 import type { House } from "./house"
@@ -146,25 +148,16 @@ export const getHouseStats = ({
     return runningTotal + width * (layout.cellLengths[index] || 0)
   }, 0)
 
-  const specialMaterials = matchSpecialMaterials(house, {
-    elements,
-    materials,
-  })
+  const systemsData = useSystemsData()
+
+  const {
+    costs: { total: cost },
+    embodiedCo2: { total: embodiedCarbon },
+  } = calculate({ houses, systemsData })
 
   return {
-    cost: houseModules.reduce(
-      (accumulator, module) =>
-        accumulator +
-        module.cost +
-        (specialMaterials.cladding?.costPerM2 || 0) * module.claddingArea +
-        (specialMaterials.internalLining?.costPerM2 || 0) * module.liningArea +
-        (specialMaterials.roofing?.costPerM2 || 0) * module.roofingArea,
-      0
-    ),
-    embodiedCarbon: houseModules.reduce(
-      (accumulator, module) => accumulator + module.embodiedCarbon,
-      0
-    ),
+    cost,
+    embodiedCarbon,
     totalHeatingDemand: Math.round(
       relevantEnergyInfo.totalHeatingDemand * surface
     ),
