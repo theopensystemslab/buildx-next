@@ -30,6 +30,7 @@ export const createMaterial = (config: Material) => {
     return new MeshStandardMaterial({
       color: config.defaultColor,
       transparent: true,
+      emissive: "#000",
     })
   }
 
