@@ -13,6 +13,23 @@ const SquareChart: FC<Props> = (props) => {
 
   const total = props.data.reduce((a, b) => a + b, 0)
 
+  if (total === 0) {
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`}>
+        <rect x="0" y="0" width={w} height={h} fill="rgba(0,0,0,0.08)"></rect>
+        <text
+          x={w / 2}
+          y={h / 2}
+          fill="#fff"
+          textAnchor="middle"
+          style={{ fontSize: 3 }}
+        >
+          No data available
+        </text>
+      </svg>
+    )
+  }
+
   // Start an accumulating y coordinate to stack bars on top of each other
   let accumulatedY = 0
 

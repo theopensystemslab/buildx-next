@@ -7,7 +7,7 @@ import CircleChart from "../charts/CircleChart"
 import { formatWithUnit, formatWithUnitLong } from "../data"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
-  <div className="grid grid-cols-1 gap-x-16 border-b border-gray-400 px-4 py-16 last:border-b-0 md:grid-cols-4 md:space-y-0">
+  <div className="px-4 py-16 border-b border-gray-400 grid grid-cols-1 gap-x-16 last:border-b-0 md:grid-cols-4 md:space-y-0">
     {props.children}
   </div>
 )
@@ -83,15 +83,17 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             <p className="text-5xl">
               {formatWithUnit(dashboardData.areas.totalFloor, "m²")}
             </p>
-            <div className="space-y-1 text-gray-300">
-              <p className="text-3xl">
-                {formatWithUnitLong(
-                  dashboardData.costs.total / dashboardData.areas.totalFloor,
-                  "€/m²"
-                )}
-              </p>
-              <p className="text-sm">cost per floor area</p>
-            </div>
+            {dashboardData.areas.totalFloor > 0 && (
+              <div className="text-gray-300 space-y-1">
+                <p className="text-3xl">
+                  {formatWithUnitLong(
+                    dashboardData.costs.total / dashboardData.areas.totalFloor,
+                    "€/m²"
+                  )}
+                </p>
+                <p className="text-sm">cost per floor area</p>
+              </div>
+            )}
           </div>
         </Titled>
         <Titled title="Energy use" subtitle="Estimated annual">
@@ -137,12 +139,16 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             ]}
             unitOfMeasurement="T"
           />
-          <div className="flex space-x-8">
-            <p className="text-5xl">{formatWithUnit(totalEmbodiedCo2, "T")}</p>
-            <p className="text-sm text-gray-300">
-              Project will remove carbon dioxide from the atmosphere
-            </p>
-          </div>
+          {totalEmbodiedCo2 < 0 && (
+            <div className="flex space-x-8">
+              <p className="text-5xl">
+                {formatWithUnit(totalEmbodiedCo2, "T")}
+              </p>
+              <p className="text-sm text-gray-300">
+                Project will remove carbon dioxide from the atmosphere
+              </p>
+            </div>
+          )}
         </Titled>
       </GridLayout>
     </div>

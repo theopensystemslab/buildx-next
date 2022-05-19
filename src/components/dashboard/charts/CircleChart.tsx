@@ -15,6 +15,23 @@ const CircleChart: FC<Props> = (props) => {
 
   const total = props.value + props.comparative
 
+  if (props.value === 0 && props.comparative === 0) {
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`}>
+        <rect x="0" y="0" width={w} height={h} fill="rgba(0,0,0,0.08)"></rect>
+        <text
+          x={w / 2}
+          y={h / 2}
+          fill="#fff"
+          textAnchor="middle"
+          style={{ fontSize: 3 }}
+        >
+          No data available
+        </text>
+      </svg>
+    )
+  }
+
   return (
     <svg viewBox={`0 0 ${w} ${h}`}>
       <circle

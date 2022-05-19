@@ -1,7 +1,15 @@
 import { Close } from "@/components/ui/icons"
-import React, { type SetStateAction, type Dispatch, type FC } from "react"
+import React, {
+  type SetStateAction,
+  type Dispatch,
+  type FC,
+  useState,
+  useRef,
+  useCallback,
+} from "react"
 import { type Houses } from "@/data/house"
 import { colorScheme } from "./Ui"
+import { useClickAway } from "@/components/ui/utils"
 
 interface Props {
   houses: Houses
@@ -22,6 +30,20 @@ const HouseMultiSelect: FC<Props> = (props) => {
       )
       .filter((v): v is { houseId: string; houseName: string } => Boolean(v))
 
+  const [expanded, setExpanded] = useState(false)
+
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+  const closeDropdown = useCallback(() => {
+    setExpanded(false)
+  }, [setExpanded])
+
+  useClickAway(dropdownRef, closeDropdown)
+
+  if (Object.values(props.houses).length === 0) {
+    return <p>No houses available</p>
+  }
+
   return (
     <div className="flex flex-wrap items-center px-4 py-4 space-x-2">
       {props.selectedHouses.map((houseId, index) => {
@@ -33,7 +55,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
           <p
             key={houseId}
             className="inline-flex items-center overflow-hidden rounded-full space-x-1"
-            style={{backgroundColor: colorScheme[index]}}
+            style={{ backgroundColor: colorScheme[index] }}
           >
             <span className="inline-block py-1 pl-3">{house.friendlyName}</span>
             <button
@@ -49,41 +71,38 @@ const HouseMultiSelect: FC<Props> = (props) => {
           </p>
         )
       })}
-      {houseSelectOptions.length > 0 ? (
-        <>
-          <div className="relative rounded cursor-auto hover:bg-gray-500 transition-colors duration-200">
-            <span className="absolute text-2xl text-white cursor-auto pointer-events-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-              +
-            </span>
-            <input
-              list="buildings"
-              className="w-10 !cursor-default bg-transparent px-2 py-1 text-transparent"
-              value=""
-              onChange={(ev) => {
-                const foundHouse = Object.entries(props.houses).find(
-                  ([_houseId, house]) => house.friendlyName === ev.target.value
-                )
-                const houseId = foundHouse?.[0]
-                if (!houseId) {
-                  return null
-                }
-                props.setSelectedHouses((prev) => [...prev, houseId])
-              }}
-            />
-          </div>
-          <datalist id="buildings">
-            {houseSelectOptions.map((houseSelectOption) => (
-              <option
-                key={houseSelectOption.houseId}
-                value={houseSelectOption.houseName}
-              />
-            ))}
-          </datalist>
-        </>
-      ) : (
-        <span className="pointer-events-none inline-flex w-10 items-center justify-center rounded px-4 py-0.5 text-2xl text-gray-400">
-          +
-        </span>
+
+      {houseSelectOptions.length > 0 && (
+        <div className="relative" ref={dropdownRef}>
+          <button
+            className="w-10 py-4 text-2xl text-center text-white text-gray-400 transition-colors duration-200 hover:text-white"
+            onClick={() => {
+              setExpanded((prev) => !prev)
+            }}
+          >
+            +
+          </button>
+
+          {expanded && (
+            <div className="absolute z-40 w-40 overflow-hidden bg-white rounded shadow-lg bottom-2 translate-y-full transform">
+              {houseSelectOptions.map((houseSelectOption) => (
+                <button
+                  className="block w-full px-4 py-2 text-left transition-colors duration-200 hover:bg-gray-100"
+                  key={houseSelectOption.houseId}
+                  onClick={() => {
+                    props.setSelectedHouses((prev) => [
+                      ...prev,
+                      houseSelectOption.houseId,
+                    ])
+                  }}
+                  value={houseSelectOption.houseName}
+                >
+                  {houseSelectOption.houseName}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
