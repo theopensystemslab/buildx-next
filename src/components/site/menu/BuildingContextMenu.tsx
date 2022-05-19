@@ -40,7 +40,13 @@ const BuildingContextMenu = (props: ContextMenuProps) => {
     }
   )
 
-  const canChangeWindow = windowOpts.length > 1
+  const windowTypeCount = windowOpts.reduce(
+    (acc, { value: { windowType } }) =>
+      acc + Number(windowType.match(/[a-zA-Z]+|[0-9]+/g)?.[1]) ?? 0,
+    0
+  )
+
+  const canChangeWindow = windowOpts.length > 1 && windowTypeCount > 0
 
   const changeWindow = ({ buildingDna }: WindowOpt["value"]) => {
     houses[buildingId].dna = buildingDna

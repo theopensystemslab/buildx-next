@@ -19,7 +19,7 @@ const HouseThumbnail = (props: Props) => (
     ></div>
     <div className="space-y-0.5">
       <h3 className="text-xl font-bold">{props.houseType.name}</h3>
-      <p className="text-sm">Description</p>
+      <p className="text-sm">{props.houseType.description}</p>
       <div className="space-x-2">
         {[].map((tag, tagIndex) => (
           <span key={tagIndex} className="rounded-xl bg-gray-100 px-3 py-0.5">
