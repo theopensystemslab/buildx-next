@@ -41,7 +41,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
   useClickAway(dropdownRef, closeDropdown)
 
   if (Object.values(props.houses).length === 0) {
-    return <p>No houses available</p>
+    return <p className="px-4 py-2 text-white">No houses available.</p>
   }
 
   return (
