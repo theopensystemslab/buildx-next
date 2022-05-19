@@ -17,11 +17,11 @@ import { getSystemSettings, type SystemSettings } from "./settings"
 import { getStairTypes, type StairType } from "./stairType"
 
 export const systems: Array<System> = [
-  {
-    id: "sample",
-    name: "Sample",
-    airtableId: "app7ApkBWMj8Z8gdV",
-  },
+  // {
+  //   id: "sample",
+  //   name: "Sample",
+  //   airtableId: "app7ApkBWMj8Z8gdV",
+  // },
   {
     id: "3cea-amvic",
     name: "3CEA-AMVIC",
