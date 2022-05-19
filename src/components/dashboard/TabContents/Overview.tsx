@@ -25,30 +25,6 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
     (d) => d.operationalCo2
   )
 
-  const totalCost = costs.reduce(
-    (accumulator, cost) => accumulator + cost.total,
-    0
-  )
-  const totalComparativeCost = costs.reduce(
-    (accumulator, cost) => accumulator + cost.comparative,
-    0
-  )
-
-  const totalOperationalCo2 = operationalCo2.reduce(
-    (accumulator, co2) => accumulator + co2.annualTotal / 1000,
-    0
-  )
-
-  const totalOperationalCo2Comparative = operationalCo2.reduce(
-    (accumulator, co2) => accumulator + co2.annualComparative / 1000,
-    0
-  )
-
-  const totalEmbodiedCo2 = embodiedCo2.reduce(
-    (accumulator, co2) => accumulator + co2.total / 1000,
-    0
-  )
-
   const { totalHeatingDemand, energyDemandComparative } =
     dashboardData.energyUse
 
@@ -64,10 +40,10 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             unitOfMeasurement="€"
           />
           <div className="flex space-x-8">
-            <p className="text-5xl">{formatWithUnit(totalCost, "€")}</p>
+            <p className="text-5xl">{formatWithUnit(dashboardData.costs.total, "€")}</p>
             <ChangeDataPoint
-              value={totalCost}
-              reference={totalComparativeCost}
+              value={dashboardData.costs.total}
+              reference={dashboardData.costs.comparative}
               description="Compared to traditional new build"
             />
           </div>
@@ -120,11 +96,11 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
           />
           <div className="flex space-x-8">
             <p className="text-5xl">
-              {formatWithUnit(totalOperationalCo2, "T")}
+              {formatWithUnit(dashboardData.operationalCo2.annualTotal, "T")}
             </p>
             <ChangeDataPoint
-              value={totalOperationalCo2}
-              reference={totalOperationalCo2Comparative}
+              value={dashboardData.operationalCo2.annualTotal / 1000}
+              reference={dashboardData.operationalCo2.annualComparative / 1000}
               description="Compared to traditional new build"
             />
           </div>
@@ -139,10 +115,10 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             ]}
             unitOfMeasurement="T"
           />
-          {totalEmbodiedCo2 < 0 && (
+          {dashboardData.embodiedCo2.total < 0 && (
             <div className="flex space-x-8">
               <p className="text-5xl">
-                {formatWithUnit(totalEmbodiedCo2, "T")}
+                {formatWithUnit(dashboardData.embodiedCo2.total / 1000, "T")}
               </p>
               <p className="text-sm text-gray-300">
                 Project will remove carbon dioxide from the atmosphere
