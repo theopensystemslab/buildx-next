@@ -34,6 +34,7 @@ export const useModuleGeometries = (
     const strippedNodeType = nodeType
       .replace(/I?None.*/, "")
       .replace(/Component.*/, "")
+      .replace(/Union.*/, "")
       .replaceAll(/[0-9]/g, "")
       .replace(/Object/, "")
       .replace(/(Ifc.*)(Ifc.*)/, "$1")

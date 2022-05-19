@@ -8,6 +8,7 @@ import {
   Radio,
 } from "@/components/ui"
 import { Check, Menu, SectionCuts } from "@/components/ui/icons"
+import { useCameraReset } from "@/stores/camera"
 import siteContext, { useSiteContext } from "@/stores/context"
 import {
   setOrthographic,
@@ -16,7 +17,7 @@ import {
   useVerticalCuts,
 } from "@/stores/settings"
 import { filterR } from "@/utils"
-import { Add32, View24 } from "@carbon/icons-react"
+import { Add32, Reset24, View24 } from "@carbon/icons-react"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/Record"
 import React, { Fragment, Suspense, useState } from "react"
@@ -49,6 +50,8 @@ const HtmlUi = () => {
 
   const [verticalCuts, setVerticalCuts] = useVerticalCuts()
 
+  const cameraReset = useCameraReset()
+
   return (
     <Fragment>
       <div className="absolute top-0 right-0 z-10 flex items-center justify-center">
@@ -79,6 +82,9 @@ const HtmlUi = () => {
             selected={orthographic}
             onChange={setOrthographic}
           />
+          <IconButton onClick={cameraReset}>
+            <Reset24 className="m-auto" />
+          </IconButton>
         </IconMenu>
         <IconMenu icon={SectionCuts}>
           <Checklist

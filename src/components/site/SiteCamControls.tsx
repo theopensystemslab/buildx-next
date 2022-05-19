@@ -1,5 +1,5 @@
 import { CamControls } from "@/components/ui-3d/CamControls"
-import camera, { defaultCamPos, useCameraFocus } from "@/stores/camera"
+import camera, { defaultCamPos } from "@/stores/camera"
 import { useSiteContext } from "@/stores/context"
 import { useSettings } from "@/stores/settings"
 import { useUserAgent } from "@oieduardorabelo/use-user-agent"
@@ -26,8 +26,6 @@ const SiteCamControls = () => {
     //   ? CameraControls.ACTION.NONE
     //   : CameraControls.ACTION.TRUCK
   }, [buildingMode, orthographic])
-
-  useCameraFocus()
 
   return (
     <Fragment>

@@ -60,4 +60,12 @@ export const useCameraFocus = () => {
   }, [buildingId])
 }
 
+export const useCameraReset = () => {
+  return () => {
+    if (!camera.controls) return
+    camera.controls.setLookAt(...defaultCamPos, ...defaultCamTgt, true)
+    camera.controls.zoomTo(1, true)
+  }
+}
+
 export default camera
