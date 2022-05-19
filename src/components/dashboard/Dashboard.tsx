@@ -57,22 +57,27 @@ const Dashboard: FC<Props> = (props) => {
             selectedHouses={selectedHouses}
             setSelectedHouses={setSelectedHouses}
           />
-          <div className="flex flex-wrap items-center justify-start px-4 py-4 border-b border-gray-400 space-x-4">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id
-              return (
-                <Link key={tab.id} href={`/dashboard/${tab.id}`}>
-                  <span
-                    className={[
-                      "inline-block cursor-pointer whitespace-pre py-1 transition-colors duration-200",
-                      isActive ? "text-white" : "text-gray-400 hover:text-gray-300",
-                    ].join(" ")}
-                  >
-                    {tab.label}
-                  </span>
-                </Link>
-              )
-            })}
+          <div className="relative border-b border-gray-400">
+            <div className="absolute top-0 bottom-0 right-0 w-28 bg-gradient-to-r from-[rgba(82,82,82,0)] to-gray-600"></div>
+            <div className="flex items-center justify-start w-full py-4 pl-4 pr-28 overflow-x-auto space-x-4">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id
+                return (
+                  <Link key={tab.id} href={`/dashboard/${tab.id}`}>
+                    <span
+                      className={[
+                        "inline-block cursor-pointer whitespace-pre py-1 transition-colors duration-200",
+                        isActive
+                          ? "text-white"
+                          : "text-gray-400 hover:text-gray-300",
+                      ].join(" ")}
+                    >
+                      {tab.label}
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
         </div>
         <div>
