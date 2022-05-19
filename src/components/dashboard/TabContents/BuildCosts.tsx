@@ -11,43 +11,36 @@ const BuildCosts: FC<{ dashboardData: DashboardData }> = (props) => {
       data={[
         {
           label: "Foundation cost",
-          description: "",
           value: costs.foundation,
           unitOfMeasurement: "€",
         },
         {
           label: "Roof structure cost",
-          description: "",
           value: costs.roofStructure,
           unitOfMeasurement: "€",
         },
         {
           label: "Superstructure cost",
-          description: "",
           value: costs.superstructure,
           unitOfMeasurement: "€",
         },
         {
           label: "Roof covering cost",
-          description: "",
           value: costs.roofing,
           unitOfMeasurement: "€",
         },
         {
           label: "Internal lining cost",
-          description: "",
           value: costs.internalLining,
           unitOfMeasurement: "€",
         },
         {
           label: "Cladding cost",
-          description: "",
           value: costs.cladding,
           unitOfMeasurement: "€",
         },
         {
           label: "Total build cost",
-          description: "",
           value: costs.total,
           unitOfMeasurement: "€",
         },

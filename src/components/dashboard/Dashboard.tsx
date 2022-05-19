@@ -59,7 +59,7 @@ const Dashboard: FC<Props> = (props) => {
           />
           <div className="relative border-b border-gray-400">
             <div className="absolute top-0 bottom-0 right-0 w-28 bg-gradient-to-r from-[rgba(82,82,82,0)] to-gray-600"></div>
-            <div className="flex items-center justify-start w-full py-4 pl-4 overflow-x-auto pr-28 space-x-4">
+            <div className="flex items-center justify-start w-full py-4 pl-4 overflow-x-auto pr-28 space-x-6">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id
                 return (
