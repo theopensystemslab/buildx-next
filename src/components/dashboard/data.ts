@@ -452,10 +452,11 @@ const calculateHouseInfo = (
     roofing: roofingCost,
     internalLining: internalLiningCost,
     cladding: claddingCost,
-    total: accumulateModuleDataIf(
-      () => true,
-      (module) => module.cost + roofingCost + internalLiningCost + claddingCost
-    ),
+    total:
+      accumulateModuleData((module) => module.cost) +
+      roofingCost +
+      internalLiningCost +
+      claddingCost,
     comparative: totalFloorArea * comparative.cost,
   }
 
