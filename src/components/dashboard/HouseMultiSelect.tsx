@@ -84,7 +84,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
           </button>
 
           {expanded && (
-            <div className="absolute z-40 w-40 overflow-hidden bg-white rounded shadow-lg bottom-2 translate-y-full transform">
+            <div className="absolute bottom-0 z-40 w-40 overflow-hidden bg-white rounded shadow-lg translate-y-full transform">
               {houseSelectOptions.map((houseSelectOption) => (
                 <button
                   className="block w-full px-4 py-2 text-left transition-colors duration-200 hover:bg-gray-100"
