@@ -32,25 +32,21 @@ const BuildingFabric: FC<{ dashboardData: DashboardData }> = (props) => {
       data={[
         {
           label: "Glazing u-value",
-          description: "",
           value: valueList((value) => value.glazingUValue),
           unitOfMeasurement: "W/m²K",
         },
         {
           label: "Floor u-value",
-          description: "",
           value: valueList((value) => value.floorUValue),
           unitOfMeasurement: "W/m²K",
         },
         {
           label: "Wall u-value",
-          description: "",
           value: valueList((value) => value.wallUValue),
           unitOfMeasurement: "W/m²K",
         },
         {
           label: "Roof u-value",
-          description: "",
           value: valueList((value) => value.roofUValue),
           unitOfMeasurement: "W/m²K",
         },

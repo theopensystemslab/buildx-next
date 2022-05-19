@@ -137,6 +137,8 @@ const accumulateOperationalCo2 = (values: OperationalCo2[]): OperationalCo2 =>
 export interface EmbodiedCo2 {
   foundations: number
   modules: number
+  roofing: number
+  internalLining: number
   cladding: number
   total: number
   comparative: number
@@ -145,6 +147,8 @@ export interface EmbodiedCo2 {
 const emptyEmbodiedCo2 = (): EmbodiedCo2 => ({
   foundations: 0,
   modules: 0,
+  roofing: 0,
+  internalLining: 0,
   cladding: 0,
   total: 0,
   comparative: 0,
@@ -156,6 +160,8 @@ const accumulateEmbodiedCo2 = (values: EmbodiedCo2[]): EmbodiedCo2 =>
       foundations: accumulator.foundations + current.foundations,
       modules: accumulator.modules + current.modules,
       cladding: accumulator.cladding + current.cladding,
+      roofing: accumulator.roofing + current.roofing,
+      internalLining: accumulator.internalLining + current.internalLining,
       total: accumulator.total + current.total,
       comparative: accumulator.comparative + current.comparative,
     }
@@ -240,10 +246,10 @@ const comparative = {
   electricityTariff: 0.2,
 }
 
-export const calculateMaterialCosts = (
+export const matchSpecialMaterials = (
   house: House,
   context: { elements: Element[]; materials: Material[] }
-) => {
+): { cladding?: Material; roofing?: Material; internalLining?: Material } => {
   const claddingElementName = "Cladding"
 
   const claddingElement = context.elements.find(
@@ -298,9 +304,9 @@ export const calculateMaterialCosts = (
     )
 
   return {
-    cladding: claddingMaterial?.costPerM2 || 0,
-    internalLining: internalLiningMaterial?.costPerM2 || 0,
-    roofing: roofingMaterial?.costPerM2 || 0,
+    cladding: claddingMaterial,
+    internalLining: internalLiningMaterial,
+    roofing: roofingMaterial,
   }
 }
 
@@ -330,7 +336,7 @@ const calculateHouseInfo = (
     return accumulateModuleDataIf(() => true, getValue)
   }
 
-  const materialCosts = calculateMaterialCosts(house, {
+  const specialMaterials = matchSpecialMaterials(house, {
     elements,
     materials,
   })
@@ -414,19 +420,18 @@ const calculateHouseInfo = (
     }),
   }
 
-  const roofingCost = accumulateModuleDataIf(
-    () => true,
-    (module) => module.roofingArea * materialCosts.roofing
+  const roofingCost = accumulateModuleData(
+    (module) => module.roofingArea * (specialMaterials.roofing?.costPerM2 || 0)
   )
 
-  const internalLiningCost = accumulateModuleDataIf(
-    () => true,
-    (module) => module.liningArea * materialCosts.internalLining
+  const internalLiningCost = accumulateModuleData(
+    (module) =>
+      module.liningArea * (specialMaterials.internalLining?.costPerM2 || 0)
   )
 
-  const claddingCost = accumulateModuleDataIf(
-    () => true,
-    (module) => module.claddingArea * materialCosts.cladding
+  const claddingCost = accumulateModuleData(
+    (module) =>
+      module.claddingArea * (specialMaterials.cladding?.costPerM2 || 0)
   )
 
   const costs: Costs = {
@@ -462,21 +467,46 @@ const calculateHouseInfo = (
     lifetime: annualTotalOperationalCo2 * 100,
   }
 
+  const claddingEmbodiedCo2 = accumulateModuleData(
+    (module) =>
+      module.claddingArea *
+      (specialMaterials.cladding?.embodiedCarbonPerM2 || 0)
+  )
+
+  const roofingEmbodiedCo2 = accumulateModuleData(
+    (module) =>
+      module.roofingArea * (specialMaterials.roofing?.embodiedCarbonPerM2 || 0)
+  )
+
+  const internalLiningEmbodiedCo2 = accumulateModuleData(
+    (module) =>
+      module.liningArea *
+      (specialMaterials.internalLining?.embodiedCarbonPerM2 || 0)
+  )
+
+  const foundationsEmbodiedCo2 = accumulateModuleDataIf(
+    (module) => module.structuredDna.levelType[0] === "F",
+    (module) => module.embodiedCarbon
+  )
+
+  const modulesEmbodiedCo2 = accumulateModuleDataIf(
+    (module) => module.structuredDna.levelType[0] !== "F",
+    (module) => module.embodiedCarbon
+  )
+
   const embodiedCo2: EmbodiedCo2 = {
-    foundations: accumulateModuleDataIf(
-      (module) => module.structuredDna.levelType[0] === "F",
-      (module) => module.embodiedCarbon
-    ),
-    modules: accumulateModuleDataIf(
-      (module) => module.structuredDna.levelType[0] !== "F",
-      (module) => module.embodiedCarbon
-    ),
-    cladding: accumulateModuleDataIf(
-      (module) => module.structuredDna.levelType[0] === "R",
-      (module) => module.embodiedCarbon
-    ),
+    foundations: foundationsEmbodiedCo2,
+    modules: modulesEmbodiedCo2,
+    cladding: claddingEmbodiedCo2,
+    roofing: roofingEmbodiedCo2,
+    internalLining: internalLiningEmbodiedCo2,
     comparative: totalFloorArea * comparative.embodiedCo2,
-    total: accumulateModuleData((module) => module.embodiedCarbon),
+    total:
+      foundationsEmbodiedCo2 +
+      modulesEmbodiedCo2 +
+      claddingEmbodiedCo2 +
+      roofingEmbodiedCo2 +
+      internalLiningEmbodiedCo2,
   }
 
   const energyUse: EnergyUse = {
@@ -523,15 +553,15 @@ const calculateHouseInfo = (
   }
 }
 
-const calculate = ({
-  houses,
-  systemsData,
-  selectedHouses,
-}: {
+const calculate = (data: {
   houses: Houses
   systemsData: SystemsData
-  selectedHouses: string[]
+  selectedHouses?: string[]
 }): DashboardData => {
+  const { houses, systemsData } = data
+
+  const selectedHouses: string[] = data.selectedHouses || Object.keys(houses)
+
   const byHouse = (() => {
     const obj: Record<string, HouseInfo> = {}
 

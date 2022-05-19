@@ -3,7 +3,6 @@ import React, { type FC, type ReactNode } from "react"
 interface Props {
   data: {
     label: string
-    description: string
     value: number | ReactNode
     unitOfMeasurement: string
   }[]
