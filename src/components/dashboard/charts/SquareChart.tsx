@@ -23,9 +23,8 @@ const SquareChart: FC<Props> = (props) => {
         const height = (d / total) * h
         accumulatedY += height
         return (
-          <g transform={`translate(0 ${currentAccummulatedY})`}>
+          <g transform={`translate(0 ${currentAccummulatedY})`} key={index}>
             <rect
-              key={index}
               x="0"
               y={0}
               fill={colorScheme[index]}
