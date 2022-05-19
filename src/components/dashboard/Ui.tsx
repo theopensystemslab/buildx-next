@@ -35,7 +35,7 @@ export const ChangeDataPoint: FC<{
 }> = (props) => {
   const percentage = (props.value / props.reference) * 100 - 100
   return (
-    <div className="text-gray-300 space-y-1">
+    <div className="text-gray-300 space-y-1 max-w-[140px] text-right">
       <p className="text-3xl">
         <span className="inline-block pt-1 text-xl">
           {percentage < 0 ? "↓ " : "↑ "}

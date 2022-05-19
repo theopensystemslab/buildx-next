@@ -1,5 +1,4 @@
 import React, { type FC } from "react"
-import { colorScheme } from "../Ui"
 import { format } from "../data"
 
 interface Props {
@@ -23,7 +22,7 @@ const CircleChart: FC<Props> = (props) => {
         cy={h / 2}
         r={w / 3 + t / 2 - (t * props.value) / total / 2}
         fill="none"
-        stroke={colorScheme[0]}
+        stroke="#fff"
         strokeWidth={(t * props.value) / total}
       />
       <circle
@@ -31,7 +30,7 @@ const CircleChart: FC<Props> = (props) => {
         cy={h / 2}
         r={w / 3 - t / 2 + (t * props.comparative) / total / 2}
         fill="none"
-        stroke="#dedede"
+        stroke="hsl(0,0%,70%)"
         strokeWidth={(5 * props.comparative) / total}
       />
       <text
