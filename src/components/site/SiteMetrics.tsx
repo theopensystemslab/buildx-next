@@ -43,11 +43,11 @@ const SiteInfoPanel = () => {
           }).format(totalHouseStats.cost),
         },
         {
-          label: "Total Carbon",
+          label: "Embodied Carbon",
           value: `${totalHouseStats.embodiedCarbon} kgCO₂e`,
         },
         {
-          label: "Total Heating Demand",
+          label: "Space Heating Demand",
           value: `${totalHouseStats.totalHeatingDemand} kWh/yr`,
         },
         {
