@@ -1,4 +1,4 @@
-import { calculateMaterialCosts } from "@/components/dashboard/data"
+import { matchSpecialMaterials } from "@/components/dashboard/data"
 import type { System } from "@/data/system"
 import { find } from "ramda"
 import { Element } from "./element"
@@ -146,7 +146,7 @@ export const getHouseStats = ({
     return runningTotal + width * (layout.cellLengths[index] || 0)
   }, 0)
 
-  const materialCosts = calculateMaterialCosts(house, {
+  const specialMaterials = matchSpecialMaterials(house, {
     elements,
     materials,
   })
@@ -156,9 +156,9 @@ export const getHouseStats = ({
       (accumulator, module) =>
         accumulator +
         module.cost +
-        materialCosts.cladding * module.claddingArea +
-        materialCosts.internalLining * module.liningArea +
-        materialCosts.roofing * module.roofingArea,
+        (specialMaterials.cladding?.costPerM2 || 0) * module.claddingArea +
+        (specialMaterials.internalLining?.costPerM2 || 0) * module.liningArea +
+        (specialMaterials.roofing?.costPerM2 || 0) * module.roofingArea,
       0
     ),
     embodiedCarbon: houseModules.reduce(
