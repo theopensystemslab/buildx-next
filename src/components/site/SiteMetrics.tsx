@@ -11,8 +11,7 @@ import { useSnapshot } from "valtio"
 import { InfoPanel } from "../ui"
 
 const SiteInfoPanel = () => {
-  const { modules, houseTypes, energyInfo, elements, materials } =
-    useSystemsData()
+  const systemsData = useSystemsData()
 
   const housesSnap = useSnapshot(houses)
 
@@ -21,11 +20,7 @@ const SiteInfoPanel = () => {
     mapRR((house) =>
       getHouseStats({
         house: house as House,
-        modules,
-        houseTypes,
-        energyInfo,
-        elements,
-        materials,
+        systemsData,
       })
     ),
     values,
@@ -44,7 +39,7 @@ const SiteInfoPanel = () => {
         },
         {
           label: "Embodied Carbon",
-          value: `${totalHouseStats.embodiedCarbon} kgCO₂e`,
+          value: `${(totalHouseStats.embodiedCarbon / 1000).toFixed(2)} tCO₂e`,
         },
         {
           label: "Space Heating Demand",
@@ -65,8 +60,7 @@ const SiteInfoPanel = () => {
 
 const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
   const house = useSnapshot(houses?.[buildingId])
-  const { modules, houseTypes, energyInfo, elements, materials } =
-    useSystemsData()
+  const systemsData = useSystemsData()
 
   const houseStats = useMemo(
     () =>
@@ -75,11 +69,7 @@ const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
         (house) =>
           getHouseStats({
             house: house as House,
-            modules,
-            houseTypes,
-            energyInfo,
-            elements,
-            materials,
+            systemsData,
           }),
         (stats) => sumHouseStats([stats] as HouseStats[])
       ),
