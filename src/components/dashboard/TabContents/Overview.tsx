@@ -3,7 +3,7 @@ import { type DashboardData } from "../data"
 import { ChangeDataPoint, Titled, defaultColor } from "../Ui"
 import StackedBarChart from "../charts/StackedBarChart"
 import SquareChart from "../charts/SquareChart"
-import CircleChart2 from "../charts/CircleChart2"
+import CircleChart from "../charts/CircleChart"
 import { formatWithUnit, formatWithUnitLong } from "../data"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
@@ -112,7 +112,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
           </div>
         </Titled>
         <Titled title="Energy use" subtitle="Estimated annual">
-          <CircleChart2
+          <CircleChart
             data={[
               {
                 value: energyUse.spaceHeatingDemandComparative,
