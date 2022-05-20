@@ -1,3 +1,4 @@
+import { useSystemsData } from "@/contexts/SystemsData"
 import {
   BareModule,
   ColumnModuleKey,
@@ -7,9 +8,16 @@ import {
 } from "@/data/module"
 import houses from "@/stores/houses"
 import { filterA, flattenA, mapA, StrEq, StrOrd, transposeA } from "@/utils"
-import { filterMap, lookup, replicate, sort, uniq } from "fp-ts/lib/Array"
+import {
+  filterMap,
+  findFirstMap,
+  lookup,
+  replicate,
+  sort,
+  uniq,
+} from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { none, some, toNullable } from "fp-ts/lib/Option"
+import { getOrElse, none, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import produce from "immer"
 import {
@@ -154,8 +162,24 @@ export const useLevelTypeOptions = (
 
   const thisLevelType = thisModule.structuredDna.levelType
 
+  const { levelTypes: systemLevelTypes } = useSystemsData()
+
+  const levelTypes = pipe(
+    systemLevelTypes,
+    filterA((lt) => lt.systemId === thisModule.systemId)
+  )
+
+  const getDescription = (levelType: string) =>
+    pipe(
+      levelTypes,
+      findFirstMap((lt) =>
+        lt.code === levelType ? some(lt.description) : none
+      ),
+      getOrElse(() => "")
+    )
+
   const selectedOption: LevelTypeOpt = {
-    label: thisLevelType,
+    label: getDescription(thisLevelType),
     value: {
       buildingDna: columnMatrixToDna(columnMatrix),
       levelType: thisLevelType,
@@ -227,7 +251,7 @@ export const useLevelTypeOptions = (
           columnMatrixToDna,
           (buildingDna) =>
             ({
-              label: levelType,
+              label: getDescription(levelType),
               value: {
                 buildingDna,
                 levelType,

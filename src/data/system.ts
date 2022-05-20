@@ -15,6 +15,7 @@ import { type WindowType, getWindowTypes } from "./windowType"
 import { type SpaceType, getSpaceTypes } from "./spaceType"
 import { getSystemSettings, type SystemSettings } from "./settings"
 import { getStairTypes, type StairType } from "./stairType"
+import { getLevelTypes, LevelType } from "./levelType"
 
 export const systems: Array<System> = [
   // {
@@ -53,6 +54,7 @@ export interface SystemsData {
   windowTypes: Array<WindowType>
   stairTypes: Array<StairType>
   internalLayoutTypes: Array<InternalLayoutType>
+  levelTypes: Array<LevelType>
   energyInfo: Array<EnergyInfo>
   spaceTypes: Array<SpaceType>
   settings: Array<SystemSettings>
@@ -111,6 +113,10 @@ export const useSystemsData = (): SystemsData | "error" | null => {
         flatten
       )
 
+      const levelTypes = await Promise.all(systems.map(getLevelTypes)).then(
+        flatten
+      )
+
       const stairTypes = await Promise.all(systems.map(getStairTypes)).then(
         flatten
       )
@@ -155,6 +161,7 @@ export const useSystemsData = (): SystemsData | "error" | null => {
         windowTypes,
         stairTypes,
         internalLayoutTypes,
+        levelTypes,
         energyInfo,
         spaceTypes,
         settings,
