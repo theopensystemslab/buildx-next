@@ -23,7 +23,8 @@ export const useModuleGeometries = (
   moduleDna: string,
   gltf: GltfT
 ) => {
-  const { elements } = useSystemsData()
+  const { elements: systemElements } = useSystemsData()
+  const elements = systemElements.filter((el) => el.systemId === systemId)
 
   const maybeModuleGeometries = geometries.get(moduleDna)
   if (maybeModuleGeometries) return maybeModuleGeometries
