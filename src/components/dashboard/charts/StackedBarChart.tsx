@@ -1,5 +1,5 @@
 import React, { useMemo, type FC } from "react"
-import { colorScheme } from "../Ui"
+import { defaultColor } from "../Ui"
 import { formatWithUnit } from "../data"
 
 /**
@@ -84,7 +84,7 @@ const StackedBarChart: FC<{
         let accumulatedY = 0
         const renderAggregate = alternatingSigns(stack.map((v) => v.value))
         const renderedStack = renderAggregate
-          ? [{ value: aggregates[index], color: "#fff" }]
+          ? [{ value: aggregates[index], color: defaultColor}]
           : stack
         return (
           <g key={index}>
