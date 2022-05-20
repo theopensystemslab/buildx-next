@@ -10,7 +10,6 @@ type Props = {
   columnIndex: number
   mirror?: boolean
   gridGroups: readonly PositionedRow[]
-  visible?: boolean
   verticalCutPlanes: Plane[]
 }
 
@@ -21,7 +20,6 @@ const BuildingHouseColumn = (props: Props) => {
     columnZ,
     gridGroups,
     mirror = false,
-    visible = true,
     verticalCutPlanes,
   } = props
   const levels = pipe(
@@ -29,27 +27,28 @@ const BuildingHouseColumn = (props: Props) => {
     mapRA(({ levelIndex, modules, y }) =>
       pipe(
         modules,
-        mapWithIndexRA((groupIndex, { module, z }) => (
-          <ColumnBuildingModule
-            key={`${columnIndex}-${levelIndex}-${groupIndex}`}
-            module={module}
-            columnIndex={columnIndex}
-            levelIndex={levelIndex}
-            levelY={y}
-            groupIndex={groupIndex}
-            buildingId={buildingId}
-            position={[
-              0,
-              y,
-              mirror
-                ? z + module.length / 2
-                : z - module.length + module.length / 2,
-            ]}
-            scale={[1, 1, mirror ? 1 : -1]}
-            visible={visible}
-            verticalCutPlanes={verticalCutPlanes}
-          />
-        ))
+        mapWithIndexRA((groupIndex, { module, z }) => {
+          return (
+            <ColumnBuildingModule
+              key={`${columnIndex}-${levelIndex}-${groupIndex}`}
+              module={module}
+              columnIndex={columnIndex}
+              levelIndex={levelIndex}
+              levelY={y}
+              groupIndex={groupIndex}
+              buildingId={buildingId}
+              position={[
+                0,
+                y,
+                mirror
+                  ? z + module.length / 2
+                  : z - module.length + module.length / 2,
+              ]}
+              scale={[1, 1, mirror ? 1 : -1]}
+              verticalCutPlanes={verticalCutPlanes}
+            />
+          )
+        })
       )
     )
   )

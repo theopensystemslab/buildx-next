@@ -24,6 +24,7 @@ export const stretch = proxy({
   startVanillaColumns: 0,
   visibleStartIndex: -1,
   visibleEndIndex: -1,
+  stretching: false,
 })
 
 export type VanillaPositionedRow = PositionedRow & {
@@ -177,8 +178,12 @@ export const useStretch = (buildingId: string) => {
 
   const sendDrag = (
     z: number,
-    { isStart }: { isStart: boolean } = { isStart: true }
+    { isStart, first }: { isStart: boolean; first: boolean } = {
+      isStart: true,
+      first: false,
+    }
   ) => {
+    if (first) stretch.stretching = true
     if (isStart) {
       if (z < 0) {
         const nextVanillaLength = Math.ceil(-z / vanillaColumnLength)
@@ -262,6 +267,7 @@ export const useStretch = (buildingId: string) => {
     stretch.visibleEndIndex = -1
     stretch.endVanillaColumns = 0
     stretch.startVanillaColumns = 0
+    stretch.stretching = false
   }
 
   return {
