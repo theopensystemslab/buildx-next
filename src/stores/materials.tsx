@@ -160,39 +160,36 @@ export const useMaterial = (
     material.clipShadows = true
   }, [clippingPlanes])
 
-  const go = () => {
+  const visibleByLevelIndex = (): boolean => {
     switch (true) {
       case siteContext.levelIndex === null:
-        if (material.visible === false) material.visible = true
-        break
       case siteContext.levelIndex === levelIndex:
-        if (material.visible === false) material.visible = true
-        break
+        return true
+      case levelIndex > (siteContext.levelIndex ?? Infinity):
+        return false
       default:
-        const above = levelIndex > siteContext.levelIndex!
-        if (above && material.visible === true) material.visible = false
-        break
+        return true
     }
   }
 
+  const visibleByStretch = (): boolean => {
+    const { visibleStartIndex, visibleEndIndex } = stretch
+    return columnIndex >= visibleStartIndex && columnIndex <= visibleEndIndex
+  }
+
+  const computeVisibility = () => {
+    const visible = stretch.stretching
+      ? visibleByLevelIndex() && visibleByStretch()
+      : visibleByLevelIndex()
+    if (material.visible !== visible) material.visible = visible
+  }
+
   useEffect(() => {
-    go()
-    return subscribeKey(siteContext, "levelIndex", go)
+    computeVisibility()
+    return subscribeKey(siteContext, "levelIndex", computeVisibility)
   }, [])
 
-  useEffect(
-    () =>
-      subscribe(stretch, () => {
-        const { visibleStartIndex, visibleEndIndex, stretching } = stretch
-
-        material.visible =
-          columnIndex >= visibleStartIndex && columnIndex <= visibleEndIndex
-        if (!stretching) {
-          go()
-        }
-      }),
-    []
-  )
+  useEffect(() => subscribe(stretch, computeVisibility), [])
 
   return material
 }

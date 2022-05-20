@@ -8,7 +8,7 @@ import { setCameraEnabled } from "@/stores/camera"
 import { EditModeEnum, useSiteContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
-import { mapRA } from "@/utils"
+import { filterRA, mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
@@ -53,6 +53,8 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
   const { startColumn, endColumn, vanillaPositionedRows } = props
   const { startVanillaColumns, endVanillaColumns } = useSnapshot(stretch)
 
+  const { levelIndex: ctxLevelIndex } = useSiteContext()
+
   const stretchMaterial = useMemo(() => {
     const material = defaultMaterial.clone()
     material.color = new Color("white")
@@ -64,6 +66,9 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
       <group position-z={startColumn.length}>
         {pipe(
           vanillaPositionedRows,
+          filterRA(
+            ({ levelIndex }) => levelIndex <= (ctxLevelIndex ?? Infinity)
+          ),
           mapRA(({ geometry, length, y, levelIndex }) => (
             <Instances
               key={levelIndex}
