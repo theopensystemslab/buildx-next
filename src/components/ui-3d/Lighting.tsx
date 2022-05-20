@@ -19,19 +19,11 @@ interface LightSetting {
   castShadow?: boolean
 }
 
-const intensityScale = 1
+const intensityScale = 0.76
 
-const VISUALIZE_LIGHTS = true
+const VISUALIZE_LIGHTS = false
 
 const Lighting = () => {
-  const { intensityScale } = useControls({
-    intensityScale: {
-      value: 0.86,
-      min: 0.25,
-      max: 2.0,
-    },
-  })
-
   const eveningLights: Array<LightSetting> = [
     {
       position: [0, 20, -20],
@@ -72,15 +64,6 @@ const Lighting = () => {
           <Line to={[30, -10, 0]} from={[0, 0, 0]} />
         </>
       )}
-      {/* <ambientLight
-        ref={(lightRef) => {
-          highlights.bloomLightRef = lightRef === null ? null : ref(lightRef)
-        }}
-        // position={[-10, -10, -10]}
-        color="red"
-        intensity={1}
-        layers={CameraLayer.invisible}
-      /> */}
     </>
   )
 }
