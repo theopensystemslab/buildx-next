@@ -73,7 +73,7 @@ export default function Radio<T>(props: Props<T>) {
             />
             {anyThumbnails && (
               <div
-                className="h-[36px] w-[36px] flex-none bg-cover bg-center"
+                className="h-16 w-16 flex-none bg-cover bg-center"
                 style={{ backgroundImage: `url(${option.thumbnail})` }}
               ></div>
             )}
