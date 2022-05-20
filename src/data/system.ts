@@ -38,6 +38,11 @@ export const systems: Array<System> = [
     name: "Swift",
     airtableId: "appGlzQcCZpDNRFsE",
   },
+  {
+    id: "holz100",
+    name: "HOLZ100",
+    airtableId: "appzG3plVRqgH6c5f",
+  },
 ]
 
 export interface System {
