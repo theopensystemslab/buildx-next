@@ -1,5 +1,5 @@
 import React, { type FC } from "react"
-import { format } from "../data"
+import { format, formatLong } from "../data"
 
 interface Props {
   data: {
@@ -7,6 +7,7 @@ interface Props {
     color: string
     description: string
   }[]
+  displayValue: number
   unitOfMeasurement: string
 }
 
@@ -63,11 +64,11 @@ const CircleChart: FC<Props> = (props) => {
         textAnchor="middle"
         style={{ fontSize: 8 }}
       >
-        {format(total)}
+        {formatLong(props.displayValue)}
       </text>
       <text
         x={w / 2}
-        y={h / 2 + 5}
+        y={h / 2 + 7}
         fill="#fff"
         textAnchor="middle"
         style={{ fontSize: 4 }}

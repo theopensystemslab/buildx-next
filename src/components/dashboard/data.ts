@@ -208,9 +208,11 @@ const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
       primaryEnergyDemand:
         accumulator.primaryEnergyDemand + current.primaryEnergyDemand,
       spaceHeatingDemandComparative:
-        accumulator.spaceHeatingDemandComparative + current.spaceHeatingDemandComparative,
+        accumulator.spaceHeatingDemandComparative +
+        current.spaceHeatingDemandComparative,
       spaceHeatingDemandNZEBComparative:
-        accumulator.spaceHeatingDemandNZEBComparative + current.spaceHeatingDemandNZEBComparative,
+        accumulator.spaceHeatingDemandNZEBComparative +
+        current.spaceHeatingDemandNZEBComparative,
       dhwCost: accumulator.dhwCost + current.dhwCost,
       spaceHeatingCost: accumulator.spaceHeatingCost + current.spaceHeatingCost,
       totalHeatingCost: accumulator.totalHeatingCost + current.totalHeatingCost,
@@ -518,8 +520,10 @@ const calculateHouseInfo = (
     spaceHeatingDemand: totalFloorArea * energyInfo.spaceHeatingDemand,
     totalHeatingDemand: totalFloorArea * energyInfo.totalHeatingDemand,
     primaryEnergyDemand: totalFloorArea * energyInfo.primaryEnergyDemand,
-    spaceHeatingDemandComparative: comparative.spaceHeatingDemand * totalFloorArea,
-    spaceHeatingDemandNZEBComparative: comparative.spaceHeatingDemandNZEB * totalFloorArea,
+    spaceHeatingDemandComparative:
+      comparative.spaceHeatingDemand * totalFloorArea,
+    spaceHeatingDemandNZEBComparative:
+      comparative.spaceHeatingDemandNZEB * totalFloorArea,
     dhwCost:
       totalFloorArea * energyInfo.dhwDemand * energyInfo.electricityTariff,
     spaceHeatingCost:
@@ -642,6 +646,12 @@ export const format = (d: number) => {
           maximumFractionDigits: 1,
         })
   return formatted
+}
+
+export const formatLong = (d: number) => {
+  return d.toLocaleString("en-GB", {
+    maximumFractionDigits: 1,
+  })
 }
 
 export const formatWithUnit = (d: number, unitOfMeasurement: string) => {

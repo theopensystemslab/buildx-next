@@ -130,6 +130,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
                 description: "Space heating nZEB baseline",
               },
             ]}
+            displayValue={energyUse.spaceHeatingDemand}
             unitOfMeasurement="kWh/year"
           />
           <div className="flex justify-end">
