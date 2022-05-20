@@ -176,12 +176,12 @@ export interface EnergyUse {
   spaceHeatingDemand: number
   totalHeatingDemand: number
   primaryEnergyDemand: number
-  energyDemandComparative: number
+  spaceHeatingDemandComparative: number
+  spaceHeatingDemandNZEBComparative: number
   dhwCost: number
   spaceHeatingCost: number
   totalHeatingCost: number
   primaryEnergyCost: number
-  energyCostComparative: number
 }
 
 const emptyEnergyUse = (): EnergyUse => ({
@@ -189,12 +189,12 @@ const emptyEnergyUse = (): EnergyUse => ({
   spaceHeatingDemand: 0,
   totalHeatingDemand: 0,
   primaryEnergyDemand: 0,
-  energyDemandComparative: 0,
+  spaceHeatingDemandComparative: 0,
+  spaceHeatingDemandNZEBComparative: 0,
   dhwCost: 0,
   spaceHeatingCost: 0,
   totalHeatingCost: 0,
   primaryEnergyCost: 0,
-  energyCostComparative: 0,
 })
 
 const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
@@ -207,15 +207,15 @@ const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
         accumulator.totalHeatingDemand + current.totalHeatingDemand,
       primaryEnergyDemand:
         accumulator.primaryEnergyDemand + current.primaryEnergyDemand,
-      energyDemandComparative:
-        accumulator.energyDemandComparative + current.energyDemandComparative,
+      spaceHeatingDemandComparative:
+        accumulator.spaceHeatingDemandComparative + current.spaceHeatingDemandComparative,
+      spaceHeatingDemandNZEBComparative:
+        accumulator.spaceHeatingDemandNZEBComparative + current.spaceHeatingDemandNZEBComparative,
       dhwCost: accumulator.dhwCost + current.dhwCost,
       spaceHeatingCost: accumulator.spaceHeatingCost + current.spaceHeatingCost,
       totalHeatingCost: accumulator.totalHeatingCost + current.totalHeatingCost,
       primaryEnergyCost:
         accumulator.primaryEnergyCost + current.primaryEnergyCost,
-      energyCostComparative:
-        accumulator.energyCostComparative + current.energyCostComparative,
     }
   }, emptyEnergyUse())
 
@@ -244,8 +244,9 @@ const comparative = {
   cost: 1600,
   operationalCo2: 20,
   embodiedCo2: 300,
-  energyUse: 120,
   electricityTariff: 0.2,
+  spaceHeatingDemand: 75,
+  spaceHeatingDemandNZEB: 25,
 }
 
 export const matchSpecialMaterials = (
@@ -517,7 +518,8 @@ const calculateHouseInfo = (
     spaceHeatingDemand: totalFloorArea * energyInfo.spaceHeatingDemand,
     totalHeatingDemand: totalFloorArea * energyInfo.totalHeatingDemand,
     primaryEnergyDemand: totalFloorArea * energyInfo.primaryEnergyDemand,
-    energyDemandComparative: comparative.energyUse * totalFloorArea,
+    spaceHeatingDemandComparative: comparative.spaceHeatingDemand * totalFloorArea,
+    spaceHeatingDemandNZEBComparative: comparative.spaceHeatingDemandNZEB * totalFloorArea,
     dhwCost:
       totalFloorArea * energyInfo.dhwDemand * energyInfo.electricityTariff,
     spaceHeatingCost:
@@ -532,8 +534,6 @@ const calculateHouseInfo = (
       totalFloorArea *
       energyInfo.primaryEnergyDemand *
       energyInfo.electricityTariff,
-    energyCostComparative:
-      comparative.energyUse * totalFloorArea * energyInfo.electricityTariff,
   }
 
   return {

@@ -63,7 +63,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
     })
   )
 
-  const { totalHeatingDemand, energyDemandComparative } =
+  const { totalHeatingDemand, spaceHeatingDemandComparative } =
     dashboardData.energyUse
 
   return (
@@ -115,13 +115,13 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
         <Titled title="Energy use" subtitle="Estimated annual">
           <CircleChart
             value={totalHeatingDemand}
-            comparative={energyDemandComparative}
+            comparative={spaceHeatingDemandComparative}
             unitOfMeasurement="kWhr/year"
           />
           <div className="flex justify-end">
             <ChangeDataPoint
               value={totalHeatingDemand}
-              reference={energyDemandComparative}
+              reference={spaceHeatingDemandComparative}
               description="Compared to traditional new build"
             />
           </div>
