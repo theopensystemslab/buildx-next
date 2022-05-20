@@ -6,6 +6,7 @@ import { type SpaceType } from "@/data/spaceType"
 import { type WindowType } from "@/data/windowType"
 import { type Element } from "@/data/element"
 import { type Material } from "@/data/material"
+import { colorScheme } from "./Ui"
 
 export interface DashboardData {
   byHouse: Record<string, HouseInfo>
@@ -15,6 +16,7 @@ export interface DashboardData {
   operationalCo2: OperationalCo2
   embodiedCo2: EmbodiedCo2
   energyUse: EnergyUse
+  colorsByHouseId: Record<string, string>
 }
 
 // Areas
@@ -174,12 +176,12 @@ export interface EnergyUse {
   spaceHeatingDemand: number
   totalHeatingDemand: number
   primaryEnergyDemand: number
-  energyDemandComparative: number
+  spaceHeatingDemandComparative: number
+  spaceHeatingDemandNZEBComparative: number
   dhwCost: number
   spaceHeatingCost: number
   totalHeatingCost: number
   primaryEnergyCost: number
-  energyCostComparative: number
 }
 
 const emptyEnergyUse = (): EnergyUse => ({
@@ -187,12 +189,12 @@ const emptyEnergyUse = (): EnergyUse => ({
   spaceHeatingDemand: 0,
   totalHeatingDemand: 0,
   primaryEnergyDemand: 0,
-  energyDemandComparative: 0,
+  spaceHeatingDemandComparative: 0,
+  spaceHeatingDemandNZEBComparative: 0,
   dhwCost: 0,
   spaceHeatingCost: 0,
   totalHeatingCost: 0,
   primaryEnergyCost: 0,
-  energyCostComparative: 0,
 })
 
 const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
@@ -205,15 +207,17 @@ const accumulateEnergyUse = (values: EnergyUse[]): EnergyUse =>
         accumulator.totalHeatingDemand + current.totalHeatingDemand,
       primaryEnergyDemand:
         accumulator.primaryEnergyDemand + current.primaryEnergyDemand,
-      energyDemandComparative:
-        accumulator.energyDemandComparative + current.energyDemandComparative,
+      spaceHeatingDemandComparative:
+        accumulator.spaceHeatingDemandComparative +
+        current.spaceHeatingDemandComparative,
+      spaceHeatingDemandNZEBComparative:
+        accumulator.spaceHeatingDemandNZEBComparative +
+        current.spaceHeatingDemandNZEBComparative,
       dhwCost: accumulator.dhwCost + current.dhwCost,
       spaceHeatingCost: accumulator.spaceHeatingCost + current.spaceHeatingCost,
       totalHeatingCost: accumulator.totalHeatingCost + current.totalHeatingCost,
       primaryEnergyCost:
         accumulator.primaryEnergyCost + current.primaryEnergyCost,
-      energyCostComparative:
-        accumulator.energyCostComparative + current.energyCostComparative,
     }
   }, emptyEnergyUse())
 
@@ -242,8 +246,9 @@ const comparative = {
   cost: 1600,
   operationalCo2: 20,
   embodiedCo2: 300,
-  energyUse: 120,
   electricityTariff: 0.2,
+  spaceHeatingDemand: 75,
+  spaceHeatingDemandNZEB: 25,
 }
 
 export const matchSpecialMaterials = (
@@ -515,7 +520,10 @@ const calculateHouseInfo = (
     spaceHeatingDemand: totalFloorArea * energyInfo.spaceHeatingDemand,
     totalHeatingDemand: totalFloorArea * energyInfo.totalHeatingDemand,
     primaryEnergyDemand: totalFloorArea * energyInfo.primaryEnergyDemand,
-    energyDemandComparative: comparative.energyUse * totalFloorArea,
+    spaceHeatingDemandComparative:
+      comparative.spaceHeatingDemand * totalFloorArea,
+    spaceHeatingDemandNZEBComparative:
+      comparative.spaceHeatingDemandNZEB * totalFloorArea,
     dhwCost:
       totalFloorArea * energyInfo.dhwDemand * energyInfo.electricityTariff,
     spaceHeatingCost:
@@ -530,8 +538,6 @@ const calculateHouseInfo = (
       totalFloorArea *
       energyInfo.primaryEnergyDemand *
       energyInfo.electricityTariff,
-    energyCostComparative:
-      comparative.energyUse * totalFloorArea * energyInfo.electricityTariff,
   }
 
   return {
@@ -560,6 +566,15 @@ const calculate = (data: {
   selectedHouses?: string[]
 }): DashboardData => {
   const { houses, systemsData } = data
+
+  const colorsByHouseId: Record<string, string> = {}
+
+  Object.keys(houses).forEach((houseId) => {
+    const code =
+      houseId.charCodeAt(0) + houseId.charCodeAt(1) + houseId.charCodeAt(2)
+    const color = colorScheme[code % colorScheme.length]
+    colorsByHouseId[houseId] = color
+  })
 
   const selectedHouses: string[] = data.selectedHouses || Object.keys(houses)
 
@@ -617,6 +632,7 @@ const calculate = (data: {
       Object.values(byHouse).map((houseInfo) => houseInfo.energyUse)
     ),
     unitsCount: selectedHouses.length,
+    colorsByHouseId,
   }
 }
 
@@ -630,6 +646,12 @@ export const format = (d: number) => {
           maximumFractionDigits: 1,
         })
   return formatted
+}
+
+export const formatLong = (d: number) => {
+  return d.toLocaleString("en-GB", {
+    maximumFractionDigits: 1,
+  })
 }
 
 export const formatWithUnit = (d: number, unitOfMeasurement: string) => {

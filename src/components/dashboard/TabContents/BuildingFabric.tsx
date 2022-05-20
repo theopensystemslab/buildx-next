@@ -1,27 +1,28 @@
 import React, { type FC } from "react"
 import { type DashboardData, type UValues } from "../data"
 import DataTable from "../DataTable"
-import { colorScheme } from "../Ui"
 
 const BuildingFabric: FC<{ dashboardData: DashboardData }> = (props) => {
   const {
-    dashboardData: { byHouse },
+    dashboardData: { byHouse, colorsByHouseId },
   } = props
 
-  const uValues = Object.entries(byHouse).map(
-    ([_houseId, info]) => info.uValues
-  )
+  const uValues = Object.entries(byHouse).map(([houseId, info]) => ({
+    values: info.uValues,
+    color: colorsByHouseId[houseId],
+  }))
 
   const valueList = (fn: (uValues: UValues) => number) => (
     <p className="space-x-1">
-      {uValues.map((value, index) => (
+      {uValues.map((d, index) => (
         <span
+          key={index}
           className="rounded px-2 py-0.5 text-sm text-black"
           style={{
-            backgroundColor: colorScheme[index],
+            backgroundColor: d.color,
           }}
         >
-          {fn(value)}
+          {fn(d.values)}
         </span>
       ))}
     </p>

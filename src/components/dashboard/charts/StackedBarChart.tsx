@@ -1,5 +1,5 @@
 import React, { useMemo, type FC } from "react"
-import { colorScheme } from "../Ui"
+import { defaultColor } from "../Ui"
 import { formatWithUnit } from "../data"
 
 /**
@@ -28,15 +28,17 @@ const alternatingSigns = (list: number[]): boolean => {
 
 /*
  * NOTE: this chart is not designed to handle all edge cases. Specifically:
- * - within one data set, all values have the same sign, e.g. [[-1, -2], [3, 4]]
  * - the case where all values are negative are not handled
  */
 const StackedBarChart: FC<{
-  data: number[][]
+  data: { value: number; color: string }[][]
   unitOfMeasurement: string
 }> = (props) => {
   const aggregates = useMemo(
-    () => props.data.map((d) => d.reduce((a, b) => a + b, 0)),
+    () =>
+      props.data.map((d) =>
+        d.reduce((accumulator, v) => accumulator + v.value, 0)
+      ),
     [props.data]
   )
 
@@ -75,31 +77,19 @@ const StackedBarChart: FC<{
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`}>
-      {
-        /* render bounding box for debugging purposes */
-        false && (
-          <rect
-            x="0"
-            y="0"
-            width={w}
-            height={h}
-            stroke="teal"
-            strokeWidth="1"
-            fill="none"
-          />
-        )
-      }
       {props.data.map((stack, index) => {
         const width = (w / (props.data.length + 1)) * 0.8
         const x = (w * (index + 1)) / (props.data.length + 1) - width / 2
         // Start an accumulating y coordinate to stack bars on top of each other
         let accumulatedY = 0
-        const renderAggregate = alternatingSigns(stack)
-        const renderedStack = renderAggregate ? [aggregates[index]] : stack
+        const renderAggregate = alternatingSigns(stack.map((v) => v.value))
+        const renderedStack = renderAggregate
+          ? [{ value: aggregates[index], color: defaultColor}]
+          : stack
         return (
           <g key={index}>
             {renderedStack.map((point, pointIndex) => {
-              const height = (point * scale) / max
+              const height = (point.value * scale) / max
               const y = baseline - Math.max(height, 0)
               const currentAccummulatedY = accumulatedY
               accumulatedY -= height
@@ -114,20 +104,9 @@ const StackedBarChart: FC<{
                     width={width}
                     height={Math.abs(height)}
                     stroke="none"
-                    fill={
-                      renderAggregate
-                        ? "#fff"
-                        : index < props.data.length - 1
-                        ? colorScheme[pointIndex]
-                        : `hsl(0,0%,${
-                            70 +
-                            (stack.length === 1
-                              ? 0
-                              : (15 * pointIndex) / (stack.length - 1))
-                          }%)`
-                    }
+                    fill={point.color}
                   />
-                  {Math.abs(point) > absoluteMax * 0.05 && (
+                  {Math.abs(point.value) > absoluteMax * 0.05 && (
                     <text
                       x={x + width / 2}
                       y={y + Math.abs(height) / 2 + 2}
@@ -135,7 +114,7 @@ const StackedBarChart: FC<{
                       textAnchor="middle"
                       style={{ fontSize: 4 }}
                     >
-                      {formatWithUnit(point, props.unitOfMeasurement)}
+                      {formatWithUnit(point.value, props.unitOfMeasurement)}
                     </text>
                   )}
                 </g>

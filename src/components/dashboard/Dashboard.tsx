@@ -56,6 +56,7 @@ const Dashboard: FC<Props> = (props) => {
             houses={houses}
             selectedHouses={selectedHouses}
             setSelectedHouses={setSelectedHouses}
+            colorsByHouseId={dashboardData.colorsByHouseId}
           />
           <div className="relative border-b border-gray-400">
             <div className="absolute top-0 bottom-0 right-0 w-28 bg-gradient-to-r from-[rgba(82,82,82,0)] to-gray-600"></div>

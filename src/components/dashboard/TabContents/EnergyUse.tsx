@@ -36,7 +36,7 @@ const EnergyUse: FC<{ dashboardData: DashboardData }> = (props) => {
           unitOfMeasurement: "€",
         },
         {
-          label: "Space heading cost",
+          label: "Space heating cost",
           value: energyUse.spaceHeatingCost,
           unitOfMeasurement: "€",
         },

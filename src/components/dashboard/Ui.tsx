@@ -1,7 +1,8 @@
 import React, { type FC, type ReactNode } from "react"
 
+export const defaultColor = "#FAFF00"
+
 export const colorScheme = [
-  "#FAFF00",
   "#ADFF00",
   "#3EFF80",
   "#7DFFE0",
@@ -11,6 +12,16 @@ export const colorScheme = [
   "#FFA1E4",
   "#F73063",
   "#FF7426",
+  //
+  "#E2FFA4",
+  "#CCF7D7",
+  "#D1FFF4",
+  "#D2F7FF",
+  "#BAD8FF",
+  "#EDC8FF",
+  "#FFCFF1",
+  "#FFADC2",
+  "#FFC9AB",
 ]
 
 export const DataPoint: FC<{
