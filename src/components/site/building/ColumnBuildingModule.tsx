@@ -34,7 +34,6 @@ const ColumnBuildingModule = (props: Props) => {
     groupIndex,
     module,
     levelY,
-    visible = true,
     verticalCutPlanes,
     ...groupProps
   } = props
@@ -93,31 +92,6 @@ const ColumnBuildingModule = (props: Props) => {
         }
       })
     }
-
-    // if (contextMode === SiteContextModeEnum.Enum.BUILDING) {
-    //   return subscribe(scope, () => {
-    //     if (
-    //       context.menu === null &&
-    //       ((scope.selected === null &&
-    //         scope.hovered?.buildingId === buildingId &&
-    //         scope.hovered.columnIndex === columnIndex &&
-    //         scope.hovered.levelIndex === levelIndex &&
-    //         scope.hovered.groupIndex === groupIndex) ||
-    //         (scope.selected?.buildingId === buildingId &&
-    //           scope.selected.columnIndex === columnIndex &&
-    //           scope.selected.levelIndex === levelIndex &&
-    //           scope.selected.groupIndex === groupIndex))
-    //     ) {
-    //       setIlluminatedModule({
-    //         buildingId,
-    //         columnIndex,
-    //         levelIndex,
-    //         groupIndex,
-    //       })
-    //     } else {
-    //     }
-    //   })
-    // }
   }, [contextMode])
 
   return (

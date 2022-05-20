@@ -14,7 +14,7 @@ import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useMemo, useRef } from "react"
-import { Color, DoubleSide, Group, Plane } from "three"
+import { Color, Group, Plane } from "three"
 import { useSnapshot } from "valtio"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
@@ -109,8 +109,6 @@ type MidColumnsProps = {
 const MidColumns = (props: MidColumnsProps) => {
   const { buildingId, columnLayout, midColumns, verticalCutPlanes } = props
 
-  const { visibleStartIndex, visibleEndIndex } = useSnapshot(stretch)
-
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
     <BuildingHouseColumn
       key={columnIndex}
@@ -119,9 +117,6 @@ const MidColumns = (props: MidColumnsProps) => {
       columnZ={z}
       gridGroups={gridGroups}
       mirror={columnIndex === columnLayout.length - 1}
-      visible={
-        columnIndex >= visibleStartIndex && columnIndex <= visibleEndIndex
-      }
       verticalCutPlanes={verticalCutPlanes}
     />
   )
@@ -162,10 +157,7 @@ const BuildingBuilding = (props: Props) => {
 
   const verticalCutPlanes = useVerticalCutPlanes(columnLayout, id)
 
-  const renderColumn = (
-    { columnIndex, z, gridGroups }: PositionedColumn,
-    visible: boolean = true
-  ) => (
+  const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
     <BuildingHouseColumn
       key={columnIndex}
       buildingId={id}
@@ -173,7 +165,6 @@ const BuildingBuilding = (props: Props) => {
       columnZ={z}
       gridGroups={gridGroups}
       mirror={columnIndex === columnLayout.length - 1}
-      visible={visible}
       verticalCutPlanes={verticalCutPlanes}
     />
   )
@@ -187,7 +178,7 @@ const BuildingBuilding = (props: Props) => {
 
         {editMode === EditModeEnum.Enum.STRETCH && (
           <StretchHandle
-            onDrag={({ last }) => {
+            onDrag={({ first, last }) => {
               const [, pz] = rotateVector(pointer.xz)
               const [, bz] = rotateVector([buildingX, buildingZ])
 
@@ -195,7 +186,7 @@ const BuildingBuilding = (props: Props) => {
 
               startRef.current.position.z = z
 
-              sendDrag(z, { isStart: true })
+              sendDrag(z, { isStart: true, first })
 
               if (last) {
                 startRef.current.position.z = 0
@@ -210,7 +201,7 @@ const BuildingBuilding = (props: Props) => {
         {renderColumn(endColumn)}
         {editMode === EditModeEnum.Enum.STRETCH && (
           <StretchHandle
-            onDrag={({ last }) => {
+            onDrag={({ first, last }) => {
               const [, pz] = rotateVector(pointer.xz)
               const [, bz] = rotateVector([buildingX, buildingZ])
 
@@ -218,7 +209,7 @@ const BuildingBuilding = (props: Props) => {
 
               endRef.current.position.z = z
 
-              sendDrag(z, { isStart: false })
+              sendDrag(z, { isStart: false, first })
 
               if (last) {
                 endRef.current.position.z = 0
