@@ -8,13 +8,13 @@ import { setCameraEnabled } from "@/stores/camera"
 import { EditModeEnum, useSiteContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
-import { mapRA } from "@/utils"
+import { filterRA, mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useMemo, useRef } from "react"
-import { Color, Group, Plane } from "three"
+import { Color, Group, Plane, Vector3 } from "three"
 import { useSnapshot } from "valtio"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
@@ -53,17 +53,31 @@ const StretchedColumns = (props: StretchedColumnsProps) => {
   const { startColumn, endColumn, vanillaPositionedRows } = props
   const { startVanillaColumns, endVanillaColumns } = useSnapshot(stretch)
 
+  const { levelIndex: ctxLevelIndex } = useSiteContext()
+
   const stretchMaterial = useMemo(() => {
     const material = defaultMaterial.clone()
     material.color = new Color("white")
+    if (ctxLevelIndex !== null) {
+      const levelY = vanillaPositionedRows[ctxLevelIndex].y
+      const module = vanillaPositionedRows[ctxLevelIndex].modules[0].module
+      const levelCutPlane: Plane = new Plane(
+        new Vector3(0, -1, 0),
+        levelY + module.height / 2
+      )
+      material.clippingPlanes = [levelCutPlane]
+    }
     return material
-  }, [])
+  }, [ctxLevelIndex])
 
   return (
     <Fragment>
       <group position-z={startColumn.length}>
         {pipe(
           vanillaPositionedRows,
+          filterRA(
+            ({ levelIndex }) => levelIndex <= (ctxLevelIndex ?? Infinity)
+          ),
           mapRA(({ geometry, length, y, levelIndex }) => (
             <Instances
               key={levelIndex}
