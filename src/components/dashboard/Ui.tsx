@@ -11,6 +11,17 @@ export const colorScheme = [
   "#FFA1E4",
   "#F73063",
   "#FF7426",
+  //
+  "#FDFFAD",
+  "#E2FFA4",
+  "#CCF7D7",
+  "#D1FFF4",
+  "#D2F7FF",
+  "#BAD8FF",
+  "#EDC8FF",
+  "#FFCFF1",
+  "#FFADC2",
+  "#FFC9AB",
 ]
 
 export const DataPoint: FC<{

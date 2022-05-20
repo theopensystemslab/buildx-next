@@ -15,14 +15,52 @@ const GridLayout: FC<{ children: ReactNode }> = (props) => (
 const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
   const { dashboardData } = props
 
-  const costs = Object.values(dashboardData.byHouse).map((d) => d.costs)
-
-  const embodiedCo2 = Object.values(dashboardData.byHouse).map(
-    (d) => d.embodiedCo2
+  const houseCosts = Object.entries(dashboardData.byHouse).map(
+    ([houseId, d]) => ({
+      value: d.costs.total,
+      color: dashboardData.colorsByHouseId[houseId],
+    })
   )
 
-  const operationalCo2 = Object.values(dashboardData.byHouse).map(
-    (d) => d.operationalCo2
+  const houseCostsComparative = Object.entries(dashboardData.byHouse).map(
+    ([_houseId, d], index, arr) => ({
+      value: d.costs.comparative,
+      color: `hsl(0,0%,${
+        70 + (arr.length === 1 ? 0 : (15 * index) / (arr.length - 1))
+      }%)`,
+    })
+  )
+
+  const houseOperationalCo2 = Object.entries(dashboardData.byHouse).map(
+    ([houseId, d]) => ({
+      value: d.operationalCo2.annualTotal / 1000,
+      color: dashboardData.colorsByHouseId[houseId],
+    })
+  )
+
+  const houseOperationalCo2Comparative = Object.entries(dashboardData.byHouse).map(
+    ([_houseId, d], index, arr) => ({
+      value: d.operationalCo2.annualComparative / 1000,
+      color: `hsl(0,0%,${
+        70 + (arr.length === 1 ? 0 : (15 * index) / (arr.length - 1))
+      }%)`,
+    })
+  )
+
+  const houseEmbodiedCo2 = Object.entries(dashboardData.byHouse).map(
+    ([houseId, d]) => ({
+      value: d.embodiedCo2.total / 1000,
+      color: dashboardData.colorsByHouseId[houseId],
+    })
+  )
+
+  const houseEmbodiedCo2Comparative = Object.entries(dashboardData.byHouse).map(
+    ([_houseId, d], index, arr) => ({
+      value: d.embodiedCo2.comparative / 1000,
+      color: `hsl(0,0%,${
+        70 + (arr.length === 1 ? 0 : (15 * index) / (arr.length - 1))
+      }%)`,
+    })
   )
 
   const { totalHeatingDemand, energyDemandComparative } =
@@ -33,14 +71,13 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
       <GridLayout>
         <Titled title="Build cost" subtitle="Estimated EUR">
           <StackedBarChart
-            data={[
-              costs.map((cost) => cost.total),
-              costs.map((cost) => cost.comparative),
-            ]}
+            data={[houseCosts, houseCostsComparative]}
             unitOfMeasurement="€"
           />
           <div className="flex space-x-8">
-            <p className="text-5xl">{formatWithUnit(dashboardData.costs.total, "€")}</p>
+            <p className="text-5xl">
+              {formatWithUnit(dashboardData.costs.total, "€")}
+            </p>
             <ChangeDataPoint
               value={dashboardData.costs.total}
               reference={dashboardData.costs.comparative}
@@ -50,8 +87,11 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
         </Titled>
         <Titled title="Floor area" subtitle="Gross internal area m²">
           <SquareChart
-            data={Object.values(dashboardData.byHouse).map(
-              (houseInfo) => houseInfo.areas.totalFloor
+            data={Object.entries(dashboardData.byHouse).map(
+              ([houseId, houseInfo]) => ({
+                value: houseInfo.areas.totalFloor,
+                color: dashboardData.colorsByHouseId[houseId],
+              })
             )}
             unitOfMeasurement="m²"
           />
@@ -89,8 +129,8 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
         <Titled title="Carbon emissions" subtitle="Estimated annual">
           <StackedBarChart
             data={[
-              operationalCo2.map((co2) => co2.annualTotal / 1000),
-              operationalCo2.map((co2) => co2.annualComparative / 1000),
+              houseOperationalCo2,
+              houseOperationalCo2Comparative,
             ]}
             unitOfMeasurement="T"
           />
@@ -110,8 +150,8 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
         <Titled title="Carbon emissions" subtitle="Estimated upfront">
           <StackedBarChart
             data={[
-              embodiedCo2.map((co2) => co2.total / 1000),
-              embodiedCo2.map((co2) => co2.comparative / 1000),
+              houseEmbodiedCo2,
+              houseEmbodiedCo2Comparative,
             ]}
             unitOfMeasurement="T"
           />

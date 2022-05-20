@@ -1,9 +1,8 @@
 import React, { type FC } from "react"
-import { colorScheme } from "../Ui"
 import { formatWithUnit } from "../data"
 
 interface Props {
-  data: number[]
+  data: { value: number, color: string }[]
   unitOfMeasurement: string
 }
 
@@ -11,7 +10,7 @@ const SquareChart: FC<Props> = (props) => {
   const w = 60
   const h = 60
 
-  const total = props.data.reduce((a, b) => a + b, 0)
+  const total = props.data.reduce((accumulator, v) => accumulator + v.value, 0)
 
   if (total === 0) {
     return (
@@ -37,18 +36,18 @@ const SquareChart: FC<Props> = (props) => {
     <svg viewBox={`0 0 ${w} ${h}`}>
       {props.data.map((d, index) => {
         const currentAccummulatedY = accumulatedY
-        const height = (d / total) * h
+        const height = (d.value / total) * h
         accumulatedY += height
         return (
           <g transform={`translate(0 ${currentAccummulatedY})`} key={index}>
             <rect
               x="0"
               y={0}
-              fill={colorScheme[index]}
+              fill={d.color}
               width={w}
               height={height}
             />
-            {d > total * 0.05 && (
+            {d.value > total * 0.05 && (
               <text
                 x={w / 2}
                 y={height / 2 + 2}
@@ -56,7 +55,7 @@ const SquareChart: FC<Props> = (props) => {
                 textAnchor="middle"
                 style={{ fontSize: 4 }}
               >
-                {formatWithUnit(d, props.unitOfMeasurement)}
+                {formatWithUnit(d.value, props.unitOfMeasurement)}
               </text>
             )}
           </g>

@@ -15,6 +15,8 @@ interface Props {
   houses: Houses
   selectedHouses: string[]
   setSelectedHouses: Dispatch<SetStateAction<string[]>>
+  // Passed as a separate prop so it can be computed in a parent component and shared
+  colorsByHouseId?: Record<string, string>
 }
 
 const HouseMultiSelect: FC<Props> = (props) => {
@@ -55,7 +57,7 @@ const HouseMultiSelect: FC<Props> = (props) => {
           <p
             key={houseId}
             className="inline-flex items-center overflow-hidden rounded-full space-x-1"
-            style={{ backgroundColor: colorScheme[index] }}
+            style={{ backgroundColor: props.colorsByHouseId?.[houseId] || colorScheme[index] }}
           >
             <span className="inline-block py-1 pl-3">{house.friendlyName}</span>
             <button

@@ -6,6 +6,7 @@ import { type SpaceType } from "@/data/spaceType"
 import { type WindowType } from "@/data/windowType"
 import { type Element } from "@/data/element"
 import { type Material } from "@/data/material"
+import { colorScheme } from "./Ui"
 
 export interface DashboardData {
   byHouse: Record<string, HouseInfo>
@@ -15,6 +16,7 @@ export interface DashboardData {
   operationalCo2: OperationalCo2
   embodiedCo2: EmbodiedCo2
   energyUse: EnergyUse
+  colorsByHouseId: Record<string, string>
 }
 
 // Areas
@@ -561,6 +563,15 @@ const calculate = (data: {
 }): DashboardData => {
   const { houses, systemsData } = data
 
+  const colorsByHouseId: Record<string, string> = {}
+
+  Object.keys(houses).forEach((houseId) => {
+    const code =
+      houseId.charCodeAt(0) + houseId.charCodeAt(1) + houseId.charCodeAt(2)
+    const color = colorScheme[code % colorScheme.length]
+    colorsByHouseId[houseId] = color
+  })
+
   const selectedHouses: string[] = data.selectedHouses || Object.keys(houses)
 
   const byHouse = (() => {
@@ -617,6 +628,7 @@ const calculate = (data: {
       Object.values(byHouse).map((houseInfo) => houseInfo.energyUse)
     ),
     unitsCount: selectedHouses.length,
+    colorsByHouseId,
   }
 }
 
