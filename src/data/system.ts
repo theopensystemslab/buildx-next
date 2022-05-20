@@ -25,17 +25,17 @@ export const systems: Array<System> = [
   // },
   {
     id: "3cea-amvic",
-    name: "3CEA-AMVIC",
+    name: "3CEA (Amvic)",
     airtableId: "appsOHJyDxhPrHyxc",
   },
   {
     id: "mobble",
-    name: "Mobble",
+    name: "Inhout Mobble",
     airtableId: "app25JFkKVKKEt5io",
   },
   {
     id: "swift",
-    name: "Swift",
+    name: "WikiHouse Swift",
     airtableId: "appGlzQcCZpDNRFsE",
   },
   {
