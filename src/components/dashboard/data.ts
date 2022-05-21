@@ -246,7 +246,6 @@ const comparative = {
   cost: 1600,
   operationalCo2: 20,
   embodiedCo2: 300,
-  electricityTariff: 0.2,
   spaceHeatingDemand: 75,
   spaceHeatingDemandNZEB: 25,
 }

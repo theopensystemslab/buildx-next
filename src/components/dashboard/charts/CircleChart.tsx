@@ -54,7 +54,7 @@ const CircleChart: FC<Props> = (props) => {
   return (
     <div className="relative">
       {hoveredDataPoint && (
-        <p className="absolute top-0 left-1/2 -translate-x-1/2 transform  rounded bg-black px-1 py-0.5 text-center text-xs">
+        <p className="absolute -bottom-4 left-1/2 -translate-x-1/2 translate-y-full transform  rounded bg-black px-1 py-0.5 text-center text-xs">
           {tooltipContent(hoveredDataPoint)}
         </p>
       )}
