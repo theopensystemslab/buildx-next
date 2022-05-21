@@ -1,12 +1,14 @@
-import React, { type FC } from "react"
-import { formatLong } from "../data"
+import React, { type FC, useState } from "react"
+import { formatLong, formatWithUnitLong } from "../data"
+
+interface DataPoint {
+  value: number
+  color: string
+  description: string
+}
 
 interface Props {
-  data: {
-    value: number
-    color: string
-    description: string
-  }[]
+  data: DataPoint[]
   displayValue: number
   unitOfMeasurement: string
 }
@@ -17,6 +19,8 @@ const CircleChart: FC<Props> = (props) => {
 
   const r1 = 20
   const r2 = 30
+
+  const [hovered, setHovered] = useState<number | null>(null)
 
   const total = props.data.reduce((accumulator, v) => accumulator + v.value, 0)
 
@@ -37,45 +41,69 @@ const CircleChart: FC<Props> = (props) => {
     )
   }
 
+  const tooltipContent = (dataPoint: DataPoint): string => {
+    return `${dataPoint.description}: ${formatWithUnitLong(dataPoint.value, props.unitOfMeasurement)}`
+  }
+
+  // Accumulate a baseline radius to place elements next to each other while mapping over data
   let baseline = r1
 
+  const hoveredDataPoint =
+    typeof hovered === "number" ? props.data[hovered] : undefined
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`}>
-      {props.data.map((d) => {
-        const currentBaseline = baseline
-        const strokeWidth = (d.value / total) * (r2 - r1)
-        const r = currentBaseline + strokeWidth / 2
-        baseline += strokeWidth
-        return (
-          <circle
-            cx={w / 2}
-            cy={h / 2}
-            r={r}
-            fill="none"
-            stroke={d.color}
-            strokeWidth={strokeWidth}
-          />
-        )
-      })}
-      <text
-        x={w / 2}
-        y={h / 2}
-        fill="#fff"
-        textAnchor="middle"
-        style={{ fontSize: 8 }}
-      >
-        {formatLong(props.displayValue)}
-      </text>
-      <text
-        x={w / 2}
-        y={h / 2 + 7}
-        fill="#fff"
-        textAnchor="middle"
-        style={{ fontSize: 4 }}
-      >
-        {props.unitOfMeasurement}
-      </text>
-    </svg>
+    <div className="relative">
+      {hoveredDataPoint && (
+        <p className="absolute top-0 left-1/2 -translate-x-1/2 transform  rounded bg-black px-1 py-0.5 text-center text-xs">
+          {tooltipContent(hoveredDataPoint)}
+        </p>
+      )}
+      <svg viewBox={`0 0 ${w} ${h}`}>
+        {props.data.map((d, index) => {
+          const currentBaseline = baseline
+          const strokeWidth = (d.value / total) * (r2 - r1)
+          const r = currentBaseline + strokeWidth / 2
+          baseline += strokeWidth
+          return (
+            <circle
+              key={index}
+              cx={w / 2}
+              cy={h / 2}
+              onMouseEnter={() => {
+                setHovered(index)
+              }}
+              onMouseLeave={() => {
+                setHovered(null)
+              }}
+              r={r}
+              fill="none"
+              stroke={d.color}
+              opacity={hovered === index ? "1" : "0.92"}
+              strokeWidth={strokeWidth}
+              className="transition-colors duration-100"
+            />
+          )
+        })}
+        <text
+          x={w / 2}
+          y={h / 2}
+          fill="#fff"
+          textAnchor="middle"
+          style={{ fontSize: 8 }}
+        >
+          {formatLong(props.displayValue)}
+        </text>
+        <text
+          x={w / 2}
+          y={h / 2 + 7}
+          fill="#fff"
+          textAnchor="middle"
+          style={{ fontSize: 4 }}
+        >
+          {props.unitOfMeasurement}
+        </text>
+      </svg>
+    </div>
   )
 }
 
