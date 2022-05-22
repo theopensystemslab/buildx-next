@@ -2,6 +2,7 @@ import { safeLocalStorageGet } from "../utils"
 import { createMaterial } from "../utils/three"
 import { useState, useEffect, useRef } from "react"
 import { flatten } from "ramda"
+import { type House } from "./house"
 import { getEnergyInfo, type EnergyInfo } from "./energyInfo"
 import { type HouseType, getHouseTypes } from "./houseType"
 import { getModules, type Module } from "./module"
@@ -96,6 +97,19 @@ const retrieveSystemsData = (): SystemsData | null => {
   }
   const savedMinutesAgo = (new Date().getTime() - data.savedAt) / 1000 / 60
   return savedMinutesAgo < 15 ? data.systemsData : null
+}
+
+export const getHouseModules = (
+  house: House,
+  systemsData: SystemsData
+): Module[] => {
+  return house.dna
+    .map((dna) =>
+      systemsData.modules.find(
+        (module) => module.dna === dna && module.systemId === house.systemId
+      )
+    )
+    .filter((module): module is Module => Boolean(module))
 }
 
 export const useSystemsData = (): SystemsData | "error" | null => {

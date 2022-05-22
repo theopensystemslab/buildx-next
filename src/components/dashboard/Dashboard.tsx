@@ -6,7 +6,7 @@ import Loader from "@/components/ui/Loader"
 import calculate, { type DashboardData } from "./data"
 import HouseMultiSelect from "./HouseMultiSelect"
 import { Tab, tabs, fromSlug } from "./dashboardTabs"
-import { type House } from "@/data/house"
+import { type Houses } from "@/data/house"
 import Overview from "./TabContents/Overview"
 import BuildingAreas from "./TabContents/BuildingAreas"
 import BuildCosts from "./TabContents/BuildCosts"
@@ -20,7 +20,7 @@ export interface Props {
 }
 
 const Dashboard: FC<Props> = (props) => {
-  const houses = useHouses() as Record<string, House>
+  const houses = useHouses() as Houses
   const systemsData = useSystemsData()
   const activeTab = fromSlug(props.slug)
 
@@ -50,7 +50,7 @@ const Dashboard: FC<Props> = (props) => {
 
   return (
     <div className="w-full h-full overflow-auto bg-gray-600">
-      <div className="pt-16 pb-16 mx-auto">
+      <div className="pt-16 pb-16">
         <div>
           <HouseMultiSelect
             houses={houses}

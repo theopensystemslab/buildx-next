@@ -1,5 +1,5 @@
 import { type Module } from "@/data/module"
-import { type SystemsData } from "@/data/system"
+import { type SystemsData, getHouseModules } from "@/data/system"
 import { type House, type Houses } from "@/data/house"
 import { type EnergyInfo } from "@/data/energyInfo"
 import { type SpaceType } from "@/data/spaceType"
@@ -594,13 +594,7 @@ const calculate = (data: {
         return
       }
 
-      const modules = house.dna
-        .map((dna) =>
-          systemsData.modules.find(
-            (module) => module.dna === dna && module.systemId === house.systemId
-          )
-        )
-        .filter((module): module is Module => Boolean(module))
+      const modules = getHouseModules(house, systemsData)
 
       obj[houseId] = calculateHouseInfo(house, modules, {
         energyInfo,
