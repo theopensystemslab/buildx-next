@@ -1,10 +1,12 @@
 import React, { useRef } from "react"
 import type { ReactNode } from "react"
 import { useClickAway, useEscape } from "./utils"
+import { ScopeItem } from "@/stores/scope"
 
 export type ContextMenuProps = {
   pageX: number
   pageY: number
+  selected: ScopeItem
   onClose?: () => void
   children?: ReactNode
 }

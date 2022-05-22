@@ -8,7 +8,7 @@ import {
   Radio,
 } from "@/components/ui"
 import { Check, Menu, SectionCuts } from "@/components/ui/icons"
-import { useCameraReset } from "@/stores/camera"
+import camera, { useCameraReset } from "@/stores/camera"
 import siteContext, { useSiteContext } from "@/stores/context"
 import {
   setOrthographic,
@@ -20,7 +20,7 @@ import { filterR } from "@/utils"
 import { Add32, Reset24, View24 } from "@carbon/icons-react"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/Record"
-import React, { Fragment, Suspense, useState } from "react"
+import React, { Fragment, Suspense, useEffect, useState } from "react"
 import UniversalMenu from "../ui/UniversalMenu"
 import { SiteContextMenu } from "./menu"
 import SiteMetrics from "./SiteMetrics"
@@ -33,7 +33,13 @@ const HtmlUi = () => {
 
   const [shadows, setShadows] = useShadows()
 
-  const { buildingId, levelIndex, editMode } = useSiteContext()
+  useEffect(() => {
+    if (!shadows || !camera.controls) return
+    const a = Math.PI / 2
+    if (camera.controls.polarAngle > a) camera.controls.rotatePolarTo(a, true)
+  }, [shadows])
+
+  const { buildingId, levelIndex, editMode, menu } = useSiteContext()
 
   const check = buildingId !== null || levelIndex !== null || editMode !== null
 
@@ -135,7 +141,11 @@ const HtmlUi = () => {
         </div>
       ) : null}
       <Breadcrumbs />
-      <SiteContextMenu />
+      {menu !== null &&
+        (() => {
+          const [pageX, pageY] = menu
+          return <SiteContextMenu {...{ pageX, pageY }} />
+        })()}
       <SiteMetrics />
     </Fragment>
   )

@@ -1,7 +1,9 @@
 import { Radio } from "@/components/ui"
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
+import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import ContextMenuNested from "@/components/ui/ContextMenuNested"
+import { House } from "@/data/house"
 import {
   LevelTypeOpt,
   useLevelInteractions,
@@ -10,16 +12,18 @@ import {
 import { useWindowOptions, WindowOpt } from "@/hooks/interactions/windows"
 import { useColumnLayout } from "@/hooks/layouts"
 import siteContext from "@/stores/context"
-import houses from "@/stores/houses"
+import houses, { useHouse } from "@/stores/houses"
 import scope from "@/stores/scope"
 import React from "react"
 import ChangeMaterials from "./ChangeMaterials"
 
 const BuildingContextMenu = (props: ContextMenuProps) => {
-  if (scope.selected === null) throw new Error("scope.selected null")
+  const { selected } = props
 
   const { elementName, groupIndex, levelIndex, columnIndex, buildingId } =
-    scope.selected
+    selected
+
+  const house = useHouse(buildingId) as House
 
   const columnLayout = useColumnLayout(buildingId)
 
@@ -72,6 +76,7 @@ const BuildingContextMenu = (props: ContextMenuProps) => {
 
   return (
     <ContextMenu {...props}>
+      <ContextMenuHeading>{house.friendlyName}</ContextMenuHeading>
       <ContextMenuButton onClick={editLevel}>{`Edit level`}</ContextMenuButton>
       {canAddFloorAbove && (
         <ContextMenuButton

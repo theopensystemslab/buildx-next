@@ -1,30 +1,31 @@
 import ContextMenu, { ContextMenuProps } from "@/components/ui/ContextMenu"
 import ContextMenuButton from "@/components/ui/ContextMenuButton"
+import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import { useSystemsData } from "@/contexts/SystemsData"
+import { House } from "@/data/house"
 import siteContext, { EditModeEnum, useSiteContext } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
-import scope from "@/stores/scope"
+import scope, { ScopeItem } from "@/stores/scope"
 import React, { Fragment, useState } from "react"
+import { useSnapshot } from "valtio"
 import BuildingContextMenu from "./BuildingContextMenu"
 import LevelContextMenu from "./LevelContextMenu"
 import RenameHouseForm from "./RenameHouseForm"
 
 const SiteContextMenu_ = (props: ContextMenuProps) => {
-  if (scope.selected === null) throw new Error("scope.selected null")
+  const { selected } = props
 
-  const { buildingId } = scope.selected
+  const { buildingId } = selected
 
-  const firstHouse = useHouse(buildingId)
+  const house = useHouse(buildingId) as House
 
   const { houseTypes } = useSystemsData()
 
   const resetBuilding = () => {
-    const house = houses[buildingId]
     const houseType = houseTypes.find((ht) => ht.id === house.houseTypeId)
     if (houseType) {
       houses[buildingId].dna = houseType.dna as string[]
       houses[buildingId].modifiedMaterials = {}
-      houses[buildingId].rotation = 0
     }
     props.onClose?.()
   }
@@ -45,7 +46,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   const rename = () => setRenaming(true)
 
   const editBuilding = () => {
-    siteContext.buildingId = firstHouse.id
+    siteContext.buildingId = house.id
     siteContext.editMode = EditModeEnum.Enum.STRETCH
     props?.onClose?.()
   }
@@ -57,6 +58,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
 
   return (
     <ContextMenu {...props}>
+      <ContextMenuHeading>{house.friendlyName}</ContextMenuHeading>
       {!renaming && (
         <Fragment>
           <ContextMenuButton onClick={resetBuilding}>Reset</ContextMenuButton>
@@ -77,9 +79,9 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
         {renaming && (
           <RenameHouseForm
             {...props}
-            currentName={firstHouse.friendlyName}
+            currentName={house.friendlyName}
             onNewName={(newName) => {
-              houses[firstHouse.id].friendlyName = newName
+              houses[buildingId].friendlyName = newName
               setRenaming(false)
             }}
           />
@@ -100,21 +102,24 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   )
 }
 
-const SiteContextMenu = () => {
-  const { menu, buildingId, levelIndex } = useSiteContext()
-
-  if (!menu) return null
-
-  const [pageX, pageY] = menu
+const SiteContextMenu = ({
+  pageX,
+  pageY,
+}: {
+  pageX: number
+  pageY: number
+}) => {
+  const { buildingId, levelIndex } = useSiteContext()
+  const { selected } = useSnapshot(scope)
 
   const onClose = () => {
     // scope.selected = null
     siteContext.menu = null
   }
 
-  const props = { pageX, pageY, onClose }
+  const props = { pageX, pageY, onClose, selected: selected as ScopeItem }
 
-  return !buildingId ? (
+  return selected === null ? null : !buildingId ? (
     <SiteContextMenu_ {...props} />
   ) : levelIndex === null ? (
     <BuildingContextMenu {...props} />

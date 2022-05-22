@@ -3,19 +3,28 @@ import { PositionedColumn } from "@/hooks/layouts"
 import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import defaultMaterial from "@/materials/defaultMaterial"
-import handleMaterial from "@/materials/handleMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import { EditModeEnum, useSiteContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
+import { useShadows } from "@/stores/settings"
 import { filterRA, mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
-import { Handler, useDrag } from "@use-gesture/react"
+import { Handler, useDrag, useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { Fragment, useMemo, useRef } from "react"
-import { Color, Group, Plane, Vector3 } from "three"
+import { Fragment, useEffect, useMemo, useRef } from "react"
+import {
+  Color,
+  Group,
+  Material,
+  Mesh,
+  MeshStandardMaterial,
+  Plane,
+  Vector3,
+} from "three"
 import { useSnapshot } from "valtio"
+import HandleMaterial from "../../../materials/HandleMaterial"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
 type StretchHandleProps = MeshProps & {
@@ -23,22 +32,48 @@ type StretchHandleProps = MeshProps & {
 }
 
 const StretchHandle = (props: StretchHandleProps) => {
+  const meshRef = useRef<Mesh>()
   const { onDrag, ...meshProps } = props
-  const bind = useDrag<ThreeEvent<PointerEvent>>((state) => {
-    const { first, last } = state
-    if (first) setCameraEnabled(false)
-    if (last) setCameraEnabled(true)
-    onDrag(state)
-    invalidate()
+  const [shadows] = useShadows()
+
+  const bind = useGesture<{ drag: ThreeEvent<PointerEvent> }>({
+    onHover: (data) => {
+      if (data.hovering) {
+        document.body.style.cursor = "grab"
+      } else {
+        document.body.style.cursor = ""
+      }
+    },
+    onDrag: (state) => {
+      const { first, last } = state
+      if (first) setCameraEnabled(false)
+      if (last) setCameraEnabled(true)
+      onDrag(state)
+      invalidate()
+    },
   })
+
+  useEffect(() => {
+    if (!meshRef.current) return
+    if (shadows) {
+      ;(meshRef.current.material as MeshStandardMaterial).color = new Color(
+        "white"
+      )
+    } else {
+      ;(meshRef.current.material as MeshStandardMaterial).color = new Color(
+        "black"
+      )
+    }
+  }, [shadows])
   return (
     <mesh
+      ref={meshRef}
       rotation-x={-Math.PI / 2}
       {...meshProps}
       {...(bind() as any)}
-      material={handleMaterial}
     >
       <circleBufferGeometry args={[0.5, 24]} />
+      <HandleMaterial />
     </mesh>
   )
 }

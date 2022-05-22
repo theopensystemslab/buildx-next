@@ -1,12 +1,10 @@
-import handleMaterial from "@/materials/handleMaterial"
+import HandleMaterial from "@/materials/HandleMaterial"
 import { setCameraEnabled } from "@/stores/camera"
 import houses from "@/stores/houses"
 import pointer from "@/stores/pointer"
-import { invalidate, ThreeEvent } from "@react-three/fiber"
+import { invalidate } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
 import React, { Fragment, useRef } from "react"
-import { DoubleSide } from "three"
-import { HorizontalPlane } from "./HorizontalPlane"
 
 type Props = {
   buildingId: string
@@ -63,18 +61,18 @@ const RotateHandles = (props: Props) => {
       <mesh
         rotation-x={-Math.PI / 2}
         position={[0, 0, -1.5]}
-        material={handleMaterial}
         {...(bind(0) as any)}
       >
         <circleBufferGeometry args={[0.5, 10]} />
+        <HandleMaterial />
       </mesh>
       <mesh
         rotation-x={-Math.PI / 2}
         position={[-buildingWidth / 2 - 1.5, 0, buildingLength / 2]}
-        material={handleMaterial}
         {...(bind(1) as any)}
       >
         <circleBufferGeometry args={[0.5, 10]} />
+        <HandleMaterial />
       </mesh>
     </Fragment>
   )

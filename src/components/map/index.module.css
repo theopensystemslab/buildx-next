@@ -4,6 +4,7 @@
 
 .geocoder > div {
   width: auto;
+  @apply rounded-none;
 }
 
 .searchedGeocoder {
