@@ -6,17 +6,16 @@ import { StairsOpt, useStairsOptions } from "@/hooks/interactions/stairs"
 import { useWindowOptions, WindowOpt } from "@/hooks/interactions/windows"
 import { useColumnLayout } from "@/hooks/layouts"
 import houses from "@/stores/houses"
-import scope from "@/stores/scope"
 import React from "react"
 import ChangeMaterials from "./ChangeMaterials"
 
 type Props = ContextMenuProps
 
 const LevelContextMenu = (props: Props) => {
-  if (scope.selected === null) throw new Error("scope.selected null")
+  const { selected } = props
 
   const { groupIndex, levelIndex, columnIndex, buildingId, elementName } =
-    scope.selected
+    selected
 
   const columnLayout = useColumnLayout(buildingId)
 
