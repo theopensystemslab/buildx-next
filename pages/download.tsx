@@ -7,6 +7,7 @@ import Container from "@/components/ui/Container"
 import { Loader } from "@/components/ui"
 import { type Houses } from "@/data/house"
 import JSZip from "jszip"
+import { CloudDownload24 } from "@carbon/icons-react"
 
 const Download = () => {
   const systemsData = useSystemsData()
@@ -63,11 +64,14 @@ const Download = () => {
     <div className="h-full w-full overflow-auto bg-gray-600 text-white">
       <div className="pt-16 pb-16">
         <a
-          className="block w-full bg-gray-500 px-4 py-2 text-xs underline no-underline transition-colors duration-200 hover:bg-gray-400"
+          className="block w-full flex items-center space-x-4 bg-gray-500 px-4 py-4 text-xs underline no-underline transition-colors duration-200 hover:bg-gray-400"
           href={zipUrl}
         >
-          <p className="text-base">Download project data</p>
-          <span className="text-sm text-gray-300">.csv</span>
+          <CloudDownload24 />
+          <div>
+            <p className="text-base">Download project data</p>
+            <span className="text-sm text-gray-300">.csv</span>
+          </div>
         </a>
       </div>
     </div>
