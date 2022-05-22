@@ -109,10 +109,10 @@ const StackedBarChart: FC<{
                   {Math.abs(point.value) > absoluteMax * 0.05 && (
                     <text
                       x={x + width / 2}
-                      y={y + Math.abs(height) / 2 + 2}
+                      y={y + Math.abs(height) / 2 + 1.5}
                       fill="#000"
                       textAnchor="middle"
-                      style={{ fontSize: 4 }}
+                      style={{ fontSize: 3.5 }}
                     >
                       {formatWithUnit(point.value, props.unitOfMeasurement)}
                     </text>

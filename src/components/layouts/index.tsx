@@ -1,5 +1,5 @@
 import { IconButton } from "@/components/ui"
-import { Build, Close, Data, Info, Site } from "@/components/ui/icons"
+import { Build, Files, Close, Data, Info, Site } from "@/components/ui/icons"
 import React, { PropsWithChildren, useState } from "react"
 import BetaBanner from "../ui/BetaBanner"
 import PartnersInfoBanner from "../ui/PartnersInfoBanner"
@@ -28,6 +28,9 @@ const Layout = ({ children }: PropsWithChildren<{}>) => {
           </IconButton>
           <IconButton href="/dashboard">
             <Data />
+          </IconButton>
+          <IconButton href="/download">
+            <Files />
           </IconButton>
         </div>
         <PartnersInfoBanner

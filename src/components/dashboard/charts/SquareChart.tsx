@@ -53,7 +53,7 @@ const SquareChart: FC<Props> = (props) => {
                 y={height / 2 + 2}
                 fill="#000"
                 textAnchor="middle"
-                style={{ fontSize: 4 }}
+                style={{ fontSize: 3.5 }}
               >
                 {formatWithUnit(d.value, props.unitOfMeasurement)}
               </text>
