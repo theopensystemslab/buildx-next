@@ -47,7 +47,7 @@ const SiteInfoPanel = () => {
         },
         {
           label: "Operational CO₂",
-          value: `${totalHouseStats.operationalCo2} kgCO₂/yr`,
+          value: `${totalHouseStats.operationalCo2} tCO₂/yr`,
         },
         {
           label: "Estimated Heating Costs",

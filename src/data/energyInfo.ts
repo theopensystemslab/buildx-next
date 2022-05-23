@@ -129,13 +129,15 @@ export const getHouseStats = ({
   const {
     costs: { total: cost },
     embodiedCo2: { total: embodiedCarbon },
+    energyUse,
+    operationalCo2,
   } = calculate({ houses, systemsData })
 
   return {
     cost: Math.round(cost),
     embodiedCarbon: Math.round(embodiedCarbon),
-    totalHeatingDemand: Math.round(relevantEnergyInfo.totalHeatingDemand),
-    operationalCo2: Math.round(relevantEnergyInfo.operationalCo2),
-    estimatedHeatingCosts: Math.round(relevantEnergyInfo.totalHeatingDemand),
+    totalHeatingDemand: Math.round(energyUse.totalHeatingDemand),
+    operationalCo2: Math.round(operationalCo2.annualTotal / 1000),
+    estimatedHeatingCosts: Math.round(energyUse.totalHeatingCost),
   }
 }
