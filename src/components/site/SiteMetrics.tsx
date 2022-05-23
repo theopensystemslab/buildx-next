@@ -88,7 +88,7 @@ const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
         },
         {
           label: "Embodied Carbon",
-          value: `${houseStats.embodiedCarbon} kgCO₂e`,
+          value: `${(houseStats.embodiedCarbon / 1000).toFixed(2)} tCO₂e`,
         },
         {
           label: "Space Heating Demand",
@@ -96,7 +96,7 @@ const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
         },
         {
           label: "Operational CO₂",
-          value: `${houseStats.operationalCo2} kgCO₂/yr`,
+          value: `${houseStats.operationalCo2} tCO₂/yr`,
         },
         {
           label: "Estimated Heating Costs",
