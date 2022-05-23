@@ -187,9 +187,9 @@ export const useMaterial = (
   useEffect(() => {
     computeVisibility()
     return subscribeKey(siteContext, "levelIndex", computeVisibility)
-  }, [])
+  }, [materialName])
 
-  useEffect(() => subscribe(stretch, computeVisibility), [])
+  useEffect(() => subscribe(stretch, computeVisibility), [materialName])
 
   return material
 }
