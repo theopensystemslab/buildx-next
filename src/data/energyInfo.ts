@@ -2,7 +2,11 @@ import calculate from "@/components/dashboard/data"
 import { useSystemsData } from "@/contexts/SystemsData"
 import type { System, SystemsData } from "@/data/system"
 import houses from "@/stores/houses"
+import { filterA, filterMapWithIndexR, filterR } from "@/utils"
+import { pipe } from "fp-ts/lib/function"
 import { find } from "ramda"
+import { useMemo } from "react"
+import { useSnapshot } from "valtio"
 import { Element } from "./element"
 import type { House } from "./house"
 import type { HouseType } from "./houseType"
@@ -109,6 +113,60 @@ export const sumHouseStats = (houseStats: Array<HouseStats>) => {
   )
 }
 
+export const useHouseStats = (buildingId: string) => {
+  const systemsData = useSystemsData()
+  const house = useSnapshot(houses[buildingId])
+
+  const {
+    costs: { total: cost },
+    embodiedCo2: { total: embodiedCarbon },
+    energyUse,
+    operationalCo2,
+  } = useMemo(
+    () =>
+      calculate({
+        houses: pipe(
+          houses,
+          // @ts-ignore
+          filterMapWithIndexR((k) => k! === house.id)
+        ),
+        systemsData,
+      }),
+    [house, systemsData]
+  )
+
+  return {
+    cost: Math.round(cost),
+    embodiedCarbon: Math.round(embodiedCarbon),
+    totalHeatingDemand: Math.round(energyUse.spaceHeatingDemand),
+    operationalCo2: Math.round(operationalCo2.annualTotal / 1000),
+    estimatedHeatingCosts: Math.round(energyUse.totalHeatingCost),
+  }
+}
+
+export const useHousesStats = () => {
+  const systemsData = useSystemsData()
+  const housesSnap = useSnapshot(houses)
+
+  const {
+    costs: { total: cost },
+    embodiedCo2: { total: embodiedCarbon },
+    energyUse,
+    operationalCo2,
+  } = useMemo(
+    () => calculate({ houses, systemsData }),
+    [housesSnap, systemsData]
+  )
+
+  return {
+    cost: Math.round(cost),
+    embodiedCarbon: Math.round(embodiedCarbon),
+    totalHeatingDemand: Math.round(energyUse.spaceHeatingDemand),
+    operationalCo2: Math.round(operationalCo2.annualTotal / 1000),
+    estimatedHeatingCosts: Math.round(energyUse.totalHeatingCost),
+  }
+}
+
 export const getHouseStats = ({
   house,
   systemsData,
@@ -131,7 +189,7 @@ export const getHouseStats = ({
     embodiedCo2: { total: embodiedCarbon },
     energyUse,
     operationalCo2,
-  } = calculate({ houses, systemsData })
+  } = useMemo(() => calculate({ houses, systemsData }), [houses, systemsData])
 
   return {
     cost: Math.round(cost),

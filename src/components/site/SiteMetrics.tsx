@@ -1,31 +1,10 @@
-import { useSystemsData } from "@/contexts/SystemsData"
-import { getHouseStats, HouseStats, sumHouseStats } from "@/data/energyInfo"
-import { House } from "@/data/house"
+import { useHousesStats, useHouseStats } from "@/data/energyInfo"
 import { useSiteContext } from "@/stores/context"
-import houses from "@/stores/houses"
-import { mapRR } from "@/utils"
-import { values } from "fp-ts-std/ReadonlyRecord"
-import { pipe } from "fp-ts/lib/function"
-import React, { useMemo } from "react"
-import { useSnapshot } from "valtio"
+import React from "react"
 import { InfoPanel } from "../ui"
 
 const SiteInfoPanel = () => {
-  const systemsData = useSystemsData()
-
-  const housesSnap = useSnapshot(houses)
-
-  const totalHouseStats = pipe(
-    housesSnap,
-    mapRR((house) =>
-      getHouseStats({
-        house: house as House,
-        systemsData,
-      })
-    ),
-    values,
-    (stats) => sumHouseStats(stats as HouseStats[])
-  )
+  const totalHouseStats = useHousesStats()
 
   return (
     <InfoPanel
@@ -59,22 +38,7 @@ const SiteInfoPanel = () => {
 }
 
 const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
-  const house = useSnapshot(houses?.[buildingId])
-  const systemsData = useSystemsData()
-
-  const houseStats = useMemo(
-    () =>
-      pipe(
-        house,
-        (house) =>
-          getHouseStats({
-            house: house as House,
-            systemsData,
-          }),
-        (stats) => sumHouseStats([stats] as HouseStats[])
-      ),
-    [house.dna, house.modifiedMaterials]
-  )
+  const houseStats = useHouseStats(buildingId)
 
   return (
     <InfoPanel
