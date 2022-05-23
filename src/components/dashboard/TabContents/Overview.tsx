@@ -7,7 +7,7 @@ import CircleChart from "../charts/CircleChart"
 import { formatWithUnit, formatWithUnitLong } from "../data"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
-  <div className="px-4 py-16 border-b border-gray-400 grid grid-cols-1 gap-x-16 last:border-b-0 md:grid-cols-4 md:space-y-0">
+  <div className="grid grid-cols-1 gap-x-16 border-b border-gray-400 px-4 py-16 last:border-b-0 md:grid-cols-4 md:space-y-0">
     {props.children}
   </div>
 )
@@ -99,7 +99,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
               {formatWithUnit(dashboardData.areas.totalFloor, "m²")}
             </p>
             {dashboardData.areas.totalFloor > 0 && (
-              <div className="text-gray-300 space-y-1">
+              <div className="space-y-1 text-gray-300">
                 <p className="text-3xl">
                   {formatWithUnitLong(
                     dashboardData.costs.total / dashboardData.areas.totalFloor,
@@ -111,7 +111,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
             )}
           </div>
         </Titled>
-        <Titled title="Energy use" subtitle="Estimated annual">
+        <Titled title="Space heating energy" subtitle="Estimated annual">
           <CircleChart
             data={[
               {

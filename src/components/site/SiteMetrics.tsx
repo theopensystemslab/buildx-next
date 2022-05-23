@@ -87,11 +87,11 @@ const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
           }).format(houseStats.cost),
         },
         {
-          label: "Total Carbon",
+          label: "Embodied Carbon",
           value: `${houseStats.embodiedCarbon} kgCO₂e`,
         },
         {
-          label: "Total Heating Demand",
+          label: "Space Heating Demand",
           value: `${houseStats.totalHeatingDemand} kWh/yr`,
         },
         {
