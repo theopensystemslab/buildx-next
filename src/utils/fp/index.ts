@@ -58,6 +58,7 @@ export {
 } from "fp-ts/lib/ReadonlyRecord"
 export {
   filter as filterR,
+  filterWithIndex as filterWithIndexR,
   map as mapR,
   mapWithIndex as mapWithIndexR,
   filterMapWithIndex as filterMapWithIndexR,

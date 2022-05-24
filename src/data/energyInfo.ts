@@ -2,17 +2,12 @@ import calculate from "@/components/dashboard/data"
 import { useSystemsData } from "@/contexts/SystemsData"
 import type { System, SystemsData } from "@/data/system"
 import houses from "@/stores/houses"
-import { filterA, filterMapWithIndexR, filterR } from "@/utils"
+import { filterWithIndexR } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { find } from "ramda"
 import { useMemo } from "react"
 import { useSnapshot } from "valtio"
-import { Element } from "./element"
 import type { House } from "./house"
-import type { HouseType } from "./houseType"
-import { Material } from "./material"
-import type { Module } from "./module"
-import { moduleLayout } from "./moduleLayout"
 import { getAirtableEntries } from "./utils"
 
 export interface EnergyInfo {
@@ -127,8 +122,7 @@ export const useHouseStats = (buildingId: string) => {
       calculate({
         houses: pipe(
           houses,
-          // @ts-ignore
-          filterMapWithIndexR((k) => k! === house.id)
+          filterWithIndexR((k) => k === house.id)
         ),
         systemsData,
       }),
