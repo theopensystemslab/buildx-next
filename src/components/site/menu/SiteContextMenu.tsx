@@ -5,8 +5,10 @@ import { useSystemsData } from "@/contexts/SystemsData"
 import { House } from "@/data/house"
 import siteContext, { EditModeEnum, useSiteContext } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
+import menu, { closeMenu } from "@/stores/menu"
 import scope, { ScopeItem } from "@/stores/scope"
-import React, { Fragment, useState } from "react"
+import React, { Fragment, useRef, useState } from "react"
+import useMeasure from "react-use-measure"
 import { useSnapshot } from "valtio"
 import BuildingContextMenu from "./BuildingContextMenu"
 import LevelContextMenu from "./LevelContextMenu"
@@ -102,29 +104,27 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   )
 }
 
-const SiteContextMenu = ({
-  pageX,
-  pageY,
-}: {
-  pageX: number
-  pageY: number
-}) => {
+const SiteContextMenu = ({ x: pageX, y: pageY }: { x: number; y: number }) => {
   const { buildingId, levelIndex } = useSiteContext()
   const { selected } = useSnapshot(scope)
 
-  const onClose = () => {
-    // scope.selected = null
-    siteContext.menu = null
+  const props = {
+    pageX,
+    pageY,
+    onClose: closeMenu,
+    selected: selected as ScopeItem,
   }
 
-  const props = { pageX, pageY, onClose, selected: selected as ScopeItem }
-
-  return selected === null ? null : !buildingId ? (
-    <SiteContextMenu_ {...props} />
-  ) : levelIndex === null ? (
-    <BuildingContextMenu {...props} />
-  ) : (
-    <LevelContextMenu {...props} />
+  return selected === null ? null : (
+    <div>
+      {!buildingId ? (
+        <SiteContextMenu_ {...props} />
+      ) : levelIndex === null ? (
+        <BuildingContextMenu {...props} />
+      ) : (
+        <LevelContextMenu {...props} />
+      )}
+    </div>
   )
 }
 

@@ -4,6 +4,7 @@ import siteContext, {
 } from "@/stores/context"
 import highlights from "@/stores/highlights"
 import { useMaterial, useMaterialName } from "@/stores/materials"
+import menu, { openMenu } from "@/stores/menu"
 import scope from "@/stores/scope"
 import { all, any, objComp, object3dChildOf, undef } from "@/utils"
 import {
@@ -68,7 +69,7 @@ const ColumnBuildingElement = (props: Props) => {
   }
 
   const checks = (intersections: Intersection[]): boolean => {
-    if (siteContext.menu !== null) return false
+    if (menu.open) return false
     if (!meshRef.current) return false
 
     const ixs =
@@ -115,7 +116,7 @@ const ColumnBuildingElement = (props: Props) => {
     onContextMenu: ({ event, event: { intersections, pageX, pageY } }) => {
       event.preventDefault?.()
       if (!checks(intersections)) return
-      siteContext.menu = [pageX, pageY]
+      openMenu(pageX, pageY)
       invalidate()
     },
     onPointerDown: ({ event: { intersections } }) => {
@@ -145,13 +146,7 @@ const ColumnBuildingElement = (props: Props) => {
       highlights.outlined.push(ref(meshRef.current as Object3D))
     }
     if (
-      all(
-        siteContext.menu === null,
-        isOutlined,
-        !isHovered,
-        !isSelected,
-        !!meshRef.current
-      )
+      all(!menu.open, isOutlined, !isHovered, !isSelected, !!meshRef.current)
     ) {
       highlights.outlined = highlights.outlined.filter(
         (x) => x.id !== meshRef.current!.id

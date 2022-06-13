@@ -6,6 +6,7 @@ import {
 } from "@/stores/context"
 import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
+import menu from "@/stores/menu"
 import scope from "@/stores/scope"
 import { mapWithIndexM, StrOrd } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
@@ -82,7 +83,7 @@ const ColumnBuildingModule = (props: Props) => {
     if (contextMode === SiteContextModeEnum.Enum.LEVEL) {
       return subscribeKey(scope, "hovered", () => {
         if (
-          context.menu === null &&
+          !menu.open &&
           scope.hovered?.columnIndex === columnIndex &&
           context.levelIndex === levelIndex
         ) {

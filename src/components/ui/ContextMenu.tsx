@@ -1,7 +1,7 @@
-import React, { useRef } from "react"
-import type { ReactNode } from "react"
-import { useClickAway, useEscape } from "./utils"
 import { ScopeItem } from "@/stores/scope"
+import type { ReactNode } from "react"
+import React, { useRef } from "react"
+import { useClickAway, useEscape } from "./utils"
 
 export type ContextMenuProps = {
   pageX: number

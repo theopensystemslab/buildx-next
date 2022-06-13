@@ -40,7 +40,9 @@
     "react-cool-portal": "^1.2.0",
     "react-dom": "^18.0.0",
     "react-hook-form": "^7.28.0",
+    "react-use-measure": "^2.1.1",
     "three": "^0.139.2",
+    "usehooks-ts": "^2.5.3",
     "valtio": "^1.2.11",
     "wouter": "^2.8.0-alpha.2",
     "zod": "^3.11.6"
