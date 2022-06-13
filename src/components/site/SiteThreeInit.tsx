@@ -3,6 +3,7 @@ import { SystemsDataContext } from "@/contexts/SystemsData"
 import siteContext from "@/stores/context"
 import { clearIlluminatedMaterials } from "@/stores/highlights"
 import { useMapBoundary } from "@/stores/map"
+import menu from "@/stores/menu"
 import { setXZ } from "@/stores/pointer"
 import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
@@ -68,12 +69,12 @@ const SiteThreeInit = (props: Props) => {
       <HorizontalPlane
         onChange={setXZ}
         onNearClick={() => {
-          siteContext.menu = null
+          menu.open = false
           scope.selected = null
           clearIlluminatedMaterials()
         }}
         onNearHover={() => {
-          if (siteContext.menu !== null) return
+          if (menu.open) return
           scope.hovered = null
           if (scope.selected === null) clearIlluminatedMaterials()
         }}

@@ -5,7 +5,6 @@ export const EditModeEnum = z.enum(["MOVE_ROTATE", "STRETCH"])
 export type EditMode = z.infer<typeof EditModeEnum>
 
 type SiteContext = {
-  menu: [number, number] | null
   sidebar: boolean
   buildingId: string | null
   levelIndex: number | null
@@ -13,7 +12,6 @@ type SiteContext = {
 }
 
 const siteContext = proxy<SiteContext>({
-  menu: null,
   sidebar: false,
   buildingId: null,
   levelIndex: null,

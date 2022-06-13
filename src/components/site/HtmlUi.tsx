@@ -10,6 +10,7 @@ import {
 import { Check, Menu, SectionCuts } from "@/components/ui/icons"
 import camera, { useCameraReset } from "@/stores/camera"
 import siteContext, { useSiteContext } from "@/stores/context"
+import menu from "@/stores/menu"
 import {
   setOrthographic,
   useSettings,
@@ -21,6 +22,7 @@ import { Add32, Reset24, View24 } from "@carbon/icons-react"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/Record"
 import React, { Fragment, Suspense, useEffect, useState } from "react"
+import { useSnapshot } from "valtio"
 import UniversalMenu from "../ui/UniversalMenu"
 import { SiteContextMenu } from "./menu"
 import SiteMetrics from "./SiteMetrics"
@@ -39,7 +41,8 @@ const HtmlUi = () => {
     if (camera.controls.polarAngle > a) camera.controls.rotatePolarTo(a, true)
   }, [shadows])
 
-  const { buildingId, levelIndex, editMode, menu } = useSiteContext()
+  const { buildingId, levelIndex, editMode } = useSiteContext()
+  const menuSnap = useSnapshot(menu)
 
   const check = buildingId !== null || levelIndex !== null || editMode !== null
 
@@ -141,10 +144,10 @@ const HtmlUi = () => {
         </div>
       ) : null}
       <Breadcrumbs />
-      {menu !== null &&
+      {menuSnap.open &&
         (() => {
-          const [pageX, pageY] = menu
-          return <SiteContextMenu {...{ pageX, pageY }} />
+          const { x, y } = menu
+          return <SiteContextMenu {...{ x, y }} />
         })()}
       <SiteMetrics />
     </Fragment>
