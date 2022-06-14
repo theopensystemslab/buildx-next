@@ -6,51 +6,34 @@ Write me
 
 ## Getting Started
 
-### Environment
+### 1. Copy an Airtable
 
-`NEXT_PUBLIC_AIRTABLE_API_KEY` and `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` must be defined. Use a file called `.env.local` when running locally, it should look like:
+The following build systems provide an open Airtable Base containing all the data for their build system:
+
+> TODO: Table here of build systems with base share links
+> e.g. https://airtable.com/shrfLb5VdqrzkrR05 for Swift
+
+### 2. Provide the Environment Variables
+
+The follwoing environment variables must be defined, use a file called `.env.local` when running locally, in the following format, with the values in places of the `...`:
 
 ```
 NEXT_PUBLIC_AIRTABLE_API_KEY=...
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=...
+NEXT_PUBLIC_AIRTABLE_BASE_IDS=...
 ```
 
-(with `...` filled out as your API key of course)
+Or provide these through the deployment dashboard e.g. on Vercel or Netlify
 
-### Configuring Build Systems
+The `NEXT_PUBLIC_AIRTABLE_BASE_IDS` variable can be a single Airtable Base ID, in which case the application adapt to only serving one build system. It can also be many, separated by `,`, e.g.:
 
-In the `buildx.config.ts` file, complete the `systems` key like so:
-
-```ts
-export const systems: Array<System> = [
-  {
-    id: "swift",
-    name: "WikiHouse Swift",
-    airtableId: "appGlzQcCZpDNRFsE",
-  },
-]
 ```
+NEXT_PUBLIC_AIRTABLE_BASE_IDS=appGlzQcCZpDNRFsE,appzG3plVRqgH6c5f,app25JFkKVKKEt5io
+```
+
+In this case, the application will adapt and provide a choice of build systems to choose from in the house type selection sidebar.
 
 The `airtableId` is the Airtable Base ID, documented [here](https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs)
-
-You can include many, like so:
-
-```ts
-export const systems: Array<System> = [
-  {
-    id: "swift",
-    name: "WikiHouse Swift",
-    airtableId: "appGlzQcCZpDNRFsE",
-  },
-  {
-    id: "holz100",
-    name: "HOLZ100",
-    airtableId: "appzG3plVRqgH6c5f",
-  },
-]
-```
-
-Including only a single build system will cause appropriate behaviour e.g. giving no choice of build systems but proceeding directly to the house types selection in the sidebar to add a house type.
 
 ## Deployment
 
