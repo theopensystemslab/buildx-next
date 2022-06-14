@@ -16,7 +16,12 @@ type Props = {
 }
 
 const SiteSidebar = ({ open, close }: Props) => {
-  const [selectedSystemId, setSelectedSystemId] = useState<string | null>(null)
+  const manySystems = systems.length > 1
+  const singleSystem = systems.length === 1
+
+  const [selectedSystemId, setSelectedSystemId] = useState<string | null>(
+    singleSystem ? systems[0].id : null
+  )
 
   const selectedSystem: System | undefined = useMemo(() => {
     return systems.find((system) => system.id === selectedSystemId)
@@ -26,7 +31,7 @@ const SiteSidebar = ({ open, close }: Props) => {
 
   return (
     <Sidebar expanded={open} onClose={close}>
-      {!selectedSystem ? (
+      {manySystems && !selectedSystem ? (
         <div className="space-y-2">
           <p className="px-4 font-bold">Systems</p>
           {systems.map((system) => (
@@ -42,50 +47,54 @@ const SiteSidebar = ({ open, close }: Props) => {
           ))}
         </div>
       ) : (
-        <div className="space-y-2">
-          <button
-            className="sticky top-2 ml-4 rounded bg-white px-2 py-2 text-xs text-gray-500 hover:text-gray-600"
-            onClick={() => {
-              setSelectedSystemId(null)
-            }}
-          >
-            ← Back
-          </button>
-          <p className="px-4 font-bold">{selectedSystem.name} House types</p>
-          {pipe(
-            houseTypes,
-            mapWithIndex((index, houseType) => {
-              return houseType.systemId === selectedSystem.id ? (
-                <HouseThumbnail
-                  key={index}
-                  houseType={houseType}
-                  onAdd={() => {
-                    const id = nanoid()
+        selectedSystem && (
+          <div className="space-y-2">
+            {manySystems && (
+              <button
+                className="sticky top-2 ml-4 rounded bg-white px-2 py-2 text-xs text-gray-500 hover:text-gray-600"
+                onClick={() => {
+                  setSelectedSystemId(null)
+                }}
+              >
+                ← Back
+              </button>
+            )}
+            <p className="px-4 font-bold">{selectedSystem.name} House types</p>
+            {pipe(
+              houseTypes,
+              mapWithIndex((index, houseType) => {
+                return houseType.systemId === selectedSystem.id ? (
+                  <HouseThumbnail
+                    key={index}
+                    houseType={houseType}
+                    onAdd={() => {
+                      const id = nanoid()
 
-                    const housePositions = Object.values(houses).map(
-                      (house) => house.position
-                    )
+                      const housePositions = Object.values(houses).map(
+                        (house) => house.position
+                      )
 
-                    const position = addNewPoint(housePositions)
+                      const position = addNewPoint(housePositions)
 
-                    houses[id] = {
-                      id,
-                      houseTypeId: houseType.id,
-                      systemId: houseType.systemId,
-                      position,
-                      rotation: 0,
-                      dna: houseType.dna as string[],
-                      modifiedMaterials: {},
-                      modifiedMaterialsPreview: {},
-                      friendlyName: `Building ${keys(houses).length + 1}`,
-                    }
-                    close()
-                  }}
-                />
-              ) : null
-            })
-          )}
-        </div>
+                      houses[id] = {
+                        id,
+                        houseTypeId: houseType.id,
+                        systemId: houseType.systemId,
+                        position,
+                        rotation: 0,
+                        dna: houseType.dna as string[],
+                        modifiedMaterials: {},
+                        modifiedMaterialsPreview: {},
+                        friendlyName: `Building ${keys(houses).length + 1}`,
+                      }
+                      close()
+                    }}
+                  />
+                ) : null
+              })
+            )}
+          </div>
+        )
       )}
     </Sidebar>
   )
