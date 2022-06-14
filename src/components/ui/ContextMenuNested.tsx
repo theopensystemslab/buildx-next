@@ -12,13 +12,14 @@ export interface Props {
 export default function ContextMenuNested(props: Props) {
   const [hovered, setHovered] = useState(false)
 
-  const [ref, { right, bottom }] = useMeasure()
+  const [ref, { top, right, bottom, width }] = useMeasure()
 
   const windowSize = useWindowSize()
 
-  const flip = right > windowSize.width
+  const flip = right > windowSize.width + width / 2
 
-  const shift = bottom > windowSize.height
+  const ty =
+    top < 0 ? 0 : bottom > windowSize.height ? -(bottom - windowSize.height) : 0
 
   return (
     <div
@@ -40,9 +41,12 @@ export default function ContextMenuNested(props: Props) {
       {hovered ? (
         <div
           ref={ref}
-          className={`absolute ${shift ? "bottom-0" : "top-0"} ${
+          className={`absolute ${
             flip ? "right-full" : "left-full"
           } z-20 bg-white ${props.long ? "w-64" : "w-48"}`}
+          style={{
+            transform: `translate(${0}px, ${ty}px)`,
+          }}
         >
           {props.children}
         </div>

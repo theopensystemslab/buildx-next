@@ -1,12 +1,13 @@
 import { IconButton } from "@/components/ui"
-import { Build, Files, Close, Data, Info, Site } from "@/components/ui/icons"
-import React, { PropsWithChildren, useState } from "react"
+import { Build, Close, Data, Files, Info, Site } from "@/components/ui/icons"
+import banners, { setBetaBanner, setPartnersInfoBanner } from "@/stores/banners"
+import React, { PropsWithChildren } from "react"
+import { useSnapshot } from "valtio"
 import BetaBanner from "../ui/BetaBanner"
 import PartnersInfoBanner from "../ui/PartnersInfoBanner"
 
 const Layout = ({ children }: PropsWithChildren<{}>) => {
-  const [partnersInfoBanner, setPartnersInfoBanner] = useState(false)
-  const [betaBanner, setBetaBanner] = useState(true)
+  const { betaBanner, partnersInfoBanner } = useSnapshot(banners)
 
   return (
     <div className="fixed flex h-full w-full flex-col">

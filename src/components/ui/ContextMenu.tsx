@@ -1,6 +1,11 @@
+import banners from "@/stores/banners"
 import { ScopeItem } from "@/stores/scope"
 import type { ReactNode } from "react"
 import React, { useRef } from "react"
+import mergeRefs from "react-merge-refs"
+import useMeasure from "react-use-measure"
+import { useWindowSize } from "usehooks-ts"
+import { useSnapshot } from "valtio"
 import { useClickAway, useEscape } from "./utils"
 
 export type ContextMenuProps = {
@@ -18,6 +23,24 @@ export default function ContextMenu(props: ContextMenuProps) {
 
   useEscape(props.onClose)
 
+  const [measureRef, { top, left, right, bottom }] = useMeasure()
+
+  const windowSize = useWindowSize()
+
+  const { betaBanner } = useSnapshot(banners)
+
+  const y0 = betaBanner ? -48 : 0
+
+  const tx =
+    left < 0 ? 0 : right > windowSize.width ? -(right - windowSize.width) : 0
+
+  const ty =
+    top < 0
+      ? y0
+      : bottom > windowSize.height
+      ? -(bottom - windowSize.height)
+      : y0
+
   return (
     <div
       className="absolute h-[1px] w-[1px]"
@@ -27,10 +50,11 @@ export default function ContextMenu(props: ContextMenuProps) {
       }}
     >
       <div
-        ref={containerRef}
-        className={`absolute z-20 w-48 bg-white shadow-lg ${
-          props.pageY > 300 ? "bottom-[2px]" : "top-[2px]"
-        }`}
+        ref={mergeRefs([containerRef, measureRef])}
+        className={`absolute z-20 w-48 bg-white shadow-lg`}
+        style={{
+          transform: `translate(${tx}px, ${ty}px)`,
+        }}
       >
         {props.children}
       </div>
