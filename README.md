@@ -6,7 +6,17 @@ Write me
 
 ## Getting Started
 
-### Environment
+### 1. Fork This Repo
+
+https://github.com/theopensystemslab/buildx-next/fork
+
+### 2. Fork an Airtable
+
+Go to https://airtable.com/shrfLb5VdqrzkrR05 and import this Airtable into your own workspace.
+
+You'll need to sign up to Airtable, and also generate an API key in your account settings.
+
+### 3. Provide Environment Variables
 
 `NEXT_PUBLIC_AIRTABLE_API_KEY` and `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` must be defined. Use a file called `.env.local` when running locally, it should look like:
 
@@ -15,11 +25,17 @@ NEXT_PUBLIC_AIRTABLE_API_KEY=...
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=...
 ```
 
-(with `...` filled out as your API key of course)
+Please go to https://account.mapbox.com/auth/signup/ to get a Mapbox account if necessary.
 
-### Configuring Build Systems
+Environment variables can also be provided through hosting service dashboard e.g. on Vercel or Netlify
 
-In the `buildx.config.ts` file, complete the `systems` key like so:
+### 4. Provide a Configuration
+
+Build X is configured via the file `buildx.config.json`.
+
+You can modify the existing file from the forked repository. You'll need to have access to each of these Airtable entries, this will only be possible for your API key if these Airtable bases are part of the workspace for which your API key is associated, so the entries from the forked repository won't work but demonstrate the file format.
+
+You may configure a single build system like so:
 
 ```ts
 export const systems: Array<System> = [
@@ -50,8 +66,8 @@ export const systems: Array<System> = [
 ]
 ```
 
-Including only a single build system will cause appropriate behaviour e.g. giving no choice of build systems but proceeding directly to the house types selection in the sidebar to add a house type.
+Including only a single build system will cause appropriate behaviour e.g. giving no choice of build systems but proceeding directly to the house types selection in the sidebar to add a house type. This makes for a nice embed experience on a build system's website.
 
-## Deployment
+### 5. Deployment
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftheopensystemslab%2Fbuildx-next%2Ftree%2Fmake-configurable)
+We recommend to use a service like Vercel or Netlify to deploy this project serverlessly. Commit the changes to the configuration file, push, and then go through the simple step by step deployment process with either of these providers.

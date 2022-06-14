@@ -17,7 +17,9 @@ import { type SpaceType, getSpaceTypes } from "./spaceType"
 import { getSystemSettings, type SystemSettings } from "./settings"
 import { getStairTypes, type StairType } from "./stairType"
 import { getLevelTypes, LevelType } from "./levelType"
-import { systems } from "../../buildx.config"
+import config from "../../buildx.config.json"
+
+const systems = config.systems
 
 export { systems }
 
