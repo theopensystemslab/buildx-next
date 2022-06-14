@@ -17,34 +17,9 @@ import { type SpaceType, getSpaceTypes } from "./spaceType"
 import { getSystemSettings, type SystemSettings } from "./settings"
 import { getStairTypes, type StairType } from "./stairType"
 import { getLevelTypes, LevelType } from "./levelType"
+import { systems } from "../../buildx.config"
 
-export const systems: Array<System> = [
-  // {
-  //   id: "sample",
-  //   name: "Sample",
-  //   airtableId: "app7ApkBWMj8Z8gdV",
-  // },
-  {
-    id: "3cea-amvic",
-    name: "3CEA (Amvic)",
-    airtableId: "appsOHJyDxhPrHyxc",
-  },
-  {
-    id: "mobble",
-    name: "Inhout Mobble",
-    airtableId: "app25JFkKVKKEt5io",
-  },
-  {
-    id: "swift",
-    name: "WikiHouse Swift",
-    airtableId: "appGlzQcCZpDNRFsE",
-  },
-  {
-    id: "holz100",
-    name: "HOLZ100",
-    airtableId: "appzG3plVRqgH6c5f",
-  },
-]
+export { systems }
 
 export interface System {
   id: string
