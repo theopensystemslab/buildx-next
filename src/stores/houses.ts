@@ -1,8 +1,7 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { Houses } from "@/data/house"
-import { LoadedModule, Module, StructuredDnaModule } from "@/data/module"
-import { StructuredDna } from "@/data/moduleLayout"
+import { Module, StructuredDnaModule } from "@/data/module"
 import {
   filterMapA,
   flattenO,

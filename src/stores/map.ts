@@ -5,7 +5,6 @@ import { useEffect, useMemo } from "react"
 import { BufferAttribute, BufferGeometry, LineBasicMaterial } from "three"
 import { proxy, useSnapshot } from "valtio"
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "../CONSTANTS"
-import { SSR } from "../utils"
 
 const mapProxy = proxy<{
   polygon: Polygon | null
