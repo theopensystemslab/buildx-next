@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-### 1. Create an Airtable Base
+### 1. Create Airtable Base(s)
 
 You'll need to sign up to Airtable if you haven't already (and also **generate an API key in your account settings**, for later).
 
