@@ -4,6 +4,9 @@
 // which doesn't have typings.
 declare module "nanoid"
 
+declare module "*.yaml"
+declare module "*.yml"
+
 type Pt3 = [number, number, number]
 
 type Pt2 = [number, number]
