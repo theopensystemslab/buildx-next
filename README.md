@@ -92,4 +92,12 @@ npm run dev
 
 ### 6. Deployment
 
-We recommend to use a service like Vercel or Netlify to deploy this project serverlessly. Commit the changes to the configuration file, push, and then go through the simple step by step deployment process with either of these providers.
+Commit and push your changes first!
+
+```
+git add .
+git commit -m "configuration"
+git push
+```
+
+We then recommend using a service like Vercel or Netlify to deploy this project serverlessly. Commit the changes to the configuration file, push, and then go through the simple step by step deployment process with either of these providers to deploy this repository to a live site.
