@@ -6,15 +6,28 @@ Write me
 
 ## Getting Started
 
-### 1. Fork This Repo
+### 1. Create an Airtable Base
 
-https://github.com/theopensystemslab/buildx-next/fork
+You'll need to sign up to Airtable if you haven't already (and also **generate an API key in your account settings**, for later).
 
-### 2. Fork an Airtable
+Here are some pre-existing Airtable bases that will work with Build X. It's recommended to copy one of these to begin with.
 
-Go to https://airtable.com/shrfLb5VdqrzkrR05 and import this Airtable into your own workspace with the `Copy base` button in the top-right corner.
+| Build System    | Shared Airtable Base URL               |
+| --------------- | -------------------------------------- |
+| WikiHouse Swift | https://airtable.com/shrfLb5VdqrzkrR05 |
+| HOLZ100         | https://airtable.com/shrIAYEoae51NWQCu |
 
-You'll need to sign up to Airtable, and also **generate an API key in your account settings**.
+Press the `Copy base` button in the top right to copy one into your own workspace. This is necessary, your API key won't work with shared bases.
+
+Any new Airtable base can be created and plugged into Build X so long as the schema remains the same and the necessary records are entered.
+
+### 2. Fork Build X
+
+Press either `Fork` or `Use this template` on this repository.
+
+### 3. Edit the Configuraton
+
+The configuration file is `buildx.config.yaml`. Click on this file
 
 ### 3. Provide Environment Variables
 

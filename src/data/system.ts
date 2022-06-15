@@ -17,9 +17,18 @@ import { type SpaceType, getSpaceTypes } from "./spaceType"
 import { getSystemSettings, type SystemSettings } from "./settings"
 import { getStairTypes, type StairType } from "./stairType"
 import { getLevelTypes, LevelType } from "./levelType"
-import config from "../../buildx.config.json"
+import config from "../../buildx.config.yaml"
+import * as z from "zod"
 
-const systems = config.systems
+const systems: Array<System> = z
+  .array(
+    z.object({
+      id: z.string().nonempty(),
+      name: z.string().nonempty(),
+      airtableId: z.string().nonempty(),
+    })
+  )
+  .parse(config.systems)
 
 export { systems }
 
