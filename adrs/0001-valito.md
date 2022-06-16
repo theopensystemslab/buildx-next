@@ -1,5 +1,11 @@
 # Valtio
 
+## Prior
+
+Passing props everywhere, lots of boilerplate and concern around triggering undesired renders
+
+## Now
+
 No need to worry about:
 
 - React component hierarchy
