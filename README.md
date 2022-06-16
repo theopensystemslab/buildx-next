@@ -6,14 +6,9 @@
 
 You'll need to sign up to Airtable if you haven't already (and also **generate an API key in your account settings**, for later).
 
-Here are some pre-existing Airtable bases that will work with Build X. It's recommended to copy one of these to begin with.
+Here is a sample Airtable Base that will work with Build X: https://airtable.com/shrfLb5VdqrzkrR05
 
-| Build System    | Shared Airtable Base URL               |
-| --------------- | -------------------------------------- |
-| WikiHouse Swift | https://airtable.com/shrfLb5VdqrzkrR05 |
-| HOLZ100         | https://airtable.com/shrIAYEoae51NWQCu |
-
-Press the `Copy base` button in the top right to copy one into your own workspace. This is necessary, your API key won't work with shared bases. The base ID (which we'll need for our configuration later) needs to be in the format described [here](https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs).
+You can copy this as a starter template. Press the `Copy base` button in the top right to copy one into your own workspace. This is necessary, your API key won't work with shared bases. The base ID (which we'll need for our configuration later) needs to be in the format described [here](https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs).
 
 Any new Airtable base can be created and plugged into Build X so long as the schema remains the same and the necessary records are entered.
 
