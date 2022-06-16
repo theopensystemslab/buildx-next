@@ -22,7 +22,7 @@ Either `Use this template` (no-code users) or `Fork` (developers/contributors) t
 
 The configuration file is `buildx.config.yaml` written in [YAML](https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html#yaml-basics).
 
-You can use the GitHub UI to edit this file by clicking on the file to open it, and then clicking the **pencil icon** in the top right to _Edit this file_.
+You can use the GitHub UI to edit this file by clicking on the file to open it, and then clicking the :pencil2: pencil icon in the top right to _Edit this file_.
 
 The `id` and `name` fields can be anything so long as the `id`'s are unique. The `airtableId` is the Airtable Base ID as described [here](https://support.airtable.com/hc/en-us/articles/4405741487383-Understanding-Airtable-IDs).
 
@@ -30,11 +30,11 @@ Commit your changes when finished editing (the button at the bottom).
 
 ### 4. Deployment
 
-The easiest way to deploy this project is with a serverless provider such as [Vercel](https://vercel.com) or [Netlify](https://netlify.com). You can sign up for an account with either provider using your GitHub account, and then create a deployment pointing to your GitHub repository (the same one that you just edited the configuration file in).
+The easiest way to deploy this project is with a serverless provider such as [Vercel](https://vercel.com) or [Netlify](https://netlify.com). You can sign up for an account with either provider using your GitHub account, and then create a deployment pointing to your GitHub repository (the same one that you just edited the configuration file with).
 
 #### Environment Variables
 
-There'll be a section to enter environment variables, there are two that need to be defined:
+There are two environment variables that must be defined in the deployment dashboard (i.e. on Vercel or Netlify or whichever provider you're using):
 
 | Key                               | Value                 |
 | --------------------------------- | --------------------- |
@@ -42,6 +42,8 @@ There'll be a section to enter environment variables, there are two that need to
 | `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` | Mapbox access token   |
 
 Please go to https://account.mapbox.com/auth/signup/ to get a Mapbox account if necessary. You should be able to get an access token from https://account.mapbox.com/.
+
+(If running locally, add these to `.env.local` in the usual environment variable file format)
 
 ### 5. Embed as an Iframe
 
