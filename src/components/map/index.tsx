@@ -52,23 +52,62 @@ const MapIndex = () => {
 
   const [mapPolygon] = useMapPolygon()
 
-  const vectorSource = useRef(new VectorSource())
+  const [vectorSource] = useState(new VectorSource())
+
+  const [xyzSource] = useState(
+    new XYZ({
+      url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      maxZoom,
+    })
+  )
 
   const draw = useRef(
     new Draw({
-      source: vectorSource.current,
+      source: vectorSource,
       type: "Polygon",
     })
   )
 
-  const modify = useRef(new Modify({ source: vectorSource.current }))
+  const modify = useRef(new Modify({ source: vectorSource }))
 
-  const snap = useRef(new Snap({ source: vectorSource.current }))
+  const snap = useRef(new Snap({ source: vectorSource }))
+
+  const [tileLayer] = useState(
+    new TileLayer({
+      source: xyzSource,
+    })
+  )
+
+  const [map] = useState(
+    new Map({
+      layers: [
+        tileLayer,
+        new VectorLayer({
+          source: vectorSource,
+          style: new Style({
+            fill: new Fill({
+              color: "rgba(255, 255, 255, 0.2)",
+            }),
+            stroke: new Stroke({
+              color: "#fff",
+              width: 2,
+            }),
+          }),
+        }),
+      ],
+      view: new View({
+        center: gadheim,
+        zoom: 5,
+        maxZoom,
+      }),
+      controls: [],
+    })
+  )
 
   useEffect(() => {
     draw.current.on("drawstart", (event) => {
       mapProxy.polygon = null
-      vectorSource.current.clear()
+      vectorSource.clear()
     })
 
     draw.current.on("drawend", ({ feature }) => {
@@ -90,37 +129,6 @@ const MapIndex = () => {
           BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
           JSON.stringify(mapProxy.polygon)
         )
-    })
-  )
-
-  const [map] = useState(
-    new Map({
-      layers: [
-        new TileLayer({
-          source: new XYZ({
-            url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            maxZoom,
-          }),
-        }),
-        new VectorLayer({
-          source: vectorSource.current,
-          style: new Style({
-            fill: new Fill({
-              color: "rgba(255, 255, 255, 0.2)",
-            }),
-            stroke: new Stroke({
-              color: "#fff",
-              width: 2,
-            }),
-          }),
-        }),
-      ],
-      view: new View({
-        center: gadheim,
-        zoom: 5,
-        maxZoom,
-      }),
-      controls: [],
     })
   )
 
@@ -177,8 +185,8 @@ const MapIndex = () => {
     if (mode === "DRAW" && !mapPolygon) {
       setSnack(true)
     } else if (mapPolygon) {
-      vectorSource.current.clear()
-      vectorSource.current.addFeature(
+      vectorSource.clear()
+      vectorSource.addFeature(
         new OLFeature({
           geometry: new OLPolygon(mapPolygon.coordinates),
         })
@@ -235,7 +243,7 @@ const MapIndex = () => {
             onClick={() => {
               mapProxy.polygon = null
               localStorage.setItem(BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY, "null")
-              vectorSource.current.clear()
+              vectorSource.clear()
             }}
           >
             <div className="flex items-center justify-center">
