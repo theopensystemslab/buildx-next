@@ -6,7 +6,7 @@ import highlights from "@/stores/highlights"
 import { useMaterial, useMaterialName } from "@/stores/materials"
 import menu, { openMenu } from "@/stores/menu"
 import scope from "@/stores/scope"
-import { all, any, objComp, object3dChildOf, undef } from "@/utils"
+import { all, objComp, object3dChildOf } from "@/utils"
 import {
   Intersection,
   invalidate,
@@ -100,6 +100,16 @@ const ColumnBuildingElement = (props: Props) => {
     return true
   }
 
+  const triggerMenu = ({
+    event,
+    event: { intersections, pageX, pageY },
+  }: any) => {
+    event.preventDefault?.()
+    if (!checks(intersections)) return
+    openMenu(pageX, pageY)
+    invalidate()
+  }
+
   const bind = useGesture<{
     hover: ThreeEvent<PointerEvent>
     onPointerDown: ThreeEvent<PointerEvent>
@@ -113,17 +123,13 @@ const ColumnBuildingElement = (props: Props) => {
       }
       invalidate()
     },
-    onContextMenu: ({ event, event: { intersections, pageX, pageY } }) => {
-      event.preventDefault?.()
-      if (!checks(intersections)) return
-      openMenu(pageX, pageY)
-      invalidate()
-    },
+    onContextMenu: triggerMenu,
     onPointerDown: ({ event: { intersections } }) => {
       if (!checks(intersections)) return
       scope.selected = key
       invalidate()
     },
+    onDoubleClick: triggerMenu,
   })
 
   const selectOrHoverHandler = () => {
