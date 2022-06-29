@@ -13,7 +13,9 @@ import { Feature, Polygon } from "geojson"
 import mapboxgl from "mapbox-gl"
 import Link from "next/link"
 import { Feature as OLFeature, Map, View } from "ol"
+import { FeatureLike } from "ol/Feature"
 import GeoJSON from "ol/format/GeoJSON"
+import { Circle, LineString, MultiPoint, Point } from "ol/geom"
 import OLPolygon from "ol/geom/Polygon"
 import { Draw, Modify, Snap } from "ol/interaction"
 import TileLayer from "ol/layer/Tile"
@@ -22,10 +24,10 @@ import "ol/ol.css"
 import { fromLonLat } from "ol/proj"
 import VectorSource from "ol/source/Vector"
 import XYZ from "ol/source/XYZ"
-import Fill from "ol/style/Fill"
-import Stroke from "ol/style/Stroke"
-import Style from "ol/style/Style"
-import React, { useEffect, useRef, useState } from "react"
+import { getArea, getLength } from "ol/sphere"
+import { Circle as StyleCircle, Fill, Stroke, Style, Text } from "ol/style"
+import RegularShape from "ol/style/RegularShape"
+import { useEffect, useRef, useState } from "react"
 import { subscribeKey } from "valtio/utils"
 import { IconButton } from "../ui"
 import { Menu } from "../ui/icons"
@@ -39,6 +41,28 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!
 // const westerngrund = fromLonLat([9.1515, 50.68]) as [number, number]
 
 const gadheim = fromLonLat([9.902056, 49.843]) as [number, number]
+
+const formatLength = function (line: LineString) {
+  const length = getLength(line)
+  let output
+  if (length > 100) {
+    output = Math.round((length / 1000) * 100) / 100 + " km"
+  } else {
+    output = Math.round(length * 100) / 100 + " m"
+  }
+  return output
+}
+
+const formatArea = function (polygon: OLPolygon) {
+  const area = getArea(polygon)
+  let output
+  if (area > 10000) {
+    output = Math.round((area / 1000000) * 100) / 100 + " km\xB2"
+  } else {
+    output = Math.round(area * 100) / 100 + " m\xB2"
+  }
+  return output
+}
 
 const MapIndex = () => {
   const [universalMenu, setUniversalMenu] = useState(false)
@@ -61,22 +85,110 @@ const MapIndex = () => {
     })
   )
 
-  const draw = useRef(
-    new Draw({
-      source: vectorSource,
-      type: "Polygon",
-    })
-  )
+  const [modify] = useState(new Modify({ source: vectorSource }))
 
-  const modify = useRef(new Modify({ source: vectorSource }))
-
-  const snap = useRef(new Snap({ source: vectorSource }))
+  const [snap] = useState(new Snap({ source: vectorSource }))
 
   const [tileLayer] = useState(
     new TileLayer({
       source: xyzSource,
     })
   )
+  const vectorStyle = new Style({
+    fill: new Fill({
+      color: "rgba(255, 255, 255, 0.2)",
+    }),
+    stroke: new Stroke({
+      color: "#fff",
+      width: 2,
+    }),
+  })
+
+  const verticesStyle = new Style({
+    image: new StyleCircle({
+      radius: 5,
+      fill: new Fill({
+        color: "white",
+      }),
+    }),
+    geometry: (feature) => {
+      const zeroGeom = new Circle([0, 0], 0)
+      const featureGeom = feature.getGeometry()
+      if (!featureGeom) return zeroGeom
+
+      const type: "Point" | "Polygon" | "LineString" = featureGeom.getType()
+
+      switch (type) {
+        case "Polygon":
+          return new MultiPoint((featureGeom as OLPolygon).getCoordinates()[0])
+        default:
+          return zeroGeom
+      }
+    },
+  })
+
+  const styleFunction = (feature: FeatureLike) => {
+    const styles: Style[] = [vectorStyle, verticesStyle]
+
+    const type = feature.getGeometry()?.getType()
+
+    if (type === "Polygon") {
+      const poly = feature.getGeometry() as OLPolygon
+      // const area = poly.getArea()
+      const coords = poly.getCoordinates()
+      const line = new LineString(coords[0])
+      let count = 0
+
+      line.forEachSegment(function (a, b) {
+        const segment = new LineString([a, b])
+        const label = formatLength(segment)
+        if (segmentStyles.length - 1 < count) {
+          segmentStyles.push(segmentStyle.clone())
+        }
+        const segmentPoint = new Point(segment.getCoordinateAt(0.5))
+        segmentStyles[count].setGeometry(segmentPoint)
+        segmentStyles[count].getText().setText(label)
+        styles.push(segmentStyles[count])
+        count++
+      })
+    }
+
+    return styles
+  }
+
+  const [draw] = useState(
+    new Draw({
+      source: vectorSource,
+      type: "Polygon",
+      style: styleFunction,
+    })
+  )
+
+  const segmentStyle = new Style({
+    text: new Text({
+      font: "12px Calibri,sans-serif",
+      fill: new Fill({
+        color: "rgba(255, 255, 255, 1)",
+      }),
+      backgroundFill: new Fill({
+        color: "rgba(0, 0, 0, 0.4)",
+      }),
+      padding: [2, 2, 2, 2],
+      textBaseline: "bottom",
+      offsetY: -12,
+    }),
+    image: new RegularShape({
+      radius: 6,
+      points: 3,
+      angle: Math.PI,
+      displacement: [0, 8],
+      fill: new Fill({
+        color: "rgba(0, 0, 0, 0.4)",
+      }),
+    }),
+  })
+
+  const segmentStyles = [segmentStyle]
 
   const [map] = useState(
     new Map({
@@ -84,15 +196,7 @@ const MapIndex = () => {
         tileLayer,
         new VectorLayer({
           source: vectorSource,
-          style: new Style({
-            fill: new Fill({
-              color: "rgba(255, 255, 255, 0.2)",
-            }),
-            stroke: new Stroke({
-              color: "#fff",
-              width: 2,
-            }),
-          }),
+          style: styleFunction,
         }),
       ],
       view: new View({
@@ -105,12 +209,12 @@ const MapIndex = () => {
   )
 
   useEffect(() => {
-    draw.current.on("drawstart", (event) => {
+    draw.on("drawstart", (event) => {
       mapProxy.polygon = null
       vectorSource.clear()
     })
 
-    draw.current.on("drawend", ({ feature }) => {
+    draw.on("drawend", ({ feature }) => {
       const polyFeature = JSON.parse(
         new GeoJSON().writeFeature(feature)
       ) as Feature<Polygon>
@@ -169,13 +273,13 @@ const MapIndex = () => {
 
   useEffect(() => {
     if (mode === "DRAW") {
-      map.addInteraction(modify.current)
-      map.addInteraction(draw.current)
-      map.addInteraction(snap.current)
+      map.addInteraction(modify)
+      map.addInteraction(draw)
+      map.addInteraction(snap)
     } else {
-      map.removeInteraction(modify.current)
-      map.removeInteraction(draw.current)
-      map.removeInteraction(snap.current)
+      map.removeInteraction(modify)
+      map.removeInteraction(draw)
+      map.removeInteraction(snap)
     }
   }, [mode])
 
