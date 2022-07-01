@@ -11,14 +11,22 @@ import { Check, Menu, SectionCuts } from "@/components/ui/icons"
 import camera, { useCameraReset } from "@/stores/camera"
 import siteContext, { useSiteContext } from "@/stores/context"
 import menu from "@/stores/menu"
-import {
+import settings, {
+  MapDisplay,
+  MapDisplayEnum,
   setOrthographic,
   useSettings,
   useShadows,
   useVerticalCuts,
 } from "@/stores/settings"
 import { filterR } from "@/utils"
-import { Add32, Reset24, View24 } from "@carbon/icons-react"
+import {
+  Add32,
+  MapBoundary24,
+  Reset24,
+  View24,
+  WatsonHealthSubVolume24,
+} from "@carbon/icons-react"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/Record"
 import React, { Fragment, Suspense, useEffect, useState } from "react"
@@ -60,6 +68,8 @@ const HtmlUi = () => {
   const [verticalCuts, setVerticalCuts] = useVerticalCuts()
 
   const cameraReset = useCameraReset()
+
+  const { mapDisplay } = useSettings()
 
   return (
     <Fragment>
@@ -120,6 +130,21 @@ const HtmlUi = () => {
             onChange={(newValue) => {
               setShadows(newValue)
             }}
+          />
+        </IconMenu>
+        <IconMenu icon={() => <WatsonHealthSubVolume24 className="m-auto" />}>
+          <Radio
+            id="draw-map"
+            label="Map Display"
+            options={[
+              { value: null, label: "None" },
+              { value: MapDisplayEnum.Enum.D2, label: "2D" },
+              { value: MapDisplayEnum.Enum.D3, label: "3D" },
+            ]}
+            selected={mapDisplay}
+            onChange={(newValue: MapDisplay) =>
+              void (settings.mapDisplay = newValue)
+            }
           />
         </IconMenu>
       </div>
