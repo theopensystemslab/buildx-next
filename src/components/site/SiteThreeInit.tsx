@@ -6,7 +6,7 @@ import { useMapBoundary } from "@/stores/map"
 import menu from "@/stores/menu"
 import { setXZ } from "@/stores/pointer"
 import scope from "@/stores/scope"
-import { useSettings } from "@/stores/settings"
+import { MapDisplayEnum, useSettings } from "@/stores/settings"
 import { useContextBridge } from "@react-three/drei"
 // import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
@@ -25,7 +25,7 @@ type Props = PropsWithChildren<{}>
 
 const SiteThreeInit = (props: Props) => {
   const { children } = props
-  const { orthographic, shadows } = useSettings()
+  const { shadows, mapDisplay } = useSettings()
   const ContextBridge = useContextBridge(SystemsDataContext)
 
   // Re-initialize canvas if settings like orthographic camera are changed
@@ -62,8 +62,8 @@ const SiteThreeInit = (props: Props) => {
       <Lighting />
       {/* <group position={[0.5, 0, 0.5]}> */}
       <RectangularGrid
-        x={{ cells: 61, size: 1 }}
-        z={{ cells: 61, size: 1 }}
+        x={{ cells: 6, size: 10 }}
+        z={{ cells: 6, size: 10 }}
         color="#ababab"
       />
       {/* </group> */}
@@ -88,12 +88,8 @@ const SiteThreeInit = (props: Props) => {
           <ShadowPlane />
         </>
       )}
-      {boundary && (
-        <Fragment>
-          <MapTiles />
-          <lineLoop args={[boundary, boundaryMaterial]} />
-        </Fragment>
-      )}
+      {boundary && <lineLoop args={[boundary, boundaryMaterial]} />}
+      {mapDisplay !== null && <MapTiles />}
       <Effects />
       <ContextBridge>
         <SiteCamControls />

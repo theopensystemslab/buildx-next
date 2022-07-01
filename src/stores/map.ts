@@ -1,6 +1,8 @@
+import { mapA } from "@/utils"
 import { dropRight, flatten, map, reduce } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { Polygon, Position } from "geojson"
+import { fromLonLat, toLonLat } from "ol/proj"
 import { useEffect, useMemo } from "react"
 import { BufferAttribute, BufferGeometry, LineBasicMaterial } from "three"
 import { proxy, useSnapshot } from "valtio"
@@ -64,7 +66,8 @@ export const useMapBoundary = () => {
   const material = useMemo(
     () =>
       new LineBasicMaterial({
-        color: "#454545",
+        // color: "#454545",
+        color: "red",
       }),
     []
   )
@@ -121,5 +124,32 @@ export const useMapUpdater = () =>
         )
     })
   )
+
+export const toLonLatPolygon = ({ coordinates, type }: Polygon) => ({
+  type,
+  coordinates: pipe(coordinates, mapA(mapA((pos) => toLonLat(pos)))),
+})
+
+export const fromLonLatPolygon = ({ coordinates, type }: Polygon) => ({
+  type,
+  coordinates: pipe(coordinates, mapA(mapA((pos) => fromLonLat(pos)))),
+})
+
+export const metersPerPixel = (latitude: number, zoomLevel: number) => {
+  var earthCircumference = 40075017
+  var latitudeRadians = latitude * (Math.PI / 180)
+  return (
+    (earthCircumference * Math.cos(latitudeRadians)) /
+    Math.pow(2, zoomLevel + 8)
+  )
+}
+
+export const pixelsPerMeters = (
+  latitude: number,
+  meters: number,
+  zoomLevel: number
+) => {
+  return meters / metersPerPixel(latitude, zoomLevel)
+}
 
 export default mapProxy

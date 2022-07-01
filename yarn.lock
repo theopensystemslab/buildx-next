@@ -685,7 +685,7 @@
 "@mapbox/geojson-area@^0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-area/-/geojson-area-0.2.2.tgz#18d7814aa36bf23fbbcc379f8e26a22927debf10"
-  integrity sha1-GNeBSqNr8j+7zDefjiaiKSfevxA=
+  integrity sha512-bBqqFn1kIbLBfn7Yq1PzzwVkPYQr9lVUeT8Dhd0NL5n76PBuXzOcuLV7GOSbEB1ia8qWxH4COCvFpziEu/yReA==
   dependencies:
     wgs84 "0.0.0"
 
@@ -828,7 +828,7 @@
   dependencies:
     "@mapbox/tilebelt" "^1.0.1"
 
-"@mapbox/tilebelt@^1.0.1":
+"@mapbox/tilebelt@^1.0.1", "@mapbox/tilebelt@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@mapbox/tilebelt/-/tilebelt-1.0.2.tgz#32936c3acad3ea3e669bb083a598bcc7d74b4ec9"
   integrity sha512-tGJN2VIgWrXqBTPIxFVklklIpcy6ss8W5ouq+cjNLXPXFraRaDR4Ice+5Q8/uLX+6aH23lWBMydOIn8PcdVcpA==
@@ -1499,6 +1499,13 @@
   dependencies:
     "@types/geojson" "*"
 
+"@types/mapbox__geojson-area@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@types/mapbox__geojson-area/-/mapbox__geojson-area-0.2.1.tgz#ca3485ae01097186b93d630d1ea82043b86e11af"
+  integrity sha512-KIVIE69HLIY+g6+N6FsTkQ8nTVJfzozaCJeualc106aZOe8DqswxFeQI4gKewHYIFhTN1NHWX2Iv3mXaKjm41Q==
+  dependencies:
+    "@types/geojson" "*"
+
 "@types/mapbox__mapbox-gl-draw@^1.2.3":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@types/mapbox__mapbox-gl-draw/-/mapbox__mapbox-gl-draw-1.2.3.tgz#1c280afaa813aa0095193db82df117a6c450de0e"
@@ -1519,6 +1526,13 @@
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@types/mapbox__tile-cover/-/mapbox__tile-cover-3.0.1.tgz#4f40fe6884928bdbfc08676cdbe56d8564a05e93"
   integrity sha512-wb78ItrCf25P2qF1L/tRbhQ2bMi+Ko+jJ6UfTUpuQSXagm+IVQdJ7M1W3CzsJoqzJ53jEYvX8nV27QJVVDRB6g==
+  dependencies:
+    "@types/geojson" "*"
+
+"@types/mapbox__tilebelt@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/mapbox__tilebelt/-/mapbox__tilebelt-1.0.0.tgz#89329e7c477263b046eddd91246ef8a0096e34d0"
+  integrity sha512-g6AmvxPWl+Yt7EV3XxHCSDT1551fF7ZaHCLlfZuItZGPMMbjVvZ0jKIeeUYTrbReBO1YvruOhs2u4iLGcb6mBA==
   dependencies:
     "@types/geojson" "*"
 
