@@ -38,7 +38,7 @@ export default function ContextMenu(props: ContextMenuProps) {
     top < 0
       ? y0
       : bottom > windowSize.height
-      ? -(bottom - windowSize.height)
+      ? -(bottom - windowSize.height - y0)
       : y0
 
   return (
