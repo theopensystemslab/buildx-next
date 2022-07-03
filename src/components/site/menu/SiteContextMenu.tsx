@@ -3,7 +3,12 @@ import ContextMenuButton from "@/components/ui/ContextMenuButton"
 import ContextMenuHeading from "@/components/ui/ContextMenuHeading"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { House } from "@/data/house"
-import siteContext, { EditModeEnum, useSiteContext } from "@/stores/context"
+import siteContext, {
+  EditModeEnum,
+  enterBuildingMode,
+  exitBuildingMode,
+  useSiteContext,
+} from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import menu, { closeMenu } from "@/stores/menu"
 import scope, { ScopeItem } from "@/stores/scope"
@@ -36,9 +41,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
     delete houses[buildingId]
     scope.selected = null
     if (Object.keys(houses).length === 0) {
-      siteContext.editMode = null
-      siteContext.buildingId = null
-      siteContext.levelIndex = null
+      exitBuildingMode()
     }
     props.onClose?.()
   }
@@ -48,8 +51,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
   const rename = () => setRenaming(true)
 
   const editBuilding = () => {
-    siteContext.buildingId = house.id
-    siteContext.editMode = EditModeEnum.Enum.STRETCH
+    enterBuildingMode(house.id)
     props?.onClose?.()
   }
 

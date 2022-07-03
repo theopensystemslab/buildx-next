@@ -1,6 +1,6 @@
 import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
-import siteContext from "@/stores/context"
+import siteContext, { EditModeEnum } from "@/stores/context"
 import { clearIlluminatedMaterials } from "@/stores/highlights"
 import { useMapBoundary } from "@/stores/map"
 import menu from "@/stores/menu"
@@ -72,6 +72,8 @@ const SiteThreeInit = (props: Props) => {
           menu.open = false
           scope.selected = null
           clearIlluminatedMaterials()
+          if (siteContext.editMode === EditModeEnum.Enum.MOVE_ROTATE)
+            siteContext.editMode = null
         }}
         onNearHover={() => {
           if (menu.open) return

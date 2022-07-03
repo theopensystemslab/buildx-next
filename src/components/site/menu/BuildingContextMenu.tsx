@@ -11,7 +11,7 @@ import {
 } from "@/hooks/interactions/levels"
 import { useWindowOptions, WindowOpt } from "@/hooks/interactions/windows"
 import { useColumnLayout } from "@/hooks/layouts"
-import siteContext from "@/stores/context"
+import siteContext, { enterLevelMode } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
 import scope from "@/stores/scope"
 import React from "react"
@@ -28,7 +28,7 @@ const BuildingContextMenu = (props: ContextMenuProps) => {
   const columnLayout = useColumnLayout(buildingId)
 
   const editLevel = () => {
-    siteContext.levelIndex = levelIndex
+    enterLevelMode(levelIndex)
     props.onClose?.()
   }
 

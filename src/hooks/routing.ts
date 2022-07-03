@@ -1,4 +1,9 @@
-import siteContext, { EditModeEnum } from "@/stores/context"
+import siteContext, {
+  EditModeEnum,
+  enterBuildingMode,
+  enterLevelMode,
+  exitBuildingMode,
+} from "@/stores/context"
 import scope from "@/stores/scope"
 import { useRoute } from "@/utils/wouter"
 import { useEffect } from "react"
@@ -33,21 +38,16 @@ export const useRouting = () => {
     switch (true) {
       case "buildingId" in params &&
         siteContext.buildingId !== params.buildingId: {
-        siteContext.buildingId = params.buildingId
-        siteContext.editMode = EditModeEnum.Enum.STRETCH
+        enterBuildingMode(params.buildingId)
       }
       case "levelIndex" in params: {
         const levelIndex = Number(params.levelIndex)
         if (siteContext.levelIndex === levelIndex || isNaN(levelIndex)) break
-        siteContext.levelIndex = levelIndex
-        siteContext.editMode = null
+        enterLevelMode(levelIndex)
         break
       }
       case !("buildingId" in params):
-        if (siteContext.buildingId !== null) siteContext.buildingId = null
-        if (siteContext.levelIndex !== null) siteContext.levelIndex = null
-        if (siteContext.editMode === EditModeEnum.Enum.MOVE_ROTATE)
-          siteContext.editMode = null
+        exitBuildingMode()
     }
 
     scope.selected = null

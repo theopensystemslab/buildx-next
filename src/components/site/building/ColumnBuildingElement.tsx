@@ -1,4 +1,7 @@
 import siteContext, {
+  EditModeEnum,
+  enterBuildingMode,
+  enterLevelMode,
   SiteContextModeEnum,
   useSiteContextMode,
 } from "@/stores/context"
@@ -100,20 +103,14 @@ const ColumnBuildingElement = (props: Props) => {
     return true
   }
 
-  const triggerMenu = ({
-    event,
-    event: { intersections, pageX, pageY },
-  }: any) => {
-    event.preventDefault?.()
-    if (!checks(intersections)) return
-    openMenu(pageX, pageY)
-    invalidate()
-  }
-
   const bind = useGesture<{
     hover: ThreeEvent<PointerEvent>
     onPointerDown: ThreeEvent<PointerEvent>
     onContextMenu: ThreeEvent<PointerEvent> &
+      React.MouseEvent<EventTarget, MouseEvent>
+    onClick: ThreeEvent<PointerEvent> &
+      React.MouseEvent<EventTarget, MouseEvent>
+    onDoubleClick: ThreeEvent<PointerEvent> &
       React.MouseEvent<EventTarget, MouseEvent>
   }>({
     onHover: ({ event: { intersections } }) => {
@@ -123,13 +120,38 @@ const ColumnBuildingElement = (props: Props) => {
       }
       invalidate()
     },
-    onContextMenu: triggerMenu,
+    onContextMenu: ({ event, event: { intersections, pageX, pageY } }: any) => {
+      event.preventDefault?.()
+      if (!checks(intersections)) return
+      openMenu(pageX, pageY)
+      invalidate()
+    },
     onPointerDown: ({ event: { intersections } }) => {
       if (!checks(intersections)) return
       scope.selected = key
       invalidate()
     },
-    onDoubleClick: triggerMenu,
+    onDoubleClick: ({ event, event: { intersections, pageX, pageY } }) => {
+      event.preventDefault?.()
+      if (!checks(intersections)) return
+
+      if (siteContext.buildingId === null) {
+        enterBuildingMode(buildingId)
+      } else {
+        enterLevelMode(levelIndex)
+      }
+      invalidate()
+    },
+    onClick: ({ event, event: { intersections, pageX, pageY } }) => {
+      event.preventDefault?.()
+      if (
+        siteContext.buildingId !== null ||
+        siteContext.editMode === EditModeEnum.Enum.MOVE_ROTATE
+      )
+        return
+      if (!checks(intersections)) return
+      siteContext.editMode = EditModeEnum.Enum.MOVE_ROTATE
+    },
   })
 
   const selectOrHoverHandler = () => {
