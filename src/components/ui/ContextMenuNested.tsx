@@ -1,5 +1,6 @@
+import { useMenu } from "@/stores/menu"
 import type { ReactNode } from "react"
-import React, { useState } from "react"
+import { useState } from "react"
 import useMeasure from "react-use-measure"
 import { useWindowSize } from "usehooks-ts"
 
@@ -12,14 +13,21 @@ export interface Props {
 export default function ContextMenuNested(props: Props) {
   const [hovered, setHovered] = useState(false)
 
-  const [ref, { top, right, bottom, width }] = useMeasure()
+  const [labelRef, labelDims] = useMeasure()
+  const [menuRef, menuDims] = useMeasure()
 
   const windowSize = useWindowSize()
 
-  const flip = right > windowSize.width + width / 2
+  const flip = menuDims.right > windowSize.width + menuDims.width / 2
+
+  const y0 = -labelDims.height
 
   const ty =
-    top < 0 ? 0 : bottom > windowSize.height ? -(bottom - windowSize.height) : 0
+    menuDims.top < 0
+      ? y0
+      : menuDims.bottom > windowSize.height
+      ? -(menuDims.bottom - windowSize.height - y0)
+      : y0
 
   return (
     <div
@@ -30,6 +38,7 @@ export default function ContextMenuNested(props: Props) {
       onMouseLeave={() => {
         setHovered(false)
       }}
+      ref={labelRef}
     >
       <div
         className={`py-2 px-3 text-left text-sm ${
@@ -40,7 +49,7 @@ export default function ContextMenuNested(props: Props) {
       </div>
       {hovered ? (
         <div
-          ref={ref}
+          ref={menuRef}
           className={`absolute ${
             flip ? "right-full" : "left-full"
           } z-20 bg-white ${props.long ? "w-64" : "w-48"}`}

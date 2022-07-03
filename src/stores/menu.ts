@@ -1,4 +1,4 @@
-import { proxy } from "valtio"
+import { proxy, useSnapshot } from "valtio"
 
 const menu = proxy({
   open: false,
@@ -15,5 +15,7 @@ export const openMenu = (x: number, y: number) => {
 export const closeMenu = () => {
   menu.open = false
 }
+
+export const useMenu = () => useSnapshot(menu)
 
 export default menu
