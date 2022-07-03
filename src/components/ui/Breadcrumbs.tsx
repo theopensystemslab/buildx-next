@@ -1,7 +1,7 @@
-import siteContext from "@/stores/context"
-import houses, { useHouse } from "@/stores/houses"
+import { enterBuildingMode, exitBuildingMode } from "@/stores/context"
+import houses from "@/stores/houses"
 import { useRoute } from "@/utils/wouter"
-import React, { Fragment } from "react"
+import { Fragment } from "react"
 import { Link } from "wouter"
 
 type BreadcrumbProps = {
@@ -36,8 +36,7 @@ const BreadcrumbsWithParams = (params: Params) => {
         path={`/site`}
         label="Site"
         onClick={() => {
-          siteContext.buildingId = null
-          siteContext.levelIndex = null
+          exitBuildingMode()
         }}
       />
       <span>{`/`}</span>
@@ -45,7 +44,7 @@ const BreadcrumbsWithParams = (params: Params) => {
         path={`/site?buildingId=${buildingId}`}
         label={friendlyName}
         onClick={() => {
-          siteContext.levelIndex = null
+          enterBuildingMode(buildingId)
         }}
       />
       {levelIndex && (

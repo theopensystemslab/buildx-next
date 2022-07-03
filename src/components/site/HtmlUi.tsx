@@ -9,7 +9,11 @@ import {
 } from "@/components/ui"
 import { Check, Menu, SectionCuts } from "@/components/ui/icons"
 import camera, { useCameraReset } from "@/stores/camera"
-import siteContext, { useSiteContext } from "@/stores/context"
+import siteContext, {
+  enterBuildingMode,
+  exitBuildingMode,
+  useSiteContext,
+} from "@/stores/context"
 import menu from "@/stores/menu"
 import {
   setOrthographic,
@@ -21,7 +25,7 @@ import { filterR } from "@/utils"
 import { Add32, Reset24, View24 } from "@carbon/icons-react"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/Record"
-import React, { Fragment, Suspense, useEffect, useState } from "react"
+import { Fragment, Suspense, useEffect, useState } from "react"
 import { useSnapshot } from "valtio"
 import UniversalMenu from "../ui/UniversalMenu"
 import { SiteContextMenu } from "./menu"
@@ -47,11 +51,10 @@ const HtmlUi = () => {
   const check = buildingId !== null || levelIndex !== null || editMode !== null
 
   const onCheck = () => {
-    if (levelIndex !== null) {
-      siteContext.levelIndex = null
+    if (levelIndex !== null && siteContext.buildingId !== null) {
+      enterBuildingMode(siteContext.buildingId)
     } else if (buildingId !== null) {
-      siteContext.buildingId = null
-      siteContext.editMode = null
+      exitBuildingMode()
     } else if (editMode !== null) {
       siteContext.editMode = null
     }

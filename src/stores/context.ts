@@ -33,4 +33,21 @@ export const useSiteContextMode = () => {
     : SiteContextModeEnum.Enum.SITE
 }
 
+export const enterBuildingMode = (buildingId: string) => {
+  if (siteContext.buildingId !== buildingId) siteContext.buildingId = buildingId
+  if (siteContext.levelIndex !== null) siteContext.levelIndex = null
+  if (siteContext.editMode !== EditModeEnum.Enum.STRETCH)
+    siteContext.editMode = EditModeEnum.Enum.STRETCH
+}
+
+export const exitBuildingMode = () => {
+  if (siteContext.levelIndex !== null) siteContext.levelIndex = null
+  if (siteContext.buildingId !== null) siteContext.buildingId = null
+  if (siteContext.editMode !== null) siteContext.editMode = null
+}
+
+export const enterLevelMode = (levelIndex: number) => {
+  if (siteContext.levelIndex !== levelIndex) siteContext.levelIndex = levelIndex
+}
+
 export default siteContext
