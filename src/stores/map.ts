@@ -4,6 +4,7 @@ import { Polygon, Position } from "geojson"
 import { useEffect, useMemo } from "react"
 import { BufferAttribute, BufferGeometry, LineBasicMaterial } from "three"
 import { proxy, useSnapshot } from "valtio"
+import { subscribeKey } from "valtio/utils"
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "../CONSTANTS"
 
 const mapProxy = proxy<{
@@ -109,5 +110,16 @@ export const useMapPolygon = () => {
 
   return [polygon, setMapPolygon] as const
 }
+
+export const useMapUpdater = () =>
+  useEffect(() =>
+    subscribeKey(mapProxy, "polygon", () => {
+      if (mapProxy.polygon !== null)
+        localStorage.setItem(
+          BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
+          JSON.stringify(mapProxy.polygon)
+        )
+    })
+  )
 
 export default mapProxy

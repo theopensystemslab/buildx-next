@@ -64,7 +64,7 @@ const addCached = (SystemsData: SystemsData): SystemsData => {
   }
 }
 
-const localStorageKey = "buildx-systems-v2"
+const localStorageKey = "buildx-systems-0.1.0"
 
 const saveSystemsData = (systemsData: SystemsData) => {
   localStorage.setItem(

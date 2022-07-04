@@ -10,14 +10,13 @@ import siteContext, {
   useSiteContext,
 } from "@/stores/context"
 import houses, { useHouse } from "@/stores/houses"
-import menu, { closeMenu } from "@/stores/menu"
+import { closeMenu } from "@/stores/menu"
 import scope, { ScopeItem } from "@/stores/scope"
-import React, { Fragment, useRef, useState } from "react"
-import useMeasure from "react-use-measure"
+import { Fragment, useState } from "react"
 import { useSnapshot } from "valtio"
 import BuildingContextMenu from "./BuildingContextMenu"
 import LevelContextMenu from "./LevelContextMenu"
-import RenameHouseForm from "./RenameHouseForm"
+import RenameForm from "./RenameForm"
 
 const SiteContextMenu_ = (props: ContextMenuProps) => {
   const { selected } = props
@@ -81,7 +80,7 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
           {`Rename building`}
         </ContextMenuButton>
         {renaming && (
-          <RenameHouseForm
+          <RenameForm
             {...props}
             currentName={house.friendlyName}
             onNewName={(newName) => {
