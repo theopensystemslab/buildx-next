@@ -1,4 +1,4 @@
-import { mapA } from "@/utils"
+import { mapA, pipeLog } from "@/utils"
 import { dropRight, flatten, map, reduce } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { Polygon, Position } from "geojson"
@@ -21,7 +21,7 @@ export const setMapPolygon = (mapPolygon: Polygon) => {
   mapProxy.polygon = mapPolygon
 }
 
-export const getMapPolygonCentre = (polygon: Polygon) =>
+export const getMapPolygonCentre = (polygon: Polygon): [number, number] =>
   pipe(polygon.coordinates[0], dropRight(1), (coords) =>
     pipe(
       coords,
@@ -30,7 +30,7 @@ export const getMapPolygonCentre = (polygon: Polygon) =>
         y0 + y1 / coords.length,
       ])
     )
-  )
+  ) as [number, number]
 
 export const polygonToCoordinates = (polygon: Polygon) => {
   const [cx, cy] = getMapPolygonCentre(polygon)
