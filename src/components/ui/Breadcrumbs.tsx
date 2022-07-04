@@ -1,8 +1,16 @@
-import { enterBuildingMode, exitBuildingMode } from "@/stores/context"
+import siteContext, {
+  enterBuildingMode,
+  exitBuildingMode,
+  SiteContextModeEnum,
+  useProjectName,
+  useSiteContext,
+  useSiteContextMode,
+} from "@/stores/context"
 import houses from "@/stores/houses"
 import { useRoute } from "@/utils/wouter"
-import { Fragment } from "react"
+import { Fragment, useState } from "react"
 import { Link } from "wouter"
+import RenameForm from "../site/menu/RenameForm"
 
 type BreadcrumbProps = {
   path: string
@@ -30,23 +38,36 @@ const BreadcrumbsWithParams = (params: Params) => {
 
   const { friendlyName } = houses[buildingId]
 
+  const [renamingBuilding, setRenamingBuilding] = useState(false)
+
+  const mode = useSiteContextMode()
+
   return (
-    <div className="absolute top-0 left-0">
-      <Breadcrumb
-        path={`/site`}
-        label="Site"
-        onClick={() => {
-          exitBuildingMode()
-        }}
-      />
+    <Fragment>
       <span>{`/`}</span>
       <Breadcrumb
         path={`/site?buildingId=${buildingId}`}
         label={friendlyName}
         onClick={() => {
-          enterBuildingMode(buildingId)
+          switch (mode) {
+            case SiteContextModeEnum.Enum.BUILDING:
+              setRenamingBuilding(true)
+              break
+            case SiteContextModeEnum.Enum.LEVEL:
+              enterBuildingMode(buildingId)
+              break
+          }
         }}
       />
+      {renamingBuilding && (
+        <RenameForm
+          currentName={friendlyName}
+          onNewName={(newName) => {
+            if (newName.length > 0) houses[buildingId].friendlyName = newName
+            setRenamingBuilding(false)
+          }}
+        />
+      )}
       {levelIndex && (
         <Fragment>
           <span>{`/`}</span>
@@ -56,7 +77,7 @@ const BreadcrumbsWithParams = (params: Params) => {
           />
         </Fragment>
       )}
-    </div>
+    </Fragment>
   )
 }
 
@@ -64,10 +85,42 @@ const Breadcrumbs = () => {
   const [, params] =
     useRoute<{ buildingId: string; levelIndex?: string }>("/site:rest*")
 
-  return typeof params === "boolean" ||
-    params === null ||
-    !("buildingId" in params) ? null : (
-    <BreadcrumbsWithParams {...(params as Params)} />
+  const mode = useSiteContextMode()
+
+  const projectName = useProjectName()
+
+  const [renamingProject, setRenamingProject] = useState(false)
+
+  return (
+    <div className="absolute top-0 left-0">
+      <Breadcrumb
+        path={`/site`}
+        label={
+          projectName === null || projectName.length === 0
+            ? `New Project`
+            : projectName
+        }
+        onClick={() => {
+          if (mode !== SiteContextModeEnum.Enum.SITE) exitBuildingMode()
+          else if (!renamingProject) setRenamingProject(true)
+        }}
+      />
+      {renamingProject && (
+        <RenameForm
+          currentName={projectName}
+          onNewName={(newName) => {
+            if (newName.length > 0) siteContext.projectName = newName
+            setRenamingProject(false)
+          }}
+        />
+      )}
+      {mode !== SiteContextModeEnum.Enum.SITE &&
+        typeof params !== "boolean" &&
+        params !== null &&
+        "buildingId" in params && (
+          <BreadcrumbsWithParams {...(params as Params)} />
+        )}
+    </div>
   )
 }
 

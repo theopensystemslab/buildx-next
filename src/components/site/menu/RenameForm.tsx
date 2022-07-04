@@ -1,5 +1,4 @@
-import ContextMenuButton from "@/components/ui/ContextMenuButton"
-import React, { Fragment } from "react"
+import { Fragment } from "react"
 import { useForm } from "react-hook-form"
 
 type Props = {
@@ -7,8 +6,8 @@ type Props = {
   onNewName: (s: string) => void
 }
 
-const RenameHouseForm = (props: Props) => {
-  const { currentName, onNewName, ...restProps } = props
+const RenameForm = (props: Props) => {
+  const { currentName, onNewName } = props
   const { register, handleSubmit } = useForm()
   const onSubmit = ({ newName }: any) => {
     onNewName(newName)
@@ -25,11 +24,9 @@ const RenameHouseForm = (props: Props) => {
           className="w-full py-2 px-3 font-bold focus:outline-none"
           autoFocus
         />
-        <hr className="divide-y-2" />
-        <ContextMenuButton type="submit">Submit</ContextMenuButton>
       </form>
     </Fragment>
   )
 }
 
-export default RenameHouseForm
+export default RenameForm

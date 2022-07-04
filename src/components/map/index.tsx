@@ -3,6 +3,7 @@ import mapProxy, {
   getMapPolygonCentre,
   useMapMode,
   useMapPolygon,
+  useMapUpdater,
 } from "@/stores/map"
 import { ArrowRight24, Search24, TrashCan24 } from "@carbon/icons-react"
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
@@ -83,15 +84,7 @@ const MapIndex = () => {
     })
   }, [])
 
-  useEffect(() =>
-    subscribeKey(mapProxy, "polygon", () => {
-      if (mapProxy.polygon !== null)
-        localStorage.setItem(
-          BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY,
-          JSON.stringify(mapProxy.polygon)
-        )
-    })
-  )
+  useMapUpdater()
 
   const [map] = useState(
     new Map({

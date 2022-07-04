@@ -9,6 +9,7 @@ type SiteContext = {
   buildingId: string | null
   levelIndex: number | null
   editMode: EditMode | null
+  projectName: string | null
 }
 
 const siteContext = proxy<SiteContext>({
@@ -16,14 +17,21 @@ const siteContext = proxy<SiteContext>({
   buildingId: null,
   levelIndex: null,
   editMode: null,
+  projectName: null,
 })
 
 export const useSiteContext = () => useSnapshot(siteContext)
 
+export const useProjectName = () => {
+  const { projectName } = useSnapshot(siteContext)
+  if (projectName === null || projectName.length <= 0) return "New project"
+  else return projectName
+}
+
 export const SiteContextModeEnum = z.enum(["SITE", "BUILDING", "LEVEL"])
 export type SiteContextMode = z.infer<typeof SiteContextModeEnum>
 
-export const useSiteContextMode = () => {
+export const useSiteContextMode = (): SiteContextMode => {
   const { buildingId, levelIndex } = useSiteContext()
 
   return levelIndex !== null
