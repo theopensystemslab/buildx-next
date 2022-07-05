@@ -9,6 +9,7 @@ import siteContext, {
   exitBuildingMode,
   useSiteContext,
 } from "@/stores/context"
+import { exportGLB } from "@/stores/events"
 import houses, { useHouse } from "@/stores/houses"
 import { closeMenu } from "@/stores/menu"
 import scope, { ScopeItem } from "@/stores/scope"
@@ -101,6 +102,10 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
           </ContextMenuButton>
         </Fragment>
       )}
+
+      <ContextMenuButton onClick={() => void exportGLB(buildingId)}>
+        Export GLB
+      </ContextMenuButton>
     </ContextMenu>
   )
 }

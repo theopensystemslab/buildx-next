@@ -7,14 +7,16 @@ import {
   useSiteContext,
   useSiteContextMode,
 } from "@/stores/context"
+import events, { glbExported } from "@/stores/events"
 import { outlineGroup } from "@/stores/highlights"
-import { usePositionRotation } from "@/stores/houses"
+import houses, { usePositionRotation } from "@/stores/houses"
 import scope from "@/stores/scope"
 import { mapRA } from "@/utils"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useEffect, useRef } from "react"
 import { Group } from "three"
+import { GLTFExporter } from "three-stdlib"
 import { subscribe } from "valtio"
 import BuildingBuilding from "./BuildingBuilding"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
@@ -62,6 +64,43 @@ const SiteBuildingMain = (props: Props) => {
   const { buildingDragHandler } = usePositionRotation(id, groupRef)
 
   const bind = useDrag(buildingDragHandler)
+
+  useEffect(
+    () =>
+      subscribe(events, () => {
+        if (events.exportBuildingGLB !== id || !groupRef.current) return
+
+        const exporter = new GLTFExporter()
+
+        exporter.parse(
+          groupRef.current,
+          function (gltf) {
+            // const glb = incoming as ArrayBuffer
+
+            console.log(gltf)
+
+            // const link = document.createElement("a")
+            // link.style.display = "none"
+            // document.body.appendChild(link)
+
+            // const blob = new Blob([JSON.stringify(gltf)], {
+            //   type: "application/json",
+            // })
+
+            // const objectURL = URL.createObjectURL(blob)
+
+            // link.href = objectURL
+            // link.href = URL.createObjectURL(blob)
+            // link.download = `${houses[id].friendlyName}.gltf`
+            // link.click()
+          },
+          { binary: false }
+        ) // you will have to provide the options here
+
+        glbExported()
+      }),
+    []
+  )
 
   return (
     <Fragment>
