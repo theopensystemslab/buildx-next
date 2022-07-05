@@ -1,12 +1,18 @@
 import { proxy, useSnapshot } from "valtio"
+import * as z from "zod"
+
+export const MapDisplayEnum = z.enum(["D2", "D3"])
+
+export type MapDisplay = z.infer<typeof MapDisplayEnum> | null
 
 const settings = proxy({
   orthographic: false,
-  shadows: true,
+  shadows: false,
   verticalCuts: {
     width: false,
     length: false,
   },
+  mapDisplay: MapDisplayEnum.Enum.D2 as MapDisplay,
 })
 
 export const setOrthographic = (b: boolean) => {
