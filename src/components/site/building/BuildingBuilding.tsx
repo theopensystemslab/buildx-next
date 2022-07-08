@@ -11,18 +11,10 @@ import { useShadows } from "@/stores/settings"
 import { filterRA, mapRA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
-import { Handler, useDrag, useGesture } from "@use-gesture/react"
+import { Handler, useGesture } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, useEffect, useMemo, useRef } from "react"
-import {
-  Color,
-  Group,
-  Material,
-  Mesh,
-  MeshStandardMaterial,
-  Plane,
-  Vector3,
-} from "three"
+import { Color, Group, Mesh, MeshStandardMaterial, Plane, Vector3 } from "three"
 import { useSnapshot } from "valtio"
 import HandleMaterial from "../../../materials/HandleMaterial"
 import BuildingHouseColumn from "./ColumnBuildingColumn"

@@ -1,6 +1,5 @@
 import { RaycasterLayer } from "@/CONSTANTS"
 import { SystemsDataContext } from "@/contexts/SystemsData"
-import siteContext, { EditModeEnum } from "@/stores/context"
 import { clearIlluminatedMaterials } from "@/stores/highlights"
 import { useMapBoundary } from "@/stores/map"
 import menu from "@/stores/menu"
@@ -8,9 +7,8 @@ import { setXZ } from "@/stores/pointer"
 import scope from "@/stores/scope"
 import { useSettings } from "@/stores/settings"
 import { useContextBridge } from "@react-three/drei"
-// import { store, useMapBoundary } from "@/store"
 import { Canvas } from "@react-three/fiber"
-import React, { PropsWithChildren } from "react"
+import { PropsWithChildren } from "react"
 import { BasicShadowMap } from "three"
 import { HorizontalPlane } from "../ui-3d/HorizontalPlane"
 import Lighting from "../ui-3d/Lighting"
@@ -72,8 +70,6 @@ const SiteThreeInit = (props: Props) => {
           menu.open = false
           scope.selected = null
           clearIlluminatedMaterials()
-          if (siteContext.editMode === EditModeEnum.Enum.MOVE_ROTATE)
-            siteContext.editMode = null
         }}
         onNearHover={() => {
           if (menu.open) return
