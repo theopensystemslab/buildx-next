@@ -1,10 +1,13 @@
 import { useHousesStats, useHouseStats } from "@/data/energyInfo"
 import { useSiteContext } from "@/stores/context"
+import { useSiteAreaString } from "@/stores/map"
 import React from "react"
 import { InfoPanel } from "../ui"
 
 const SiteInfoPanel = () => {
   const totalHouseStats = useHousesStats()
+
+  const siteAreaString = useSiteAreaString()
 
   return (
     <InfoPanel
@@ -31,6 +34,10 @@ const SiteInfoPanel = () => {
         {
           label: "Estimated Heating Costs",
           value: `${totalHouseStats.estimatedHeatingCosts} €/yr`,
+        },
+        {
+          label: "Site Area",
+          value: siteAreaString,
         },
       ]}
     />

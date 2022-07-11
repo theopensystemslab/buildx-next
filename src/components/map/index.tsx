@@ -53,17 +53,6 @@ const formatLength = function (line: LineString) {
   return output
 }
 
-// const formatArea = function (polygon: OLPolygon) {
-//   const area = getArea(polygon)
-//   let output
-//   if (area > 10000) {
-//     output = Math.round((area / 1000000) * 100) / 100 + " km\xB2"
-//   } else {
-//     output = Math.round(area * 100) / 100 + " m\xB2"
-//   }
-//   return output
-// }
-
 const MapIndex = () => {
   const [universalMenu, setUniversalMenu] = useState(false)
 

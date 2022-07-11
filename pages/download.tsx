@@ -64,7 +64,7 @@ const Download = () => {
     <div className="h-full w-full overflow-auto bg-gray-600 text-white">
       <div className="pt-16 pb-16">
         <a
-          className="block w-full flex items-center space-x-4 bg-gray-500 px-4 py-4 text-xs underline no-underline transition-colors duration-200 hover:bg-gray-400"
+          className="flex w-full items-center space-x-4 bg-gray-500 px-4 py-4 text-xs  no-underline transition-colors duration-200 hover:bg-gray-400"
           href={zipUrl}
         >
           <CloudDownload24 />

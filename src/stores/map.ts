@@ -1,10 +1,11 @@
+import { area as siteArea, toWgs84 } from "@turf/turf"
 import { dropRight, flatten, map, reduce } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { Polygon, Position } from "geojson"
 import { useEffect, useMemo } from "react"
 import { BufferAttribute, BufferGeometry, LineBasicMaterial } from "three"
 import { proxy, useSnapshot } from "valtio"
-import { subscribeKey } from "valtio/utils"
+import { derive, subscribeKey } from "valtio/utils"
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "../CONSTANTS"
 
 const mapProxy = proxy<{
@@ -14,6 +15,19 @@ const mapProxy = proxy<{
   polygon: null,
   mode: "SEARCH",
 })
+
+export const mapDerivatives = derive({
+  siteArea: (get) => {
+    const { polygon } = get(mapProxy)
+    return !polygon ? 0 : siteArea(toWgs84(polygon))
+  },
+})
+
+export const useSiteAreaString = () => {
+  const { siteArea } = useSnapshot(mapDerivatives)
+
+  return `${siteArea}m\xB2`
+}
 
 export const setMapPolygon = (mapPolygon: Polygon) => {
   mapProxy.polygon = mapPolygon
