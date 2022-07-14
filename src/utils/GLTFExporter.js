@@ -51,9 +51,9 @@ class GLTFExporter {
       return new GLTFMaterialsClearcoatExtension(writer)
     })
 
-    this.register(function (writer) {
-      return new GLTFMaterialsIridescenceExtension(writer)
-    })
+    // this.register(function (writer) {
+    //   return new GLTFMaterialsIridescenceExtension(writer)
+    // })
   }
 
   register(callback) {
@@ -2105,53 +2105,53 @@ class GLTFMaterialsClearcoatExtension {
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_iridescence
  */
-class GLTFMaterialsIridescenceExtension {
-  constructor(writer) {
-    this.writer = writer
-    this.name = "KHR_materials_iridescence"
-  }
+// class GLTFMaterialsIridescenceExtension {
+//   constructor(writer) {
+//     this.writer = writer
+//     this.name = "KHR_materials_iridescence"
+//   }
 
-  writeMaterial(material, materialDef) {
-    if (!material.isMeshPhysicalMaterial) return
+//   writeMaterial(material, materialDef) {
+//     if (!material.isMeshPhysicalMaterial) return
 
-    const writer = this.writer
-    const extensionsUsed = writer.extensionsUsed
+//     const writer = this.writer
+//     const extensionsUsed = writer.extensionsUsed
 
-    const extensionDef = {}
+//     const extensionDef = {}
 
-    extensionDef.iridescenceFactor = material.iridescence
+//     extensionDef.iridescenceFactor = material.iridescence
 
-    if (material.iridescenceMap) {
-      const iridescenceMapDef = {
-        index: writer.processTexture(material.iridescenceMap),
-      }
-      writer.applyTextureTransform(iridescenceMapDef, material.iridescenceMap)
-      extensionDef.iridescenceTexture = iridescenceMapDef
-    }
+//     if (material.iridescenceMap) {
+//       const iridescenceMapDef = {
+//         index: writer.processTexture(material.iridescenceMap),
+//       }
+//       writer.applyTextureTransform(iridescenceMapDef, material.iridescenceMap)
+//       extensionDef.iridescenceTexture = iridescenceMapDef
+//     }
 
-    extensionDef.iridescenceIor = material.iridescenceIOR
-    extensionDef.iridescenceThicknessMinimum =
-      material.iridescenceThicknessRange[0]
-    extensionDef.iridescenceThicknessMaximum =
-      material.iridescenceThicknessRange[1]
+//     extensionDef.iridescenceIor = material.iridescenceIOR
+//     extensionDef.iridescenceThicknessMinimum =
+//       material.iridescenceThicknessRange[0]
+//     extensionDef.iridescenceThicknessMaximum =
+//       material.iridescenceThicknessRange[1]
 
-    if (material.iridescenceThicknessMap) {
-      const iridescenceThicknessMapDef = {
-        index: writer.processTexture(material.iridescenceThicknessMap),
-      }
-      writer.applyTextureTransform(
-        iridescenceThicknessMapDef,
-        material.iridescenceThicknessMap
-      )
-      extensionDef.iridescenceThicknessTexture = iridescenceThicknessMapDef
-    }
+//     if (material.iridescenceThicknessMap) {
+//       const iridescenceThicknessMapDef = {
+//         index: writer.processTexture(material.iridescenceThicknessMap),
+//       }
+//       writer.applyTextureTransform(
+//         iridescenceThicknessMapDef,
+//         material.iridescenceThicknessMap
+//       )
+//       extensionDef.iridescenceThicknessTexture = iridescenceThicknessMapDef
+//     }
 
-    materialDef.extensions = materialDef.extensions || {}
-    materialDef.extensions[this.name] = extensionDef
+//     materialDef.extensions = materialDef.extensions || {}
+//     materialDef.extensions[this.name] = extensionDef
 
-    extensionsUsed[this.name] = true
-  }
-}
+//     extensionsUsed[this.name] = true
+//   }
+// }
 
 /**
  * Transmission Materials Extension
