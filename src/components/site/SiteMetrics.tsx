@@ -35,10 +35,14 @@ const SiteInfoPanel = () => {
           label: "Estimated Heating Costs",
           value: `${totalHouseStats.estimatedHeatingCosts} €/yr`,
         },
-        {
-          label: "Site Area",
-          value: siteAreaString,
-        },
+        ...(siteAreaString !== null
+          ? [
+              {
+                label: "Site Area",
+                value: siteAreaString,
+              },
+            ]
+          : []),
       ]}
     />
   )
