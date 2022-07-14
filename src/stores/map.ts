@@ -26,7 +26,7 @@ export const mapDerivatives = derive({
 export const useSiteAreaString = () => {
   const { siteArea } = useSnapshot(mapDerivatives)
 
-  return `${siteArea}m\xB2`
+  return `${siteArea.toFixed(0)}m\xB2`
 }
 
 export const setMapPolygon = (mapPolygon: Polygon) => {
