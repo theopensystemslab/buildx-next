@@ -31,6 +31,7 @@ export interface Module {
   dna: string
   structuredDna: StructuredDna
   modelUrl: string
+  ifcUrl: string
   width: number
   height: number
   length: number
@@ -68,6 +69,7 @@ export const getModules = async (system: System): Promise<Array<Module>> => {
         dna,
         structuredDna: parseDna(dna),
         modelUrl: record.fields?.["GLB_model"]?.[0]?.url ?? "",
+        ifcUrl: record.fields?.["IFC_model"]?.[0]?.url ?? "",
         width: record.fields?.["section_width"]?.[0] ?? 1,
         height: record.fields?.["level_height"]?.[0] ?? 1,
         length: record.fields?.["length_dims"] ?? 0,

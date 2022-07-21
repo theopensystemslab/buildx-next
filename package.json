@@ -45,9 +45,11 @@
     "react-merge-refs": "^1.1.0",
     "react-use-measure": "^2.1.1",
     "three": "^0.139.2",
+    "three-mesh-bvh": "^0.5.14",
     "three-stdlib": "^2.12.1",
     "usehooks-ts": "^2.5.3",
     "valtio": "^1.2.11",
+    "web-ifc-three": "^0.0.118",
     "wouter": "^2.8.0-alpha.2",
     "zod": "^3.11.6"
   },
