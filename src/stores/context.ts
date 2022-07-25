@@ -1,5 +1,6 @@
 import { proxy, useSnapshot } from "valtio"
 import * as z from "zod"
+import houses from "./houses"
 
 export const EditModeEnum = z.enum(["MOVE_ROTATE", "STRETCH"])
 export type EditMode = z.infer<typeof EditModeEnum>
@@ -56,6 +57,12 @@ export const exitBuildingMode = () => {
 
 export const enterLevelMode = (levelIndex: number) => {
   if (siteContext.levelIndex !== levelIndex) siteContext.levelIndex = levelIndex
+}
+
+export const useSystemId = () => {
+  const { buildingId } = useSiteContext()
+  if (buildingId === null) return null
+  return houses[buildingId].systemId
 }
 
 export default siteContext

@@ -1,5 +1,8 @@
+import { useSystemId } from "@/stores/context"
+import { filterA, mapR } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import React, { Fragment, ReactNode } from "react"
+import { useSnapshot } from "valtio"
 import { SystemsData, useSystemsData } from "../data/system"
 import { createCtx } from "./utils"
 
@@ -24,4 +27,19 @@ export const SystemsDataProvider = ({
   if (!systemsData) return <Fragment>{onLoading}</Fragment>
   if (systemsData === "error") return <Fragment>{onError}</Fragment>
   return <CtxProvider value={systemsData}>{children}</CtxProvider>
+}
+
+export const useSystemData = () => {
+  const systemId = useSystemId()
+  const systemsData = useCtx() as unknown as {
+    [key: string]: Array<{ systemId: string }>
+  }
+
+  if (!systemId)
+    throw new Error("useSystemData called without a building selected")
+
+  return pipe(
+    systemsData,
+    mapR(filterA((v: { systemId: string }) => v.systemId === systemId))
+  ) as unknown as SystemsData
 }

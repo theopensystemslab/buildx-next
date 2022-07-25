@@ -9,15 +9,15 @@ import produce from "immer"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import { proxy } from "valtio"
-import { useRotateVector } from "./geometry"
+import { useRotateVector } from "@/hooks/geometry"
 import {
   columnLayoutToDNA,
   PositionedColumn,
   PositionedModule,
   PositionedRow,
   useColumnLayout,
-} from "./layouts"
-import { useGetVanillaModule } from "./modules"
+} from "@/hooks/layouts"
+import { useGetVanillaModule } from "@/hooks/modules"
 
 export const stretch = proxy({
   endVanillaColumns: 0,
@@ -124,7 +124,7 @@ export const useVanillaPositionedRows = (
   )
 }
 
-export const useStretch = (buildingId: string) => {
+export const useStretchLength = (buildingId: string) => {
   const columnLayout = useColumnLayout(buildingId)
 
   const house = useHouse(buildingId)

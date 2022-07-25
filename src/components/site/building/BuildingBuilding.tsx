@@ -1,6 +1,13 @@
+import { useSystemData, useSystemsData } from "@/contexts/SystemsData"
+import { BareModule } from "@/data/module"
 import { useRotateVector } from "@/hooks/geometry"
-import { PositionedColumn } from "@/hooks/layouts"
-import { stretch, useStretch, VanillaPositionedRow } from "@/hooks/stretch"
+import { columnLayoutToMatrix, PositionedColumn } from "@/hooks/layouts"
+import {
+  stretch,
+  useStretchLength,
+  useStretchWidth,
+  VanillaPositionedRow,
+} from "@/stores/stretch"
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
@@ -8,67 +15,94 @@ import { EditModeEnum, useSiteContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
 import { useShadows } from "@/stores/settings"
-import { filterRA, mapRA } from "@/utils"
-import { Instance, Instances } from "@react-three/drei"
+import { filterRA, flattenA, mapA, mapRA, pipeLog, reduceA } from "@/utils"
+import { Instance, Instances, Line } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useGesture } from "@use-gesture/react"
+import { sum } from "fp-ts-std/Array"
+import { takeLeft } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { Fragment, useEffect, useMemo, useRef } from "react"
-import { Color, Group, Mesh, MeshStandardMaterial, Plane, Vector3 } from "three"
+import {
+  forwardRef,
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
+import {
+  Color,
+  DoubleSide,
+  Group,
+  Mesh,
+  MeshStandardMaterial,
+  Plane,
+  Vector3,
+} from "three"
 import { useSnapshot } from "valtio"
 import HandleMaterial from "../../../materials/HandleMaterial"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
+import PlanesDebug from "@/components/debug/PlanesDebug"
+import mergeRefs from "react-merge-refs"
 
 type StretchHandleProps = MeshProps & {
-  onDrag: Handler<"drag", ThreeEvent<PointerEvent>>
+  onDrag?: Handler<"drag", ThreeEvent<PointerEvent>>
+  onHover?: Handler<"hover", ThreeEvent<PointerEvent>>
 }
 
-const StretchHandle = (props: StretchHandleProps) => {
-  const meshRef = useRef<Mesh>()
-  const { onDrag, ...meshProps } = props
-  const [shadows] = useShadows()
+const StretchHandle = forwardRef<Mesh, StretchHandleProps>(
+  (props, forwardedRef) => {
+    const localRef = useRef<Mesh>()
+    const { onDrag, onHover, ...meshProps } = props
+    const [shadows] = useShadows()
 
-  const bind = useGesture<{ drag: ThreeEvent<PointerEvent> }>({
-    onHover: (data) => {
-      if (data.hovering) {
-        document.body.style.cursor = "grab"
+    const bind = useGesture<{
+      drag: ThreeEvent<PointerEvent>
+      hover: ThreeEvent<PointerEvent>
+    }>({
+      onHover: (state) => {
+        if (state.hovering) {
+          document.body.style.cursor = "grab"
+        } else {
+          document.body.style.cursor = ""
+        }
+        onHover?.(state)
+      },
+      onDrag: (state) => {
+        const { first, last } = state
+        if (first) setCameraEnabled(false)
+        if (last) setCameraEnabled(true)
+        onDrag?.(state)
+        invalidate()
+      },
+    })
+
+    useEffect(() => {
+      if (!localRef.current) return
+      if (shadows) {
+        ;(localRef.current.material as MeshStandardMaterial).color = new Color(
+          "white"
+        )
       } else {
-        document.body.style.cursor = ""
+        ;(localRef.current.material as MeshStandardMaterial).color = new Color(
+          "black"
+        )
       }
-    },
-    onDrag: (state) => {
-      const { first, last } = state
-      if (first) setCameraEnabled(false)
-      if (last) setCameraEnabled(true)
-      onDrag(state)
-      invalidate()
-    },
-  })
+    }, [shadows])
 
-  useEffect(() => {
-    if (!meshRef.current) return
-    if (shadows) {
-      ;(meshRef.current.material as MeshStandardMaterial).color = new Color(
-        "white"
-      )
-    } else {
-      ;(meshRef.current.material as MeshStandardMaterial).color = new Color(
-        "black"
-      )
-    }
-  }, [shadows])
-  return (
-    <mesh
-      ref={meshRef}
-      rotation-x={-Math.PI / 2}
-      {...meshProps}
-      {...(bind() as any)}
-    >
-      <circleBufferGeometry args={[0.5, 24]} />
-      <HandleMaterial />
-    </mesh>
-  )
-}
+    return (
+      <mesh
+        ref={mergeRefs([localRef, forwardedRef])}
+        rotation-x={-Math.PI / 2}
+        {...meshProps}
+        {...(bind() as any)}
+      >
+        <circleBufferGeometry args={[0.5, 24]} />
+        <HandleMaterial />
+      </mesh>
+    )
+  }
+)
 
 type StretchedColumnsProps = {
   startColumn: PositionedColumn
@@ -187,7 +221,7 @@ const BuildingBuilding = (props: Props) => {
     vanillaPositionedRows,
     sendDrag,
     sendDrop,
-  } = useStretch(id)
+  } = useStretchLength(id)
 
   const startRef = useRef<Group>(null!)
   const endRef = useRef<Group>(null!)
@@ -211,6 +245,33 @@ const BuildingBuilding = (props: Props) => {
   )
 
   const rotateVector = useRotateVector(id)
+
+  const houseWidth = startColumn.gridGroups[0].modules[0].module.width
+  const houseLength = pipe(
+    columnLayout,
+    (x) => columnLayoutToMatrix<BareModule>(x),
+    mapA(takeLeft(1)),
+    flattenA,
+    flattenA,
+    reduceA(0, (acc, v) => acc + v.length)
+  )
+
+  const { canStretchWidth, gateLineX, sectionTypes, sendWidthDrag } =
+    useStretchWidth(id)
+
+  const rightHandleRef = useRef<Mesh>(null)
+  const leftHandleRef = useRef<Mesh>(null)
+  let widthHandleDragging = false
+  const [widthGatesEnabled, setWidthGatesEnabled] = useState(false)
+
+  const widthStretchHoverHandler: Handler<
+    "hover",
+    ThreeEvent<PointerEvent>
+  > = ({ hovering }) => {
+    if (widthHandleDragging) return
+    if (!widthGatesEnabled && hovering) setWidthGatesEnabled(true)
+    if (widthGatesEnabled && !hovering) setWidthGatesEnabled(false)
+  }
 
   return (
     <group position={[buildingX, 0, buildingZ]} rotation={[0, rotation, 0]}>
@@ -270,6 +331,57 @@ const BuildingBuilding = (props: Props) => {
       <StretchedColumns
         {...{ endColumn, startColumn, vanillaPositionedRows }}
       />
+      {canStretchWidth && (
+        <Fragment>
+          <StretchHandle
+            ref={rightHandleRef}
+            onHover={widthStretchHoverHandler}
+            onDrag={({ first, last }) => {
+              if (!rightHandleRef.current) return
+
+              if (first) {
+                widthHandleDragging = true
+              }
+
+              const [px] = rotateVector(pointer.xz)
+              const [bx] = rotateVector([buildingX, buildingZ])
+
+              // const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
+              const x = pipe(px - bx)
+
+              rightHandleRef.current.position.x = x
+              sendWidthDrag(x)
+              // sendDrag(x, { isRight: true, first })
+
+              if (last) {
+                widthHandleDragging = false
+                rightHandleRef.current.position.x =
+                  houseWidth / 2 + handleOffset
+                // sendDrop()
+              }
+            }}
+            position={[houseWidth / 2 + handleOffset, 0, houseLength / 2]}
+          />
+          {/* <StretchHandle
+            ref={leftHandleRef}
+            onHover={widthStretchHoverHandler}
+            onDrag={() => {}}
+            position={[-(houseWidth / 2 + handleOffset), 0, houseLength / 2]}
+          /> */}
+          {widthGatesEnabled && (
+            <group position={[0, 0, houseLength / 2]}>
+              {[gateLineX, -gateLineX].map((x) => {
+                return (
+                  <mesh key={x} position={[x, 0, 0]} rotation-x={Math.PI / 2}>
+                    <planeBufferGeometry args={[0.1, 10]} />
+                    <meshBasicMaterial color="white" side={DoubleSide} />
+                  </mesh>
+                )
+              })}
+            </group>
+          )}
+        </Fragment>
+      )}
     </group>
   )
 }
