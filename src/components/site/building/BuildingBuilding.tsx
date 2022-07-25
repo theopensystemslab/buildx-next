@@ -15,7 +15,15 @@ import { EditModeEnum, useSiteContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
 import { useShadows } from "@/stores/settings"
-import { filterRA, flattenA, mapA, mapRA, pipeLog, reduceA } from "@/utils"
+import {
+  clamp,
+  filterRA,
+  flattenA,
+  mapA,
+  mapRA,
+  pipeLog,
+  reduceA,
+} from "@/utils"
 import { Instance, Instances, Line } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useGesture } from "@use-gesture/react"
@@ -256,7 +264,7 @@ const BuildingBuilding = (props: Props) => {
     reduceA(0, (acc, v) => acc + v.length)
   )
 
-  const { canStretchWidth, gateLineX, sectionTypes, sendWidthDrag } =
+  const { canStretchWidth, gateLineX, sendWidthDrag, maxWidth } =
     useStretchWidth(id)
 
   const rightHandleRef = useRef<Mesh>(null)
@@ -334,10 +342,10 @@ const BuildingBuilding = (props: Props) => {
       {canStretchWidth && (
         <Fragment>
           <StretchHandle
-            ref={rightHandleRef}
+            ref={leftHandleRef}
             onHover={widthStretchHoverHandler}
             onDrag={({ first, last }) => {
-              if (!rightHandleRef.current) return
+              if (!leftHandleRef.current) return
 
               if (first) {
                 widthHandleDragging = true
@@ -346,24 +354,26 @@ const BuildingBuilding = (props: Props) => {
               const [px] = rotateVector(pointer.xz)
               const [bx] = rotateVector([buildingX, buildingZ])
 
-              // const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
-              const x = pipe(px - bx)
+              const leftClamp = clamp(0, maxWidth)
+              // const rightClamp = clamp(-maxWidth, 0)
 
-              rightHandleRef.current.position.x = x
+              // const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
+              const x = pipe(px - bx, leftClamp)
+
+              leftHandleRef.current.position.x = x
               sendWidthDrag(x)
               // sendDrag(x, { isRight: true, first })
 
               if (last) {
                 widthHandleDragging = false
-                rightHandleRef.current.position.x =
-                  houseWidth / 2 + handleOffset
+                leftHandleRef.current.position.x = houseWidth / 2 + handleOffset
                 // sendDrop()
               }
             }}
             position={[houseWidth / 2 + handleOffset, 0, houseLength / 2]}
           />
           {/* <StretchHandle
-            ref={leftHandleRef}
+            ref={rightHandleRef}
             onHover={widthStretchHoverHandler}
             onDrag={() => {}}
             position={[-(houseWidth / 2 + handleOffset), 0, houseLength / 2]}

@@ -1,15 +1,22 @@
 import { useSystemData } from "@/contexts/SystemsData"
 import { SectionType } from "@/data/sectionType"
-import { clamp, filterMapA, flattenA, mapA, reduceA } from "@/utils"
-import { ThreeEvent } from "@react-three/fiber"
-import { Handler } from "@use-gesture/react"
-import { Foldable } from "fp-ts/lib/Array"
+import {
+  mapA,
+  mapO,
+  NumEq,
+  NumOrd,
+  pipeLog,
+  pipeLogWith,
+  reduceA,
+} from "@/utils"
+import { findFirst, Foldable, sort } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { none, some } from "fp-ts/lib/Option"
-import { fromFoldable } from "fp-ts/lib/Record"
+import { concatAll, endo, filterFirst } from "fp-ts/lib/Magma"
+import { fromFoldable } from "fp-ts/lib/Map"
+import { contramap } from "fp-ts/lib/Ord"
 import { first } from "fp-ts/lib/Semigroup"
 import { useState } from "react"
-import houses, { useBuildingModules } from "../houses"
+import { useBuildingModules } from "../houses"
 
 const { max } = Math
 
@@ -45,6 +52,16 @@ export const useStretchWidth = (id: string) => {
     }
   )
 
+  const sortedSTs = pipe(
+    sectionTypes,
+    sort(
+      pipe(
+        NumOrd,
+        contramap((st: SectionType) => st.width)
+      )
+    )
+  )
+
   // filter where we have the modules
 
   // draw thin, line-like debug planes at each type?
@@ -59,20 +76,12 @@ export const useStretchWidth = (id: string) => {
   // sometimes working directly in X (more or less absolute)
   // sometimes working relative to current section type
 
-  const leftClamp = clamp(-maxWidth, 0)
-  const rightClamp = clamp(0, maxWidth / 2)
-
   const canStretchWidth = true // todo
 
-  const delimiters = pipe(
-    sectionTypes,
-    mapA((st): [number, string] => [st.width, st.code])
-  )
-
-  const nearestST = (x: number) =>
-    delimiters.reduce((acc, [width, code]) =>
-      x > width / 2 ? acc : [width, code]
-    )
+  // const nearestST = (x: number) =>
+  //   sectionTypes.reduce((acc, st) =>
+  //     x > st.width / 2 ? acc : [width, code]
+  //   , sectionTypes[0])
 
   // const gateLineX = pipe(
   //   sectionTypes,
@@ -100,7 +109,11 @@ export const useStretchWidth = (id: string) => {
   const [gateLineX, setGateLineX] = useState(current.width / 2)
 
   const sendWidthDrag = (x: number) => {
-    console.log(nearestST(x))
+    const found = pipe(
+      sortedSTs,
+      findFirst((st) => st.width > x),
+      mapO(pipeLogWith((x) => x.code))
+    )
   }
 
   return {
@@ -108,5 +121,6 @@ export const useStretchWidth = (id: string) => {
     canStretchWidth,
     gateLineX,
     sendWidthDrag,
+    maxWidth,
   }
 }
