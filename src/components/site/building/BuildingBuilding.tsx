@@ -1,7 +1,11 @@
 import { useSystemData, useSystemsData } from "@/contexts/SystemsData"
 import { BareModule } from "@/data/module"
 import { useRotateVector } from "@/hooks/geometry"
-import { columnLayoutToMatrix, PositionedColumn } from "@/hooks/layouts"
+import {
+  columnLayoutToMatrix,
+  PositionedColumn,
+  useColumnLayout,
+} from "@/hooks/layouts"
 import {
   stretch,
   useStretchLength,
@@ -219,17 +223,18 @@ const BuildingBuilding = (props: Props) => {
     rotation,
   } = useHouse(id)
 
+  const columnLayout = useColumnLayout(id)
+
   const {
     startColumn,
     midColumns,
     endColumn,
-    columnLayout,
     startClamp,
     endClamp,
     vanillaPositionedRows,
     sendDrag,
     sendDrop,
-  } = useStretchLength(id)
+  } = useStretchLength(id, columnLayout)
 
   const startRef = useRef<Group>(null!)
   const endRef = useRef<Group>(null!)
@@ -264,8 +269,14 @@ const BuildingBuilding = (props: Props) => {
     reduceA(0, (acc, v) => acc + v.length)
   )
 
-  const { canStretchWidth, gateLineX, sendWidthDrag, maxWidth } =
-    useStretchWidth(id)
+  const {
+    canStretchWidth,
+    minWidth,
+    maxWidth,
+    gateLineX,
+    sendWidthDrag,
+    sendWidthDrop,
+  } = useStretchWidth(id, columnLayout)
 
   const rightHandleRef = useRef<Mesh>(null)
   const leftHandleRef = useRef<Mesh>(null)
@@ -354,20 +365,20 @@ const BuildingBuilding = (props: Props) => {
               const [px] = rotateVector(pointer.xz)
               const [bx] = rotateVector([buildingX, buildingZ])
 
-              const leftClamp = clamp(0, maxWidth)
+              const leftClamp = clamp(0, Infinity)
               // const rightClamp = clamp(-maxWidth, 0)
 
               // const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
               const x = pipe(px - bx, leftClamp)
 
               leftHandleRef.current.position.x = x
-              sendWidthDrag(x)
+              sendWidthDrag(x - handleOffset)
               // sendDrag(x, { isRight: true, first })
 
               if (last) {
                 widthHandleDragging = false
                 leftHandleRef.current.position.x = houseWidth / 2 + handleOffset
-                // sendDrop()
+                sendWidthDrop()
               }
             }}
             position={[houseWidth / 2 + handleOffset, 0, houseLength / 2]}

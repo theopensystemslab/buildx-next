@@ -11,6 +11,7 @@ import { mergeBufferGeometries } from "three-stdlib"
 import { proxy } from "valtio"
 import { useRotateVector } from "@/hooks/geometry"
 import {
+  ColumnLayout,
   columnLayoutToDNA,
   PositionedColumn,
   PositionedModule,
@@ -124,9 +125,10 @@ export const useVanillaPositionedRows = (
   )
 }
 
-export const useStretchLength = (buildingId: string) => {
-  const columnLayout = useColumnLayout(buildingId)
-
+export const useStretchLength = (
+  buildingId: string,
+  columnLayout: ColumnLayout
+) => {
   const house = useHouse(buildingId)
 
   const rotateVector = useRotateVector(buildingId)

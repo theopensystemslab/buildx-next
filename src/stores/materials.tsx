@@ -158,6 +158,7 @@ export const useMaterial = (
   useEffect(() => {
     material.clippingPlanes = clippingPlanes
     material.clipShadows = true
+    // material.visible = false
   }, [clippingPlanes])
 
   const visibleByLevelIndex = (): boolean => {

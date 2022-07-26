@@ -1,29 +1,37 @@
 import { useSystemData } from "@/contexts/SystemsData"
+import {
+  filterCompatibleModules,
+  Module,
+  StructuredDnaModule,
+  topCandidateByHamming,
+} from "@/data/module"
 import { SectionType } from "@/data/sectionType"
+import { ColumnLayout } from "@/hooks/layouts"
 import {
   mapA,
   mapO,
-  NumEq,
+  mapRA,
   NumOrd,
-  pipeLog,
   pipeLogWith,
   reduceA,
+  reduceWithIndexA,
 } from "@/utils"
-import { findFirst, Foldable, sort } from "fp-ts/lib/Array"
+import { findFirst, isNonEmpty, sort } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { concatAll, endo, filterFirst } from "fp-ts/lib/Magma"
-import { fromFoldable } from "fp-ts/lib/Map"
+import { head, NonEmptyArray } from "fp-ts/lib/NonEmptyArray"
 import { contramap } from "fp-ts/lib/Ord"
-import { first } from "fp-ts/lib/Semigroup"
-import { useState } from "react"
+import { last } from "fp-ts/lib/ReadonlyNonEmptyArray"
+import { useMemo, useState } from "react"
 import { useBuildingModules } from "../houses"
 
-const { max } = Math
+const { max, abs } = Math
 
-export const useStretchWidth = (id: string) => {
-  const { sectionTypes } = useSystemData()
+export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
+  const { sectionTypes, modules } = useSystemData()
 
   const buildingModules = useBuildingModules(id)
+
+  const canStretchWidth = true // todo
 
   const { current, options } = pipe(
     sectionTypes,
@@ -52,75 +60,106 @@ export const useStretchWidth = (id: string) => {
     }
   )
 
-  const sortedSTs = pipe(
+  const sortedSTs: NonEmptyArray<SectionType> = pipe(
     sectionTypes,
     sort(
       pipe(
         NumOrd,
         contramap((st: SectionType) => st.width)
       )
-    )
+    ),
+    (sts) => {
+      if (!isNonEmpty(sts)) throw new Error("Empty section types")
+      return sts
+    }
   )
 
-  // filter where we have the modules
+  // let's say lines are like 3 8 14 20
+  // x is 15
+  // x is 4
+  // x is
 
-  // draw thin, line-like debug planes at each type?
+  const maxWidth = pipe(sortedSTs, last, (x) => x.width)
 
-  // gates are always +/- .5width
+  const minWidth = pipe(sortedSTs, head, (x) => x.width)
 
-  const maxWidth = pipe(
-    sectionTypes,
-    reduceA(0, (acc, v) => max(acc, v.width))
-  )
+  const [stIndex, setSTIndex] = useState(-1)
 
-  // sometimes working directly in X (more or less absolute)
-  // sometimes working relative to current section type
+  const gateLineX = useMemo(() => {
+    if (stIndex === -1) return current.width / 2
+    return sortedSTs[stIndex].width / 2
+  }, [stIndex])
 
-  const canStretchWidth = true // todo
-
-  // const nearestST = (x: number) =>
-  //   sectionTypes.reduce((acc, st) =>
-  //     x > st.width / 2 ? acc : [width, code]
-  //   , sectionTypes[0])
-
-  // const gateLineX = pipe(
-  //   sectionTypes,
-  //   filterMapA((st) =>
-  //     st.code === current.code
-  //       ? none
-  //       : some([
-  //           st.width / 2,
-  //           //  -st.width / 2
-  //         ])
-  //   ),
-  //   flattenA
-  // )
-
-  // const gateLineX = useState(current.)
-
-  // could map section types with gate lines
-  // then need the current X
-  // hold a section type / gate line in a useState
-  // also with the X value? but it's + and -...
-  // it'll be a mirror though
-
-  // just focus on RHS first
-
-  const [gateLineX, setGateLineX] = useState(current.width / 2)
+  const candidateModules: Module[] = useMemo(() => {
+    // if (stIndex === -1) return []
+    // const st = sortedSTs[stIndex]
+    // return pipe(modules, filterCompatibleModules(["gridType", "gridUnits"]))
+    return []
+  }, [stIndex])
 
   const sendWidthDrag = (x: number) => {
-    const found = pipe(
-      sortedSTs,
-      findFirst((st) => st.width > x),
-      mapO(pipeLogWith((x) => x.code))
+    const absX = abs(x)
+
+    let distance = Infinity,
+      index = -1
+
+    for (let i = 0; i < sortedSTs.length; i++) {
+      const st = sortedSTs[i]
+      const d = abs(st.width / 2 - absX)
+      if (d < distance) {
+        distance = d
+        index = i
+      }
+    }
+
+    setSTIndex(index)
+  }
+
+  const sendWidthDrop = () => {
+    // matrix the DNA, map swap each module for the appropriate section width
+    pipe(
+      columnLayout,
+      mapA(({ gridGroups, ...column }) => ({
+        ...column,
+        gridGroups: pipe(
+          gridGroups,
+          mapRA(({ modules, ...gridGroup }) => ({
+            ...gridGroup,
+            modules: pipe(
+              modules,
+              mapRA(({ module, z }) => ({
+                z,
+                module: topCandidateByHamming<StructuredDnaModule>(
+                  [
+                    "internalLayoutType",
+                    "stairsType",
+                    "windowTypeEnd",
+                    "windowTypeSide1",
+                    "windowTypeSide2",
+                    "windowTypeTop",
+                  ],
+                  module,
+                  candidateModules
+                ),
+              }))
+            ),
+          }))
+        ),
+      }))
     )
+
+    // need to vanilla-ify where necessary
+
+    // minimum checks? has end modules for each level of new st?
+    // has vanilla for each level of new st?
   }
 
   return {
-    sectionTypes,
     canStretchWidth,
+    minWidth,
+    maxWidth,
     gateLineX,
     sendWidthDrag,
-    maxWidth,
+    sendWidthDrop,
   }
 }
