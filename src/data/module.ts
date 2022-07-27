@@ -89,8 +89,16 @@ export const getModules = async (system: System): Promise<Array<Module>> => {
 }
 
 export const filterCompatibleModules =
-  (ks: Array<keyof StructuredDna>) => (module: BareModule) =>
-    filter((m: BareModule) =>
+  <T extends StructuredDnaModule>(
+    ks: Array<keyof StructuredDna> = [
+      "sectionType",
+      "positionType",
+      "levelType",
+      "gridType",
+    ]
+  ) =>
+  (module: T) =>
+    filter((m: T) =>
       ks.reduce(
         (acc: boolean, k) =>
           acc && m.structuredDna[k] === module.structuredDna[k],
@@ -147,7 +155,15 @@ export const keysHammingTotal =
     pipe(keysHamming(ks)(a, b), values, sum)
 
 export const topCandidateByHamming = <M extends StructuredDnaModule>(
-  ks: Array<keyof StructuredDna>,
+  ks: Array<keyof StructuredDna> = [
+    "gridUnits",
+    "internalLayoutType",
+    "stairsType",
+    "windowTypeEnd",
+    "windowTypeSide1",
+    "windowTypeSide2",
+    "windowTypeTop",
+  ],
   targetModule: M,
   candidateModules: M[]
 ): M | null =>

@@ -1,11 +1,13 @@
-import { useSystemsData } from "@/contexts/SystemsData"
+import { useSystemData, useSystemsData } from "@/contexts/SystemsData"
 import {
   BareModule,
   keysFilter,
   Module,
+  StructuredDnaModule,
   topCandidateByHamming,
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
+import { NoVanillaModuleError } from "@/errors"
 import { all, filterA, filterRA, mapA, mapO, reduceA, StrOrd } from "@/utils"
 import { loadModule } from "@/utils/modules"
 import { replicate } from "fp-ts/lib/Array"
@@ -21,29 +23,32 @@ export const useGetVanillaModule = <T extends BareModule>(
   opts: { loadGLTF?: boolean } = {}
 ) => {
   const { loadGLTF = false } = opts
-  const { modules: allModules } = useSystemsData()
+  const { modules: systemModules } = useSystemData()
 
   return (
     module: T,
     opts: {
+      sectionType?: string
       positionType?: string
       levelType?: string
       constrainGridType?: boolean
     } = {}
   ) => {
-    const { positionType, levelType, constrainGridType = true } = opts
-
-    const systemModules = pipe(
-      allModules,
-      filterRA((m) => m.systemId === module.systemId)
-    )
+    const {
+      sectionType,
+      positionType,
+      levelType,
+      constrainGridType = true,
+    } = opts
 
     const vanillaModule = pipe(
       systemModules,
       filterRA((sysModule) =>
         all(
-          sysModule.structuredDna.sectionType ===
-            module.structuredDna.sectionType,
+          sectionType
+            ? sysModule.structuredDna.sectionType === sectionType
+            : sysModule.structuredDna.sectionType ===
+                module.structuredDna.sectionType,
           positionType
             ? sysModule.structuredDna.positionType === positionType
             : sysModule.structuredDna.positionType ===
@@ -68,7 +73,9 @@ export const useGetVanillaModule = <T extends BareModule>(
     )
 
     if (!vanillaModule)
-      throw new Error(`No vanilla module found for ${module.dna}`)
+      throw new NoVanillaModuleError(
+        `No vanilla module found for ${module.dna}`
+      )
 
     return vanillaModule
   }

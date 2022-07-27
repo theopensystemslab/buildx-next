@@ -1,37 +1,57 @@
 import { useSystemData } from "@/contexts/SystemsData"
 import {
+  BareModule,
   filterCompatibleModules,
+  LoadedModule,
   Module,
   StructuredDnaModule,
   topCandidateByHamming,
 } from "@/data/module"
 import { SectionType } from "@/data/sectionType"
-import { ColumnLayout } from "@/hooks/layouts"
+import { NoVanillaModuleError } from "@/errors"
+import { ColumnLayout, PositionedModule } from "@/hooks/layouts"
+import { useGetVanillaModule } from "@/hooks/modules"
 import {
+  filterMapA,
   mapA,
-  mapO,
   mapRA,
+  notNullish,
   NumOrd,
-  pipeLogWith,
   reduceA,
-  reduceWithIndexA,
+  reduceRA,
 } from "@/utils"
-import { findFirst, isNonEmpty, sort } from "fp-ts/lib/Array"
+import { isNonEmpty, sort } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { head, NonEmptyArray } from "fp-ts/lib/NonEmptyArray"
+import { groupBy, head, NonEmptyArray } from "fp-ts/lib/NonEmptyArray"
+import { none } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { last } from "fp-ts/lib/ReadonlyNonEmptyArray"
+import produce from "immer"
 import { useMemo, useState } from "react"
 import { useBuildingModules } from "../houses"
 
 const { max, abs } = Math
 
 export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
-  const { sectionTypes, modules } = useSystemData()
+  const { sectionTypes, modules: systemModules } = useSystemData()
 
-  const buildingModules = useBuildingModules(id)
+  const getVanillaModule = useGetVanillaModule()
 
-  const canStretchWidth = true // todo
+  const module0 = columnLayout[0].gridGroups[0].modules[0].module
+
+  const modulesBySectionType = pipe(
+    systemModules,
+    (ms) => {
+      if (!isNonEmpty(ms)) throw new Error("Empty section types")
+      return ms
+    },
+    groupBy((m: Module) => m.structuredDna.sectionType)
+  )
+
+  // key by code
+
+  // store a "current"/"options" of codes
+  // store a code:dna-change (validate in processing)
 
   const { current, options } = pipe(
     sectionTypes,
@@ -44,7 +64,7 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
         }: { current: SectionType | null; options: SectionType[] },
         st
       ) =>
-        st.code === buildingModules[0].structuredDna.sectionType
+        st.code === module0.structuredDna.sectionType
           ? {
               current: st,
               options,
@@ -54,11 +74,128 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
               options: [...options, st],
             }
     ),
-    ({ current, options }) => {
-      if (current === null) throw new Error("current sectionType null")
-      return { current, options }
-    }
+    ({ current, options }) => ({
+      current: pipe(current, notNullish("current sectionType nullish")),
+      options,
+    })
   )
+
+  const dnaChangeOptions = pipe(
+    options,
+    filterMapA((st) => {
+      // may also want to store END and Vanilla modules for each level
+
+      // may want to for loop this so we can break
+
+      // or try catch?
+
+      // this try-catch stuff is nasty, just use optional properly?
+
+      const nextLayout = pipe(
+        columnLayout,
+        mapA(({ gridGroups, ...columnRest }) => ({
+          ...columnRest,
+          gridGroups: pipe(
+            gridGroups,
+            mapRA(({ modules, ...gridGroupRest }) => {
+              const length = modules.reduce(
+                (acc, v) => acc + v.module.length,
+                0
+              )
+
+              // you can probably get the vanilla module here?
+
+              const vanillaModule = getVanillaModule(modules[0].module, {
+                sectionType: st.code,
+              })
+
+              // if no vanilla, shoot for none
+
+              // if vanilla, everything possible?
+
+              // try throw, catch vanillify?
+
+              const nextModules: PositionedModule[] = pipe(
+                modules,
+                reduceRA([], (acc: PositionedModule[], { module, z }) => {
+                  const target: StructuredDnaModule = {
+                    structuredDna: {
+                      ...module.structuredDna,
+                      sectionType: st.code,
+                    },
+                  }
+                  const compatModules = pipe(
+                    systemModules,
+                    filterCompatibleModules()(target)
+                  )
+
+                  if (compatModules.length === 0) throw null
+
+                  console.log(module.dna)
+
+                  const foo = undefined as any
+                  // work here
+
+                  // try to find a matching module
+
+                  // if no, try vanillify
+
+                  // if no, set some bool to filter map away
+                  return acc
+                })
+                // remember you go extra [] for padding
+              )
+
+              const nextLength = nextModules.reduce(
+                (acc, v) => acc + v.module.length,
+                0
+              )
+
+              // if (nextLength !== length)
+              //   throw new Error("Length mismatch changing section type")
+
+              return {
+                ...gridGroupRest,
+                modules: nextModules,
+              }
+            })
+          ),
+        }))
+      )
+
+      // const dna = produce(columnLayout, (draft) => {
+      //   console.log(draft)
+      //   for (let i = 0; i < draft.length; i++) {
+      //     for (let j = 0; j < draft[i].gridGroups.length; j++) {
+      //       for (let k = 0; j < draft[i].gridGroups[j].length; k++) {
+      //         const m0 = draft[i].gridGroups[j].modules[k].module
+      //         const target = {
+      //           ...m0,
+      //           structuredDna: { ...m0.structuredDna, sectionType: st.code },
+      //         }
+      //         const m1 = pipe(
+      //           modulesBySectionType[st.code],
+      //           filterCompatibleModules()(target),
+      //           (ms) => topCandidateByHamming<BareModule>(undefined, target, ms)
+      //         )
+
+      //         // the grid groups must be maintained
+      //         // try to find a module of same grid length
+      //         // if no, vanilla-ify the module
+      //       }
+      //     }
+      //   }
+      // })
+
+      // for each column
+      // for each gridGroup
+      // for each
+
+      return none
+    })
+  )
+
+  const canStretchWidth = true // todo
 
   const sortedSTs: NonEmptyArray<SectionType> = pipe(
     sectionTypes,
@@ -90,13 +227,6 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
     return sortedSTs[stIndex].width / 2
   }, [stIndex])
 
-  const candidateModules: Module[] = useMemo(() => {
-    // if (stIndex === -1) return []
-    // const st = sortedSTs[stIndex]
-    // return pipe(modules, filterCompatibleModules(["gridType", "gridUnits"]))
-    return []
-  }, [stIndex])
-
   const sendWidthDrag = (x: number) => {
     const absX = abs(x)
 
@@ -117,39 +247,37 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
 
   const sendWidthDrop = () => {
     // matrix the DNA, map swap each module for the appropriate section width
-    pipe(
-      columnLayout,
-      mapA(({ gridGroups, ...column }) => ({
-        ...column,
-        gridGroups: pipe(
-          gridGroups,
-          mapRA(({ modules, ...gridGroup }) => ({
-            ...gridGroup,
-            modules: pipe(
-              modules,
-              mapRA(({ module, z }) => ({
-                z,
-                module: topCandidateByHamming<StructuredDnaModule>(
-                  [
-                    "internalLayoutType",
-                    "stairsType",
-                    "windowTypeEnd",
-                    "windowTypeSide1",
-                    "windowTypeSide2",
-                    "windowTypeTop",
-                  ],
-                  module,
-                  candidateModules
-                ),
-              }))
-            ),
-          }))
-        ),
-      }))
-    )
-
+    // pipe(
+    //   columnLayout,
+    //   mapA(({ gridGroups, ...column }) => ({
+    //     ...column,
+    //     gridGroups: pipe(
+    //       gridGroups,
+    //       mapRA(({ modules, ...gridGroup }) => ({
+    //         ...gridGroup,
+    //         modules: pipe(
+    //           modules,
+    //           mapRA(({ module, z }) => ({
+    //             z,
+    //             module: topCandidateByHamming<StructuredDnaModule>(
+    //               [
+    //                 "internalLayoutType",
+    //                 "stairsType",
+    //                 "windowTypeEnd",
+    //                 "windowTypeSide1",
+    //                 "windowTypeSide2",
+    //                 "windowTypeTop",
+    //               ],
+    //               module,
+    //               candidateModules
+    //             ),
+    //           }))
+    //         ),
+    //       }))
+    //     ),
+    //   }))
+    // )
     // need to vanilla-ify where necessary
-
     // minimum checks? has end modules for each level of new st?
     // has vanilla for each level of new st?
   }

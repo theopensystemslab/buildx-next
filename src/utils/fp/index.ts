@@ -142,3 +142,12 @@ export const hamming = (a: string, b: string) => {
     abs(a.codePointAt(0)! - b.codePointAt(0)!)
   ).reduce((acc, v) => acc + v, 0)
 }
+
+export const notNullish =
+  (msg = "notNullish error") =>
+  <T extends unknown>(val: T | null | undefined): T => {
+    if (val === null || val === undefined) {
+      throw new Error(msg)
+    }
+    return val as T
+  }
