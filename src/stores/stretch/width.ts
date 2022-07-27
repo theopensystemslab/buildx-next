@@ -11,6 +11,7 @@ import { SectionType } from "@/data/sectionType"
 import { NoVanillaModuleError } from "@/errors"
 import {
   ColumnLayout,
+  columnLayoutToDNA,
   GridGroup,
   PositionedColumn,
   PositionedModule,
@@ -29,12 +30,14 @@ import {
   reduceRA,
   reduceToOption,
 } from "@/utils"
-import { isNonEmpty, sort } from "fp-ts/lib/Array"
+import { Foldable, isNonEmpty, sort } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { groupBy, head, NonEmptyArray } from "fp-ts/lib/NonEmptyArray"
 import { isNone, none, Option, some } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { last } from "fp-ts/lib/ReadonlyNonEmptyArray"
+import { fromFoldable } from "fp-ts/lib/Record"
+import { first } from "fp-ts/lib/Semigroup"
 import produce from "immer"
 import { useMemo, useState } from "react"
 import { useBuildingModules } from "../houses"
@@ -105,29 +108,21 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
                     0
                   )
 
-                  // you can probably get the vanilla module here?
-
                   const vanillaModule = getVanillaModule(modules[0].module, {
                     sectionType: st.code,
                   })
 
                   if (isNone(vanillaModule)) return none
 
-                  // if no vanilla, shoot for none
-
-                  // if vanilla, everything possible?
-
-                  // try throw, catch vanillify?
-
-                  const nextGridGroup: Option<PositionedRow> = pipe(
+                  return pipe(
                     modules,
                     reduceToOption(
-                      some({} as any),
+                      some([]),
                       (
                         _i,
-                        acc: Option<PositionedRow>,
+                        acc: Option<PositionedModule[]>,
                         { module, z }: PositionedModule
-                      ): Option<PositionedRow> => {
+                      ): Option<PositionedModule[]> => {
                         const target: StructuredDnaModule = {
                           structuredDna: {
                             ...module.structuredDna,
@@ -143,51 +138,19 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
 
                         const nextModules: PositionedModule[] = []
 
-                        // work here
-
-                        // try to find a matching module
-
-                        // if no, try vanillify
-
-                        // if no, set some bool to filter map away
                         return pipe(
                           acc,
-                          mapO(
-                            (acc): PositionedRow => ({
-                              ...gridGroupRest,
-                              modules: nextModules,
-                            })
-                          )
+                          mapO((ms) => [...ms, ...nextModules])
                         )
                       }
+                    ),
+                    mapO(
+                      (modules): GridGroup => ({
+                        ...gridGroupRest,
+                        modules,
+                      })
                     )
-                    // remember you go extra [] for padding
                   )
-
-                  return nextGridGroup
-
-                  // const foo = pipe(
-                  //   nextGridGroup,
-                  //   mapO((modules): PositionedColumn["gridGroups"][0] => ({
-                  //     ...gridGroupRest,
-                  //     modules,
-                  //   }))
-                  // )
-
-                  // return foo
-
-                  const nextLength = nextGridGroup.reduce(
-                    (acc, v) => acc + v.module.length,
-                    0
-                  )
-
-                  // if (nextLength !== length)
-                  //   throw new Error("Length mismatch changing section type")
-
-                  return {
-                    ...gridGroupRest,
-                    modules: nextGridGroup,
-                  }
                 }
               ),
               mapO((gridGroups) => ({
@@ -195,120 +158,14 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
                 gridGroups,
               }))
             )
-        )
+        ),
+        mapO((columnLayout): [string, string[]] => [
+          st.code,
+          columnLayoutToDNA(columnLayout as ColumnLayout),
+        ])
       )
-    )
-    // filterMapA((st) => {
-    //   // may also want to store END and Vanilla modules for each level
-
-    //   // may want to for loop this so we can break
-
-    //   // or try catch?
-
-    //   // this try-catch stuff is nasty, just use optional properly?
-
-    //   const nextLayout = pipe(
-    //     columnLayout,
-    //     mapA(({ gridGroups, ...columnRest }) => ({
-    //       ...columnRest,
-    //       gridGroups: pipe(
-    //         gridGroups,
-    //         mapRA(({ modules, ...gridGroupRest }) => {
-    //           const length = modules.reduce(
-    //             (acc, v) => acc + v.module.length,
-    //             0
-    //           )
-
-    //           // you can probably get the vanilla module here?
-
-    //           const vanillaModule = getVanillaModule(modules[0].module, {
-    //             sectionType: st.code,
-    //           })
-
-    //           // if no vanilla, shoot for none
-
-    //           // if vanilla, everything possible?
-
-    //           // try throw, catch vanillify?
-
-    //           const nextModules: PositionedModule[] = pipe(
-    //             modules,
-    //             reduceRA([], (acc: PositionedModule[], { module, z }) => {
-    //               const target: StructuredDnaModule = {
-    //                 structuredDna: {
-    //                   ...module.structuredDna,
-    //                   sectionType: st.code,
-    //                 },
-    //               }
-    //               const compatModules = pipe(
-    //                 systemModules,
-    //                 filterCompatibleModules()(target)
-    //               )
-
-    //               if (compatModules.length === 0) throw null
-
-    //               console.log(module.dna)
-
-    //               const foo = undefined as any
-    //               // work here
-
-    //               // try to find a matching module
-
-    //               // if no, try vanillify
-
-    //               // if no, set some bool to filter map away
-    //               return acc
-    //             })
-    //             // remember you go extra [] for padding
-    //           )
-
-    //           const nextLength = nextModules.reduce(
-    //             (acc, v) => acc + v.module.length,
-    //             0
-    //           )
-
-    //           // if (nextLength !== length)
-    //           //   throw new Error("Length mismatch changing section type")
-
-    //           return {
-    //             ...gridGroupRest,
-    //             modules: nextModules,
-    //           }
-    //         })
-    //       ),
-    //     }))
-    //   )
-
-    //   // const dna = produce(columnLayout, (draft) => {
-    //   //   console.log(draft)
-    //   //   for (let i = 0; i < draft.length; i++) {
-    //   //     for (let j = 0; j < draft[i].gridGroups.length; j++) {
-    //   //       for (let k = 0; j < draft[i].gridGroups[j].length; k++) {
-    //   //         const m0 = draft[i].gridGroups[j].modules[k].module
-    //   //         const target = {
-    //   //           ...m0,
-    //   //           structuredDna: { ...m0.structuredDna, sectionType: st.code },
-    //   //         }
-    //   //         const m1 = pipe(
-    //   //           modulesBySectionType[st.code],
-    //   //           filterCompatibleModules()(target),
-    //   //           (ms) => topCandidateByHamming<BareModule>(undefined, target, ms)
-    //   //         )
-
-    //   //         // the grid groups must be maintained
-    //   //         // try to find a module of same grid length
-    //   //         // if no, vanilla-ify the module
-    //   //       }
-    //   //     }
-    //   //   }
-    //   // })
-
-    //   // for each column
-    //   // for each gridGroup
-    //   // for each
-
-    //   return none
-    // })
+    ),
+    fromFoldable(first<string[]>(), Foldable)
   )
 
   const canStretchWidth = true // todo
