@@ -1,7 +1,5 @@
 import {
-  BareModule,
   keysHamming,
-  keysHammingSort,
   keysHammingTotal,
   StructuredDnaModule,
 } from "@/data/module"

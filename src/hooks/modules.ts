@@ -8,11 +8,20 @@ import {
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
 import { NoVanillaModuleError } from "@/errors"
-import { all, filterA, filterRA, mapA, mapO, reduceA, StrOrd } from "@/utils"
+import {
+  all,
+  errorThrower,
+  filterA,
+  filterRA,
+  mapA,
+  mapO,
+  reduceA,
+  StrOrd,
+} from "@/utils"
 import { loadModule } from "@/utils/modules"
 import { replicate } from "fp-ts/lib/Array"
-import { pipe } from "fp-ts/lib/function"
-import { toNullable } from "fp-ts/lib/Option"
+import { identity, pipe } from "fp-ts/lib/function"
+import { match, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 
@@ -41,7 +50,7 @@ export const useGetVanillaModule = <T extends BareModule>(
       constrainGridType = true,
     } = opts
 
-    const vanillaModule = pipe(
+    return pipe(
       systemModules,
       filterRA((sysModule) =>
         all(
@@ -68,16 +77,8 @@ export const useGetVanillaModule = <T extends BareModule>(
         )
       ),
       head,
-      mapO((m) => (loadGLTF ? loadModule(m) : m)),
-      toNullable
+      mapO((m) => (loadGLTF ? loadModule(m) : m))
     )
-
-    if (!vanillaModule)
-      throw new NoVanillaModuleError(
-        `No vanilla module found for ${module.dna}`
-      )
-
-    return vanillaModule
   }
 }
 
@@ -110,7 +111,16 @@ export const usePadColumn = () => {
         )
         return [
           ...level,
-          ...replicate(target - levelLength, getVanillaModule(level[0])),
+          ...replicate(
+            target - levelLength,
+            pipe(
+              getVanillaModule(level[0]),
+              match(
+                errorThrower(`no vanilla module found for ${level[0].dna}`),
+                identity
+              )
+            )
+          ),
         ]
       })
     )

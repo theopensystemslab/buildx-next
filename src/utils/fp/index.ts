@@ -2,7 +2,14 @@ import { reduce, zipWith } from "fp-ts/lib/Array"
 import { flow, pipe } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
 import { Ord as NumOrd, Eq as NumEq } from "fp-ts/lib/number"
-import { map as mapO, flatten as flattenO } from "fp-ts/lib/Option"
+import {
+  map as mapO,
+  flatten as flattenO,
+  Option,
+  isNone,
+  none,
+  some,
+} from "fp-ts/lib/Option"
 import { clamp } from "fp-ts/lib/Ord"
 import { modifyAt } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/Record"
@@ -151,3 +158,40 @@ export const notNullish =
     }
     return val as T
   }
+
+export const errorThrower = (message?: string) => () => {
+  throw new Error(message)
+}
+
+export const reduceToOption: <A, B>(
+  b: Option<B>,
+  f: (i: number, b: Option<B>, a: A) => Option<B>
+) => (fa: ReadonlyArray<A>) => Option<B> = (b, f) => (fa) => {
+  const len = fa.length
+  let out = b
+  for (let i = 0; i < len; i++) {
+    out = f(i, out, fa[i])
+    if (isNone(out)) return none
+  }
+  return out
+}
+
+export const mapToOption =
+  <A, B>(f: (a: A) => Option<B>) =>
+  (fa: ReadonlyArray<A>): Option<ReadonlyArray<B>> => {
+    const fb = new Array<B>(fa.length)
+    //                   ^?
+    for (let i = 0; i < fa.length; i++) {
+      const result = f(fa[i])
+      if (isNone(result)) return none
+      else fb[i] = result.value
+    }
+    return some(fb)
+  }
+
+// fa.map((a) => f(a))
+
+// export const foo: <A,B>(f: (a: A) => B) => void = (f) => {
+//   const xs = new Array<B>()
+//   return
+// }

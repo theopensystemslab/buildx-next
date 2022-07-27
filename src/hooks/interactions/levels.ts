@@ -7,7 +7,15 @@ import {
   topCandidateByHamming,
 } from "@/data/module"
 import houses from "@/stores/houses"
-import { filterA, flattenA, mapA, StrEq, StrOrd, transposeA } from "@/utils"
+import {
+  errorThrower,
+  filterA,
+  flattenA,
+  mapA,
+  StrEq,
+  StrOrd,
+  transposeA,
+} from "@/utils"
 import {
   filterMap,
   findFirstMap,
@@ -16,8 +24,8 @@ import {
   sort,
   uniq,
 } from "fp-ts/lib/Array"
-import { pipe } from "fp-ts/lib/function"
-import { getOrElse, none, some, toNullable } from "fp-ts/lib/Option"
+import { identity, pipe } from "fp-ts/lib/function"
+import { getOrElse, match, none, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import produce from "immer"
 import {
@@ -82,9 +90,16 @@ export const useLevelInteractions = (
             pipe(
               group,
               mapA((m) => {
-                const vanillaModule = getVanillaModule(m, {
-                  levelType: targetLevelType,
-                })
+                const vanillaModule = pipe(
+                  getVanillaModule(m, {
+                    levelType: targetLevelType,
+                  }),
+                  match(
+                    errorThrower(`no vanilla module found for ${m.dna}`),
+                    identity
+                  )
+                )
+
                 if (m.structuredDna.stairsType === "ST0")
                   return replicate(
                     m.structuredDna.gridUnits /

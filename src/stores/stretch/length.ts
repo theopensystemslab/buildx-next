@@ -1,8 +1,15 @@
 import { LoadedModule } from "@/data/module"
 import { useSystemSettings } from "@/data/settings"
 import houses, { useHouse } from "@/stores/houses"
-import { clamp, isMesh, mapRA, reduceRA, reduceWithIndexRA } from "@/utils"
-import { flow, pipe } from "fp-ts/lib/function"
+import {
+  clamp,
+  errorThrower,
+  isMesh,
+  mapRA,
+  reduceRA,
+  reduceWithIndexRA,
+} from "@/utils"
+import { flow, identity, pipe } from "fp-ts/lib/function"
 import { flatten, partition, replicate } from "fp-ts/lib/ReadonlyArray"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
@@ -19,6 +26,7 @@ import {
   useColumnLayout,
 } from "@/hooks/layouts"
 import { useGetVanillaModule } from "@/hooks/modules"
+import { match } from "fp-ts/lib/Option"
 
 export const stretch = proxy({
   endVanillaColumns: 0,
@@ -57,10 +65,16 @@ export const useVanillaPositionedRows = (
           ) => {
             const isFirst: boolean = i === 0
 
-            const vanillaModuleOut = getVanillaModule(moduleIn, {
-              positionType: "MID",
-              constrainGridType: false,
-            }) as LoadedModule
+            const vanillaModuleOut = pipe(
+              getVanillaModule(moduleIn, {
+                positionType: "MID",
+                constrainGridType: false,
+              }),
+              match(
+                errorThrower(`no vanilla module found for ${moduleIn.dna}`),
+                identity
+              )
+            ) as LoadedModule
 
             const z = isFirst
               ? vanillaModuleOut.length / 2
