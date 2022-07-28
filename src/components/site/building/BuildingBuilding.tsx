@@ -385,20 +385,15 @@ const BuildingBuilding = (props: Props) => {
               const [px] = rotateVector(pointer.xz)
               const [bx] = rotateVector([buildingX, buildingZ])
 
-              // const leftClamp = clamp(0, Infinity)
               const rightClamp = clamp(
-                // -(minWidth / 2 + handleOffset),
-                -Infinity,
-                0
-                // -(maxWidth / 2 + handleOffset)
+                -(maxWidth / 2 + handleOffset),
+                -(minWidth / 2 + handleOffset)
               )
 
-              // const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
               const x = pipe(px - bx, rightClamp)
 
               rightHandleRef.current.position.x = x
               sendWidthDrag(x + handleOffset)
-              // sendDrag(x, { isRight: true, first })
 
               if (last) {
                 widthHandleDragging = false
@@ -411,12 +406,6 @@ const BuildingBuilding = (props: Props) => {
             }}
             position={[-(houseWidth / 2 + handleOffset), 0, houseLength / 2]}
           />
-          {/* <StretchHandle
-            ref={rightHandleRef}
-            onHover={widthStretchHoverHandler}
-            onDrag={() => {}}
-            position={[-(houseWidth / 2 + handleOffset), 0, houseLength / 2]}
-          /> */}
           {widthGatesEnabled && (
             <group position={[0, 0, houseLength / 2]}>
               {[gateLineX, -gateLineX].map((x) => {

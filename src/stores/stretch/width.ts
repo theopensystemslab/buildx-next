@@ -218,11 +218,6 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
     }
   )
 
-  // let's say lines are like 3 8 14 20
-  // x is 15
-  // x is 4
-  // x is
-
   const maxWidth = pipe(sortedSTs, last, (x) => x.width)
 
   const minWidth = pipe(sortedSTs, head, (x) => x.width)
@@ -256,40 +251,6 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
     const st = sortedSTs[stIndex]
     const dnaChange = dnaChangeOptions[st.code]
     if (dnaChange !== houses[id].dna) houses[id].dna = dnaChange
-    // matrix the DNA, map swap each module for the appropriate section width
-    // pipe(
-    //   columnLayout,
-    //   mapA(({ gridGroups, ...column }) => ({
-    //     ...column,
-    //     gridGroups: pipe(
-    //       gridGroups,
-    //       mapRA(({ modules, ...gridGroup }) => ({
-    //         ...gridGroup,
-    //         modules: pipe(
-    //           modules,
-    //           mapRA(({ module, z }) => ({
-    //             z,
-    //             module: topCandidateByHamming<StructuredDnaModule>(
-    //               [
-    //                 "internalLayoutType",
-    //                 "stairsType",
-    //                 "windowTypeEnd",
-    //                 "windowTypeSide1",
-    //                 "windowTypeSide2",
-    //                 "windowTypeTop",
-    //               ],
-    //               module,
-    //               candidateModules
-    //             ),
-    //           }))
-    //         ),
-    //       }))
-    //     ),
-    //   }))
-    // )
-    // need to vanilla-ify where necessary
-    // minimum checks? has end modules for each level of new st?
-    // has vanilla for each level of new st?
   }
 
   return {
