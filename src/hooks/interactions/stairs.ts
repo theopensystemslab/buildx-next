@@ -4,7 +4,6 @@ import { StairType } from "@/data/stairType"
 import { filterMapA, mapA, mapO, reduceA, reduceWithIndexRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { range } from "fp-ts/lib/NonEmptyArray"
-import { fromNullable } from "fp-ts/lib/Option"
 import produce from "immer"
 import {
   ColumnLayout,
@@ -95,7 +94,6 @@ export const useStairsOptions = <T extends BareModule>(
             getStairsModule(columnMatrix[columnIndex][levelIdx][groupIdx], {
               stairsType: stairType.code,
             }),
-            fromNullable,
             mapO((newModule) =>
               produce(columnMatrix[columnIndex][levelIdx], (draft) => {
                 draft[groupIdx] = newModule

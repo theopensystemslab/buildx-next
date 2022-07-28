@@ -106,13 +106,14 @@ export const useLevelInteractions = (
                       vanillaModule.structuredDna.gridUnits,
                     vanillaModule
                   )
-                const stairsModule = getStairsModule(m, {
-                  levelType: targetLevelType,
-                })
-                if (!stairsModule)
-                  throw new Error(
+                const stairsModule = pipe(
+                  getStairsModule(m, {
+                    levelType: targetLevelType,
+                  }),
+                  errorThrower(
                     `No stairs module found for ${m.dna} level ${targetLevelLetter}`
                   )
+                )
                 return [stairsModule]
               }),
               flattenA
@@ -230,18 +231,9 @@ export const useLevelTypeOptions = (
                   )
                 ),
                 (modules) => {
-                  const candidate = topCandidateByHamming(
-                    [
-                      "gridUnits",
-                      "stairsType",
-                      "internalLayoutType",
-                      "windowTypeSide1",
-                      "windowTypeSide2",
-                      "windowTypeEnd",
-                      "windowTypeTop",
-                    ],
-                    module,
-                    modules
+                  const candidate = pipe(
+                    topCandidateByHamming(module)(modules),
+                    toNullable
                   )
                   if (candidate === null) {
                     fail = true

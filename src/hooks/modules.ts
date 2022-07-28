@@ -159,18 +159,13 @@ export const useGetStairsModule = () => {
             ? x.structuredDna.levelType === oldModule.structuredDna.levelType
             : x.structuredDna.levelType === levelType)
       ),
-      (modules) =>
-        topCandidateByHamming(
-          [
-            "internalLayoutType",
-            "windowTypeSide1",
-            "windowTypeSide2",
-            "windowTypeEnd",
-            "windowTypeTop",
-          ],
-          oldModule,
-          modules
-        )
+      topCandidateByHamming(oldModule, [
+        "internalLayoutType",
+        "windowTypeSide1",
+        "windowTypeSide2",
+        "windowTypeEnd",
+        "windowTypeTop",
+      ])
     )
   }
 }

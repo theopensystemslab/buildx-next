@@ -19,7 +19,7 @@ import {
 import { pipe } from "fp-ts/lib/function"
 import { range } from "fp-ts/lib/NonEmptyArray"
 import { Ord } from "fp-ts/lib/number"
-import { match, toNullable } from "fp-ts/lib/Option"
+import { match, Option } from "fp-ts/lib/Option"
 import { contramap, fromCompare } from "fp-ts/lib/Ord"
 import { sign } from "fp-ts/lib/Ordering"
 import { fromFoldable } from "fp-ts/lib/Record"
@@ -158,32 +158,32 @@ export const keysHammingTotal =
   <M extends StructuredDnaModule>(a: M, b: M) =>
     pipe(keysHamming(ks)(a, b), values, sum)
 
-export const topCandidateByHamming = <M extends StructuredDnaModule>(
-  ks: Array<keyof StructuredDna> = [
-    "gridUnits",
-    "internalLayoutType",
-    "stairsType",
-    "windowTypeEnd",
-    "windowTypeSide1",
-    "windowTypeSide2",
-    "windowTypeTop",
-  ],
-  targetModule: M,
-  candidateModules: M[]
-): M | null =>
-  pipe(
-    candidateModules,
-    mapA((m): [M, number] => [m, keysHammingTotal(ks)(targetModule, m)]),
-    sort(
-      pipe(
-        Ord,
-        contramap(([, n]: [M, number]) => n)
-      )
-    ),
-    head,
-    mapO(([m]) => m),
-    toNullable
-  )
+export const topCandidateByHamming =
+  <M extends StructuredDnaModule>(
+    targetModule: M,
+    ks: Array<keyof StructuredDna> = [
+      "gridUnits",
+      "internalLayoutType",
+      "stairsType",
+      "windowTypeEnd",
+      "windowTypeSide1",
+      "windowTypeSide2",
+      "windowTypeTop",
+    ]
+  ) =>
+  (candidateModules: M[]): Option<M> =>
+    pipe(
+      candidateModules,
+      mapA((m): [M, number] => [m, keysHammingTotal(ks)(targetModule, m)]),
+      sort(
+        pipe(
+          Ord,
+          contramap(([, n]: [M, number]) => n)
+        )
+      ),
+      head,
+      mapO(([m]) => m)
+    )
 
 export const keysHammingSort = <M extends BareModule>(
   ks: Array<keyof StructuredDna>,

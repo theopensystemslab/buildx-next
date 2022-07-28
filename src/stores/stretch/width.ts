@@ -1,48 +1,43 @@
 import { useSystemData } from "@/contexts/SystemsData"
 import {
-  BareModule,
   filterCompatibleModules,
-  LoadedModule,
   Module,
   StructuredDnaModule,
   topCandidateByHamming,
 } from "@/data/module"
 import { SectionType } from "@/data/sectionType"
-import { NoVanillaModuleError } from "@/errors"
 import {
   ColumnLayout,
   columnLayoutToDNA,
   GridGroup,
   PositionedColumn,
   PositionedModule,
-  PositionedRow,
 } from "@/hooks/layouts"
 import { useGetVanillaModule } from "@/hooks/modules"
 import {
+  filterA,
   filterMapA,
+  flattenO,
   mapA,
   mapO,
-  mapRA,
   mapToOption,
   notNullish,
   NumOrd,
   reduceA,
-  reduceRA,
   reduceToOption,
 } from "@/utils"
-import { Foldable, isNonEmpty, sort } from "fp-ts/lib/Array"
+import { Foldable, isNonEmpty, replicate, sort } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { groupBy, head, NonEmptyArray } from "fp-ts/lib/NonEmptyArray"
-import { isNone, none, Option, some } from "fp-ts/lib/Option"
+import { isNone, none, Option, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { last } from "fp-ts/lib/ReadonlyNonEmptyArray"
-import { fromFoldable } from "fp-ts/lib/Record"
+import { fromFoldable, keys } from "fp-ts/lib/Record"
 import { first } from "fp-ts/lib/Semigroup"
-import produce from "immer"
 import { useMemo, useState } from "react"
-import { useBuildingModules } from "../houses"
+import houses from "../houses"
 
-const { max, abs } = Math
+const { max, abs, sign } = Math
 
 export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
   const { sectionTypes, modules: systemModules } = useSystemData()
@@ -93,7 +88,7 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
   )
 
   const dnaChangeOptions = pipe(
-    options,
+    [current, ...options],
     filterMapA((st) =>
       pipe(
         columnLayout,
@@ -103,16 +98,14 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
               gridGroups,
               mapToOption(
                 ({ modules, ...gridGroupRest }): Option<GridGroup> => {
-                  const length = modules.reduce(
-                    (acc, v) => acc + v.module.length,
-                    0
+                  const vanillaModule = pipe(
+                    getVanillaModule(modules[0].module, {
+                      sectionType: st.code,
+                    }),
+                    toNullable
                   )
 
-                  const vanillaModule = getVanillaModule(modules[0].module, {
-                    sectionType: st.code,
-                  })
-
-                  if (isNone(vanillaModule)) return none
+                  if (vanillaModule === null) return none
 
                   return pipe(
                     modules,
@@ -133,14 +126,54 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
                           systemModules,
                           filterCompatibleModules()(target)
                         )
-
                         if (compatModules.length === 0) return none
 
-                        const nextModules: PositionedModule[] = []
-
                         return pipe(
-                          acc,
-                          mapO((ms) => [...ms, ...nextModules])
+                          compatModules,
+                          topCandidateByHamming(target),
+                          mapO((bestModule) => {
+                            const distanceToTarget =
+                              target.structuredDna.gridUnits -
+                              bestModule.structuredDna.gridUnits
+                            switch (true) {
+                              case sign(distanceToTarget) > 0:
+                                // fill in some vanilla
+                                return [
+                                  bestModule,
+                                  ...replicate(
+                                    distanceToTarget / vanillaModule.length,
+                                    vanillaModule
+                                  ),
+                                ]
+                              case sign(distanceToTarget) < 0:
+                                // abort and only vanilla
+                                return replicate(
+                                  module.length / vanillaModule.length,
+                                  vanillaModule
+                                )
+
+                              case sign(distanceToTarget) === 0:
+                              default:
+                                return [bestModule]
+                              // swap the module
+                            }
+                          }),
+                          mapO((nextModules) =>
+                            pipe(
+                              acc,
+                              mapO((positionedModules) => [
+                                ...positionedModules,
+                                ...nextModules.map(
+                                  (module) =>
+                                    ({
+                                      module,
+                                      z,
+                                    } as PositionedModule)
+                                ),
+                              ])
+                            )
+                          ),
+                          flattenO
                         )
                       }
                     ),
@@ -168,10 +201,13 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
     fromFoldable(first<string[]>(), Foldable)
   )
 
+  console.log(dnaChangeOptions)
+
   const canStretchWidth = true // todo
 
   const sortedSTs: NonEmptyArray<SectionType> = pipe(
     sectionTypes,
+    filterA((st) => keys(dnaChangeOptions).includes(st.code)),
     sort(
       pipe(
         NumOrd,
@@ -219,6 +255,9 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
   }
 
   const sendWidthDrop = () => {
+    const st = sortedSTs[stIndex]
+    const dnaChange = dnaChangeOptions[st.code]
+    if (dnaChange !== houses[id].dna) houses[id].dna = dnaChange
     // matrix the DNA, map swap each module for the appropriate section width
     // pipe(
     //   columnLayout,
