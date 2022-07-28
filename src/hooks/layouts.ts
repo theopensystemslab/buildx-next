@@ -29,6 +29,8 @@ export type PositionedRow = {
   length: number
 }
 
+export type GridGroup = PositionedRow
+
 export type RowLayout = Array<PositionedRow>
 
 export type PositionedColumn = {

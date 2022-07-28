@@ -1,13 +1,12 @@
 import Sidebar from "@/components/ui/Sidebar"
 import { useSystemsData } from "@/contexts/SystemsData"
-import { addNewPoint } from "@/data/collisions"
 import { System, systems } from "@/data/system"
-import houses from "@/stores/houses"
+import houses, { getFreshHousePosition } from "@/stores/houses"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/ReadonlyRecord"
 import { nanoid } from "nanoid"
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import HouseThumbnail from "./HouseThumbnail"
 
 type Props = {
@@ -70,17 +69,11 @@ const SiteSidebar = ({ open, close }: Props) => {
                     onAdd={() => {
                       const id = nanoid()
 
-                      const housePositions = Object.values(houses).map(
-                        (house) => house.position
-                      )
-
-                      const position = addNewPoint(housePositions)
-
                       houses[id] = {
                         id,
                         houseTypeId: houseType.id,
                         systemId: houseType.systemId,
-                        position,
+                        position: getFreshHousePosition(),
                         rotation: 0,
                         dna: houseType.dna as string[],
                         modifiedMaterials: {},

@@ -1,4 +1,4 @@
-import { useSystemsData } from "@/contexts/SystemsData"
+import { useSystemData, useSystemsData } from "@/contexts/SystemsData"
 import {
   BareModule,
   keysFilter,
@@ -6,11 +6,20 @@ import {
   topCandidateByHamming,
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
-import { all, filterA, filterRA, mapA, mapO, reduceA, StrOrd } from "@/utils"
+import {
+  all,
+  errorThrower,
+  filterA,
+  filterRA,
+  mapA,
+  mapO,
+  reduceA,
+  StrOrd,
+} from "@/utils"
 import { loadModule } from "@/utils/modules"
 import { replicate } from "fp-ts/lib/Array"
-import { pipe } from "fp-ts/lib/function"
-import { toNullable } from "fp-ts/lib/Option"
+import { identity, pipe } from "fp-ts/lib/function"
+import { match } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 
@@ -21,29 +30,32 @@ export const useGetVanillaModule = <T extends BareModule>(
   opts: { loadGLTF?: boolean } = {}
 ) => {
   const { loadGLTF = false } = opts
-  const { modules: allModules } = useSystemsData()
+  const { modules: systemModules } = useSystemData()
 
   return (
     module: T,
     opts: {
+      sectionType?: string
       positionType?: string
       levelType?: string
       constrainGridType?: boolean
     } = {}
   ) => {
-    const { positionType, levelType, constrainGridType = true } = opts
+    const {
+      sectionType,
+      positionType,
+      levelType,
+      constrainGridType = true,
+    } = opts
 
-    const systemModules = pipe(
-      allModules,
-      filterRA((m) => m.systemId === module.systemId)
-    )
-
-    const vanillaModule = pipe(
+    return pipe(
       systemModules,
       filterRA((sysModule) =>
         all(
-          sysModule.structuredDna.sectionType ===
-            module.structuredDna.sectionType,
+          sectionType
+            ? sysModule.structuredDna.sectionType === sectionType
+            : sysModule.structuredDna.sectionType ===
+                module.structuredDna.sectionType,
           positionType
             ? sysModule.structuredDna.positionType === positionType
             : sysModule.structuredDna.positionType ===
@@ -63,14 +75,8 @@ export const useGetVanillaModule = <T extends BareModule>(
         )
       ),
       head,
-      mapO((m) => (loadGLTF ? loadModule(m) : m)),
-      toNullable
+      mapO((m) => (loadGLTF ? loadModule(m) : m))
     )
-
-    if (!vanillaModule)
-      throw new Error(`No vanilla module found for ${module.dna}`)
-
-    return vanillaModule
   }
 }
 
@@ -103,7 +109,16 @@ export const usePadColumn = () => {
         )
         return [
           ...level,
-          ...replicate(target - levelLength, getVanillaModule(level[0])),
+          ...replicate(
+            target - levelLength,
+            pipe(
+              getVanillaModule(level[0]),
+              match(
+                errorThrower(`no vanilla module found for ${level[0].dna}`),
+                identity
+              )
+            )
+          ),
         ]
       })
     )
@@ -142,18 +157,13 @@ export const useGetStairsModule = () => {
             ? x.structuredDna.levelType === oldModule.structuredDna.levelType
             : x.structuredDna.levelType === levelType)
       ),
-      (modules) =>
-        topCandidateByHamming(
-          [
-            "internalLayoutType",
-            "windowTypeSide1",
-            "windowTypeSide2",
-            "windowTypeEnd",
-            "windowTypeTop",
-          ],
-          oldModule,
-          modules
-        )
+      topCandidateByHamming(oldModule, [
+        "internalLayoutType",
+        "windowTypeSide1",
+        "windowTypeSide2",
+        "windowTypeEnd",
+        "windowTypeTop",
+      ])
     )
   }
 }

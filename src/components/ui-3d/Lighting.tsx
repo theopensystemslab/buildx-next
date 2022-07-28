@@ -1,15 +1,18 @@
+import { softShadows } from "@react-three/drei"
 import { useControls } from "leva"
 import React from "react"
 import Line from "./Line"
 
+softShadows()
+
 const shadowProps = {
-  "shadow-camera-far": 100,
-  "shadow-camera-near": 2,
-  "shadow-camera-left": -100,
-  "shadow-camera-right": 100,
-  "shadow-camera-top": 100,
-  "shadow-camera-bottom": -100,
-  "shadow-mapSize": [4096, 4096],
+  "shadow-mapSize-width": 1024,
+  "shadow-mapSize-height": 1024,
+  "shadow-camera-far": 50,
+  "shadow-camera-left": -10,
+  "shadow-camera-right": 10,
+  "shadow-camera-top": 10,
+  "shadow-camera-bottom": -10,
 }
 
 interface LightSetting {

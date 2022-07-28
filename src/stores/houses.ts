@@ -1,5 +1,6 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
+import { addNewPoint } from "@/data/collisions"
 import { Houses } from "@/data/house"
 import { Module, StructuredDnaModule } from "@/data/module"
 import {
@@ -245,6 +246,11 @@ export const modulesToRows = <T extends StructuredDnaModule>(
 export const useBuildingRows = (buildingId: string) => {
   const houseModules = useBuildingModules(buildingId)
   return modulesToRows(houseModules)
+}
+
+export const getFreshHousePosition = () => {
+  const housePositions = Object.values(houses).map((house) => house.position)
+  return addNewPoint(housePositions)
 }
 
 export default houses
