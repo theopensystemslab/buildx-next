@@ -1,5 +1,14 @@
 import { LoadedModule } from "@/data/module"
 import { useSystemSettings } from "@/data/settings"
+import { useRotateVector } from "@/hooks/geometry"
+import {
+  ColumnLayout,
+  columnLayoutToDNA,
+  PositionedColumn,
+  PositionedModule,
+  PositionedRow,
+} from "@/hooks/layouts"
+import { useGetVanillaModule } from "@/hooks/modules"
 import houses, { useHouse } from "@/stores/houses"
 import {
   clamp,
@@ -10,23 +19,13 @@ import {
   reduceWithIndexRA,
 } from "@/utils"
 import { flow, identity, pipe } from "fp-ts/lib/function"
+import { match } from "fp-ts/lib/Option"
 import { flatten, partition, replicate } from "fp-ts/lib/ReadonlyArray"
 import { toReadonlyArray } from "fp-ts/lib/ReadonlyRecord"
 import produce from "immer"
 import { BufferGeometry, Mesh } from "three"
 import { mergeBufferGeometries } from "three-stdlib"
 import { proxy } from "valtio"
-import { useRotateVector } from "@/hooks/geometry"
-import {
-  ColumnLayout,
-  columnLayoutToDNA,
-  PositionedColumn,
-  PositionedModule,
-  PositionedRow,
-  useColumnLayout,
-} from "@/hooks/layouts"
-import { useGetVanillaModule } from "@/hooks/modules"
-import { match } from "fp-ts/lib/Option"
 
 export const stretch = proxy({
   endVanillaColumns: 0,
@@ -230,10 +229,6 @@ export const useStretchLength = (
   }
 
   const sendDrop = () => {
-    // update the DNA depending on...
-    // endVanillaColumns
-    // which end (isStart)
-
     const {
       startVanillaColumns,
       endVanillaColumns,
@@ -298,36 +293,3 @@ export const useStretchLength = (
     vanillaPositionedRows,
   }
 }
-
-// const realN = back ? n - 1 : n
-// const dna = pipe(
-//   columnLayout,
-//   spanLeft(
-//     ({ columnIndex }) =>
-//       columnIndex !== (back ? columnLayout.length - 1 : 1)
-//   ),
-//   ({ init, rest }) => [
-//     ...init,
-//     ...replicate(realN, {
-//       columnIndex: 0,
-//       gridGroups: positionedRows,
-//       z: 0,
-//     }),
-//     ...rest,
-//   ],
-//   columnLayoutToDNA
-// ) as string[]
-
-// let position = house.position
-// if (!back) {
-//   position[1] -= columnLength * realN
-// }
-
-// houses[buildingId] = {
-//   ...house,
-//   dna,
-//   position: back
-//     ? house.position
-//     : [house.position[0], house.position[1] - columnLength * realN],
-// }
-// setN(0)

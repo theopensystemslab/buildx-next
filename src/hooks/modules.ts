@@ -3,11 +3,9 @@ import {
   BareModule,
   keysFilter,
   Module,
-  StructuredDnaModule,
   topCandidateByHamming,
 } from "@/data/module"
 import { StairType } from "@/data/stairType"
-import { NoVanillaModuleError } from "@/errors"
 import {
   all,
   errorThrower,
@@ -21,7 +19,7 @@ import {
 import { loadModule } from "@/utils/modules"
 import { replicate } from "fp-ts/lib/Array"
 import { identity, pipe } from "fp-ts/lib/function"
-import { match, toNullable } from "fp-ts/lib/Option"
+import { match } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { head, sort } from "fp-ts/lib/ReadonlyArray"
 

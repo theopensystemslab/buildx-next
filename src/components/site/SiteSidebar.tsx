@@ -1,13 +1,12 @@
 import Sidebar from "@/components/ui/Sidebar"
 import { useSystemsData } from "@/contexts/SystemsData"
-import { addNewPoint } from "@/data/collisions"
 import { System, systems } from "@/data/system"
 import houses, { getFreshHousePosition } from "@/stores/houses"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/ReadonlyRecord"
 import { nanoid } from "nanoid"
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import HouseThumbnail from "./HouseThumbnail"
 
 type Props = {

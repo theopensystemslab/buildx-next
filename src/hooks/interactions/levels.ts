@@ -75,10 +75,6 @@ export const useLevelInteractions = (
   const addFloorAbove = () => {
     if (!canAddFloorAbove) return
 
-    // what's the algorithm?
-
-    // how about just do it vanilla and then do a change stairs separately?
-
     houses[buildingId].dna = pipe(
       columnMatrix,
       transposeA,
