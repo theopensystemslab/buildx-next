@@ -1,7 +1,11 @@
 import type { System } from "@/data/system"
-import { ColumnLayout, columnLayoutToDNA } from "@/hooks/layouts"
+import {
+  ColumnLayout,
+  columnLayoutToDNA,
+  PositionedModule,
+} from "@/hooks/layouts"
 import { useGetVanillaModule } from "@/hooks/modules"
-import { abs, filterA, GltfT, hamming, mapA, mapO } from "@/utils"
+import { abs, errorThrower, filterA, GltfT, hamming, mapA, mapO } from "@/utils"
 import { sum } from "fp-ts-std/Array"
 import { values } from "fp-ts-std/Record"
 import {
@@ -15,7 +19,7 @@ import {
 import { pipe } from "fp-ts/lib/function"
 import { range } from "fp-ts/lib/NonEmptyArray"
 import { Ord } from "fp-ts/lib/number"
-import { toNullable } from "fp-ts/lib/Option"
+import { match, Option } from "fp-ts/lib/Option"
 import { contramap, fromCompare } from "fp-ts/lib/Ord"
 import { sign } from "fp-ts/lib/Ordering"
 import { fromFoldable } from "fp-ts/lib/Record"
@@ -89,8 +93,16 @@ export const getModules = async (system: System): Promise<Array<Module>> => {
 }
 
 export const filterCompatibleModules =
-  (ks: Array<keyof StructuredDna>) => (module: BareModule) =>
-    filter((m: BareModule) =>
+  <T extends StructuredDnaModule>(
+    ks: Array<keyof StructuredDna> = [
+      "sectionType",
+      "positionType",
+      "levelType",
+      "gridType",
+    ]
+  ) =>
+  (module: T) =>
+    filter((m: T) =>
       ks.reduce(
         (acc: boolean, k) =>
           acc && m.structuredDna[k] === module.structuredDna[k],
@@ -146,24 +158,32 @@ export const keysHammingTotal =
   <M extends StructuredDnaModule>(a: M, b: M) =>
     pipe(keysHamming(ks)(a, b), values, sum)
 
-export const topCandidateByHamming = <M extends StructuredDnaModule>(
-  ks: Array<keyof StructuredDna>,
-  targetModule: M,
-  candidateModules: M[]
-): M | null =>
-  pipe(
-    candidateModules,
-    mapA((m): [M, number] => [m, keysHammingTotal(ks)(targetModule, m)]),
-    sort(
-      pipe(
-        Ord,
-        contramap(([, n]: [M, number]) => n)
-      )
-    ),
-    head,
-    mapO(([m]) => m),
-    toNullable
-  )
+export const topCandidateByHamming =
+  <M extends StructuredDnaModule>(
+    targetModule: M,
+    ks: Array<keyof StructuredDna> = [
+      "gridUnits",
+      "internalLayoutType",
+      "stairsType",
+      "windowTypeEnd",
+      "windowTypeSide1",
+      "windowTypeSide2",
+      "windowTypeTop",
+    ]
+  ) =>
+  (candidateModules: M[]): Option<M> =>
+    pipe(
+      candidateModules,
+      mapA((m): [M, number] => [m, keysHammingTotal(ks)(targetModule, m)]),
+      sort(
+        pipe(
+          Ord,
+          contramap(([, n]: [M, number]) => n)
+        )
+      ),
+      head,
+      mapO(([m]) => m)
+    )
 
 export const keysHammingSort = <M extends BareModule>(
   ks: Array<keyof StructuredDna>,
@@ -215,27 +235,36 @@ export const useChangeModuleLayout = <T extends BareModule>(
     const roofIndex = columnLayout[columnIndex].gridGroups.length - 1
 
     switch (true) {
-      case sign(gridUnitDiff) < 0:
-        // old module was bigger
+      case sign(gridUnitDiff) < 0: {
         // for this level index vanilla the gridUnitDiff
-        return pipe(
-          columnLayout,
-          produce((draft: ColumnLayout) => {
-            draft[columnIndex].gridGroups[levelIndex].modules[
-              groupIndex
-            ].module.dna = newModule.dna
-            draft[columnIndex].gridGroups[levelIndex].modules = [
-              ...draft[columnIndex].gridGroups[levelIndex].modules,
-              ...pipe(
-                replicate(-gridUnitDiff, getVanillaModule(newModule)),
-                mapA((module) => ({ module, z: 0 } as any))
-              ),
-            ]
-          }),
-          columnLayoutToDNA
-        ) as string[]
+        const vanillaModule = getVanillaModule(newModule)
 
-      case sign(gridUnitDiff) > 0:
+        return pipe(
+          vanillaModule,
+          match(
+            errorThrower(`no vanilla module for ${newModule.dna}`),
+            (vanillaModule) =>
+              pipe(
+                columnLayout,
+                produce((draft: ColumnLayout) => {
+                  draft[columnIndex].gridGroups[levelIndex].modules[
+                    groupIndex
+                  ].module.dna = newModule.dna
+                  draft[columnIndex].gridGroups[levelIndex].modules = [
+                    ...draft[columnIndex].gridGroups[levelIndex].modules,
+                    ...pipe(
+                      replicate(-gridUnitDiff, vanillaModule as LoadedModule),
+                      mapA((module): PositionedModule => ({ module, z: 0 }))
+                    ),
+                  ]
+                }),
+                columnLayoutToDNA
+              )
+          )
+        )
+      }
+
+      case sign(gridUnitDiff) > 0: {
         // new module is bigger
         // for this level vanilla all other levels
         return pipe(
@@ -248,23 +277,33 @@ export const useChangeModuleLayout = <T extends BareModule>(
               range(0, roofIndex),
               filterA((x) => x !== levelIndex)
             ).forEach((i) => {
-              const vanillaModule = getVanillaModule(
+              const m0 =
                 columnLayout[columnIndex].gridGroups[i].modules[0].module
+              const vanillaModule = getVanillaModule(m0)
+
+              pipe(
+                vanillaModule,
+                match(
+                  errorThrower(`no vanilla module found for ${m0.dna}`),
+                  (vanillaModule) => {
+                    draft[columnIndex].gridGroups[i].modules = [
+                      ...draft[columnIndex].gridGroups[i].modules,
+                      ...pipe(
+                        replicate(
+                          gridUnitDiff / vanillaModule.structuredDna.gridUnits,
+                          vanillaModule
+                        ),
+                        mapA((module) => ({ module, z: 0 }))
+                      ),
+                    ]
+                  }
+                )
               )
-              draft[columnIndex].gridGroups[i].modules = [
-                ...draft[columnIndex].gridGroups[i].modules,
-                ...pipe(
-                  replicate(
-                    gridUnitDiff / vanillaModule.structuredDna.gridUnits,
-                    vanillaModule
-                  ),
-                  mapA((module) => ({ module, z: 0 }))
-                ),
-              ]
             })
           }),
           columnLayoutToDNA
         )
+      }
 
       case sign(gridUnitDiff) === 0:
       default:

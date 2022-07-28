@@ -19,6 +19,7 @@ import { getStairTypes, type StairType } from "./stairType"
 import { getLevelTypes, LevelType } from "./levelType"
 import config from "../../buildx.config.yaml"
 import * as z from "zod"
+import { getSectionTypes, SectionType } from "./sectionType"
 
 const systems: Array<System> = z
   .array(
@@ -49,6 +50,7 @@ export interface SystemsData {
   levelTypes: Array<LevelType>
   energyInfo: Array<EnergyInfo>
   spaceTypes: Array<SpaceType>
+  sectionTypes: Array<SectionType>
   settings: Array<SystemSettings>
 }
 
@@ -134,6 +136,10 @@ export const useSystemsData = (): SystemsData | "error" | null => {
         flatten
       )
 
+      const sectionTypes = await Promise.all(systems.map(getSectionTypes)).then(
+        flatten
+      )
+
       const houseTypes = await Promise.all(
         systems.map((system) => getHouseTypes(system))
       )
@@ -169,6 +175,7 @@ export const useSystemsData = (): SystemsData | "error" | null => {
         levelTypes,
         energyInfo,
         spaceTypes,
+        sectionTypes,
         settings,
       })
     } catch (err) {

@@ -1,6 +1,5 @@
 import { DEFAULT_MATERIAL_NAME } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
-import { stretch } from "@/hooks/stretch"
 import builtInMaterials from "@/materials/builtInMaterials"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { findFirstMap } from "fp-ts/lib/Array"
@@ -12,6 +11,7 @@ import { subscribe, useSnapshot } from "valtio"
 import { proxyMap, subscribeKey } from "valtio/utils"
 import siteContext from "./context"
 import houses from "./houses"
+import { stretch } from "./stretch"
 
 export type ColorOpts = {
   default: Color

@@ -7,7 +7,15 @@ import {
   topCandidateByHamming,
 } from "@/data/module"
 import houses from "@/stores/houses"
-import { filterA, flattenA, mapA, StrEq, StrOrd, transposeA } from "@/utils"
+import {
+  errorThrower,
+  filterA,
+  flattenA,
+  mapA,
+  StrEq,
+  StrOrd,
+  transposeA,
+} from "@/utils"
 import {
   filterMap,
   findFirstMap,
@@ -16,8 +24,8 @@ import {
   sort,
   uniq,
 } from "fp-ts/lib/Array"
-import { pipe } from "fp-ts/lib/function"
-import { getOrElse, none, some, toNullable } from "fp-ts/lib/Option"
+import { identity, pipe } from "fp-ts/lib/function"
+import { getOrElse, match, none, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import produce from "immer"
 import {
@@ -67,10 +75,6 @@ export const useLevelInteractions = (
   const addFloorAbove = () => {
     if (!canAddFloorAbove) return
 
-    // what's the algorithm?
-
-    // how about just do it vanilla and then do a change stairs separately?
-
     houses[buildingId].dna = pipe(
       columnMatrix,
       transposeA,
@@ -82,22 +86,30 @@ export const useLevelInteractions = (
             pipe(
               group,
               mapA((m) => {
-                const vanillaModule = getVanillaModule(m, {
-                  levelType: targetLevelType,
-                })
+                const vanillaModule = pipe(
+                  getVanillaModule(m, {
+                    levelType: targetLevelType,
+                  }),
+                  match(
+                    errorThrower(`no vanilla module found for ${m.dna}`),
+                    identity
+                  )
+                )
+
                 if (m.structuredDna.stairsType === "ST0")
                   return replicate(
                     m.structuredDna.gridUnits /
                       vanillaModule.structuredDna.gridUnits,
                     vanillaModule
                   )
-                const stairsModule = getStairsModule(m, {
-                  levelType: targetLevelType,
-                })
-                if (!stairsModule)
-                  throw new Error(
+                const stairsModule = pipe(
+                  getStairsModule(m, {
+                    levelType: targetLevelType,
+                  }),
+                  errorThrower(
                     `No stairs module found for ${m.dna} level ${targetLevelLetter}`
                   )
+                )
                 return [stairsModule]
               }),
               flattenA
@@ -215,18 +227,9 @@ export const useLevelTypeOptions = (
                   )
                 ),
                 (modules) => {
-                  const candidate = topCandidateByHamming(
-                    [
-                      "gridUnits",
-                      "stairsType",
-                      "internalLayoutType",
-                      "windowTypeSide1",
-                      "windowTypeSide2",
-                      "windowTypeEnd",
-                      "windowTypeTop",
-                    ],
-                    module,
-                    modules
+                  const candidate = pipe(
+                    topCandidateByHamming(module)(modules),
+                    toNullable
                   )
                   if (candidate === null) {
                     fail = true

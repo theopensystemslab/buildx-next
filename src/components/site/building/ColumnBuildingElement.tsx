@@ -10,6 +10,7 @@ import { useMaterial, useMaterialName } from "@/stores/materials"
 import menu, { openMenu } from "@/stores/menu"
 import scope from "@/stores/scope"
 import { all, objComp, object3dChildOf } from "@/utils"
+import { useBVH } from "@react-three/drei"
 import {
   Intersection,
   invalidate,
@@ -184,6 +185,8 @@ const ColumnBuildingElement = (props: Props) => {
 
   useEffect(() => subscribeKey(scope, "hovered", selectOrHoverHandler))
   useEffect(() => subscribeKey(scope, "selected", selectOrHoverHandler))
+
+  useBVH(meshRef)
 
   return (
     <mesh
