@@ -411,7 +411,7 @@ const BuildingBuilding = (props: Props) => {
               {[gateLineX, -gateLineX].map((x) => {
                 return (
                   <mesh key={x} position={[x, 0, 0]} rotation-x={Math.PI / 2}>
-                    <planeBufferGeometry args={[0.1, 10]} />
+                    <planeBufferGeometry args={[0.15, houseLength + 10]} />
                     <meshBasicMaterial color="white" side={DoubleSide} />
                   </mesh>
                 )

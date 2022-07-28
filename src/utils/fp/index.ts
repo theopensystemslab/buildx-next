@@ -1,39 +1,43 @@
 import { reduce, zipWith } from "fp-ts/lib/Array"
 import { flow, pipe } from "fp-ts/lib/function"
 import { concatAll } from "fp-ts/lib/Monoid"
-import { Ord as NumOrd, Eq as NumEq } from "fp-ts/lib/number"
+import { Eq as NumEq, Ord as NumOrd } from "fp-ts/lib/number"
 import {
-  map as mapO,
   flatten as flattenO,
-  Option,
   isNone,
+  map as mapO,
   none,
+  Option,
   some,
 } from "fp-ts/lib/Option"
 import { clamp } from "fp-ts/lib/Ord"
 import { modifyAt } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/Record"
 import {
+  Eq as StrEq,
   Monoid,
+  Ord as StrOrd,
   split,
   toUpperCase,
-  Eq as StrEq,
-  Ord as StrOrd,
 } from "fp-ts/lib/string"
 
-export { NumOrd, NumEq, StrOrd, StrEq }
-
-const { min, max, abs, sign } = Math
-
+export { transpose as transposeA } from "fp-ts-std/Array"
+export { transpose as transposeRA } from "fp-ts-std/ReadonlyArray"
 export {
   filter as filterA,
   filterMap as filterMapA,
+  flatten as flattenA,
   map as mapA,
   mapWithIndex as mapWithIndexA,
   reduce as reduceA,
   reduceWithIndex as reduceWithIndexA,
-  flatten as flattenA,
 } from "fp-ts/lib/Array"
+export {
+  map as mapM,
+  mapWithIndex as mapWithIndexM,
+  reduce as reduceM,
+  reduceWithIndex as reduceWithIndexM,
+} from "fp-ts/lib/Map"
 export {
   filter as filterNEA,
   head as headNEA,
@@ -65,25 +69,19 @@ export {
 } from "fp-ts/lib/ReadonlyRecord"
 export {
   filter as filterR,
+  filterMapWithIndex as filterMapWithIndexR,
   filterWithIndex as filterWithIndexR,
   map as mapR,
   mapWithIndex as mapWithIndexR,
-  filterMapWithIndex as filterMapWithIndexR,
   reduce as reduceR,
 } from "fp-ts/lib/Record"
 export { map as mapT } from "fp-ts/lib/Task"
+export { NumOrd, NumEq, StrOrd, StrEq }
 export { min, max, abs, sign }
 export { clamp_ as clamp }
 export { mapO, flattenO }
-export {
-  map as mapM,
-  reduce as reduceM,
-  mapWithIndex as mapWithIndexM,
-  reduceWithIndex as reduceWithIndexM,
-} from "fp-ts/lib/Map"
 
-export { transpose as transposeA } from "fp-ts-std/Array"
-export { transpose as transposeRA } from "fp-ts-std/ReadonlyArray"
+const { min, max, abs, sign } = Math
 
 const clamp_ = clamp(NumOrd)
 
@@ -188,10 +186,3 @@ export const mapToOption =
     }
     return some(fb)
   }
-
-// fa.map((a) => f(a))
-
-// export const foo: <A,B>(f: (a: A) => B) => void = (f) => {
-//   const xs = new Array<B>()
-//   return
-// }

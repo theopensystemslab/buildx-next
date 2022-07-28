@@ -1,7 +1,6 @@
 import { useSystemData } from "@/contexts/SystemsData"
 import {
   filterCompatibleModules,
-  Module,
   StructuredDnaModule,
   topCandidateByHamming,
 } from "@/data/module"
@@ -18,7 +17,6 @@ import {
   filterA,
   filterMapA,
   flattenO,
-  mapA,
   mapO,
   mapToOption,
   notNullish,
@@ -28,8 +26,8 @@ import {
 } from "@/utils"
 import { Foldable, isNonEmpty, replicate, sort } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { groupBy, head, NonEmptyArray } from "fp-ts/lib/NonEmptyArray"
-import { isNone, none, Option, some, toNullable } from "fp-ts/lib/Option"
+import { head, NonEmptyArray } from "fp-ts/lib/NonEmptyArray"
+import { none, Option, some, toNullable } from "fp-ts/lib/Option"
 import { contramap } from "fp-ts/lib/Ord"
 import { last } from "fp-ts/lib/ReadonlyNonEmptyArray"
 import { fromFoldable, keys } from "fp-ts/lib/Record"
@@ -37,7 +35,7 @@ import { first } from "fp-ts/lib/Semigroup"
 import { useMemo, useState } from "react"
 import houses from "../houses"
 
-const { max, abs, sign } = Math
+const { abs, sign } = Math
 
 export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
   const { sectionTypes, modules: systemModules } = useSystemData()
@@ -45,20 +43,6 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
   const getVanillaModule = useGetVanillaModule()
 
   const module0 = columnLayout[0].gridGroups[0].modules[0].module
-
-  const modulesBySectionType = pipe(
-    systemModules,
-    (ms) => {
-      if (!isNonEmpty(ms)) throw new Error("Empty section types")
-      return ms
-    },
-    groupBy((m: Module) => m.structuredDna.sectionType)
-  )
-
-  // key by code
-
-  // store a "current"/"options" of codes
-  // store a code:dna-change (validate in processing)
 
   const { current, options } = pipe(
     sectionTypes,
