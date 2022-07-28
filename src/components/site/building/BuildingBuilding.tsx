@@ -1,4 +1,3 @@
-import { useSystemData, useSystemsData } from "@/contexts/SystemsData"
 import { BareModule } from "@/data/module"
 import { useRotateVector } from "@/hooks/geometry"
 import {
@@ -6,12 +5,6 @@ import {
   PositionedColumn,
   useColumnLayout,
 } from "@/hooks/layouts"
-import {
-  stretch,
-  useStretchLength,
-  useStretchWidth,
-  VanillaPositionedRow,
-} from "@/stores/stretch"
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
@@ -20,18 +13,15 @@ import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
 import { useShadows } from "@/stores/settings"
 import {
-  clamp,
-  filterRA,
-  flattenA,
-  mapA,
-  mapRA,
-  pipeLog,
-  reduceA,
-} from "@/utils"
-import { Instance, Instances, Line } from "@react-three/drei"
+  stretch,
+  useStretchLength,
+  useStretchWidth,
+  VanillaPositionedRow,
+} from "@/stores/stretch"
+import { clamp, filterRA, flattenA, mapA, mapRA, reduceA } from "@/utils"
+import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
 import { Handler, useGesture } from "@use-gesture/react"
-import { sum } from "fp-ts-std/Array"
 import { takeLeft } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import {
@@ -42,6 +32,7 @@ import {
   useRef,
   useState,
 } from "react"
+import mergeRefs from "react-merge-refs"
 import {
   Color,
   DoubleSide,
@@ -54,8 +45,6 @@ import {
 import { useSnapshot } from "valtio"
 import HandleMaterial from "../../../materials/HandleMaterial"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
-import PlanesDebug from "@/components/debug/PlanesDebug"
-import mergeRefs from "react-merge-refs"
 
 type StretchHandleProps = MeshProps & {
   onDrag?: Handler<"drag", ThreeEvent<PointerEvent>>
@@ -365,15 +354,15 @@ const BuildingBuilding = (props: Props) => {
               const [px] = rotateVector(pointer.xz)
               const [bx] = rotateVector([buildingX, buildingZ])
 
-              const leftClamp = clamp(0, Infinity)
-              // const rightClamp = clamp(-maxWidth, 0)
+              const leftClamp = clamp(
+                minWidth / 2 + handleOffset,
+                maxWidth / 2 + handleOffset
+              )
 
-              // const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
               const x = pipe(px - bx, leftClamp)
 
               leftHandleRef.current.position.x = x
               sendWidthDrag(x - handleOffset)
-              // sendDrag(x, { isRight: true, first })
 
               if (last) {
                 widthHandleDragging = false
@@ -382,6 +371,45 @@ const BuildingBuilding = (props: Props) => {
               }
             }}
             position={[houseWidth / 2 + handleOffset, 0, houseLength / 2]}
+          />
+          <StretchHandle
+            ref={rightHandleRef}
+            onHover={widthStretchHoverHandler}
+            onDrag={({ first, last }) => {
+              if (!rightHandleRef.current) return
+
+              if (first) {
+                widthHandleDragging = true
+              }
+
+              const [px] = rotateVector(pointer.xz)
+              const [bx] = rotateVector([buildingX, buildingZ])
+
+              // const leftClamp = clamp(0, Infinity)
+              const rightClamp = clamp(
+                // -(minWidth / 2 + handleOffset),
+                -Infinity,
+                0
+                // -(maxWidth / 2 + handleOffset)
+              )
+
+              // const z = pipe(-(endColumn.z + handleOffset) + pz - bz, endClamp)
+              const x = pipe(px - bx, rightClamp)
+
+              rightHandleRef.current.position.x = x
+              sendWidthDrag(x + handleOffset)
+              // sendDrag(x, { isRight: true, first })
+
+              if (last) {
+                widthHandleDragging = false
+                rightHandleRef.current.position.x = -(
+                  houseWidth / 2 +
+                  handleOffset
+                )
+                sendWidthDrop()
+              }
+            }}
+            position={[-(houseWidth / 2 + handleOffset), 0, houseLength / 2]}
           />
           {/* <StretchHandle
             ref={rightHandleRef}

@@ -201,8 +201,6 @@ export const useStretchWidth = (id: string, columnLayout: ColumnLayout) => {
     fromFoldable(first<string[]>(), Foldable)
   )
 
-  console.log(dnaChangeOptions)
-
   const canStretchWidth = true // todo
 
   const sortedSTs: NonEmptyArray<SectionType> = pipe(
