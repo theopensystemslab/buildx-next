@@ -50,7 +50,7 @@ export type StructuredDnaModule = Pick<Module, "structuredDna">
 
 export type BareModule = Omit<Module, "modelUrl">
 
-export type LoadedModule = BareModule & {
+export type LoadedModule = Module & {
   gltf: GltfT
 }
 

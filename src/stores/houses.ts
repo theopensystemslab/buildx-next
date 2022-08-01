@@ -175,8 +175,9 @@ export const useBuildingModules = (buildingId: string) => {
   )
 
   const gltfs = useGLTF(modules.map(({ modelUrl }) => modelUrl))
-  return modules.map(({ modelUrl, ...rest }, i) => ({
-    ...rest,
+
+  return modules.map((props, i) => ({
+    ...props,
     gltf: gltfs[i],
   }))
 }

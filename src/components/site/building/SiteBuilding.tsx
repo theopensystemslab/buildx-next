@@ -19,7 +19,7 @@ import { Fragment, useEffect, useRef } from "react"
 import { Group } from "three"
 import { subscribe } from "valtio"
 import BuildingBuilding from "./BuildingBuilding"
-import BuildingHouseColumn from "./ColumnBuildingColumn"
+import ColumnBuildingColumn from "./ColumnBuildingColumn"
 
 type Props = {
   id: string
@@ -47,7 +47,7 @@ const SiteBuildingMain = (props: Props) => {
   const verticalCutPlanes = useVerticalCutPlanes(columns, id)
 
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
-    <BuildingHouseColumn
+    <ColumnBuildingColumn
       key={columnIndex}
       buildingId={id}
       columnIndex={columnIndex}

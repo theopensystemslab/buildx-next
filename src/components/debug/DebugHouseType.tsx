@@ -3,7 +3,6 @@ import { HouseType } from "@/data/houseType"
 import { Module } from "@/data/module"
 import { mapRA, reduceRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
-import { groupBy } from "fp-ts/lib/NonEmptyArray"
 import { none, some } from "fp-ts/lib/Option"
 import {
   filterMap,
@@ -12,6 +11,8 @@ import {
 } from "fp-ts/lib/ReadonlyArray"
 import { useControls } from "leva"
 import { Fragment, Suspense, useEffect, useState } from "react"
+import DebugIfcModule from "./DebugIfcModule"
+// import DebugIfcModule from "./DebugIfcModule"
 import DebugModule from "./DebugModule"
 
 const DebugHouseType = () => {
@@ -38,7 +39,7 @@ const DebugHouseType = () => {
 
   const [maxModuleIndex, setMaxModuleIndex] = useState(0)
 
-  const { selection, moduleIndex } = useControls(
+  const { selection, moduleIndex, ifc } = useControls(
     {
       selection: {
         options: pipe(
@@ -55,11 +56,13 @@ const DebugHouseType = () => {
         max: maxModuleIndex,
         step: 1,
       },
+      ifc: false,
     },
     [maxModuleIndex]
   ) as {
     selection: { houseType: HouseType; modules: Module[] }
     moduleIndex: number
+    ifc: boolean
   }
 
   useEffect(
@@ -68,7 +71,10 @@ const DebugHouseType = () => {
   )
 
   useEffect(() => {
-    console.log(selection.modules[moduleIndex].dna)
+    console.log(
+      selection.modules[moduleIndex].dna,
+      selection.modules[moduleIndex]
+    )
   }, [moduleIndex])
 
   const { modules } = selection
@@ -81,7 +87,13 @@ const DebugHouseType = () => {
           i === moduleIndex
             ? some(
                 <Suspense key={i} fallback={null}>
-                  <DebugModule module={module} />
+                  {ifc ? (
+                    !module.ifcUrl || module.ifcUrl.length === 0 ? null : (
+                      <DebugIfcModule module={module} />
+                    )
+                  ) : (
+                    <DebugModule module={module} />
+                  )}
                 </Suspense>
               )
             : none

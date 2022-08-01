@@ -1,64 +1,31 @@
-import { useSystemsData } from "@/contexts/SystemsData"
-import { filterA } from "@/utils"
+import { Module } from "@/data/module"
 import { useBVH } from "@react-three/drei"
 import { useLoader } from "@react-three/fiber"
-import { pipe } from "fp-ts/lib/function"
 import { useMemo, useRef } from "react"
 import { Group, Mesh, MeshLambertMaterial } from "three"
 import { IFCLoader } from "web-ifc-three"
-import { LoadedModule, Module } from "@/data/module"
-import { GroupProps } from "@react-three/fiber"
-import { Plane } from "three"
 
-type Props = GroupProps & {
+type Props = {
   module: Module
-  columnIndex: number
-  levelIndex: number
-  groupIndex: number
-  buildingId: string
-  levelY: number
-  verticalCutPlanes: Plane[]
 }
 
-const IfcModule = (props: Props) => {
-  const {
-    buildingId,
-    columnIndex,
-    levelIndex,
-    groupIndex,
-    module,
-    levelY,
-    verticalCutPlanes,
-    ...groupProps
-  } = props
+const DebugIfcModule = (props: Props) => {
+  const { module } = props
 
   const groupRef = useRef<Group>(null)
   const meshRef = useRef<Mesh>()
-
-  console.log(module.dna)
 
   const { geometry, material, ifcManager, modelID } = useLoader(
     IFCLoader,
     module.ifcUrl,
     (loader) => {
       if (loader instanceof IFCLoader) {
-        loader.ifcManager.setWasmPath("../../../wasm/")
+        loader.ifcManager.setWasmPath("../../../../wasm/")
       }
     }
   )
 
   useBVH(meshRef)
-
-  // useEffect(() => {
-  //   if (ifcManager === null) return
-  //   ifcManager.setupThreeMeshBVH(
-  //     acceleratedRaycast,
-  //     computeBoundsTree,
-  //     disposeBoundsTree
-  //   )
-  // }, [ifcManager])
-
-  // useHelper(meshRef, MeshBVHVisualizer)
 
   const fooMaterial = useMemo(
     () =>
@@ -99,4 +66,4 @@ const IfcModule = (props: Props) => {
     </group>
   )
 }
-export default IfcModule
+export default DebugIfcModule
