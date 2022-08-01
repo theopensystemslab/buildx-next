@@ -1,23 +1,26 @@
 import { useSystemsData } from "@/contexts/SystemsData"
 import { systems } from "@/data/system"
 import { StrEq, StrOrd } from "@/utils"
-import { sort, filterMap, findFirstMap, uniq } from "fp-ts/lib/Array"
+import { filterMap, findFirstMap, sort, uniq } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
-import { getOrElse, none, some, toNullable } from "fp-ts/lib/Option"
+import { none, some, toNullable } from "fp-ts/lib/Option"
 import { useControls } from "leva"
 import { Fragment, Suspense } from "react"
+import DebugIfcModule from "./DebugIfcModule"
 import DebugModule from "./DebugModule"
 
 const DebugSystem = () => {
   const { modules: allModules } = useSystemsData()
 
-  const { system } = useControls({
+  const { system, ifc } = useControls({
     system: {
       options: systems.map((x) => x.id),
       value: systems[0].id,
     },
+    ifc: false,
   }) as {
     system: string
+    ifc: boolean
   }
 
   const moduleOptions = pipe(
@@ -47,7 +50,13 @@ const DebugSystem = () => {
           module.systemId === system && module.dna === moduleDna
             ? some(
                 <Suspense key={moduleDna} fallback={null}>
-                  <DebugModule module={module} />
+                  {ifc ? (
+                    !module.ifcUrl || module.ifcUrl.length === 0 ? null : (
+                      <DebugIfcModule module={module} />
+                    )
+                  ) : (
+                    <DebugModule module={module} />
+                  )}
                 </Suspense>
               )
             : none

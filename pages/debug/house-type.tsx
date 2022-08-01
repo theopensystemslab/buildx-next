@@ -1,4 +1,3 @@
-import DebugHouseType from "@/components/debug/DebugHouseType"
 import Layout from "@/components/layouts"
 import HtmlUi from "@/components/site/HtmlUi"
 import { Loader } from "@/components/ui"
@@ -6,11 +5,18 @@ import Container from "@/components/ui/Container"
 import Leva from "@/components/ui/Leva"
 import { SystemsDataProvider } from "@/contexts/SystemsData"
 import dynamic from "next/dynamic"
-import React, { Fragment } from "react"
+import { Fragment } from "react"
 
 const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
   ssr: false,
 })
+
+const DebugHouseType = dynamic(
+  () => import("@/components/debug/DebugHouseType"),
+  {
+    ssr: false,
+  }
+)
 
 const ModuleDebugPage = () => {
   return (
