@@ -1,4 +1,3 @@
-import DebugSystem from "@/components/debug/DebugSystem"
 import Layout from "@/components/layouts"
 import HtmlUi from "@/components/site/HtmlUi"
 import { Loader } from "@/components/ui"
@@ -9,6 +8,10 @@ import dynamic from "next/dynamic"
 import React, { Fragment } from "react"
 
 const SiteThreeInit = dynamic(() => import("@/components/site/SiteThreeInit"), {
+  ssr: false,
+})
+
+const DebugSystem = dynamic(() => import("@/components/debug/DebugSystem"), {
   ssr: false,
 })
 
