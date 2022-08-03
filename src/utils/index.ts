@@ -42,3 +42,5 @@ export type DeepReadonly<T> = T extends (...a: any[]) => any
 
 export * from "./three"
 export * from "./fp"
+
+export const reverseV2 = ([x, y]: [number, number]): [number, number] => [y, x]

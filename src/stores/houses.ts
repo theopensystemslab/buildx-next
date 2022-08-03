@@ -1,4 +1,4 @@
-import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
+import { BUILDX_LOCAL_STORAGE_HOUSES_KEY, DEFAULT_ORIGIN } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { addNewPoint } from "@/data/collisions"
 import { Houses } from "@/data/house"
@@ -250,6 +250,7 @@ export const useBuildingRows = (buildingId: string) => {
 
 export const getFreshHousePosition = () => {
   const housePositions = Object.values(houses).map((house) => house.position)
+  return DEFAULT_ORIGIN
   return addNewPoint(housePositions)
 }
 

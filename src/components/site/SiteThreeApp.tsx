@@ -13,6 +13,8 @@ import SiteBuilding from "./building/SiteBuilding"
 const SiteThreeApp = () => {
   const { buildingId, levelIndex } = useSiteContext()
 
+  console.log("hello?")
+
   useEffect(() => {
     highlights.outlined = []
     clearIlluminatedMaterials()
@@ -23,6 +25,8 @@ const SiteThreeApp = () => {
   const houses = useHouses()
 
   useRouting()
+
+  console.log({ houses, buildingId })
 
   return buildingId === null ? (
     <group>
