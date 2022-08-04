@@ -42,7 +42,10 @@ const CircleChart: FC<Props> = (props) => {
   }
 
   const tooltipContent = (dataPoint: DataPoint): string => {
-    return `${dataPoint.description}: ${formatWithUnitLong(dataPoint.value, props.unitOfMeasurement)}`
+    return `${dataPoint.description}: ${formatWithUnitLong(
+      dataPoint.value,
+      props.unitOfMeasurement
+    )}`
   }
 
   // Accumulate a baseline radius to place elements next to each other while mapping over data

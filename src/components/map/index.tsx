@@ -1,4 +1,8 @@
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "@/CONSTANTS"
+import siteContext, {
+  saveContext,
+  useLocallyStoredContext,
+} from "@/stores/context"
 import mapProxy, {
   getMapPolygonCentre,
   useMapMode,
@@ -9,7 +13,9 @@ import { ArrowRight24, Search24, TrashCan24 } from "@carbon/icons-react"
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder"
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css"
 import { Snackbar } from "@mui/material"
+import { toWgs84 } from "@turf/turf"
 import clsx from "clsx"
+import { pipe } from "fp-ts/lib/function"
 import { Feature, Polygon } from "geojson"
 import mapboxgl from "mapbox-gl"
 import Link from "next/link"
@@ -25,7 +31,7 @@ import "ol/ol.css"
 import { fromLonLat } from "ol/proj"
 import VectorSource from "ol/source/Vector"
 import XYZ from "ol/source/XYZ"
-import { getArea, getLength } from "ol/sphere"
+import { getLength } from "ol/sphere"
 import { Circle as StyleCircle, Fill, Stroke, Style, Text } from "ol/style"
 import RegularShape from "ol/style/RegularShape"
 import { useEffect, useRef, useState } from "react"
@@ -197,6 +203,8 @@ const MapIndex = () => {
     })
   )
 
+  useLocallyStoredContext()
+
   useEffect(() => {
     draw.on("drawstart", (event) => {
       mapProxy.polygon = null
@@ -212,6 +220,13 @@ const MapIndex = () => {
         coordinates: polyFeature.geometry.coordinates,
         type: polyFeature.geometry.type,
       }
+
+      pipe(
+        mapProxy.polygon,
+        getMapPolygonCentre,
+        toWgs84,
+        setProjectNameFromLongLat
+      )
     })
   }, [])
 
@@ -224,6 +239,21 @@ const MapIndex = () => {
       map.setTarget(undefined)
     }
   }, [map])
+
+  const setProjectNameFromLongLat = async ([lat, lon]: [number, number]) => {
+    const result = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lat},${lon}.json?types=place%2Cpostcode%2Caddress&limit=1&access_token=${mapboxgl.accessToken}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    ).then((response) => response.json())
+
+    siteContext.projectName = result?.features?.[0]?.text ?? "New Project"
+
+    saveContext()
+  }
 
   useEffect(() => {
     if (!geocoderDiv.current) return
@@ -242,6 +272,14 @@ const MapIndex = () => {
       const target = fromLonLat(result.center) as [number, number]
       map.getView().setCenter(target)
       map.getView().setZoom(maxZoom)
+
+      const isGB = result.context.find(
+        ({ id, short_code }: any) =>
+          id.includes("country") && short_code === "gb"
+      )
+      if (isGB && siteContext.region !== "UK") siteContext.region = "UK"
+      else if (siteContext.region !== "EU") siteContext.region = "EU"
+      saveContext()
 
       setMode("DRAW")
     })
