@@ -1,5 +1,5 @@
 import { useHousesStats, useHouseStats } from "@/data/energyInfo"
-import { useSiteContext } from "@/stores/context"
+import { useSiteContext, useSiteCurrency } from "@/stores/context"
 import { useSiteAreaString } from "@/stores/map"
 import React from "react"
 import { InfoPanel } from "../ui"
@@ -9,6 +9,8 @@ const SiteInfoPanel = () => {
 
   const siteAreaString = useSiteAreaString()
 
+  const { code: currencyCode, symbol: currencySymbol } = useSiteCurrency()
+
   return (
     <InfoPanel
       data={[
@@ -16,7 +18,7 @@ const SiteInfoPanel = () => {
           label: "Estimated build cost",
           value: new Intl.NumberFormat("en-US", {
             style: "currency",
-            currency: "EUR",
+            currency: currencyCode,
           }).format(totalHouseStats.cost),
         },
         {
@@ -33,7 +35,7 @@ const SiteInfoPanel = () => {
         },
         {
           label: "Estimated Heating Costs",
-          value: `${totalHouseStats.estimatedHeatingCosts} €/yr`,
+          value: `${currencySymbol}${totalHouseStats.estimatedHeatingCosts}/yr`,
         },
         ...(siteAreaString !== null
           ? [
@@ -51,6 +53,8 @@ const SiteInfoPanel = () => {
 const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
   const houseStats = useHouseStats(buildingId)
 
+  const { code: currencyCode, symbol: currencySymbol } = useSiteCurrency()
+
   return (
     <InfoPanel
       data={[
@@ -58,7 +62,7 @@ const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
           label: "Estimated build cost",
           value: new Intl.NumberFormat("en-US", {
             style: "currency",
-            currency: "EUR",
+            currency: currencyCode,
           }).format(houseStats.cost),
         },
         {
@@ -75,7 +79,7 @@ const BuildingInfoPanel = ({ buildingId }: { buildingId: string }) => {
         },
         {
           label: "Estimated Heating Costs",
-          value: `${houseStats.estimatedHeatingCosts} €/yr`,
+          value: `${currencySymbol}${houseStats.estimatedHeatingCosts}/yr`,
         },
       ]}
     />

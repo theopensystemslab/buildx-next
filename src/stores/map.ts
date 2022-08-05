@@ -42,7 +42,7 @@ export const getMapPolygonCentre = (polygon: Polygon) =>
         y0 + y1 / coords.length,
       ])
     )
-  )
+  ) as [number, number]
 
 export const polygonToCoordinates = (polygon: Polygon) => {
   const [cx, cy] = getMapPolygonCentre(polygon)

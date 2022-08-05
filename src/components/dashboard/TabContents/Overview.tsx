@@ -5,6 +5,7 @@ import StackedBarChart from "../charts/StackedBarChart"
 import SquareChart from "../charts/SquareChart"
 import CircleChart from "../charts/CircleChart"
 import { formatWithUnit, formatWithUnitLong } from "../data"
+import { useSiteCurrency } from "@/stores/context"
 
 const GridLayout: FC<{ children: ReactNode }> = (props) => (
   <div className="grid grid-cols-1 gap-x-16 border-b border-gray-400 px-4 py-16 last:border-b-0 md:grid-cols-4 md:space-y-0">
@@ -65,17 +66,19 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
 
   const { energyUse } = dashboardData
 
+  const { symbol: currencySymbol, code: currencyCode } = useSiteCurrency()
+
   return (
     <div className="text-white">
       <GridLayout>
-        <Titled title="Build cost" subtitle="Estimated EUR">
+        <Titled title="Build cost" subtitle={`Estimated ${currencyCode}`}>
           <StackedBarChart
             data={[houseCosts, houseCostsComparative]}
-            unitOfMeasurement="€"
+            unitOfMeasurement={currencySymbol}
           />
           <div className="flex space-x-4">
             <p className="text-4xl">
-              {formatWithUnit(dashboardData.costs.total, "€")}
+              {formatWithUnit(dashboardData.costs.total, currencySymbol)}
             </p>
             <ChangeDataPoint
               value={dashboardData.costs.total}
@@ -135,7 +138,7 @@ const OverviewTab: FC<{ dashboardData: DashboardData }> = (props) => {
           />
           <div className="flex justify-end">
             <p className="text-4xl">
-              {formatWithUnit(energyUse.totalHeatingCost, "€")}
+              {formatWithUnit(energyUse.totalHeatingCost, currencySymbol)}
             </p>
             <ChangeDataPoint
               value={energyUse.spaceHeatingDemand}

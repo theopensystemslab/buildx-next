@@ -1,4 +1,7 @@
-import { proxy, useSnapshot } from "valtio"
+import { BUILDX_LOCAL_STORAGE_CONTEXT_KEY } from "@/CONSTANTS"
+import { SSR } from "@/utils"
+import { useEffect } from "react"
+import { proxy, subscribe, useSnapshot } from "valtio"
 import * as z from "zod"
 import houses from "./houses"
 
@@ -11,20 +14,44 @@ type SiteContext = {
   levelIndex: number | null
   editMode: EditMode | null
   projectName: string | null
+  region: "UK" | "EU"
 }
 
-const siteContext = proxy<SiteContext>({
+const defaults = {
   sidebar: false,
   buildingId: null,
   levelIndex: null,
   editMode: null,
   projectName: null,
-})
+  region: "EU",
+}
+
+export const getInitialContext = () =>
+  SSR
+    ? defaults
+    : JSON.parse(
+        localStorage.getItem(BUILDX_LOCAL_STORAGE_CONTEXT_KEY) ??
+          JSON.stringify(defaults)
+      )
+
+const siteContext = proxy<SiteContext>(getInitialContext())
 
 export const useSiteContext = () => useSnapshot(siteContext)
 
+export const useLocallyStoredContext = () => {
+  useEffect(
+    subscribe(siteContext, () => {
+      localStorage.setItem(
+        BUILDX_LOCAL_STORAGE_CONTEXT_KEY,
+        JSON.stringify(siteContext)
+      )
+    }),
+    []
+  )
+}
 export const useProjectName = () => {
-  const { projectName } = useSnapshot(siteContext)
+  const ctx = useSnapshot(siteContext)
+  const { projectName } = ctx
   if (projectName === null || projectName.length <= 0) return "New project"
   else return projectName
 }
@@ -57,6 +84,14 @@ export const exitBuildingMode = () => {
 
 export const enterLevelMode = (levelIndex: number) => {
   if (siteContext.levelIndex !== levelIndex) siteContext.levelIndex = levelIndex
+}
+
+export const useSiteCurrency = () => {
+  const { region } = useSiteContext()
+  return {
+    symbol: region === "UK" ? "£" : "€",
+    code: region === "UK" ? "GBP" : "EUR",
+  }
 }
 
 export const useSystemId = () => {
