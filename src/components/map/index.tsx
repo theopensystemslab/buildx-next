@@ -1,8 +1,5 @@
 import { BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY } from "@/CONSTANTS"
-import siteContext, {
-  saveContext,
-  useLocallyStoredContext,
-} from "@/stores/context"
+import siteContext, { useLocallyStoredContext } from "@/stores/context"
 import mapProxy, {
   getMapPolygonCentre,
   useMapMode,
@@ -251,8 +248,6 @@ const MapIndex = () => {
     ).then((response) => response.json())
 
     siteContext.projectName = result?.features?.[0]?.text ?? "New Project"
-
-    saveContext()
   }
 
   useEffect(() => {
@@ -279,7 +274,6 @@ const MapIndex = () => {
       )
       if (isGB && siteContext.region !== "UK") siteContext.region = "UK"
       else if (siteContext.region !== "EU") siteContext.region = "EU"
-      saveContext()
 
       setMode("DRAW")
     })

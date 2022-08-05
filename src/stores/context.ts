@@ -3,7 +3,7 @@ import { SSR } from "@/utils"
 import { useEffect } from "react"
 import { proxy, subscribe, useSnapshot } from "valtio"
 import * as z from "zod"
-import ctx from "./houses"
+import houses from "./houses"
 
 export const EditModeEnum = z.enum(["MOVE_ROTATE", "STRETCH"])
 export type EditMode = z.infer<typeof EditModeEnum>
@@ -38,20 +38,12 @@ const siteContext = proxy<SiteContext>(getInitialContext())
 
 export const useSiteContext = () => useSnapshot(siteContext)
 
-export const saveContext = () => {
-  localStorage.setItem(
-    BUILDX_LOCAL_STORAGE_CONTEXT_KEY,
-    JSON.stringify(siteContext)
-  )
-}
-
 export const useLocallyStoredContext = () => {
   useEffect(
-    subscribe(ctx, () => {
-      console.log("called")
+    subscribe(siteContext, () => {
       localStorage.setItem(
         BUILDX_LOCAL_STORAGE_CONTEXT_KEY,
-        JSON.stringify(ctx)
+        JSON.stringify(siteContext)
       )
     }),
     []
@@ -94,18 +86,18 @@ export const enterLevelMode = (levelIndex: number) => {
   if (siteContext.levelIndex !== levelIndex) siteContext.levelIndex = levelIndex
 }
 
-export const useSystemId = () => {
-  const { buildingId } = useSiteContext()
-  if (buildingId === null) return null
-  return ctx[buildingId].systemId
-}
-
 export const useSiteCurrency = () => {
   const { region } = useSiteContext()
   return {
     symbol: region === "UK" ? "£" : "€",
     code: region === "UK" ? "GBP" : "EUR",
   }
+}
+
+export const useSystemId = () => {
+  const { buildingId } = useSiteContext()
+  if (buildingId === null) return null
+  return houses[buildingId].systemId
 }
 
 export default siteContext

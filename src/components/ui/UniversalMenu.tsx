@@ -1,5 +1,6 @@
 import Sidebar from "@/components/ui/Sidebar"
 import houses from "@/stores/houses"
+import map from "@/stores/map"
 import { useRouter } from "next/router"
 import React, { useState } from "react"
 import usePortal from "react-cool-portal"
@@ -25,6 +26,8 @@ const UniversalMenu = ({ open, close }: Props) => {
     Object.keys(houses).forEach((k) => {
       delete houses[k]
     })
+    map.polygon = null
+    map.mode = "SEARCH"
     if (path === "map") {
       router.reload()
     } else {
