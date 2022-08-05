@@ -67,6 +67,8 @@ export const getModules = async (system: System): Promise<Array<Module>> => {
 
     return moduleRecords.records.map((record: any) => {
       const dna = record.fields?.["module_code"] ?? ""
+      const field = record.fields?.["baseline_module_cost"]
+
       return {
         id: record.id,
         systemId: system.id,
