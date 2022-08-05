@@ -8,11 +8,15 @@ import { useLocallyStoredHouses } from "@/stores/houses"
 import dynamic from "next/dynamic"
 import React, { Fragment } from "react"
 
-const MapNgThreeInit = dynamic(
-  () => import("@/components/map-ng/MapNgThreeInit"),
+const MapboxThreeApp = dynamic(
+  () => import("@/components/map-ng/MapboxThreeApp"),
   {
     ssr: false,
   }
+)
+
+const MapboxNgThreeInit = dynamic(
+  () => import("@/components/map-ng/MapNgThreeInit")
 )
 
 const SiteIndexPage = () => {
@@ -33,7 +37,10 @@ const SiteIndexPage = () => {
             </Container>
           }
         >
-          <MapNgThreeInit>{/* <SiteThreeApp /> */}</MapNgThreeInit>
+          {/* <MapboxThreeApp /> */}
+          <MapboxNgThreeInit>
+            <SiteThreeApp />
+          </MapboxNgThreeInit>
           <HtmlUi />
         </SystemsDataProvider>
       </Layout>

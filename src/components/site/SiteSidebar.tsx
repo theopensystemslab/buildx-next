@@ -2,6 +2,7 @@ import Sidebar from "@/components/ui/Sidebar"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { System, systems } from "@/data/system"
 import houses, { getFreshHousePosition } from "@/stores/houses"
+import { advance } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
 import { keys } from "fp-ts/lib/ReadonlyRecord"
@@ -81,6 +82,7 @@ const SiteSidebar = ({ open, close }: Props) => {
                         friendlyName: `Building ${keys(houses).length + 1}`,
                       }
                       close()
+                      advance()
                     }}
                   />
                 ) : null
