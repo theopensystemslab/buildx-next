@@ -96,7 +96,7 @@ const ColumnBuildingModule = (props: Props) => {
   }, [contextMode])
 
   return (
-    <group ref={groupRef} {...groupProps}>
+    <group ref={groupRef as any} {...groupProps}>
       {children}
     </group>
   )

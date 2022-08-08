@@ -37,6 +37,7 @@ import {
   useSiteContext,
   useSiteContextMode,
 } from "./context"
+import { useInteractions } from "./mapSync"
 import pointer from "./pointer"
 import scope from "./scope"
 
@@ -109,6 +110,8 @@ export const usePositionRotation = (
 
   const lastPointer = useRef<[number, number]>([0, 0])
 
+  const [enableInteractions, disableInteractions] = useInteractions()
+
   const buildingDragHandler: Handler<"drag", ThreeEvent<PointerEvent>> = ({
     first,
     last,
@@ -124,6 +127,7 @@ export const usePositionRotation = (
 
     if (first) {
       setCameraEnabled(false)
+      disableInteractions()
       lastPointer.current = pointer.xz
     }
 
@@ -139,6 +143,7 @@ export const usePositionRotation = (
 
     if (last) {
       setCameraEnabled(true)
+      enableInteractions()
       const [x, z] = houses[buildingId].position.map(snapToGrid) as [
         number,
         number

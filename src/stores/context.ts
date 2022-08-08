@@ -94,10 +94,11 @@ export const useSiteCurrency = () => {
   }
 }
 
-export const useSystemId = () => {
-  const { buildingId } = useSiteContext()
-  if (buildingId === null) return null
-  return houses[buildingId].systemId
+export const useSystemId = (buildingId?: string) => {
+  const { buildingId: ctxBuildingId } = useSiteContext()
+  if (ctxBuildingId === null && typeof buildingId === "undefined") return null
+  const id: string = (buildingId ?? ctxBuildingId) as string
+  return houses[id].systemId
 }
 
 export default siteContext

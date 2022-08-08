@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
-module.exports = {
+
+const withTM = require("next-transpile-modules")(["web-ifc-three"])
+
+module.exports = withTM({
   reactStrictMode: true,
   webpack: function (config) {
     config.module.rules.push({
@@ -8,4 +11,4 @@ module.exports = {
     })
     return config
   },
-}
+})
