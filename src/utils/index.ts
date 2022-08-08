@@ -40,5 +40,7 @@ export type DeepReadonly<T> = T extends (...a: any[]) => any
       readonly [P in keyof T]: DeepReadonly<T[P]>
     }
 
+export const reverseV2 = ([x, y]: [number, number]): [number, number] => [y, x]
+
 export * from "./three"
 export * from "./fp"
