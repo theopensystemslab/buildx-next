@@ -1,4 +1,4 @@
-import { LoadedModule } from "@/data/module"
+import { LoadedGltfModule } from "@/data/module"
 import {
   SiteContextModeEnum,
   useSiteContext,
@@ -18,7 +18,7 @@ import { subscribeKey } from "valtio/utils"
 import ColumnBuildingElement from "./ColumnBuildingElement"
 
 type Props = GroupProps & {
-  module: LoadedModule
+  module: LoadedGltfModule
   columnIndex: number
   levelIndex: number
   groupIndex: number

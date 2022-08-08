@@ -25,6 +25,7 @@ import { sign } from "fp-ts/lib/Ordering"
 import { fromFoldable } from "fp-ts/lib/Record"
 import { first } from "fp-ts/lib/Semigroup"
 import produce from "immer"
+import { IFCModel } from "web-ifc-three/IFC/components/IFCModel"
 import type { StructuredDna } from "./moduleLayout"
 import { parseDna } from "./moduleLayout"
 import { getAirtableEntries } from "./utils"
@@ -54,8 +55,12 @@ export type StructuredDnaModule = Pick<Module, "structuredDna">
 
 export type BareModule = Omit<Module, "modelUrl">
 
-export type LoadedModule = BareModule & {
+export type LoadedGltfModule = BareModule & {
   gltf: GltfT
+}
+
+export type LoadedIfcModule = Module & {
+  ifcModel: IFCModel
 }
 
 export const getModules = async (system: System): Promise<Array<Module>> => {
@@ -257,7 +262,10 @@ export const useChangeModuleLayout = <T extends BareModule>(
                   draft[columnIndex].gridGroups[levelIndex].modules = [
                     ...draft[columnIndex].gridGroups[levelIndex].modules,
                     ...pipe(
-                      replicate(-gridUnitDiff, vanillaModule as LoadedModule),
+                      replicate(
+                        -gridUnitDiff,
+                        vanillaModule as LoadedGltfModule
+                      ),
                       mapA((module): PositionedModule => ({ module, z: 0 }))
                     ),
                   ]

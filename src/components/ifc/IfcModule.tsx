@@ -6,7 +6,7 @@ import { pipe } from "fp-ts/lib/function"
 import { useMemo, useRef } from "react"
 import { Group, Mesh, MeshLambertMaterial } from "three"
 import { IFCLoader } from "web-ifc-three"
-import { LoadedModule, Module } from "@/data/module"
+import { LoadedGltfModule, Module } from "@/data/module"
 import { GroupProps } from "@react-three/fiber"
 import { Plane } from "three"
 

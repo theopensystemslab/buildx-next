@@ -11,12 +11,16 @@ import CameraSync from "@/threebox/camera/CameraSync"
 import { DEFAULT_ORIGIN } from "@/CONSTANTS"
 import utils from "@/threebox/utils/utils"
 import { pipe } from "fp-ts/lib/function"
+import { useHouses } from "@/stores/houses"
+import { keys } from "fp-ts/lib/ReadonlyRecord"
+import { mapRA } from "@/utils"
 
-const IfcModule = dynamic(() => import("../ifc/IfcModule"), { ssr: false })
+// const IfcModule = dynamic(() => import("../ifc/IfcModule"), { ssr: false })
+const IfcHouse = dynamic(() => import("../ifc/IfcHouse"), { ssr: false })
 
 const SiteNgApp = () => {
-  const { buildingId, levelIndex } = useSiteContext()
-  const { modules } = useSystemData("skylark")
+  // const { buildingId, levelIndex } = useSiteContext()
+  // const { modules } = useSystemData({})
   const worldRef = useRef<Group>(null)
 
   useRouting()
@@ -29,6 +33,8 @@ const SiteNgApp = () => {
       mapSync.cameraSync = new CameraSync(map, camera, worldRef.current)
     }
   }, [camera, map])
+
+  const houses = useHouses()
 
   const [lat, lng] = DEFAULT_ORIGIN
 
@@ -45,20 +51,31 @@ const SiteNgApp = () => {
   }, [SIZE])
 
   console.log(UNITS_MULTIPLIER)
-
   return (
-    <group ref={worldRef}>
-      <group position={mapCenterUnits}>
-        <Suspense fallback={<Loader3D />}>
-          <IfcModule
-            module={modules[0]}
-            scale={UNITS_MULTIPLIER}
-            rotation-x={Math.PI / 2}
-          />
-        </Suspense>
-      </group>
+    <group>
+      {pipe(
+        keys(houses),
+        mapRA((id) => (
+          <Suspense key={id} fallback={<Loader3D />}>
+            <IfcHouse id={id} />
+          </Suspense>
+        ))
+      )}
     </group>
   )
+  // return (
+  //   <group ref={worldRef}>
+  //     <group position={mapCenterUnits}>
+  //       <Suspense fallback={<Loader3D />}>
+  //         <IfcModule
+  //           module={modules[0]}
+  //           scale={UNITS_MULTIPLIER}
+  //           rotation-x={Math.PI / 2}
+  //         />
+  //       </Suspense>
+  //     </group>
+  //   </group>
+  // )
 
   // return buildingId === null ? (
   //   <group>

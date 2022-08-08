@@ -26,11 +26,13 @@ export { transpose as transposeRA } from "fp-ts-std/ReadonlyArray"
 export {
   filter as filterA,
   filterMap as filterMapA,
+  findFirst as findFirstA,
   flatten as flattenA,
   map as mapA,
   mapWithIndex as mapWithIndexA,
   reduce as reduceA,
   reduceWithIndex as reduceWithIndexA,
+  zip as zipA,
 } from "fp-ts/lib/Array"
 export {
   map as mapM,
@@ -49,6 +51,7 @@ export {
   filter as filterRA,
   filterMap as filterMapRA,
   filterMapWithIndex as filterMapWithIndexRA,
+  findFirst as findFirstRA,
   map as mapRA,
   mapWithIndex as mapWithIndexRA,
   reduce as reduceRA,

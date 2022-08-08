@@ -2,7 +2,7 @@ import { filter, map } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { map as mapR, toArray } from "fp-ts/lib/Record"
 import { drop, flatten, last, mapAccum, range, repeat, slice } from "ramda"
-import type { LoadedModule, Module } from "../data/module"
+import type { LoadedGltfModule, Module } from "../data/module"
 
 export interface StructuredDna {
   level: number

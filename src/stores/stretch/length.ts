@@ -1,4 +1,4 @@
-import { LoadedModule } from "@/data/module"
+import { LoadedGltfModule } from "@/data/module"
 import { useSystemSettings } from "@/data/settings"
 import { useRotateVector } from "@/hooks/geometry"
 import {
@@ -73,7 +73,7 @@ export const useVanillaPositionedRows = (
                 errorThrower(`no vanilla module found for ${moduleIn.dna}`),
                 identity
               )
-            ) as LoadedModule
+            ) as LoadedGltfModule
 
             const z = isFirst
               ? vanillaModuleOut.length / 2

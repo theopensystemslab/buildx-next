@@ -1,4 +1,8 @@
-import { BareModule, LoadedModule, StructuredDnaModule } from "@/data/module"
+import {
+  BareModule,
+  LoadedGltfModule,
+  StructuredDnaModule,
+} from "@/data/module"
 import {
   flattenA,
   mapA,
@@ -13,11 +17,11 @@ import { transpose } from "fp-ts-std/ReadonlyArray"
 import { pipe } from "fp-ts/lib/function"
 import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
-import { useBuildingRows } from "../stores/houses"
-import { usePadColumn } from "./modules"
+import { useBuildingRows } from "../../stores/houses"
+import { usePadColumn } from "../modules"
 
 export type PositionedModule = {
-  module: LoadedModule
+  module: LoadedGltfModule
   z: number
 }
 
@@ -50,7 +54,7 @@ export const useRowLayout = (buildingId: string): RowLayout =>
         row,
         reduceWithIndex(
           [],
-          (i, prevs: Array<PositionedModule>, module: LoadedModule) => {
+          (i, prevs: Array<PositionedModule>, module: LoadedGltfModule) => {
             const isFirst: boolean = i === 0
 
             const z = isFirst
@@ -137,7 +141,7 @@ const analyzeColumn =
     )
   }
 
-const columnify =
+export const columnify =
   <A extends unknown>(toLength: (a: A) => number) =>
   (input: readonly A[][]) => {
     let slices = new Array<[number, number]>(input.length).fill([0, 1])
@@ -186,7 +190,10 @@ export const useColumnLayout = (buildingId: string) => {
         reduceRA(
           { prev: null, acc: [] },
           (
-            { prev, acc }: { prev: LoadedModule | null; acc: LoadedModule[][] },
+            {
+              prev,
+              acc,
+            }: { prev: LoadedGltfModule | null; acc: LoadedGltfModule[][] },
             module
           ) => ({
             acc:
@@ -287,7 +294,7 @@ export const useColumnLayout = (buildingId: string) => {
                       (
                         i,
                         positionedModules: PositionedModule[],
-                        module: LoadedModule
+                        module: LoadedGltfModule
                       ) => {
                         const isFirst: boolean = i === 0
 
@@ -430,3 +437,5 @@ export const usePadColumnMatrix = () => {
   return <T extends BareModule = BareModule>(columnMatrix: T[][][]) =>
     pipe(columnMatrix, mapA(padColumn))
 }
+
+export * from "./ifc"

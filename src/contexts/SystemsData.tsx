@@ -29,8 +29,12 @@ export const SystemsDataProvider = ({
   return <CtxProvider value={systemsData}>{children}</CtxProvider>
 }
 
-export const useSystemData = (systemId?: string) => {
-  const selectedBuildingId = useSystemId()
+export const useSystemData = (
+  opts: { systemId?: string; buildingId?: string } = {}
+) => {
+  const { systemId, buildingId } = opts
+
+  const selectedBuildingId = useSystemId(buildingId)
 
   const systemsData = useCtx() as unknown as {
     [key: string]: Array<{ systemId: string }>

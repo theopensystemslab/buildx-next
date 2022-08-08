@@ -1,4 +1,4 @@
-import { LoadedModule, Module } from "@/data/module"
+import { LoadedGltfModule, Module } from "@/data/module"
 import { pipe } from "fp-ts/lib/function"
 import { sort as sortNEA } from "fp-ts/lib/NonEmptyArray"
 import { useGLTF } from "."
@@ -6,7 +6,10 @@ import { Ord as StrOrd } from "fp-ts/lib/string"
 import { contramap } from "fp-ts/lib/Ord"
 import { sort as sortA } from "fp-ts/lib/Array"
 
-export const loadModule = ({ modelUrl, ...rest }: Module): LoadedModule => ({
+export const loadModule = ({
+  modelUrl,
+  ...rest
+}: Module): LoadedGltfModule => ({
   ...rest,
   gltf: useGLTF(modelUrl),
 })
