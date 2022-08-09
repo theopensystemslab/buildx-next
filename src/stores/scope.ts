@@ -11,11 +11,13 @@ export type ScopeItem = {
 export type Scope = {
   selected: ScopeItem | null
   hovered: ScopeItem | null
+  locked: boolean
 }
 
 const scope = proxy<Scope>({
   hovered: null,
   selected: null,
+  locked: false,
 })
 
 export default scope

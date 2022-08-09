@@ -17,7 +17,7 @@ import {
   useStretchLength,
   useStretchWidth,
   VanillaPositionedRow,
-} from "@/stores/stretch"
+} from "@/stores/interactions/stretch"
 import { clamp, filterRA, flattenA, mapA, mapRA, reduceA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"

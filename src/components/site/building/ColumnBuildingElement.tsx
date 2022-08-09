@@ -1,3 +1,4 @@
+import { setCameraEnabled } from "@/stores/camera"
 import siteContext, {
   EditModeEnum,
   enterBuildingMode,
@@ -132,6 +133,13 @@ const ColumnBuildingElement = (props: Props) => {
       scope.selected = key
       invalidate()
     },
+    // onDrag: ({ first, last }) => {
+    //   if (first) {
+    //     setCameraEnabled(false)
+    //   } else if (last) {
+    //     setCameraEnabled(true)
+    //   }
+    // },
     onDoubleClick: ({ event, event: { intersections, pageX, pageY } }) => {
       event.preventDefault?.()
       if (!checks(intersections)) return

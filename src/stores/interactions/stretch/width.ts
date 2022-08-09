@@ -33,7 +33,7 @@ import { last } from "fp-ts/lib/ReadonlyNonEmptyArray"
 import { fromFoldable, keys } from "fp-ts/lib/Record"
 import { first } from "fp-ts/lib/Semigroup"
 import { useMemo, useState } from "react"
-import houses from "../houses"
+import houses from "@/stores/houses"
 
 const { abs, sign } = Math
 

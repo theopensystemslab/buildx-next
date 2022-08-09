@@ -11,7 +11,7 @@ import { subscribe, useSnapshot } from "valtio"
 import { proxyMap, subscribeKey } from "valtio/utils"
 import siteContext from "./context"
 import houses from "./houses"
-import { stretch } from "./stretch"
+import { stretch } from "@/stores/interactions/stretch"
 
 export type ColorOpts = {
   default: Color
