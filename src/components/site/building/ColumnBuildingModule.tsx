@@ -119,14 +119,17 @@ const ColumnBuildingModule = (props: Props) => {
           scope.selected === null ||
           scope.selected.buildingId !== buildingId ||
           scope.selected.levelIndex !== levelIndex ||
-          scope.selected.columnIndex === columnIndex ||
+          module.structuredDna.positionType === "END" ||
           !groupRef.current
         )
           return
 
-        const { z0, z } = events.dragModule
+        const { z0, z, length } = events.dragModule
 
-        const [dx, dz] = rotateVector([0, module.length])
+        const [dx, dz] = rotateVector([0, length])
+
+        // const lowZ = columnZ - module.length / 2
+        // const highZ = columnZ + module.length / 2
 
         switch (true) {
           case dragModuleShifted.current !== "DOWN" &&
@@ -152,43 +155,39 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.z = 0
             break
         }
-
-        // if ... less than ... and it wasn't before then
-
-        // if (events.dragModuleZ < columnZ && !dragModuleShifted.current) {
-        //   groupRef.current.position.x = dx
-        //   groupRef.current.position.z = dz
-        //   dragModuleShifted.current = true
-        // } else if (events.dragModuleZ > columnZ && dragModuleShifted.current) {
-        //   groupRef.current.position.x = 0
-        //   groupRef.current.position.z = 0
-        //   dragModuleShifted.current = false
-        // }
       }),
     []
   )
 
   const bind = useDrag(({ first, last }) => {
-    if (siteContext.levelIndex === null || !groupRef.current) return
+    if (
+      siteContext.levelIndex === null ||
+      !groupRef.current ||
+      module.structuredDna.positionType === "END"
+    )
+      return
 
-    const [px, pz] = rotateVector(pointer.xz)
+    const [px, pz] = pointer.xz
 
     if (first) {
       setCameraEnabled(false)
       scope.locked = true
-      initXZ.current = rotateVector([px, pz])
+      initXZ.current = [px, pz]
     }
 
     const [x0, z0] = initXZ.current
 
-    const dz = pz - z0
+    const [dx, dz] = rotateVector([0, pz - z0])
 
-    groupRef.current.position.x = px - x0
-    groupRef.current.position.z = pz - z0
+    if (levelIndex === siteContext.levelIndex) {
+      groupRef.current.position.x = dx
+      groupRef.current.position.z = dz
+    }
 
     events.dragModule = {
       z: columnZ + dz,
       z0: columnZ,
+      length: module.length,
     }
 
     if (last) {
@@ -200,18 +199,7 @@ const ColumnBuildingModule = (props: Props) => {
   })
 
   return (
-    <group
-      ref={groupRef as any}
-      {...(bind() as any)}
-      // onDrag: ({ first, last }) => {
-      //   if (first) {
-      //     setCameraEnabled(false)
-      //   } else if (last) {
-      //     setCameraEnabled(true)
-      //   }
-      // },
-      {...groupProps}
-    >
+    <group ref={groupRef as any} {...(bind() as any)} {...groupProps}>
       {children}
     </group>
   )
