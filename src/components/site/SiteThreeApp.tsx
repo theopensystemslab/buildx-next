@@ -16,8 +16,10 @@ const SiteThreeApp = () => {
   useEffect(() => {
     highlights.outlined = []
     clearIlluminatedMaterials()
-    scope.hovered = null
-    scope.selected = null
+    if (!scope.locked) {
+      scope.hovered = null
+      scope.selected = null
+    }
   }, [buildingId, levelIndex])
 
   const houses = useHouses()

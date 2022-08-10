@@ -117,7 +117,11 @@ const ColumnBuildingElement = (props: Props) => {
   }>({
     onHover: ({ event: { intersections } }) => {
       if (!checks(intersections)) return
-      if (scope.hovered === null || !objComp(scope.hovered, key)) {
+      if (
+        !scope.locked ||
+        scope.hovered === null ||
+        !objComp(scope.hovered, key)
+      ) {
         scope.hovered = key
       }
       invalidate()
@@ -130,16 +134,16 @@ const ColumnBuildingElement = (props: Props) => {
     },
     onPointerDown: ({ event: { intersections } }) => {
       if (!checks(intersections)) return
-      scope.selected = key
+      if (siteContext.levelIndex !== null) {
+        scope.selected = {
+          ...key,
+          levelIndex: siteContext.levelIndex,
+        }
+      } else {
+        scope.selected = key
+      }
       invalidate()
     },
-    // onDrag: ({ first, last }) => {
-    //   if (first) {
-    //     setCameraEnabled(false)
-    //   } else if (last) {
-    //     setCameraEnabled(true)
-    //   }
-    // },
     onDoubleClick: ({ event, event: { intersections, pageX, pageY } }) => {
       event.preventDefault?.()
       if (!checks(intersections)) return

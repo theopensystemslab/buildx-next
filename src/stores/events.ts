@@ -5,6 +5,7 @@ type Events = {
   dragModule: {
     z: number
     z0: number
+    length: number
   } | null
 }
 

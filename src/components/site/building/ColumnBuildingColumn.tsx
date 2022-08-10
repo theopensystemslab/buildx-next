@@ -1,5 +1,5 @@
 import { PositionedRow } from "@/hooks/layouts"
-import { mapRA, mapWithIndexRA } from "@/utils"
+import { mapRA, mapWithIndexRA, pipeLogWith } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { Plane } from "three"
 import ColumnBuildingModule from "./ColumnBuildingModule"

@@ -20,4 +20,20 @@ const scope = proxy<Scope>({
   locked: false,
 })
 
+export const isSelected = (si: Partial<ScopeItem>) => {
+  if (scope.selected === null) return false
+  for (let k of Object.keys(si) as Array<keyof ScopeItem>) {
+    if (scope.selected[k] !== si[k]) return false
+  }
+  return true
+}
+
+export const isHovered = (si: Partial<ScopeItem>) => {
+  if (scope.hovered === null) return false
+  for (let k of Object.keys(si) as Array<keyof ScopeItem>) {
+    if (scope.hovered[k] !== si[k]) return false
+  }
+  return true
+}
+
 export default scope

@@ -11,13 +11,11 @@ import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
 import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
-import scope from "@/stores/scope"
-import { mapA, mapWithIndexM, reduceWithIndexM, StrOrd } from "@/utils"
-import { GroupProps } from "@react-three/fiber"
+import scope, { isSelected } from "@/stores/scope"
+import { reduceWithIndexM, StrOrd } from "@/utils"
+import { GroupProps, ThreeEvent } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { toArray } from "fp-ts/lib/Map"
-import { Ord, trivial } from "fp-ts/lib/Ord"
 import { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
 import { subscribeKey } from "valtio/utils"
@@ -115,18 +113,27 @@ const ColumnBuildingModule = (props: Props) => {
     () =>
       subscribeKey(events, "dragModule", () => {
         if (
-          events.dragModule === null ||
           scope.selected === null ||
           scope.selected.buildingId !== buildingId ||
           scope.selected.levelIndex !== levelIndex ||
           scope.selected.columnIndex === columnIndex ||
+          module.structuredDna.positionType === "END" ||
           !groupRef.current
         )
           return
 
-        const { z0, z } = events.dragModule
+        if (events.dragModule === null) {
+          if (dragModuleShifted.current !== null) {
+            dragModuleShifted.current = null
+            groupRef.current.position.x = 0
+            groupRef.current.position.z = 0
+          }
+          return
+        }
 
-        const [dx, dz] = rotateVector([0, module.length])
+        const { z0, z, length } = events.dragModule
+
+        const [dx, dz] = rotateVector([0, length])
 
         switch (true) {
           case dragModuleShifted.current !== "DOWN" &&
@@ -152,47 +159,57 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.z = 0
             break
         }
-
-        // if ... less than ... and it wasn't before then
-
-        // if (events.dragModuleZ < columnZ && !dragModuleShifted.current) {
-        //   groupRef.current.position.x = dx
-        //   groupRef.current.position.z = dz
-        //   dragModuleShifted.current = true
-        // } else if (events.dragModuleZ > columnZ && dragModuleShifted.current) {
-        //   groupRef.current.position.x = 0
-        //   groupRef.current.position.z = 0
-        //   dragModuleShifted.current = false
-        // }
       }),
     []
   )
 
-  const bind = useDrag(({ first, last }) => {
-    if (siteContext.levelIndex === null || !groupRef.current) return
+  const bind = useDrag<ThreeEvent<PointerEvent>>(({ first, last }) => {
+    if (first) setCameraEnabled(false)
+    if (last) setCameraEnabled(true)
 
-    const [px, pz] = rotateVector(pointer.xz)
+    if (
+      scope.selected === null ||
+      siteContext.levelIndex === null ||
+      siteContext.levelIndex !== scope.selected.levelIndex ||
+      !groupRef.current ||
+      module.structuredDna.positionType === "END"
+    ) {
+      return
+    }
+
+    const [px, pz] = pointer.xz
+    initXZ.current = [px, pz]
 
     if (first) {
-      setCameraEnabled(false)
       scope.locked = true
-      initXZ.current = rotateVector([px, pz])
+    }
+
+    if (
+      !isSelected({
+        buildingId,
+        columnIndex,
+        levelIndex: siteContext.levelIndex,
+        groupIndex,
+      })
+    ) {
+      return
     }
 
     const [x0, z0] = initXZ.current
 
-    const dz = pz - z0
+    const [dx, dz] = rotateVector([0, pz - z0])
 
-    groupRef.current.position.x = px - x0
-    groupRef.current.position.z = pz - z0
+    groupRef.current.position.x = dx
+    groupRef.current.position.z = dz
 
     events.dragModule = {
       z: columnZ + dz,
       z0: columnZ,
+      length: module.length,
     }
 
     if (last) {
-      setCameraEnabled(true)
+      events.dragModule = null
       scope.locked = false
       groupRef.current.position.x = 0
       groupRef.current.position.z = 0
@@ -200,18 +217,7 @@ const ColumnBuildingModule = (props: Props) => {
   })
 
   return (
-    <group
-      ref={groupRef as any}
-      {...(bind() as any)}
-      // onDrag: ({ first, last }) => {
-      //   if (first) {
-      //     setCameraEnabled(false)
-      //   } else if (last) {
-      //     setCameraEnabled(true)
-      //   }
-      // },
-      {...groupProps}
-    >
+    <group ref={groupRef as any} {...(bind() as any)} {...groupProps}>
       {children}
     </group>
   )

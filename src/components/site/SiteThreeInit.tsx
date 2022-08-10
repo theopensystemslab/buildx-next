@@ -68,12 +68,12 @@ const SiteThreeInit = (props: Props) => {
         onChange={setXZ}
         onNearClick={() => {
           menu.open = false
-          scope.selected = null
+          if (!scope.locked) scope.selected = null
           clearIlluminatedMaterials()
         }}
         onNearHover={() => {
           if (menu.open) return
-          scope.hovered = null
+          if (!scope.locked) scope.hovered = null
           if (scope.selected === null) clearIlluminatedMaterials()
         }}
       />
