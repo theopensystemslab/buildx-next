@@ -2,12 +2,15 @@ import { proxy } from "valtio"
 
 type Events = {
   exportBuildingGLB: string | null
-  dragModuleZ: number | null
+  dragModule: {
+    z: number
+    z0: number
+  } | null
 }
 
 const events = proxy<Events>({
   exportBuildingGLB: null,
-  dragModuleZ: null,
+  dragModule: null,
 })
 
 export const exportGLB = (buildingId: string) => {

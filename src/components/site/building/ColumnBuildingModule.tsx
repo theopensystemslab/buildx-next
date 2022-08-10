@@ -12,14 +12,14 @@ import { outlineGroup } from "@/stores/highlights"
 import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
-import { mapWithIndexM, StrOrd } from "@/utils"
+import { mapA, mapWithIndexM, reduceWithIndexM, StrOrd } from "@/utils"
 import { GroupProps } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { toArray } from "fp-ts/lib/Map"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import { Ord, trivial } from "fp-ts/lib/Ord"
+import { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
-import { subscribe } from "valtio"
 import { subscribeKey } from "valtio/utils"
 import ColumnBuildingElement from "./ColumnBuildingElement"
 
@@ -64,25 +64,28 @@ const ColumnBuildingModule = (props: Props) => {
 
   const children = pipe(
     moduleGeometries,
-    mapWithIndexM((elementName, geometry) => (
-      <ColumnBuildingElement
-        key={elementName}
-        {...{
-          elementName,
-          geometry,
-          systemId: module.systemId,
-          buildingId,
-          columnIndex,
-          levelIndex,
-          groupIndex,
-          clippingPlanes: [
-            verticalCutPlanes,
-            context.levelIndex === levelIndex ? [levelCutPlane] : [],
-          ].flat(),
-        }}
-      />
-    )),
-    toArray(StrOrd)
+    reduceWithIndexM(StrOrd)(
+      [],
+      (elementName, acc: JSX.Element[], geometry) => [
+        ...acc,
+        <ColumnBuildingElement
+          key={elementName}
+          {...{
+            elementName,
+            geometry,
+            systemId: module.systemId,
+            buildingId,
+            columnIndex,
+            levelIndex,
+            groupIndex,
+            clippingPlanes: [
+              verticalCutPlanes,
+              context.levelIndex === levelIndex ? [levelCutPlane] : [],
+            ].flat(),
+          }}
+        />,
+      ]
+    )
   )
 
   const contextMode = useSiteContextMode()
@@ -106,13 +109,13 @@ const ColumnBuildingModule = (props: Props) => {
   const rotateVector = useRotateVector(buildingId)
   const initXZ = useRef([0, 0])
 
-  const dragModuleShifted = useRef(false)
+  const dragModuleShifted = useRef<"UP" | "DOWN" | null>(null)
 
   useEffect(
     () =>
-      subscribeKey(events, "dragModuleZ", () => {
+      subscribeKey(events, "dragModule", () => {
         if (
-          events.dragModuleZ === null ||
+          events.dragModule === null ||
           scope.selected === null ||
           scope.selected.buildingId !== buildingId ||
           scope.selected.levelIndex !== levelIndex ||
@@ -121,19 +124,46 @@ const ColumnBuildingModule = (props: Props) => {
         )
           return
 
-        const [dx, dz] = rotateVector([0, module.width])
+        const { z0, z } = events.dragModule
 
-        // it depends on whether we're up or down of the module which shift we wanna do
+        const [dx, dz] = rotateVector([0, module.length])
 
-        if (events.dragModuleZ > columnZ && !dragModuleShifted.current) {
-          groupRef.current.position.x += dx
-          groupRef.current.position.z += dz
-          dragModuleShifted.current = true
-        } else if (events.dragModuleZ < columnZ && dragModuleShifted.current) {
-          groupRef.current.position.x -= dx
-          groupRef.current.position.z -= dz
-          dragModuleShifted.current = false
+        switch (true) {
+          case dragModuleShifted.current !== "DOWN" &&
+            z0 < columnZ &&
+            z > columnZ:
+            dragModuleShifted.current = "DOWN"
+            groupRef.current.position.x = -dx
+            groupRef.current.position.z = -dz
+            break
+
+          case dragModuleShifted.current !== "UP" &&
+            z0 > columnZ &&
+            z < columnZ:
+            dragModuleShifted.current = "UP"
+            groupRef.current.position.x = dx
+            groupRef.current.position.z = dz
+            break
+
+          case dragModuleShifted.current !== null &&
+            ((z0 < columnZ && z < columnZ) || (z0 > columnZ && z > columnZ)):
+            dragModuleShifted.current = null
+            groupRef.current.position.x = 0
+            groupRef.current.position.z = 0
+            break
         }
+
+        // if ... less than ... and it wasn't before then
+
+        // if (events.dragModuleZ < columnZ && !dragModuleShifted.current) {
+        //   groupRef.current.position.x = dx
+        //   groupRef.current.position.z = dz
+        //   dragModuleShifted.current = true
+        // } else if (events.dragModuleZ > columnZ && dragModuleShifted.current) {
+        //   groupRef.current.position.x = 0
+        //   groupRef.current.position.z = 0
+        //   dragModuleShifted.current = false
+        // }
       }),
     []
   )
@@ -156,7 +186,10 @@ const ColumnBuildingModule = (props: Props) => {
     groupRef.current.position.x = px - x0
     groupRef.current.position.z = pz - z0
 
-    events.dragModuleZ = columnZ + dz
+    events.dragModule = {
+      z: columnZ + dz,
+      z0: columnZ,
+    }
 
     if (last) {
       setCameraEnabled(true)
