@@ -13,7 +13,7 @@ import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
 import { mapA, mapWithIndexM, reduceWithIndexM, StrOrd } from "@/utils"
-import { GroupProps } from "@react-three/fiber"
+import { GroupProps, invalidate } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { toArray } from "fp-ts/lib/Map"
@@ -115,7 +115,6 @@ const ColumnBuildingModule = (props: Props) => {
     () =>
       subscribeKey(events, "dragModule", () => {
         if (
-          events.dragModule === null ||
           scope.selected === null ||
           scope.selected.buildingId !== buildingId ||
           scope.selected.levelIndex !== levelIndex ||
@@ -123,6 +122,13 @@ const ColumnBuildingModule = (props: Props) => {
           !groupRef.current
         )
           return
+
+        if (events.dragModule === null) {
+          dragModuleShifted.current = null
+          groupRef.current.position.x = 0
+          groupRef.current.position.z = 0
+          return
+        }
 
         const { z0, z, length } = events.dragModule
 
@@ -155,6 +161,8 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.z = 0
             break
         }
+
+        invalidate()
       }),
     []
   )
@@ -182,20 +190,24 @@ const ColumnBuildingModule = (props: Props) => {
     if (levelIndex === siteContext.levelIndex) {
       groupRef.current.position.x = dx
       groupRef.current.position.z = dz
-    }
-
-    events.dragModule = {
-      z: columnZ + dz,
-      z0: columnZ,
-      length: module.length,
+      events.dragModule = {
+        z: columnZ + dz,
+        z0: columnZ,
+        length: module.length,
+      }
     }
 
     if (last) {
       setCameraEnabled(true)
       scope.locked = false
-      groupRef.current.position.x = 0
-      groupRef.current.position.z = 0
+      if (levelIndex === siteContext.levelIndex) {
+        groupRef.current.position.x = 0
+        groupRef.current.position.z = 0
+        events.dragModule = null
+      }
     }
+
+    invalidate()
   })
 
   return (
