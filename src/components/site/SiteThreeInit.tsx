@@ -67,7 +67,7 @@ const SiteThreeInit = (props: Props) => {
           center: reverseV2(DEFAULT_ORIGIN), // starting position [lng, lat]
           zoom: 18, // starting zoom
           antialias: true,
-          interactive: false,
+          interactive: true,
         })
       )
     }

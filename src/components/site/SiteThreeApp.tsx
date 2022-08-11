@@ -51,8 +51,8 @@ const SiteThreeApp = () => {
   return (
     <group ref={worldRef}>
       <group
-        // scale={perMeter}
-        scale={0.5}
+        scale={perMeter}
+        // scale={0.5}
         position={mapCenter}
         rotation-x={Math.PI / 2}
       >
