@@ -47,6 +47,7 @@ const BuildingHouseColumn = (props: Props) => {
               scale={[1, 1, mirror ? 1 : -1]}
               verticalCutPlanes={verticalCutPlanes}
               columnZ={columnZ}
+              moduleZ={columnZ + z}
             />
           )
         })

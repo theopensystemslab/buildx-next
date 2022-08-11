@@ -3,7 +3,7 @@ import { proxy } from "valtio"
 type Events = {
   exportBuildingGLB: string | null
   dragModule: {
-    z: number
+    dz: number
     z0: number
     length: number
   } | null

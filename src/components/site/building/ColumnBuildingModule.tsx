@@ -12,12 +12,10 @@ import { outlineGroup } from "@/stores/highlights"
 import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
-import { mapA, mapWithIndexM, reduceWithIndexM, StrOrd } from "@/utils"
+import { reduceWithIndexM, StrOrd } from "@/utils"
 import { GroupProps, invalidate } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { toArray } from "fp-ts/lib/Map"
-import { Ord, trivial } from "fp-ts/lib/Ord"
 import { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
 import { subscribeKey } from "valtio/utils"
@@ -32,6 +30,7 @@ type Props = GroupProps & {
   levelY: number
   verticalCutPlanes: Plane[]
   columnZ: number
+  moduleZ: number
 }
 
 const ColumnBuildingModule = (props: Props) => {
@@ -44,6 +43,7 @@ const ColumnBuildingModule = (props: Props) => {
     levelY,
     verticalCutPlanes,
     columnZ,
+    moduleZ,
     ...groupProps
   } = props
 
@@ -111,6 +111,8 @@ const ColumnBuildingModule = (props: Props) => {
 
   const dragModuleShifted = useRef<"UP" | "DOWN" | null>(null)
 
+  const dragThreshold = 0.01
+
   useEffect(
     () =>
       subscribeKey(events, "dragModule", () => {
@@ -119,6 +121,10 @@ const ColumnBuildingModule = (props: Props) => {
           scope.selected.buildingId !== buildingId ||
           scope.selected.levelIndex !== levelIndex ||
           module.structuredDna.positionType === "END" ||
+          (scope.selected.buildingId === buildingId &&
+            scope.selected.columnIndex === columnIndex &&
+            scope.selected.levelIndex === levelIndex &&
+            scope.selected.groupIndex === groupIndex) ||
           !groupRef.current
         )
           return
@@ -130,36 +136,38 @@ const ColumnBuildingModule = (props: Props) => {
           return
         }
 
-        const { z0, z, length } = events.dragModule
+        const { dragModule } = events
 
-        const [dx, dz] = rotateVector([0, length])
+        const [dx, dz] = rotateVector([0, dragModule.length])
 
-        // const lowZ = columnZ - module.length / 2
-        // const highZ = columnZ + module.length / 2
+        const thisLow = moduleZ,
+          thisHigh = moduleZ + module.length,
+          current = dragModule.z0 + dragModule.length / 2 + dragModule.dz,
+          isHigherModule = moduleZ > dragModule.z0,
+          isLowerModule = !isHigherModule
 
-        switch (true) {
-          case dragModuleShifted.current !== "DOWN" &&
-            z0 < columnZ &&
-            z > columnZ:
-            dragModuleShifted.current = "DOWN"
+        // need something for going up and then down
+
+        if (isHigherModule) {
+          if (current > thisHigh && dragModuleShifted.current !== "DOWN") {
             groupRef.current.position.x = -dx
             groupRef.current.position.z = -dz
-            break
-
-          case dragModuleShifted.current !== "UP" &&
-            z0 > columnZ &&
-            z < columnZ:
-            dragModuleShifted.current = "UP"
-            groupRef.current.position.x = dx
-            groupRef.current.position.z = dz
-            break
-
-          case dragModuleShifted.current !== null &&
-            ((z0 < columnZ && z < columnZ) || (z0 > columnZ && z > columnZ)):
-            dragModuleShifted.current = null
+            dragModuleShifted.current = "DOWN"
+          } else if (current < thisHigh && dragModuleShifted.current !== null) {
             groupRef.current.position.x = 0
             groupRef.current.position.z = 0
-            break
+            dragModuleShifted.current = null
+          }
+        } else if (isLowerModule) {
+          if (current < thisLow && dragModuleShifted.current !== "UP") {
+            groupRef.current.position.x = dx
+            groupRef.current.position.z = dz
+            dragModuleShifted.current = "UP"
+          } else if (current > thisLow && dragModuleShifted.current !== null) {
+            groupRef.current.position.x = 0
+            groupRef.current.position.z = 0
+            dragModuleShifted.current = null
+          }
         }
 
         invalidate()
@@ -183,7 +191,7 @@ const ColumnBuildingModule = (props: Props) => {
       initXZ.current = [px, pz]
     }
 
-    const [x0, z0] = initXZ.current
+    const [, z0] = initXZ.current
 
     const [dx, dz] = rotateVector([0, pz - z0])
 
@@ -191,8 +199,8 @@ const ColumnBuildingModule = (props: Props) => {
       groupRef.current.position.x = dx
       groupRef.current.position.z = dz
       events.dragModule = {
-        z: columnZ + dz,
-        z0: columnZ,
+        dz,
+        z0: moduleZ,
         length: module.length,
       }
     }
