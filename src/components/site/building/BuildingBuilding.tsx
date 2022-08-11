@@ -8,7 +8,7 @@ import {
 import { useVerticalCutPlanes } from "@/hooks/verticalCutPlanes"
 import defaultMaterial from "@/materials/defaultMaterial"
 import { setCameraEnabled } from "@/stores/camera"
-import { EditModeEnum, useSiteContext } from "@/stores/context"
+import siteContext, { EditModeEnum, useSiteContext } from "@/stores/context"
 import { useHouse } from "@/stores/houses"
 import pointer from "@/stores/pointer"
 import { useShadows } from "@/stores/settings"
@@ -45,6 +45,7 @@ import {
 import { useSnapshot } from "valtio"
 import HandleMaterial from "../../../materials/HandleMaterial"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
+import swap from "@/stores/interactions/swap"
 
 type StretchHandleProps = MeshProps & {
   onDrag?: Handler<"drag", ThreeEvent<PointerEvent>>
@@ -213,6 +214,8 @@ const BuildingBuilding = (props: Props) => {
   } = useHouse(id)
 
   const columnLayout = useColumnLayout(id)
+
+  swap.activeBuildingMatrix = columnLayoutToMatrix(columnLayout)
 
   const {
     startColumn,

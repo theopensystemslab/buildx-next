@@ -364,7 +364,7 @@ export const columnLayoutToMatrix = <
         mapRA((gridGroup) =>
           pipe(
             gridGroup.modules,
-            mapRA(({ module }) => module)
+            mapRA(({ module: { gltf, ...rest } }) => rest)
           )
         )
       )

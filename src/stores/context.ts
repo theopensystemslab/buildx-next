@@ -1,4 +1,5 @@
 import { BUILDX_LOCAL_STORAGE_CONTEXT_KEY } from "@/CONSTANTS"
+import { BareModule, StructuredDnaModule } from "@/data/module"
 import { SSR } from "@/utils"
 import { useEffect } from "react"
 import { proxy, subscribe, useSnapshot } from "valtio"

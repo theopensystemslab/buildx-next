@@ -1,5 +1,6 @@
-import { LoadedModule } from "@/data/module"
+import { BareModule, LoadedModule, StructuredDnaModule } from "@/data/module"
 import { useRotateVector } from "@/hooks/geometry"
+import { columnMatrixToDna } from "@/hooks/layouts"
 import { setCameraEnabled } from "@/stores/camera"
 import siteContext, {
   SiteContextModeEnum,
@@ -9,17 +10,20 @@ import siteContext, {
 import events from "@/stores/events"
 import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
+import houses from "@/stores/houses"
 import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
-import { reduceWithIndexM, StrOrd } from "@/utils"
+import { pipeLog, reduceWithIndexM, StrOrd } from "@/utils"
 import { GroupProps, invalidate } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
+import produce from "immer"
 import { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
 import { subscribeKey } from "valtio/utils"
 import ColumnBuildingElement from "./ColumnBuildingElement"
+import swap from "@/stores/interactions/swap"
 
 type Props = GroupProps & {
   module: LoadedModule
@@ -113,7 +117,7 @@ const ColumnBuildingModule = (props: Props) => {
 
   useEffect(
     () =>
-      subscribeKey(events, "dragModule", () => {
+      subscribeKey(swap, "dragModule", () => {
         if (
           scope.selected === null ||
           scope.selected.buildingId !== buildingId ||
@@ -127,14 +131,14 @@ const ColumnBuildingModule = (props: Props) => {
         )
           return
 
-        if (events.dragModule === null) {
+        if (swap.dragModule === null) {
           dragModuleShifted.current = null
           groupRef.current.position.x = 0
           groupRef.current.position.z = 0
           return
         }
 
-        const { dragModule } = events
+        const { dragModule } = swap
 
         const [dx, dz] = rotateVector([0, dragModule.length])
 
@@ -154,7 +158,11 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.x = -dx
             groupRef.current.position.z = -dz
             dragModuleShifted.current = "DOWN"
-            events.dragModuleShiftCount++
+            swap.dragModuleResponder = {
+              columnIndex,
+              levelIndex,
+              groupIndex,
+            }
           }
           if (
             current + dragThreshold < thisHigh &&
@@ -163,7 +171,11 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.x = 0
             groupRef.current.position.z = 0
             dragModuleShifted.current = null
-            events.dragModuleShiftCount--
+            swap.dragModuleResponder = {
+              columnIndex,
+              levelIndex,
+              groupIndex,
+            }
           }
         } else if (isLowerModule) {
           if (
@@ -173,7 +185,11 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.x = dx
             groupRef.current.position.z = dz
             dragModuleShifted.current = "UP"
-            events.dragModuleShiftCount--
+            swap.dragModuleResponder = {
+              columnIndex,
+              levelIndex,
+              groupIndex,
+            }
           }
           if (
             current - dragThreshold > thisLow &&
@@ -182,7 +198,11 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.x = 0
             groupRef.current.position.z = 0
             dragModuleShifted.current = null
-            events.dragModuleShiftCount++
+            swap.dragModuleResponder = {
+              columnIndex,
+              levelIndex,
+              groupIndex,
+            }
           }
         }
 
@@ -214,7 +234,7 @@ const ColumnBuildingModule = (props: Props) => {
     if (levelIndex === siteContext.levelIndex) {
       groupRef.current.position.x = dx
       groupRef.current.position.z = dz
-      events.dragModule = {
+      swap.dragModule = {
         dz,
         z0: moduleZ,
         length: module.length,
@@ -227,7 +247,38 @@ const ColumnBuildingModule = (props: Props) => {
       if (levelIndex === siteContext.levelIndex) {
         groupRef.current.position.x = 0
         groupRef.current.position.z = 0
-        events.dragModule = null
+        swap.dragModule = null
+
+        if (
+          swap.activeBuildingMatrix === null ||
+          swap.dragModuleResponder === null
+        )
+          return
+
+        const {
+          columnIndex: c,
+          levelIndex: l,
+          groupIndex: g,
+        } = swap.dragModuleResponder
+
+        if (c === columnIndex && l === levelIndex && g === groupIndex) return
+
+        houses[buildingId].dna = pipe(
+          swap.activeBuildingMatrix,
+          produce<BareModule[][][]>((draft) => {
+            const tmp = { ...draft[columnIndex][levelIndex][groupIndex] }
+            draft[columnIndex][levelIndex][groupIndex] = { ...draft[c][l][g] }
+            draft[c][l][g] = { ...tmp }
+          }),
+          (x) => {
+            swap.activeBuildingMatrix = x
+            return x
+          },
+          columnMatrixToDna
+        )
+
+        swap.dragModule = null
+        swap.dragModuleResponder = null
       }
     }
 
