@@ -147,23 +147,38 @@ const ColumnBuildingModule = (props: Props) => {
           isLowerModule = !isHigherModule
 
         // need something for going up and then down
+        const dragThreshold = Math.min(dragModule.length, module.length)
 
         if (isHigherModule) {
-          if (current > thisHigh && dragModuleShifted.current !== "DOWN") {
+          if (
+            current + dragThreshold > thisHigh &&
+            dragModuleShifted.current !== "DOWN"
+          ) {
             groupRef.current.position.x = -dx
             groupRef.current.position.z = -dz
             dragModuleShifted.current = "DOWN"
-          } else if (current < thisHigh && dragModuleShifted.current !== null) {
+          }
+          if (
+            current + dragThreshold < thisHigh &&
+            dragModuleShifted.current !== null
+          ) {
             groupRef.current.position.x = 0
             groupRef.current.position.z = 0
             dragModuleShifted.current = null
           }
         } else if (isLowerModule) {
-          if (current < thisLow && dragModuleShifted.current !== "UP") {
+          if (
+            current - dragThreshold < thisLow &&
+            dragModuleShifted.current !== "UP"
+          ) {
             groupRef.current.position.x = dx
             groupRef.current.position.z = dz
             dragModuleShifted.current = "UP"
-          } else if (current > thisLow && dragModuleShifted.current !== null) {
+          }
+          if (
+            current - dragThreshold > thisLow &&
+            dragModuleShifted.current !== null
+          ) {
             groupRef.current.position.x = 0
             groupRef.current.position.z = 0
             dragModuleShifted.current = null
