@@ -111,8 +111,6 @@ const ColumnBuildingModule = (props: Props) => {
 
   const dragModuleShifted = useRef<"UP" | "DOWN" | null>(null)
 
-  const dragThreshold = 0.01
-
   useEffect(
     () =>
       subscribeKey(events, "dragModule", () => {
@@ -146,7 +144,6 @@ const ColumnBuildingModule = (props: Props) => {
           isHigherModule = moduleZ > dragModule.z0,
           isLowerModule = !isHigherModule
 
-        // need something for going up and then down
         const dragThreshold = Math.min(dragModule.length, module.length)
 
         if (isHigherModule) {
@@ -157,6 +154,7 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.x = -dx
             groupRef.current.position.z = -dz
             dragModuleShifted.current = "DOWN"
+            events.dragModuleShiftCount++
           }
           if (
             current + dragThreshold < thisHigh &&
@@ -165,6 +163,7 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.x = 0
             groupRef.current.position.z = 0
             dragModuleShifted.current = null
+            events.dragModuleShiftCount--
           }
         } else if (isLowerModule) {
           if (
@@ -174,6 +173,7 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.x = dx
             groupRef.current.position.z = dz
             dragModuleShifted.current = "UP"
+            events.dragModuleShiftCount--
           }
           if (
             current - dragThreshold > thisLow &&
@@ -182,6 +182,7 @@ const ColumnBuildingModule = (props: Props) => {
             groupRef.current.position.x = 0
             groupRef.current.position.z = 0
             dragModuleShifted.current = null
+            events.dragModuleShiftCount++
           }
         }
 
