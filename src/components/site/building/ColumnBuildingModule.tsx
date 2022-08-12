@@ -73,7 +73,7 @@ const ColumnBuildingModule = (props: Props) => {
       (elementName, acc: JSX.Element[], geometry) => [
         ...acc,
         <ColumnBuildingElement
-          key={elementName}
+          key={`${buildingId}-${columnIndex}-${levelIndex}-${groupIndex}-${elementName}`}
           {...{
             elementName,
             geometry,
@@ -100,7 +100,8 @@ const ColumnBuildingModule = (props: Props) => {
         if (
           !menu.open &&
           scope.hovered?.columnIndex === columnIndex &&
-          context.levelIndex === levelIndex
+          context.levelIndex === levelIndex &&
+          scope.hovered.groupIndex === groupIndex
         ) {
           outlineGroup(groupRef)
         } else {

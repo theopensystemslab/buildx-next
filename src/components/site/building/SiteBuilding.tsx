@@ -120,7 +120,7 @@ const SiteBuilding = ({ id }: Props) => {
   return buildingId !== id ? (
     <SiteBuildingMain id={id} />
   ) : (
-    <BuildingBuilding id={id} />
+    <BuildingBuilding buildingId={id} />
   )
 }
 
