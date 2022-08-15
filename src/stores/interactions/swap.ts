@@ -10,12 +10,14 @@ type Swap = {
     length: number
   } | null
   dragModuleResponder: Omit<ScopeItem, "buildingId" | "elementName"> | null
+  dragModuleShifted: "UP" | "DOWN" | null
 }
 
 const swap = proxy<Swap>({
   activeBuildingMatrix: null,
   dragModule: null,
   dragModuleResponder: null,
+  dragModuleShifted: null,
 })
 
 export default swap
