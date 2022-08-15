@@ -5,7 +5,7 @@ import { ScopeItem } from "./scope"
 type Swap = {
   activeBuildingMatrix: BareModule[][][] | null
   dragModule: {
-    dz: number
+    dpz: number
     z0: number
     length: number
   } | null

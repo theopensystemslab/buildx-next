@@ -1,7 +1,7 @@
 import { LoadedModule } from "@/data/module"
 import { useRotateVector } from "@/hooks/geometry"
 import { setCameraEnabled } from "@/stores/camera"
-import {
+import siteContext, {
   SiteContextModeEnum,
   useSiteContext,
   useSiteContextMode,
@@ -11,6 +11,7 @@ import { outlineGroup } from "@/stores/highlights"
 import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
+import swap from "@/stores/swap"
 import { mapWithIndexM, reduceWithIndexM, StrOrd } from "@/utils"
 import { GroupProps, invalidate } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
@@ -19,6 +20,7 @@ import { toArray } from "fp-ts/lib/Map"
 import { and, not, or, Predicate } from "fp-ts/lib/Predicate"
 import React, { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
+import { subscribe } from "valtio"
 import { subscribeKey } from "valtio/utils"
 import ColumnBuildingElement from "./ColumnBuildingElement"
 
@@ -43,6 +45,16 @@ const ColumnBuildingModule = (props: Props) => {
     verticalCutPlanes,
     ...groupProps
   } = props
+
+  const { position } = groupProps
+
+  // so these positions are relative to the column
+  const [positionX0, positionZ0] =
+    position instanceof Vector3
+      ? [position.x, position.z]
+      : typeof position === "object"
+      ? [position[0], position[1]]
+      : [0, 0]
 
   const groupRef = useRef<Group>(null)
 
@@ -103,23 +115,52 @@ const ColumnBuildingModule = (props: Props) => {
     }
   }, [contextMode])
 
-  const isSelected: Predicate<void> = pipe(
-    () => scope.selected?.buildingId === buildingId,
-    and(() => scope.selected?.columnIndex === columnIndex),
-    and(() => scope.selected?.levelIndex === levelIndex),
-    and(() => scope.selected?.groupIndex === groupIndex)
-  )
+  const isSelected = (): boolean =>
+    scope.selected?.buildingId === buildingId &&
+    scope.selected?.columnIndex === columnIndex &&
+    scope.selected?.levelIndex === levelIndex &&
+    scope.selected?.groupIndex === groupIndex
 
-  const isDragResponsive: Predicate<void> = pipe(
-    () => scope.selected === null,
-    or(() => scope.selected?.buildingId !== buildingId),
-    or(() => scope.selected?.levelIndex === levelIndex),
-    or(isSelected),
-    or(() => module.structuredDna.positionType === "END"),
-    not
-  )
+  const isDragResponsive = (): boolean =>
+    buildingId === siteContext.buildingId && // the right building
+    levelIndex === siteContext.levelIndex && // the right level
+    module.structuredDna.positionType !== "END" && // not an end
+    !isSelected() // not selected
 
   const rotateVector = useRotateVector(buildingId)
+
+  useEffect(() => {
+    return subscribe(swap, () => {
+      if (!groupRef.current) return
+      if (!isDragResponsive()) return
+
+      const { dragModule } = swap
+
+      if (dragModule === null) return
+
+      const v = new Vector3()
+      const { z: z0 } = v.setFromMatrixPosition(groupRef.current.matrixWorld)
+
+      const thisLow = z0,
+        thisHigh = z0 + module.length,
+        current = dragModule.z0 + dragModule.length / 2 + dragModule.dpz,
+        isHigherModule = thisLow > dragModule.z0,
+        isLowerModule = !isHigherModule
+
+      // console.log({
+      //   gridUnits: module.structuredDna.gridUnits,
+      //   isLowerModule,
+      //   isHigherModule,
+      // })
+
+      switch (true) {
+        case dragModule === null:
+        default:
+          break
+      }
+    })
+  }, [])
+
   const pointerXZ0 = useRef([0, 0])
   const dragModuleXZ0 = useRef([0, 0])
 
@@ -138,22 +179,32 @@ const ColumnBuildingModule = (props: Props) => {
 
     const [, initZ] = pointerXZ0.current
     const [dragModuleX0, dragModuleZ0] = dragModuleXZ0.current
-    const [dx, dz] = rotateVector([0, pz - initZ])
+    const [dpx, dpz] = rotateVector([0, pz - initZ])
 
     if (isSelected()) {
-      groupRef.current.position.x = dragModuleX0 + dx
-      groupRef.current.position.z = dragModuleZ0 + dz
+      groupRef.current.position.x = dragModuleX0 + dpx
+      groupRef.current.position.z = dragModuleZ0 + dpz
+
+      swap.dragModule = {
+        dpz: dpz,
+        z0: dragModuleZ0,
+        length: module.length,
+      }
     }
 
     if (last) {
       setCameraEnabled(true)
 
-      // handle drop...
+      if (isSelected()) {
+        // handle drop...
 
-      // has something changed or am I snapping back to 0 change?
-      if (true) {
-        groupRef.current.position.x = dragModuleX0
-        groupRef.current.position.z = dragModuleZ0
+        // has something changed or am I snapping back to 0 change?
+        if (true) {
+          groupRef.current.position.x = dragModuleX0
+          groupRef.current.position.z = dragModuleZ0
+        }
+
+        swap.dragModule = null
       }
     }
 
