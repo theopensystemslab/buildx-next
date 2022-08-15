@@ -40,14 +40,11 @@ const BuildingHouseColumn = (props: Props) => {
               position={[
                 0,
                 y,
-                mirror
-                  ? z + module.length / 2
-                  : z - module.length + module.length / 2,
+                mirror ? z + module.length / 2 : z - module.length / 2,
               ]}
               scale={[1, 1, mirror ? 1 : -1]}
               verticalCutPlanes={verticalCutPlanes}
               columnZ={columnZ}
-              moduleZ={columnZ + z}
             />
           )
         })

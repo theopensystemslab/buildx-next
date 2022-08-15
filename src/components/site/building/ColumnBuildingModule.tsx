@@ -1,4 +1,4 @@
-import { BareModule, LoadedModule, StructuredDnaModule } from "@/data/module"
+import { BareModule, LoadedModule } from "@/data/module"
 import { useRotateVector } from "@/hooks/geometry"
 import { columnMatrixToDna } from "@/hooks/layouts"
 import { setCameraEnabled } from "@/stores/camera"
@@ -7,14 +7,14 @@ import siteContext, {
   useSiteContext,
   useSiteContextMode,
 } from "@/stores/context"
-import events from "@/stores/events"
 import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
 import houses from "@/stores/houses"
+import swap from "@/stores/interactions/swap"
 import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
-import { pipeLog, reduceWithIndexM, StrOrd } from "@/utils"
+import { reduceWithIndexM, StrOrd } from "@/utils"
 import { GroupProps, invalidate } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
@@ -23,7 +23,10 @@ import { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
 import { subscribeKey } from "valtio/utils"
 import ColumnBuildingElement from "./ColumnBuildingElement"
-import swap from "@/stores/interactions/swap"
+
+const TGT = "W1-MID-G1-GRID2-19-ST0-L0-SIDE0-SIDE0-END0-TOP0"
+
+const isTgt = (moduleDna: string): boolean => moduleDna === TGT
 
 type Props = GroupProps & {
   module: LoadedModule
@@ -34,7 +37,6 @@ type Props = GroupProps & {
   levelY: number
   verticalCutPlanes: Plane[]
   columnZ: number
-  moduleZ: number
 }
 
 const ColumnBuildingModule = (props: Props) => {
@@ -47,9 +49,19 @@ const ColumnBuildingModule = (props: Props) => {
     levelY,
     verticalCutPlanes,
     columnZ,
-    moduleZ,
     ...groupProps
   } = props
+
+  const { position, scale } = groupProps
+
+  const [positionX0, positionZ0] =
+    position instanceof Vector3
+      ? [position.x, position.z]
+      : typeof position === "object"
+      ? [position[0], position[1]]
+      : [0, 0]
+
+  const [x0, z0] = [positionX0, columnZ + positionZ0 + module.length / 2]
 
   const groupRef = useRef<Group>()
 
@@ -134,8 +146,8 @@ const ColumnBuildingModule = (props: Props) => {
 
         if (swap.dragModule === null) {
           dragModuleShifted.current = null
-          groupRef.current.position.x = 0
-          groupRef.current.position.z = 0
+          groupRef.current.position.x = positionX0
+          groupRef.current.position.z = positionZ0
           return
         }
 
@@ -143,10 +155,10 @@ const ColumnBuildingModule = (props: Props) => {
 
         const [dx, dz] = rotateVector([0, dragModule.length])
 
-        const thisLow = moduleZ,
-          thisHigh = moduleZ + module.length,
+        const thisLow = z0,
+          thisHigh = z0 + module.length,
           current = dragModule.z0 + dragModule.length / 2 + dragModule.dz,
-          isHigherModule = moduleZ > dragModule.z0,
+          isHigherModule = z0 > dragModule.z0,
           isLowerModule = !isHigherModule
 
         const dragThreshold = Math.min(dragModule.length, module.length)
@@ -169,8 +181,8 @@ const ColumnBuildingModule = (props: Props) => {
             current + dragThreshold < thisHigh &&
             dragModuleShifted.current !== null
           ) {
-            groupRef.current.position.x = 0
-            groupRef.current.position.z = 0
+            groupRef.current.position.x = positionX0
+            groupRef.current.position.z = positionZ0
             dragModuleShifted.current = null
             swap.dragModuleResponder = {
               columnIndex,
@@ -183,6 +195,7 @@ const ColumnBuildingModule = (props: Props) => {
             current - dragThreshold < thisLow &&
             dragModuleShifted.current !== "UP"
           ) {
+            console.log("LOWER")
             groupRef.current.position.x = dx
             groupRef.current.position.z = dz
             dragModuleShifted.current = "UP"
@@ -196,8 +209,8 @@ const ColumnBuildingModule = (props: Props) => {
             current - dragThreshold > thisLow &&
             dragModuleShifted.current !== null
           ) {
-            groupRef.current.position.x = 0
-            groupRef.current.position.z = 0
+            groupRef.current.position.x = positionX0
+            groupRef.current.position.z = positionZ0
             dragModuleShifted.current = null
             swap.dragModuleResponder = {
               columnIndex,
@@ -212,42 +225,53 @@ const ColumnBuildingModule = (props: Props) => {
     []
   )
 
-  const bind = useDrag(({ first, last }) => {
-    if (
-      siteContext.levelIndex === null ||
-      !groupRef.current ||
-      module.structuredDna.positionType === "END"
-    )
-      return
+  const dragModuleXZ0 = useRef([0, 0])
 
+  const bind = useDrag(({ first, last }) => {
     const [px, pz] = pointer.xz
 
     if (first) {
       setCameraEnabled(false)
       scope.locked = true
       initXZ.current = [px, pz]
-    }
-
-    const [, z0] = initXZ.current
-
-    const [dx, dz] = rotateVector([0, pz - z0])
-
-    if (levelIndex === siteContext.levelIndex) {
-      groupRef.current.position.x = dx
-      groupRef.current.position.z = dz
-      swap.dragModule = {
-        dz,
-        z0: moduleZ,
-        length: module.length,
-      }
+      dragModuleXZ0.current = [
+        groupRef.current?.position.x ?? 0,
+        groupRef.current?.position.z ?? 0,
+      ]
     }
 
     if (last) {
       setCameraEnabled(true)
       scope.locked = false
+    }
+
+    if (
+      siteContext.levelIndex === null ||
+      !groupRef.current ||
+      module.structuredDna.positionType === "END" ||
+      !(
+        levelIndex === siteContext.levelIndex &&
+        groupIndex === scope.selected?.groupIndex
+      )
+    )
+      return
+
+    const [, initZ] = initXZ.current
+    const [dragModuleX0, dragModuleZ0] = dragModuleXZ0.current
+
+    const [dx, dz] = rotateVector([0, pz - initZ])
+
+    groupRef.current.position.x = dragModuleX0 + dx
+    groupRef.current.position.z = dragModuleZ0 + dz
+
+    swap.dragModule = {
+      dz,
+      z0,
+      length: module.length,
+    }
+
+    if (last) {
       if (levelIndex === siteContext.levelIndex) {
-        groupRef.current.position.x = 0
-        groupRef.current.position.z = 0
         swap.dragModule = null
 
         if (
@@ -264,22 +288,26 @@ const ColumnBuildingModule = (props: Props) => {
 
         if (c === columnIndex && l === levelIndex && g === groupIndex) return
 
-        houses[buildingId].dna = pipe(
-          swap.activeBuildingMatrix,
-          produce<BareModule[][][]>((draft) => {
-            const tmp = { ...draft[columnIndex][levelIndex][groupIndex] }
-            draft[columnIndex][levelIndex][groupIndex] = { ...draft[c][l][g] }
-            draft[c][l][g] = { ...tmp }
-          }),
-          (x) => {
-            swap.activeBuildingMatrix = x
-            return x
-          },
-          columnMatrixToDna
-        )
+        if (dragModuleShifted.current !== null)
+          houses[buildingId].dna = pipe(
+            swap.activeBuildingMatrix,
+            produce<BareModule[][][]>((draft) => {
+              const tmp = { ...draft[columnIndex][levelIndex][groupIndex] }
+              draft[columnIndex][levelIndex][groupIndex] = { ...draft[c][l][g] }
+              draft[c][l][g] = { ...tmp }
+            }),
+            (x) => {
+              swap.activeBuildingMatrix = x
+              return x
+            },
+            columnMatrixToDna
+          )
 
         swap.dragModule = null
         swap.dragModuleResponder = null
+
+        groupRef.current.position.x = positionX0
+        groupRef.current.position.z = positionZ0
       }
     }
 
