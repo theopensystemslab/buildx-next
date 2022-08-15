@@ -43,7 +43,6 @@ export const useSystemData = (systemId?: string) => {
 
   return pipe(
     systemsData,
-    pipeLog,
     mapR(
       filterA(
         (v: { systemId: string }) =>

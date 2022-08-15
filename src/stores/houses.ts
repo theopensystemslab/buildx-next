@@ -81,7 +81,7 @@ export const useHouseType = (houseId: string) => {
 
 export const usePositionRotation = (
   buildingId: string,
-  groupRef: MutableRefObject<Group | undefined>
+  groupRef: MutableRefObject<Group | null>
 ) => {
   const onPositionUpdate = useCallback(() => {
     if (!groupRef.current) return

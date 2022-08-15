@@ -1,4 +1,6 @@
 import { LoadedModule } from "@/data/module"
+import { useRotateVector } from "@/hooks/geometry"
+import { setCameraEnabled } from "@/stores/camera"
 import {
   SiteContextModeEnum,
   useSiteContext,
@@ -7,11 +9,14 @@ import {
 import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
 import menu from "@/stores/menu"
+import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
-import { mapWithIndexM, StrOrd } from "@/utils"
-import { GroupProps } from "@react-three/fiber"
+import { mapWithIndexM, reduceWithIndexM, StrOrd } from "@/utils"
+import { GroupProps, invalidate } from "@react-three/fiber"
+import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
 import { toArray } from "fp-ts/lib/Map"
+import { and, not, or, Predicate } from "fp-ts/lib/Predicate"
 import React, { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
 import { subscribeKey } from "valtio/utils"
@@ -39,7 +44,7 @@ const ColumnBuildingModule = (props: Props) => {
     ...groupProps
   } = props
 
-  const groupRef = useRef<Group>()
+  const groupRef = useRef<Group>(null)
 
   const moduleGeometries = useModuleGeometries(
     module.systemId,
@@ -56,25 +61,28 @@ const ColumnBuildingModule = (props: Props) => {
 
   const children = pipe(
     moduleGeometries,
-    mapWithIndexM((elementName, geometry) => (
-      <ColumnBuildingElement
-        key={elementName}
-        {...{
-          elementName,
-          geometry,
-          systemId: module.systemId,
-          buildingId,
-          columnIndex,
-          levelIndex,
-          groupIndex,
-          clippingPlanes: [
-            verticalCutPlanes,
-            context.levelIndex === levelIndex ? [levelCutPlane] : [],
-          ].flat(),
-        }}
-      />
-    )),
-    toArray(StrOrd)
+    reduceWithIndexM(StrOrd)(
+      [],
+      (elementName, acc: JSX.Element[], geometry) => [
+        ...acc,
+        <ColumnBuildingElement
+          key={elementName}
+          {...{
+            elementName,
+            geometry,
+            systemId: module.systemId,
+            buildingId,
+            columnIndex,
+            levelIndex,
+            groupIndex,
+            clippingPlanes: [
+              verticalCutPlanes,
+              context.levelIndex === levelIndex ? [levelCutPlane] : [],
+            ].flat(),
+          }}
+        />,
+      ]
+    )
   )
 
   const contextMode = useSiteContextMode()
@@ -95,8 +103,65 @@ const ColumnBuildingModule = (props: Props) => {
     }
   }, [contextMode])
 
+  const isSelected: Predicate<void> = pipe(
+    () => scope.selected?.buildingId === buildingId,
+    and(() => scope.selected?.columnIndex === columnIndex),
+    and(() => scope.selected?.levelIndex === levelIndex),
+    and(() => scope.selected?.groupIndex === groupIndex)
+  )
+
+  const isDragResponsive: Predicate<void> = pipe(
+    () => scope.selected === null,
+    or(() => scope.selected?.buildingId !== buildingId),
+    or(() => scope.selected?.levelIndex === levelIndex),
+    or(isSelected),
+    or(() => module.structuredDna.positionType === "END"),
+    not
+  )
+
+  const rotateVector = useRotateVector(buildingId)
+  const pointerXZ0 = useRef([0, 0])
+  const dragModuleXZ0 = useRef([0, 0])
+
+  const bind = useDrag(({ first, last }) => {
+    if (!groupRef.current) return
+    const [px, pz] = pointer.xz
+
+    if (first) {
+      setCameraEnabled(false)
+      pointerXZ0.current = [px, pz]
+      dragModuleXZ0.current = [
+        groupRef.current.position.x ?? 0,
+        groupRef.current.position.z ?? 0,
+      ]
+    }
+
+    const [, initZ] = pointerXZ0.current
+    const [dragModuleX0, dragModuleZ0] = dragModuleXZ0.current
+    const [dx, dz] = rotateVector([0, pz - initZ])
+
+    if (isSelected()) {
+      groupRef.current.position.x = dragModuleX0 + dx
+      groupRef.current.position.z = dragModuleZ0 + dz
+    }
+
+    if (last) {
+      setCameraEnabled(true)
+
+      // handle drop...
+
+      // has something changed or am I snapping back to 0 change?
+      if (true) {
+        groupRef.current.position.x = dragModuleX0
+        groupRef.current.position.z = dragModuleZ0
+      }
+    }
+
+    invalidate()
+  })
+
   return (
-    <group ref={groupRef} {...groupProps}>
+    <group ref={groupRef} {...groupProps} {...(bind() as any)}>
       {children}
     </group>
   )

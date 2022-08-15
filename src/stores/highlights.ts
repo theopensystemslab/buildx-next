@@ -89,7 +89,7 @@ export const setIlluminatedModule = ({
 }
 
 export const outlineGroup = (
-  groupRef: MutableRefObject<Group | undefined>,
+  groupRef: MutableRefObject<Group | null>,
   opts: { remove: boolean } = { remove: false }
 ) => {
   if (!groupRef.current) return

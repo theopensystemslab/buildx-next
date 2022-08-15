@@ -22,12 +22,12 @@ import BuildingBuilding from "./BuildingBuilding"
 import BuildingHouseColumn from "./ColumnBuildingColumn"
 
 type Props = {
-  id: string
+  buildingId: string
 }
 
 const SiteBuildingMain = (props: Props) => {
-  const { id } = props
-  const groupRef = useRef<Group>()
+  const { buildingId } = props
+  const groupRef = useRef<Group>(null)
   const contextMode = useSiteContextMode()
   const { editMode } = useSiteContext()
 
@@ -37,19 +37,20 @@ const SiteBuildingMain = (props: Props) => {
     return subscribe(scope, () => {
       outlineGroup(groupRef, {
         remove:
-          scope.hovered?.buildingId !== id && scope.selected?.buildingId !== id,
+          scope.hovered?.buildingId !== buildingId &&
+          scope.selected?.buildingId !== buildingId,
       })
     })
   }, [contextMode])
 
-  const columns = useColumnLayout(id)
+  const columns = useColumnLayout(buildingId)
 
-  const verticalCutPlanes = useVerticalCutPlanes(columns, id)
+  const verticalCutPlanes = useVerticalCutPlanes(columns, buildingId)
 
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
     <BuildingHouseColumn
       key={columnIndex}
-      buildingId={id}
+      buildingId={buildingId}
       columnIndex={columnIndex}
       columnZ={z}
       gridGroups={gridGroups}
@@ -61,14 +62,14 @@ const SiteBuildingMain = (props: Props) => {
   const buildingLength = columns.reduce((acc, v) => acc + v.length, 0)
   const buildingWidth = columns[0].gridGroups[0].modules[0].module.width
 
-  const { buildingDragHandler } = usePositionRotation(id, groupRef)
+  const { buildingDragHandler } = usePositionRotation(buildingId, groupRef)
 
   const bind = useDrag(buildingDragHandler)
 
   useEffect(
     () =>
       subscribe(events, () => {
-        if (events.exportBuildingGLB !== id || !groupRef.current) return
+        if (events.exportBuildingGLB !== buildingId || !groupRef.current) return
 
         const exporter = new GLTFExporter() as any
 
@@ -87,7 +88,7 @@ const SiteBuildingMain = (props: Props) => {
 
             link.href = objectURL
             link.href = URL.createObjectURL(blob)
-            link.download = `${houses[id].friendlyName}.gltf`
+            link.download = `${houses[buildingId].friendlyName}.gltf`
             link.click()
           },
           { binary: false }
@@ -104,7 +105,7 @@ const SiteBuildingMain = (props: Props) => {
         {pipe(columns, mapRA(renderColumn))}
         {editMode === EditModeEnum.Enum.MOVE_ROTATE && (
           <RotateHandles
-            buildingId={id}
+            buildingId={buildingId}
             buildingLength={buildingLength}
             buildingWidth={buildingWidth}
           />
@@ -114,13 +115,13 @@ const SiteBuildingMain = (props: Props) => {
   )
 }
 
-const SiteBuilding = ({ id }: Props) => {
+const SiteBuilding = ({ buildingId: id }: Props) => {
   const { buildingId } = useSiteContext()
 
   return buildingId !== id ? (
-    <SiteBuildingMain id={id} />
+    <SiteBuildingMain buildingId={id} />
   ) : (
-    <BuildingBuilding id={id} />
+    <BuildingBuilding buildingId={id} />
   )
 }
 

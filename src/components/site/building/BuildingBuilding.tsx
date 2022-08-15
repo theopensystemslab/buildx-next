@@ -44,7 +44,7 @@ import {
 } from "three"
 import { useSnapshot } from "valtio"
 import HandleMaterial from "../../../materials/HandleMaterial"
-import BuildingHouseColumn from "./ColumnBuildingColumn"
+import ColumnBuildingColumn from "./ColumnBuildingColumn"
 
 type StretchHandleProps = MeshProps & {
   onDrag?: Handler<"drag", ThreeEvent<PointerEvent>>
@@ -186,7 +186,7 @@ const MidColumns = (props: MidColumnsProps) => {
   const { buildingId, columnLayout, midColumns, verticalCutPlanes } = props
 
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
-    <BuildingHouseColumn
+    <ColumnBuildingColumn
       key={columnIndex}
       buildingId={buildingId}
       columnIndex={columnIndex}
@@ -201,18 +201,18 @@ const MidColumns = (props: MidColumnsProps) => {
 }
 
 type Props = {
-  id: string
+  buildingId: string
 }
 
 const BuildingBuilding = (props: Props) => {
-  const { id } = props
+  const { buildingId } = props
 
   const {
     position: [buildingX, buildingZ],
     rotation,
-  } = useHouse(id)
+  } = useHouse(buildingId)
 
-  const columnLayout = useColumnLayout(id)
+  const columnLayout = useColumnLayout(buildingId)
 
   const {
     startColumn,
@@ -223,7 +223,7 @@ const BuildingBuilding = (props: Props) => {
     vanillaPositionedRows,
     sendDrag,
     sendDrop,
-  } = useStretchLength(id, columnLayout)
+  } = useStretchLength(buildingId, columnLayout)
 
   const startRef = useRef<Group>(null!)
   const endRef = useRef<Group>(null!)
@@ -232,12 +232,12 @@ const BuildingBuilding = (props: Props) => {
 
   const { editMode } = useSiteContext()
 
-  const verticalCutPlanes = useVerticalCutPlanes(columnLayout, id)
+  const verticalCutPlanes = useVerticalCutPlanes(columnLayout, buildingId)
 
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
-    <BuildingHouseColumn
+    <ColumnBuildingColumn
       key={columnIndex}
-      buildingId={id}
+      buildingId={buildingId}
       columnIndex={columnIndex}
       columnZ={z}
       gridGroups={gridGroups}
@@ -246,7 +246,7 @@ const BuildingBuilding = (props: Props) => {
     />
   )
 
-  const rotateVector = useRotateVector(id)
+  const rotateVector = useRotateVector(buildingId)
 
   const houseWidth = startColumn.gridGroups[0].modules[0].module.width
   const houseLength = pipe(
@@ -265,7 +265,7 @@ const BuildingBuilding = (props: Props) => {
     gateLineX,
     sendWidthDrag,
     sendWidthDrop,
-  } = useStretchWidth(id, columnLayout)
+  } = useStretchWidth(buildingId, columnLayout)
 
   const rightHandleRef = useRef<Mesh>(null)
   const leftHandleRef = useRef<Mesh>(null)
@@ -332,7 +332,7 @@ const BuildingBuilding = (props: Props) => {
       </group>
       <MidColumns
         columnLayout={columnLayout}
-        buildingId={id}
+        buildingId={buildingId}
         midColumns={midColumns}
         verticalCutPlanes={verticalCutPlanes}
       />
