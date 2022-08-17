@@ -1,8 +1,7 @@
 import { useSystemId } from "@/stores/context"
-import { filterA, mapR, pipeLog } from "@/utils"
+import { filterA, mapR } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
-import React, { Fragment, ReactNode } from "react"
-import { useSnapshot } from "valtio"
+import { Fragment, ReactNode } from "react"
 import { SystemsData, useSystemsData } from "../data/system"
 import { createCtx } from "./utils"
 

@@ -137,14 +137,6 @@ const ColumnBuildingModule = (props: Props) => {
   const shifted = useRef<"DOWN" | "UP" | null>(null)
 
   useEffect(() => {
-    const init = () => {
-      if (!groupRef.current) return
-      console.log("init start")
-      console.log(groupRef.current.position)
-      console.log([groupPosX0, groupPosZ0])
-      console.log("init end")
-    }
-    init()
     return subscribe(swap, () => {
       if (!groupRef.current) return
       if (!isDragResponsive()) return
@@ -184,7 +176,6 @@ const ColumnBuildingModule = (props: Props) => {
       switch (true) {
         // needs shifting down
         case down:
-          console.log("down")
           shifted.current = "DOWN"
           groupRef.current.position.z = groupPosZ0 - dragModulePing.length
           swap.dragModulePong = {
@@ -196,7 +187,6 @@ const ColumnBuildingModule = (props: Props) => {
 
         // down needs shifting back up
         case downToNull: {
-          console.log("downToNull")
           shifted.current = null
           groupRef.current.position.z = groupPosZ0
           const sibling = getSibling(
@@ -209,7 +199,6 @@ const ColumnBuildingModule = (props: Props) => {
 
         // needs shifting up
         case up:
-          console.log("up")
           shifted.current = "UP"
           groupRef.current.position.z = groupPosZ0 + dragModulePing.length
           swap.dragModulePong = {
@@ -220,7 +209,6 @@ const ColumnBuildingModule = (props: Props) => {
           break
 
         case upToNull: {
-          console.log("upToNull")
           shifted.current = null
           groupRef.current.position.z = groupPosZ0
           const sibling = getSibling({ columnIndex, levelIndex, groupIndex }, 1)
@@ -230,7 +218,6 @@ const ColumnBuildingModule = (props: Props) => {
 
         // up needs shifting back down
         case dragModulePing === null:
-          console.log("dragModulePing null")
           groupRef.current.position.x = groupPosX0
           groupRef.current.position.z = groupPosZ0
           break
@@ -306,7 +293,6 @@ const ColumnBuildingModule = (props: Props) => {
       )
 
       // reset stuff
-      console.log("reset")
       groupRef.current.position.x = groupPosX0
       groupRef.current.position.z = groupPosZ0
       swap.dragModulePing = null

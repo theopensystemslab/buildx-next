@@ -1,7 +1,6 @@
 import { PositionedRow } from "@/hooks/layouts"
 import { mapRA, mapWithIndexRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
-import { useMemo } from "react"
 import { Plane } from "three"
 import ColumnBuildingModule from "./ColumnBuildingModule"
 
@@ -32,7 +31,7 @@ const BuildingHouseColumn = (props: Props) => {
         mapWithIndexRA((groupIndex, { module, z }) => {
           return (
             <ColumnBuildingModule
-              key={`${columnIndex}-${levelIndex}-${groupIndex}-columnZ:${columnZ}-z:${z}`}
+              key={`${columnIndex}-${levelIndex}-${groupIndex}`}
               module={module}
               columnIndex={columnIndex}
               levelIndex={levelIndex}

@@ -188,7 +188,7 @@ const MidColumns = (props: MidColumnsProps) => {
 
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
     <ColumnBuildingColumn
-      key={`${columnIndex}-z:${z}`}
+      key={`${columnIndex}`}
       buildingId={buildingId}
       columnIndex={columnIndex}
       columnZ={z}

@@ -49,7 +49,7 @@ const SiteBuildingMain = (props: Props) => {
 
   const renderColumn = ({ columnIndex, z, gridGroups }: PositionedColumn) => (
     <BuildingHouseColumn
-      key={`${columnIndex}-z:${z}`}
+      key={`${columnIndex}`}
       buildingId={buildingId}
       columnIndex={columnIndex}
       columnZ={z}
