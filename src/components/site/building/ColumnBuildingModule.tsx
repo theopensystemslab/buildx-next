@@ -109,7 +109,8 @@ const ColumnBuildingModule = (props: Props) => {
         if (
           !menu.open &&
           scope.hovered?.columnIndex === columnIndex &&
-          context.levelIndex === levelIndex
+          context.levelIndex === levelIndex &&
+          groupIndex === scope.hovered?.groupIndex
         ) {
           outlineGroup(groupRef)
         } else {
