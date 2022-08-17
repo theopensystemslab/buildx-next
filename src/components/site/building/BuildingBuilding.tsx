@@ -18,6 +18,7 @@ import {
   useStretchWidth,
   VanillaPositionedRow,
 } from "@/stores/stretch"
+import swap from "@/stores/swap"
 import { clamp, filterRA, flattenA, mapA, mapRA, reduceA } from "@/utils"
 import { Instance, Instances } from "@react-three/drei"
 import { invalidate, MeshProps, ThreeEvent } from "@react-three/fiber"
@@ -213,6 +214,7 @@ const BuildingBuilding = (props: Props) => {
   } = useHouse(buildingId)
 
   const columnLayout = useColumnLayout(buildingId)
+  swap.activeBuildingMatrix = columnLayoutToMatrix(columnLayout)
 
   const {
     startColumn,

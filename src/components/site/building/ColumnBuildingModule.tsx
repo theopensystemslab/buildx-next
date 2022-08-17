@@ -1,5 +1,6 @@
-import { LoadedModule } from "@/data/module"
+import { BareModule, LoadedModule } from "@/data/module"
 import { useRotateVector } from "@/hooks/geometry"
+import { columnMatrixToDna } from "@/hooks/layouts"
 import { setCameraEnabled } from "@/stores/camera"
 import siteContext, {
   SiteContextModeEnum,
@@ -8,6 +9,7 @@ import siteContext, {
 } from "@/stores/context"
 import { useModuleGeometries } from "@/stores/geometries"
 import { outlineGroup } from "@/stores/highlights"
+import houses from "@/stores/houses"
 import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
@@ -16,10 +18,12 @@ import { reduceWithIndexM, StrOrd } from "@/utils"
 import { GroupProps, invalidate } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
+import produce from "immer"
 import { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
 import { subscribe } from "valtio"
 import { subscribeKey } from "valtio/utils"
+import { getSibling } from "../../../stores/swap"
 import ColumnBuildingElement from "./ColumnBuildingElement"
 
 type Props = GroupProps & {
@@ -136,29 +140,21 @@ const ColumnBuildingModule = (props: Props) => {
       if (!groupRef.current) return
       if (!isDragResponsive()) return
 
-      const { dragModulePing: dragModule } = swap
+      const { dragModulePing } = swap
 
-      if (dragModule === null) return
-
-      // const v = new Vector3()
-      // const { z: z0 } = v.setFromMatrixPosition(groupRef.current.matrixWorld)
+      if (dragModulePing === null) return
 
       const thisLow = columnZ + groupPosZ0,
         thisHigh = thisLow + module.length,
-        current = dragModule.z0 + dragModule.length / 2 + dragModule.dpz,
-        isHigherModule = thisLow > dragModule.z0,
+        current =
+          dragModulePing.z0 + dragModulePing.length / 2 + dragModulePing.dpz,
+        isHigherModule = thisLow > dragModulePing.z0,
         isLowerModule = !isHigherModule,
-        dragThreshold = Math.min(dragModule.length, module.length)
+        dragThreshold = Math.min(dragModulePing.length, module.length)
 
-      // console.log({
-      //   gridUnits: module.structuredDna.gridUnits,
-      //   isLowerModule,
-      //   isHigherModule,
-      // })
-
-      const nullToDown =
+      const down =
         isHigherModule &&
-        shifted.current !== "DOWN" &&
+        shifted.current === null &&
         current + dragThreshold > thisHigh
 
       const downToNull =
@@ -166,9 +162,9 @@ const ColumnBuildingModule = (props: Props) => {
         shifted.current === "DOWN" &&
         current + dragThreshold <= thisHigh
 
-      const nullToUp =
+      const up =
         isLowerModule &&
-        shifted.current !== "UP" &&
+        shifted.current === null &&
         current - dragThreshold < thisLow
 
       const upToNull =
@@ -178,31 +174,56 @@ const ColumnBuildingModule = (props: Props) => {
 
       switch (true) {
         // needs shifting down
-        case nullToDown: {
+        case down:
+          console.log("down")
           shifted.current = "DOWN"
-          groupRef.current.position.z = groupPosZ0 - dragModule.length
+          groupRef.current.position.z = groupPosZ0 - dragModulePing.length
+          swap.dragModulePong = {
+            columnIndex,
+            levelIndex,
+            groupIndex,
+          }
           break
-        }
 
         // down needs shifting back up
         case downToNull: {
+          console.log("downToNull")
           shifted.current = null
           groupRef.current.position.z = groupPosZ0
+          const sibling = getSibling(
+            { columnIndex, levelIndex, groupIndex },
+            -1
+          )
+          swap.dragModulePong = sibling
           break
         }
 
-        case nullToUp:
+        // needs shifting up
+        case up:
+          console.log("up")
           shifted.current = "UP"
-          groupRef.current.position.z = groupPosZ0 + dragModule.length
+          groupRef.current.position.z = groupPosZ0 + dragModulePing.length
+          swap.dragModulePong = {
+            columnIndex,
+            levelIndex,
+            groupIndex,
+          }
           break
 
-        case upToNull:
+        case upToNull: {
+          console.log("upToNull")
           shifted.current = null
           groupRef.current.position.z = groupPosZ0
+          const sibling = getSibling({ columnIndex, levelIndex, groupIndex }, 1)
+          swap.dragModulePong = sibling
           break
+        }
 
-        case dragModule === null:
-        default:
+        // up needs shifting back down
+        case dragModulePing === null:
+          console.log("dragModulePing null")
+          groupRef.current.position.x = groupPosX0
+          groupRef.current.position.z = groupPosZ0
           break
       }
     })
@@ -211,7 +232,13 @@ const ColumnBuildingModule = (props: Props) => {
   const pointerXZ0 = useRef([0, 0])
 
   const bind = useDrag(({ first, last }) => {
-    if (!groupRef.current) return
+    if (
+      !groupRef.current ||
+      buildingId !== siteContext.buildingId ||
+      levelIndex !== siteContext.levelIndex
+    )
+      return
+
     const [px, pz] = pointer.xz
 
     if (first) {
@@ -236,17 +263,44 @@ const ColumnBuildingModule = (props: Props) => {
     if (last) {
       setCameraEnabled(true)
 
-      if (isSelected()) {
-        // handle drop...
+      // handle drop...
 
-        // has something changed or am I snapping back to 0 change?
-        if (true) {
-          groupRef.current.position.x = groupPosX0
-          groupRef.current.position.z = groupPosZ0
-        }
+      // has something changed or am I snapping back to 0 change?
 
-        swap.dragModulePing = null
-      }
+      // could check if this module is dragModulePing
+
+      if (
+        !isSelected() ||
+        swap.activeBuildingMatrix === null ||
+        swap.dragModulePong === null
+      )
+        return
+
+      const {
+        dragModulePong: { columnIndex: c, levelIndex: l, groupIndex: g },
+      } = swap
+
+      if (c === columnIndex && l === levelIndex && g === groupIndex) return
+
+      houses[buildingId].dna = pipe(
+        swap.activeBuildingMatrix!,
+        produce<BareModule[][][]>((draft) => {
+          const tmp = { ...draft[columnIndex][levelIndex][groupIndex] }
+          draft[columnIndex][levelIndex][groupIndex] = { ...draft[c][l][g] }
+          draft[c][l][g] = { ...tmp }
+        }),
+        (x) => {
+          swap.activeBuildingMatrix = x
+          return x
+        },
+        columnMatrixToDna
+      )
+
+      // reset stuff
+      console.log("reset")
+      groupRef.current.position.x = groupPosX0
+      groupRef.current.position.z = groupPosZ0
+      swap.dragModulePing = null
     }
 
     invalidate()

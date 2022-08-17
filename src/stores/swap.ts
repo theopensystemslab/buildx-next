@@ -2,6 +2,8 @@ import { BareModule } from "@/data/module"
 import { proxy } from "valtio"
 import { ScopeItem } from "./scope"
 
+type SwapItem = Omit<ScopeItem, "buildingId" | "elementName">
+
 type Swap = {
   activeBuildingMatrix: BareModule[][][] | null
   dragModulePing: {
@@ -9,10 +11,7 @@ type Swap = {
     z0: number
     length: number
   } | null
-  dragModulePong: {
-    scope: Omit<ScopeItem, "buildingId" | "elementName">
-    diff: 1 | -1 | 0
-  } | null
+  dragModulePong: SwapItem | null
   // dragModuleResponder: Omit<ScopeItem, "buildingId" | "elementName"> | null
   // dragModuleShifted: "UP" | "DOWN" | null
 }
@@ -24,5 +23,40 @@ const swap = proxy<Swap>({
   // dragModuleResponder: null,
   // dragModuleShifted: null,
 })
+
+export const getSibling = (incoming: SwapItem, direction: 1 | -1): SwapItem => {
+  if (swap.activeBuildingMatrix === null)
+    throw new Error("getSibling called with null swap.activeBuildingMatrix")
+
+  let columnIndex = incoming.columnIndex,
+    levelIndex = incoming.levelIndex,
+    groupIndex = incoming.groupIndex
+
+  switch (direction) {
+    case 1:
+      if (swap.activeBuildingMatrix?.[columnIndex][levelIndex][groupIndex + 1])
+        groupIndex++
+      else {
+        columnIndex++
+        groupIndex = 0
+      }
+    case -1:
+      if (groupIndex > 0) groupIndex--
+      else {
+        columnIndex--
+        groupIndex =
+          swap.activeBuildingMatrix[columnIndex][levelIndex].length - 1
+      }
+  }
+
+  if (
+    typeof swap.activeBuildingMatrix?.[columnIndex]?.[levelIndex]?.[
+      groupIndex
+    ] === "undefined"
+  )
+    throw new Error("getLowerSibling result undefined")
+
+  return { columnIndex, levelIndex, groupIndex }
+}
 
 export default swap
