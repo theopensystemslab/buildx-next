@@ -82,7 +82,7 @@ const ColumnBuildingModule = (props: Props) => {
       (elementName, acc: JSX.Element[], geometry) => [
         ...acc,
         <ColumnBuildingElement
-          key={elementName}
+          key={`${buildingId}-${columnIndex}-${levelIndex}-${groupIndex}-${module.dna}-${elementName}`}
           {...{
             elementName,
             geometry,
@@ -120,7 +120,7 @@ const ColumnBuildingModule = (props: Props) => {
     }
   }, [contextMode])
 
-  const isSelected = (): boolean =>
+  const isSelectedCheck = (): boolean =>
     scope.selected?.buildingId === buildingId &&
     scope.selected?.columnIndex === columnIndex &&
     scope.selected?.levelIndex === levelIndex &&
@@ -130,7 +130,7 @@ const ColumnBuildingModule = (props: Props) => {
     buildingId === siteContext.buildingId && // the right building
     levelIndex === siteContext.levelIndex && // the right level
     module.structuredDna.positionType !== "END" && // not an end
-    !isSelected() // not selected
+    !isSelectedCheck() // not selected
 
   const rotateVector = useRotateVector(buildingId)
 
@@ -143,7 +143,11 @@ const ColumnBuildingModule = (props: Props) => {
 
       const { dragModulePing } = swap
 
-      if (dragModulePing === null) return
+      if (dragModulePing === null) {
+        groupRef.current.position.x = groupPosX0
+        groupRef.current.position.z = groupPosZ0
+        return
+      }
 
       const thisLow = columnZ + groupPosZ0,
         thisHigh = thisLow + module.length,
@@ -215,37 +219,32 @@ const ColumnBuildingModule = (props: Props) => {
           swap.dragModulePong = sibling
           break
         }
-
-        // up needs shifting back down
-        case dragModulePing === null:
-          groupRef.current.position.x = groupPosX0
-          groupRef.current.position.z = groupPosZ0
-          break
       }
     })
   }, [])
 
   const pointerXZ0 = useRef([0, 0])
 
+  const canDragCheck = (): boolean =>
+    module.structuredDna.positionType !== "END" &&
+    buildingId === siteContext.buildingId &&
+    levelIndex === siteContext.levelIndex
+
   const bind = useDrag(({ first, last }) => {
-    if (
-      !groupRef.current ||
-      buildingId !== siteContext.buildingId ||
-      levelIndex !== siteContext.levelIndex
-    )
-      return
+    if (first) setCameraEnabled(false)
+    if (last) setCameraEnabled(true)
+    if (!canDragCheck() || !groupRef.current) return
 
     const [px, pz] = pointer.xz
 
     if (first) {
-      setCameraEnabled(false)
       pointerXZ0.current = [px, pz]
     }
 
     const [, initZ] = pointerXZ0.current
     const [dpx, dpz] = rotateVector([0, pz - initZ])
 
-    if (isSelected()) {
+    if (isSelectedCheck()) {
       groupRef.current.position.x = groupPosX0 + dpx
       groupRef.current.position.z = groupPosZ0 + dpz
 
@@ -256,30 +255,22 @@ const ColumnBuildingModule = (props: Props) => {
       }
     }
 
-    if (last) {
-      setCameraEnabled(true)
-
-      // handle drop...
-
-      // has something changed or am I snapping back to 0 change?
-
-      // could check if this module is dragModulePing
-
-      if (
-        !isSelected() ||
-        swap.activeBuildingMatrix === null ||
-        swap.dragModulePong === null
-      )
+    if (last && isSelectedCheck()) {
+      if (swap.dragModulePong === null || swap.activeBuildingMatrix === null)
         return
 
       const {
-        dragModulePong: { columnIndex: c, levelIndex: l, groupIndex: g },
-      } = swap
+        columnIndex: c,
+        levelIndex: l,
+        groupIndex: g,
+      } = swap.dragModulePong
 
-      if (c === columnIndex && l === levelIndex && g === groupIndex) return
+      const noChange = c === columnIndex && l === levelIndex && g === groupIndex
+
+      if (noChange) return
 
       houses[buildingId].dna = pipe(
-        swap.activeBuildingMatrix!,
+        swap.activeBuildingMatrix,
         produce<BareModule[][][]>((draft) => {
           const tmp = { ...draft[columnIndex][levelIndex][groupIndex] }
           draft[columnIndex][levelIndex][groupIndex] = { ...draft[c][l][g] }
@@ -292,7 +283,7 @@ const ColumnBuildingModule = (props: Props) => {
         columnMatrixToDna
       )
 
-      // reset stuff
+      // reset
       groupRef.current.position.x = groupPosX0
       groupRef.current.position.z = groupPosZ0
       swap.dragModulePing = null
