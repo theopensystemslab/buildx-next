@@ -12,13 +12,11 @@ import menu from "@/stores/menu"
 import pointer from "@/stores/pointer"
 import scope from "@/stores/scope"
 import swap from "@/stores/swap"
-import { mapWithIndexM, reduceWithIndexM, StrOrd } from "@/utils"
+import { reduceWithIndexM, StrOrd } from "@/utils"
 import { GroupProps, invalidate } from "@react-three/fiber"
 import { useDrag } from "@use-gesture/react"
 import { pipe } from "fp-ts/lib/function"
-import { toArray } from "fp-ts/lib/Map"
-import { and, not, or, Predicate } from "fp-ts/lib/Predicate"
-import React, { useEffect, useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { Group, Plane, Vector3 } from "three"
 import { subscribe } from "valtio"
 import { subscribeKey } from "valtio/utils"
@@ -32,6 +30,7 @@ type Props = GroupProps & {
   buildingId: string
   levelY: number
   verticalCutPlanes: Plane[]
+  columnZ: number
 }
 
 const ColumnBuildingModule = (props: Props) => {
@@ -43,13 +42,14 @@ const ColumnBuildingModule = (props: Props) => {
     module,
     levelY,
     verticalCutPlanes,
+    columnZ,
     ...groupProps
   } = props
 
   const { position } = groupProps
 
   // so these positions are relative to the column
-  const [positionX0, positionZ0] =
+  const [groupPosX0, groupPosZ0] =
     position instanceof Vector3
       ? [position.x, position.z]
       : typeof position === "object"
@@ -129,23 +129,26 @@ const ColumnBuildingModule = (props: Props) => {
 
   const rotateVector = useRotateVector(buildingId)
 
+  const shifted = useRef<"DOWN" | "UP" | null>(null)
+
   useEffect(() => {
     return subscribe(swap, () => {
       if (!groupRef.current) return
       if (!isDragResponsive()) return
 
-      const { dragModule } = swap
+      const { dragModulePing: dragModule } = swap
 
       if (dragModule === null) return
 
-      const v = new Vector3()
-      const { z: z0 } = v.setFromMatrixPosition(groupRef.current.matrixWorld)
+      // const v = new Vector3()
+      // const { z: z0 } = v.setFromMatrixPosition(groupRef.current.matrixWorld)
 
-      const thisLow = z0,
-        thisHigh = z0 + module.length,
+      const thisLow = columnZ + groupPosZ0,
+        thisHigh = thisLow + module.length,
         current = dragModule.z0 + dragModule.length / 2 + dragModule.dpz,
         isHigherModule = thisLow > dragModule.z0,
-        isLowerModule = !isHigherModule
+        isLowerModule = !isHigherModule,
+        dragThreshold = Math.min(dragModule.length, module.length)
 
       // console.log({
       //   gridUnits: module.structuredDna.gridUnits,
@@ -153,7 +156,51 @@ const ColumnBuildingModule = (props: Props) => {
       //   isHigherModule,
       // })
 
+      const nullToDown =
+        isHigherModule &&
+        shifted.current !== "DOWN" &&
+        current + dragThreshold > thisHigh
+
+      const downToNull =
+        isHigherModule &&
+        shifted.current === "DOWN" &&
+        current + dragThreshold <= thisHigh
+
+      const nullToUp =
+        isLowerModule &&
+        shifted.current !== "UP" &&
+        current - dragThreshold < thisLow
+
+      const upToNull =
+        isLowerModule &&
+        shifted.current === "UP" &&
+        current - dragThreshold >= thisLow
+
       switch (true) {
+        // needs shifting down
+        case nullToDown: {
+          shifted.current = "DOWN"
+          groupRef.current.position.z = groupPosZ0 - dragModule.length
+          break
+        }
+
+        // down needs shifting back up
+        case downToNull: {
+          shifted.current = null
+          groupRef.current.position.z = groupPosZ0
+          break
+        }
+
+        case nullToUp:
+          shifted.current = "UP"
+          groupRef.current.position.z = groupPosZ0 + dragModule.length
+          break
+
+        case upToNull:
+          shifted.current = null
+          groupRef.current.position.z = groupPosZ0
+          break
+
         case dragModule === null:
         default:
           break
@@ -162,7 +209,6 @@ const ColumnBuildingModule = (props: Props) => {
   }, [])
 
   const pointerXZ0 = useRef([0, 0])
-  const dragModuleXZ0 = useRef([0, 0])
 
   const bind = useDrag(({ first, last }) => {
     if (!groupRef.current) return
@@ -171,23 +217,18 @@ const ColumnBuildingModule = (props: Props) => {
     if (first) {
       setCameraEnabled(false)
       pointerXZ0.current = [px, pz]
-      dragModuleXZ0.current = [
-        groupRef.current.position.x ?? 0,
-        groupRef.current.position.z ?? 0,
-      ]
     }
 
     const [, initZ] = pointerXZ0.current
-    const [dragModuleX0, dragModuleZ0] = dragModuleXZ0.current
     const [dpx, dpz] = rotateVector([0, pz - initZ])
 
     if (isSelected()) {
-      groupRef.current.position.x = dragModuleX0 + dpx
-      groupRef.current.position.z = dragModuleZ0 + dpz
+      groupRef.current.position.x = groupPosX0 + dpx
+      groupRef.current.position.z = groupPosZ0 + dpz
 
-      swap.dragModule = {
+      swap.dragModulePing = {
         dpz: dpz,
-        z0: dragModuleZ0,
+        z0: columnZ + groupPosZ0,
         length: module.length,
       }
     }
@@ -200,11 +241,11 @@ const ColumnBuildingModule = (props: Props) => {
 
         // has something changed or am I snapping back to 0 change?
         if (true) {
-          groupRef.current.position.x = dragModuleX0
-          groupRef.current.position.z = dragModuleZ0
+          groupRef.current.position.x = groupPosX0
+          groupRef.current.position.z = groupPosZ0
         }
 
-        swap.dragModule = null
+        swap.dragModulePing = null
       }
     }
 
