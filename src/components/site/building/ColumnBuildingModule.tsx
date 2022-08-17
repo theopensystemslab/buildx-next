@@ -57,7 +57,7 @@ const ColumnBuildingModule = (props: Props) => {
     position instanceof Vector3
       ? [position.x, position.z]
       : typeof position === "object"
-      ? [position[0], position[1]]
+      ? [position[0], position[2]]
       : [0, 0]
 
   const groupRef = useRef<Group>(null)
@@ -137,6 +137,14 @@ const ColumnBuildingModule = (props: Props) => {
   const shifted = useRef<"DOWN" | "UP" | null>(null)
 
   useEffect(() => {
+    const init = () => {
+      if (!groupRef.current) return
+      console.log("init start")
+      console.log(groupRef.current.position)
+      console.log([groupPosX0, groupPosZ0])
+      console.log("init end")
+    }
+    init()
     return subscribe(swap, () => {
       if (!groupRef.current) return
       if (!isDragResponsive()) return
