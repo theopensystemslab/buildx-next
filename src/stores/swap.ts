@@ -12,16 +12,12 @@ type Swap = {
     length: number
   } | null
   dragModulePong: SwapItem | null
-  // dragModuleResponder: Omit<ScopeItem, "buildingId" | "elementName"> | null
-  // dragModuleShifted: "UP" | "DOWN" | null
 }
 
 const swap = proxy<Swap>({
   activeBuildingMatrix: null,
   dragModulePing: null,
   dragModulePong: null,
-  // dragModuleResponder: null,
-  // dragModuleShifted: null,
 })
 
 export const getSibling = (incoming: SwapItem, direction: 1 | -1): SwapItem => {

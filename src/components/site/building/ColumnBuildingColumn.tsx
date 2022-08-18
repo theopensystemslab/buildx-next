@@ -31,7 +31,12 @@ const BuildingHouseColumn = (props: Props) => {
         mapWithIndexRA((groupIndex, { module, z }) => {
           return (
             <ColumnBuildingModule
-              key={`${columnIndex}-${levelIndex}-${groupIndex}-z:${z}-${module.dna}`}
+              key={JSON.stringify({
+                columnIndex,
+                levelIndex,
+                groupIndex,
+                dna: module.dna,
+              })}
               module={module}
               columnIndex={columnIndex}
               levelIndex={levelIndex}

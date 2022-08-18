@@ -82,7 +82,14 @@ const ColumnBuildingModule = (props: Props) => {
       (elementName, acc: JSX.Element[], geometry) => [
         ...acc,
         <ColumnBuildingElement
-          key={`${buildingId}-${columnIndex}-${levelIndex}-${groupIndex}-${module.dna}-${elementName}`}
+          key={JSON.stringify({
+            buildingId,
+            columnIndex,
+            levelIndex,
+            groupIndex,
+            dna: module.dna,
+            elementName,
+          })}
           {...{
             elementName,
             geometry,
