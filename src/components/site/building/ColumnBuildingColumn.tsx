@@ -22,6 +22,7 @@ const BuildingHouseColumn = (props: Props) => {
     mirror = false,
     verticalCutPlanes,
   } = props
+
   const levels = pipe(
     gridGroups,
     mapRA(({ levelIndex, modules, y }) =>
@@ -30,7 +31,12 @@ const BuildingHouseColumn = (props: Props) => {
         mapWithIndexRA((groupIndex, { module, z }) => {
           return (
             <ColumnBuildingModule
-              key={`${columnIndex}-${levelIndex}-${groupIndex}`}
+              key={JSON.stringify({
+                columnIndex,
+                levelIndex,
+                groupIndex,
+                dna: module.dna,
+              })}
               module={module}
               columnIndex={columnIndex}
               levelIndex={levelIndex}
@@ -40,12 +46,11 @@ const BuildingHouseColumn = (props: Props) => {
               position={[
                 0,
                 y,
-                mirror
-                  ? z + module.length / 2
-                  : z - module.length + module.length / 2,
+                mirror ? z + module.length / 2 : z - module.length / 2,
               ]}
               scale={[1, 1, mirror ? 1 : -1]}
               verticalCutPlanes={verticalCutPlanes}
+              columnZ={columnZ}
             />
           )
         })

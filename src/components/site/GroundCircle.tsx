@@ -2,7 +2,7 @@ import { useRef } from "react"
 import { DoubleSide, Mesh } from "three"
 
 const GroundCircle = () => {
-  const ref = useRef<Mesh>()
+  const ref = useRef<Mesh>(null)
 
   return (
     <mesh ref={ref} position={[0, -0.04, 0]} rotation={[-Math.PI / 2, 0, 0]}>

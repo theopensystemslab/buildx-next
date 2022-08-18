@@ -13,7 +13,7 @@ const DebugIfcModule = (props: Props) => {
   const { module } = props
 
   const groupRef = useRef<Group>(null)
-  const meshRef = useRef<Mesh>()
+  const meshRef = useRef<Mesh>(null)
 
   if (typeof module.ifcUrl !== "string")
     throw new Error(`no string IFC url in DebugIfcModule ${module.dna}`)
@@ -28,7 +28,7 @@ const DebugIfcModule = (props: Props) => {
     }
   )
 
-  useBVH(meshRef)
+  useBVH(meshRef as any)
 
   return (
     <group ref={groupRef}>

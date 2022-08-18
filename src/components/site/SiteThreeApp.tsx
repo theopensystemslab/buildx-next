@@ -30,14 +30,14 @@ const SiteThreeApp = () => {
         keys(houses),
         mapRA((id) => (
           <Suspense key={id} fallback={<Loader3D />}>
-            <SiteBuilding id={id} />
+            <SiteBuilding buildingId={id} />
           </Suspense>
         ))
       )}
     </group>
   ) : (
     <Suspense fallback={<Loader3D />}>
-      <SiteBuilding id={buildingId} />
+      <SiteBuilding buildingId={buildingId} />
     </Suspense>
   )
 }
