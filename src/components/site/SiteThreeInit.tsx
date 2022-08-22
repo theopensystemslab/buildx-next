@@ -165,8 +165,52 @@ const SiteThreeInit = (props: Props) => {
       },
     }
 
+    const minZoom = 12
+
+    const buildingsLayer: AnyLayer = {
+      id: "3d-buildings",
+      source: "composite",
+      "source-layer": "building",
+      filter: ["==", "extrude", "true"],
+      type: "fill-extrusion",
+      minzoom: minZoom,
+      paint: {
+        "fill-extrusion-color": [
+          "case",
+          ["boolean", ["feature-state", "select"], false],
+          "lightgreen",
+          ["boolean", ["feature-state", "hover"], false],
+          "lightblue",
+          "#aaa",
+        ],
+
+        // use an 'interpolate' expression to add a smooth transition effect to the
+        // buildings as the user zooms in
+        "fill-extrusion-height": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          minZoom,
+          0,
+          minZoom + 0.05,
+          ["get", "height"],
+        ],
+        "fill-extrusion-base": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          minZoom,
+          0,
+          minZoom + 0.05,
+          ["get", "min_height"],
+        ],
+        "fill-extrusion-opacity": 0.9,
+      },
+    }
+
     map.on("style.load", () => {
       // map.setFog({}) // Set the default atmosphere style
+      map.addLayer(buildingsLayer)
       map.addLayer(customLayer)
     })
 
