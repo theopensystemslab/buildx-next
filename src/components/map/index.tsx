@@ -264,6 +264,7 @@ const MapIndex = () => {
     geocoder.addTo(geocoderDiv.current!)
 
     geocoder.on("result", ({ result }) => {
+      console.log(result.center)
       const target = fromLonLat(result.center) as [number, number]
       map.getView().setCenter(target)
       map.getView().setZoom(maxZoom)

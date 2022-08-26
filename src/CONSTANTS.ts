@@ -21,4 +21,5 @@ export const BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY = "buildx-polygon-0.1.0"
 
 export const DEFAULT_MATERIAL_NAME = "Plywood"
 
-export const DEFAULT_ORIGIN: [number, number] = [52.455449, -1.923407] // lat, lon
+export const DEFAULT_ORIGIN: [number, number] = [51.54093, -0.055219] // mare st
+// [52.455449, -1.923407] // lat, lon // track and field

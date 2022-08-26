@@ -212,6 +212,9 @@ const SiteThreeInit = (props: Props) => {
       // map.setFog({}) // Set the default atmosphere style
       map.addLayer(buildingsLayer)
       map.addLayer(customLayer)
+
+      const style = map.getStyle()
+      console.log(style)
     })
 
     return () => root.unmount()
