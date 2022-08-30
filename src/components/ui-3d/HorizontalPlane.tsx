@@ -3,11 +3,14 @@
  * cursor is on a horizontal plane. This position is broadcast to the parent where it
  * can be stored, usually in a ref to keep performance in check.
  */
+import { useGetCameraGroundPlaneIntersect } from "@/stores/camera"
+import pointer from "@/stores/pointer"
 import { ThreeEvent } from "@react-three/fiber"
 import { useGesture } from "@use-gesture/react"
-import React, { useRef } from "react"
+import { useEffect, useRef } from "react"
 import * as three from "three"
 import { Mesh } from "three"
+import { ref } from "valtio"
 
 // Make sure this value is always larger than the model bounds
 const planeSize = 5000
@@ -31,7 +34,12 @@ export const HorizontalPlane = (props: {
   onNearClick?: () => void
 }) => {
   const { onChange, onNearClick, onNearHover } = props
-  const meshRef = useRef<Mesh>()
+  const meshRef = useRef<Mesh>(null)
+
+  useEffect(() => {
+    if (!meshRef.current) return
+    pointer.planeMesh = ref(meshRef.current)
+  }, [])
 
   const bind = useGesture<{
     onPointerMove: ThreeEvent<PointerEvent>
@@ -60,6 +68,7 @@ export const HorizontalPlane = (props: {
       }
     },
   })
+
   return (
     <mesh
       ref={meshRef}
