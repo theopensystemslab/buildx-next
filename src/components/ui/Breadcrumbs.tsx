@@ -27,7 +27,7 @@ const Breadcrumb = ({ path, label, onClick }: BreadcrumbProps) => (
   <Link
     href={path}
     onClick={onClick}
-    className="m-1 rounded-sm bg-white p-1 hover:bg-gray-300"
+    className="mx-1 rounded-sm  p-1 text-lg font-bold"
   >
     {label}
   </Link>
@@ -68,7 +68,7 @@ const BreadcrumbsWithParams = (params: Params) => {
           }}
         />
       )}
-      {levelIndex && (
+      {typeof levelIndex !== "undefined" && (
         <Fragment>
           <span>{`/`}</span>
           <Breadcrumb
@@ -92,7 +92,7 @@ const Breadcrumbs = () => {
   const [renamingProject, setRenamingProject] = useState(false)
 
   return (
-    <div className="absolute top-0 left-0">
+    <div className="absolute top-0 left-0 m-1">
       <Breadcrumb
         path={`/site`}
         label={
