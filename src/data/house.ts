@@ -7,7 +7,7 @@ import type { HouseType } from "./houseType"
 import type { Module } from "./module"
 import { moduleLayout } from "./moduleLayout"
 
-export interface House {
+export type House = {
   id: string
   houseTypeId: string
   systemId: string
@@ -19,7 +19,15 @@ export interface House {
   friendlyName: string
 }
 
+export type HouseAug = House & {
+  width: number
+  length: number
+  groundBox: [V2, V2]
+}
+
 export type Houses = Record<string, House>
+
+export type HousesAug = Record<string, HouseAug>
 
 export const findCollisions = (
   houses: Houses,

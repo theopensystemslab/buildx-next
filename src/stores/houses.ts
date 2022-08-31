@@ -1,12 +1,14 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { addNewPoint } from "@/data/collisions"
-import { Houses } from "@/data/house"
+import { House, HouseAug, Houses, HousesAug } from "@/data/house"
 import { Module, StructuredDnaModule } from "@/data/module"
 import {
   filterMapA,
   flattenO,
   mapO,
+  mapR,
+  mapRR,
   reduceA,
   snapToGrid,
   SSR,
@@ -24,6 +26,7 @@ import {
   findFirst,
   reduceWithIndex,
 } from "fp-ts/lib/ReadonlyArray"
+import { keys } from "fp-ts/lib/ReadonlyRecord"
 import { lookup } from "fp-ts/lib/Record"
 import produce from "immer"
 import { MutableRefObject, useCallback, useEffect, useRef } from "react"
@@ -47,6 +50,8 @@ export const getInitialHouses = () =>
 
 const houses = proxy<Houses>(getInitialHouses())
 
+export const housesAug = proxy<HousesAug>({})
+
 export const useLocallyStoredHouses = () => {
   useEffect(
     subscribe(houses, () => {
@@ -59,7 +64,27 @@ export const useLocallyStoredHouses = () => {
   )
 }
 
-export const useHouses = () => useSnapshot(houses)
+export const useHouses = () => {
+  const snap = useSnapshot(houses)
+
+  for (let houseId of keys(snap)) {
+    const width = 0
+    const length = 0
+    const groundBox: [V2, V2] = [
+      [0, 0],
+      [0, 0],
+    ]
+
+    housesAug[houseId] = {
+      ...(snap[houseId] as House),
+      width,
+      length,
+      groundBox,
+    }
+  }
+
+  return snap
+}
 
 export const useHouse = (houseId: string) => {
   const housesSnap = useSnapshot(houses)

@@ -15,6 +15,8 @@ export enum EffectsLayer {
   bloom = 5,
 }
 
+export const CACHE_SYSTEMS_DATA = true
+
 export const BUILDX_LOCAL_STORAGE_HOUSES_KEY = "buildx-houses-0.1.0"
 export const BUILDX_LOCAL_STORAGE_CONTEXT_KEY = "buildx-context-0.1.0"
 export const BUILDX_LOCAL_STORAGE_MAP_POLYGON_KEY = "buildx-polygon-0.1.0"

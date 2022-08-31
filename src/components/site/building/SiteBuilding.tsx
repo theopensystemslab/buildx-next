@@ -9,7 +9,7 @@ import {
 } from "@/stores/context"
 import events, { glbExported } from "@/stores/events"
 import { outlineGroup } from "@/stores/highlights"
-import houses, { usePositionRotation } from "@/stores/houses"
+import houses, { housesAug, usePositionRotation } from "@/stores/houses"
 import scope from "@/stores/scope"
 import { mapRA } from "@/utils"
 import { GLTFExporter } from "@/utils/GLTFExporter"

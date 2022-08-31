@@ -1,25 +1,25 @@
+import { flatten } from "ramda"
+import { useEffect, useRef, useState } from "react"
+import * as z from "zod"
+import config from "../../buildx.config.yaml"
 import { safeLocalStorageGet } from "../utils"
 import { createMaterial } from "../utils/three"
-import { useState, useEffect, useRef } from "react"
-import { flatten } from "ramda"
-import { type House } from "./house"
+import { getElements, type Element } from "./element"
 import { getEnergyInfo, type EnergyInfo } from "./energyInfo"
-import { type HouseType, getHouseTypes } from "./houseType"
-import { getModules, type Module } from "./module"
-import { type Material, getMaterials } from "./material"
+import { type House } from "./house"
+import { getHouseTypes, type HouseType } from "./houseType"
 import {
-  type InternalLayoutType,
   getInternalLayoutTypes,
+  type InternalLayoutType,
 } from "./internalLayoutType"
-import { type Element, getElements } from "./element"
-import { type WindowType, getWindowTypes } from "./windowType"
-import { type SpaceType, getSpaceTypes } from "./spaceType"
-import { getSystemSettings, type SystemSettings } from "./settings"
-import { getStairTypes, type StairType } from "./stairType"
 import { getLevelTypes, LevelType } from "./levelType"
-import config from "../../buildx.config.yaml"
-import * as z from "zod"
+import { getMaterials, type Material } from "./material"
+import { getModules, type Module } from "./module"
 import { getSectionTypes, SectionType } from "./sectionType"
+import { getSystemSettings, type SystemSettings } from "./settings"
+import { getSpaceTypes, type SpaceType } from "./spaceType"
+import { getStairTypes, type StairType } from "./stairType"
+import { getWindowTypes, type WindowType } from "./windowType"
 
 const systems: Array<System> = z
   .array(
