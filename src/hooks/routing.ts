@@ -22,7 +22,7 @@ export const useRouting = () => {
     let path = "/site"
     if (siteContext.buildingId) {
       path += `?buildingId=${siteContext.buildingId}`
-      if (siteContext.levelIndex) {
+      if (siteContext.levelIndex !== null) {
         path += `&levelIndex=${siteContext.levelIndex}`
       }
     }
