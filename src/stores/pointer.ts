@@ -12,7 +12,7 @@ export const pointer = proxy<PointerStore>({
 })
 
 export const setXZ = ([x, z]: [number, number]) => {
-  pointer.xz = [x, -z]
+  pointer.xz = [x, z]
 }
 
 export default pointer
