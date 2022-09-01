@@ -2,11 +2,12 @@ import { useRotateVector } from "@/hooks/geometry"
 import CameraControls from "camera-controls"
 import { pipe } from "fp-ts/lib/function"
 import { getOrElse } from "fp-ts/lib/Option"
-import { useEffect } from "react"
-import { Vector3 } from "three"
+import { useEffect, useMemo } from "react"
+import { Raycaster, Vector3 } from "three"
 import { proxy } from "valtio"
 import { useSiteContext } from "./context"
 import { useHouses, useMaybeBuildingLength } from "./houses"
+import pointer from "./pointer"
 
 type CameraProxy = {
   controls: CameraControls | null
@@ -65,6 +66,26 @@ export const useCameraReset = () => {
     if (!camera.controls) return
     camera.controls.setLookAt(...defaultCamPos, ...defaultCamTgt, true)
     camera.controls.zoomTo(1, true)
+  }
+}
+
+export const useGetCameraGroundPlaneIntersect = () => {
+  const raycaster = useMemo(() => new Raycaster(), [])
+
+  return (): [number, number] | null => {
+    if (!camera.controls || !pointer.planeMesh) return null
+
+    raycaster.setFromCamera({ x: 0, y: 0 }, camera.controls.camera)
+    const intersections = raycaster.intersectObject(pointer.planeMesh)
+    if (intersections.length === 0) return null
+
+    const [
+      {
+        point: { x, z },
+      },
+    ] = intersections
+
+    return [x, z]
   }
 }
 

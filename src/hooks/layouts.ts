@@ -253,13 +253,14 @@ export const useColumnLayout = (buildingId: string) => {
       (columnIndex, positionedCols: PositionedColumn[], loadedModules) => {
         const last =
           columnIndex === 0 ? null : positionedCols[positionedCols.length - 1]
-        const z = !last
-          ? 0
-          : last.z +
-            last.gridGroups[0].modules.reduce(
-              (modulesLength, module) => modulesLength + module.module.length,
-              0
-            )
+        const z =
+          last === null
+            ? 0
+            : last.z +
+              last.gridGroups[0].modules.reduce(
+                (modulesLength, module) => modulesLength + module.module.length,
+                0
+              )
 
         const gridGroups = pipe(
           loadedModules,
