@@ -13,7 +13,10 @@ import { transpose } from "fp-ts-std/ReadonlyArray"
 import { pipe } from "fp-ts/lib/function"
 import { flatten, reduceWithIndex } from "fp-ts/lib/ReadonlyArray"
 import produce from "immer"
-import { useBuildingRows } from "../stores/houses"
+import { useMemo } from "react"
+import { Box3, Vector3 } from "three"
+import { getMatrix } from "../data/collisions"
+import houses, { housesAug, useBuildingRows, useHouse } from "../stores/houses"
 import { usePadColumn } from "./modules"
 
 export type PositionedModule = {
@@ -176,6 +179,27 @@ const columnify =
 
 export const useColumnLayout = (buildingId: string) => {
   const rows = useBuildingRows(buildingId)
+
+  const width = rows[0][0].width
+  const length = rows[0].flat().reduce((acc, v) => acc + v.length, 0)
+
+  const { position, rotation } = houses[buildingId]
+
+  const x = width / 2
+  const z = length
+  const groundBox = useMemo(() => {
+    const min = new Vector3(-x, 0, 0)
+    const max = new Vector3(x, 1, z)
+    const box = new Box3(min, max)
+    box.applyMatrix4(getMatrix({ position, rotation }))
+    return box
+  }, [x, z])
+
+  housesAug[buildingId] = {
+    width,
+    length,
+    groundBox,
+  }
 
   const columns = pipe(
     rows,

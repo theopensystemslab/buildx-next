@@ -1,7 +1,7 @@
 import { BUILDX_LOCAL_STORAGE_HOUSES_KEY } from "@/CONSTANTS"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { addNewPoint } from "@/data/collisions"
-import { Houses } from "@/data/house"
+import { HouseAug, Houses } from "@/data/house"
 import { Module, StructuredDnaModule } from "@/data/module"
 import {
   filterMapA,
@@ -46,6 +46,8 @@ export const getInitialHouses = () =>
     : JSON.parse(localStorage.getItem(BUILDX_LOCAL_STORAGE_HOUSES_KEY) ?? "{}")
 
 const houses = proxy<Houses>(getInitialHouses())
+
+export const housesAug = proxy<Record<string, HouseAug>>({})
 
 export const useLocallyStoredHouses = () => {
   useEffect(

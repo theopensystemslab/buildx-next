@@ -1,6 +1,7 @@
 import { DeepReadonly, safeLocalStorageGet } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { map } from "fp-ts/lib/ReadonlyRecord"
+import { Box3 } from "three"
 import type { Rectangle } from "./collisions"
 import { checkRectangleIntersection } from "./collisions"
 import type { HouseType } from "./houseType"
@@ -20,6 +21,12 @@ export interface House {
 }
 
 export type Houses = Record<string, House>
+
+export type HouseAug = {
+  width: number
+  length: number
+  groundBox: Box3
+}
 
 export const findCollisions = (
   houses: Houses,
