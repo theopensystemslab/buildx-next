@@ -27,7 +27,7 @@ const Breadcrumb = ({ path, label, onClick }: BreadcrumbProps) => (
   <Link
     href={path}
     onClick={onClick}
-    className="mx-1 rounded-sm  p-1 text-lg font-bold"
+    className="mx-1 rounded-sm  p-1 text-lg font-normal"
   >
     {label}
   </Link>

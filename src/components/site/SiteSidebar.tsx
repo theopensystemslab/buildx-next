@@ -1,6 +1,7 @@
 import Sidebar from "@/components/ui/Sidebar"
 import { useSystemsData } from "@/contexts/SystemsData"
 import { System, systems } from "@/data/system"
+import { useGetCameraGroundPlaneIntersect } from "@/stores/camera"
 import houses, { getFreshHousePosition } from "@/stores/houses"
 import { pipe } from "fp-ts/lib/function"
 import { mapWithIndex } from "fp-ts/lib/ReadonlyArray"
@@ -27,6 +28,8 @@ const SiteSidebar = ({ open, close }: Props) => {
   }, [selectedSystemId])
 
   const { houseTypes } = useSystemsData()
+
+  const getCameraGroundPlaneIntersect = useGetCameraGroundPlaneIntersect()
 
   return (
     <Sidebar expanded={open} onClose={close}>
@@ -69,11 +72,13 @@ const SiteSidebar = ({ open, close }: Props) => {
                     onAdd={() => {
                       const id = nanoid()
 
+                      const position = getCameraGroundPlaneIntersect() ?? [0, 0]
+
                       houses[id] = {
                         id,
                         houseTypeId: houseType.id,
                         systemId: houseType.systemId,
-                        position: getFreshHousePosition(),
+                        position,
                         rotation: 0,
                         dna: houseType.dna as string[],
                         modifiedMaterials: {},
