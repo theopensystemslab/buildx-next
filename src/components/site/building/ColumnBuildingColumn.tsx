@@ -43,6 +43,11 @@ const BuildingHouseColumn = (props: Props) => {
               levelY={y}
               groupIndex={groupIndex}
               buildingId={buildingId}
+              // the house is positioned precisely from the front-center
+              // everything goes in the - direction
+              // we flip everything
+              // the last, we mirror, so we don't flip
+              // so we position it in the other direction (+)
               position={[
                 0,
                 y,

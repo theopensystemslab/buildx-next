@@ -36,7 +36,7 @@ export interface Rectangle {
   rotation: number
 }
 
-const getMatrix = ({
+export const getMatrix = ({
   position,
   rotation,
 }: {
