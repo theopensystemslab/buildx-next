@@ -13,7 +13,7 @@ import {
   useGLTF,
 } from "@/utils"
 import { invalidate, ThreeEvent } from "@react-three/fiber"
-import { Handler } from "@use-gesture/core/types"
+import { Handler } from "@use-gesture/react"
 import { head } from "fp-ts/lib/Array"
 import { pipe } from "fp-ts/lib/function"
 import { none, some } from "fp-ts/lib/Option"
