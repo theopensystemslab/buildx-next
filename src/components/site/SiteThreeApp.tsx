@@ -6,8 +6,7 @@ import scope from "@/stores/scope"
 import { mapRA } from "@/utils"
 import { pipe } from "fp-ts/lib/function"
 import { keys } from "fp-ts/lib/ReadonlyRecord"
-import React, { Suspense, useEffect } from "react"
-import Loader3D from "../ui-3d/Loader3D"
+import { Suspense, useEffect } from "react"
 import SiteBuilding from "./building/SiteBuilding"
 
 const SiteThreeApp = () => {
@@ -29,14 +28,14 @@ const SiteThreeApp = () => {
       {pipe(
         keys(houses),
         mapRA((id) => (
-          <Suspense key={id} fallback={<Loader3D />}>
+          <Suspense key={id} fallback={null}>
             <SiteBuilding buildingId={id} />
           </Suspense>
         ))
       )}
     </group>
   ) : (
-    <Suspense fallback={<Loader3D />}>
+    <Suspense fallback={null}>
       <SiteBuilding buildingId={buildingId} />
     </Suspense>
   )

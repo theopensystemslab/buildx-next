@@ -1,7 +1,9 @@
 import { useSystemId } from "@/stores/context"
 import { filterA, mapR } from "@/utils"
+import { useLoader } from "@react-three/fiber"
 import { pipe } from "fp-ts/lib/function"
 import { Fragment, ReactNode } from "react"
+import { GLTFLoader } from "three-stdlib"
 import { SystemsData, useSystemsData } from "../data/system"
 import { createCtx } from "./utils"
 
@@ -25,6 +27,11 @@ export const SystemsDataProvider = ({
   const systemsData = useSystemsData()
   if (!systemsData) return <Fragment>{onLoading}</Fragment>
   if (systemsData === "error") return <Fragment>{onError}</Fragment>
+
+  systemsData.modules.forEach((module) => {
+    useLoader.preload(GLTFLoader, module.modelUrl)
+  })
+
   return <CtxProvider value={systemsData}>{children}</CtxProvider>
 }
 
