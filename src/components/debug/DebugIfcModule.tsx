@@ -47,6 +47,12 @@ const DebugIfcModule = (props: Props) => {
           console.log(ifcType)
         }}
       />
+      <mesh position={[0, module.height / 2, -module.length / 2]}>
+        <boxBufferGeometry
+          args={[module.width, module.height, module.length]}
+        />
+        <meshBasicMaterial color="blue" wireframe />
+      </mesh>
     </group>
   )
 }
