@@ -65,8 +65,6 @@ const SiteContextMenu_ = (props: ContextMenuProps) => {
       <ContextMenuHeading>{house.friendlyName}</ContextMenuHeading>
       {!renaming && (
         <Fragment>
-          <ContextMenuButton onClick={resetBuilding}>Reset</ContextMenuButton>
-          <ContextMenuButton onClick={deleteBuilding}>Delete</ContextMenuButton>
           <ContextMenuButton onClick={editBuilding}>
             {`Edit building`}
           </ContextMenuButton>
