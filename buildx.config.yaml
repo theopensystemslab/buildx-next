@@ -1,6 +1,6 @@
 systems:
-  - id: 3cea-amvic
-    name: 3CEA (Amvic)
+  - id: amvic
+    name: South East Energy Agency (AMVIC)
     airtableId: appsOHJyDxhPrHyxc
   - id: mobble
     name: Inhout Mobble

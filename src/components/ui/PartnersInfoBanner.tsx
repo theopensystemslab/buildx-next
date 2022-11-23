@@ -171,7 +171,7 @@ function PartnersInfoBanner(props: Props) {
             </p>
             <p className="pb-1 text-sm font-medium not-italic leading-4 text-black">
               {" "}
-              3CEA
+              {"South East Energy Agency (AMVIC)"}
               <span className="text-sm font-medium not-italic leading-4 text-gray-500">
                 {" "}
                 IE{" "}
