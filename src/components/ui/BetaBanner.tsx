@@ -19,13 +19,13 @@ export default function BetaBanner(props: Props) {
           Prototype
         </span>
         <p>
-          This tool is in development. Please give us
+          This tool is a prototype. We would love to receive your
           <FeedbackFish projectId="722731cad3a24a">
             <button className="inline-block px-1 underline hover:text-blue-800">
-              suggestions and feedback
+              feedback
             </button>
           </FeedbackFish>
-          for how we can improve it.
+          as we continue to develop it.
         </p>
       </div>
       {props.onClose && (
